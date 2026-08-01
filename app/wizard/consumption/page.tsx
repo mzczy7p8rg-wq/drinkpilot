@@ -8,10 +8,19 @@ import ProgressBar from "@/components/ProgressBar";
 export default function ConsumptionPage() {
   const { data, setData } = useStore();
 
-  return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-lg">
+  const totalDrinksPerDay =
+    data.coffee +
+    data.water +
+    data.soda +
+    data.beer +
+    data.wine +
+    data.cocktail;
 
+  const hasConsumption = totalDrinksPerDay > 0;
+
+  return (
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
+      <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-lg">
         <ProgressBar currentStep={3} totalSteps={4} />
 
         <h1 className="text-3xl font-bold text-slate-900">
@@ -19,18 +28,23 @@ export default function ConsumptionPage() {
         </h1>
 
         <p className="mt-3 text-slate-500">
-          Indica un consumo aproximado para cada tipo de bebida.
+          Indica el consumo aproximado de una persona durante un día normal
+          del crucero.
         </p>
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-6 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">
+          💡 Introduce las bebidas que consumirías aunque no contrataras un
+          paquete.
+        </div>
 
+        <div className="mt-8 space-y-4">
           <DrinkCounter
             label="☕ Cafés"
             value={data.coffee}
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                coffee: value,
+                coffee: Math.max(0, value),
               }))
             }
           />
@@ -41,7 +55,7 @@ export default function ConsumptionPage() {
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                water: value,
+                water: Math.max(0, value),
               }))
             }
           />
@@ -52,7 +66,7 @@ export default function ConsumptionPage() {
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                soda: value,
+                soda: Math.max(0, value),
               }))
             }
           />
@@ -63,7 +77,7 @@ export default function ConsumptionPage() {
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                beer: value,
+                beer: Math.max(0, value),
               }))
             }
           />
@@ -74,7 +88,7 @@ export default function ConsumptionPage() {
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                wine: value,
+                wine: Math.max(0, value),
               }))
             }
           />
@@ -85,15 +99,34 @@ export default function ConsumptionPage() {
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                cocktail: value,
+                cocktail: Math.max(0, value),
               }))
             }
           />
-
         </div>
 
-        <div className="mt-10 flex gap-4">
+        <div className="mt-6 rounded-xl bg-slate-100 p-4 text-center">
+          <span className="text-sm text-slate-500">
+            Consumo diario estimado
+          </span>
 
+          <p className="mt-1 text-2xl font-bold text-slate-900">
+            {totalDrinksPerDay}{" "}
+            {totalDrinksPerDay === 1 ? "bebida" : "bebidas"}
+          </p>
+
+          <p className="text-sm text-slate-500">
+            por persona / día
+          </p>
+        </div>
+
+        {!hasConsumption && (
+          <p className="mt-4 text-center text-sm font-medium text-amber-700">
+            Añade al menos una bebida para continuar.
+          </p>
+        )}
+
+        <div className="mt-10 flex gap-4">
           <Link
             href="/wizard/package"
             className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold hover:bg-slate-100"
@@ -102,26 +135,27 @@ export default function ConsumptionPage() {
           </Link>
 
           <Link
-            href="/wizard/people"
-            onClick={() =>
+            href={hasConsumption ? "/wizard/people" : "#"}
+            onClick={(event) => {
+              if (!hasConsumption) {
+                event.preventDefault();
+                return;
+              }
+
               setData((prev) => ({
                 ...prev,
-                drinksPerDay:
-                  prev.coffee +
-                  prev.water +
-                  prev.soda +
-                  prev.beer +
-                  prev.wine +
-                  prev.cocktail,
-              }))
-            }
-            className="flex-1 rounded-xl bg-sky-600 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
+                drinksPerDay: totalDrinksPerDay,
+              }));
+            }}
+            className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${
+              hasConsumption
+                ? "bg-sky-600 text-white hover:bg-sky-700"
+                : "pointer-events-none bg-slate-300 text-slate-500"
+            }`}
           >
             Continuar
           </Link>
-
         </div>
-
       </div>
     </main>
   );

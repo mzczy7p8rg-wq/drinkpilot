@@ -25,8 +25,11 @@ export type CalculationResult = {
   savings: number;
   recommended: boolean;
 
+  // Coste diario por persona
   dailyDrinkCost: number;
 
+  // Coste total durante todo el crucero
+  // para todas las personas
   coffeeCost: number;
   waterCost: number;
   sodaCost: number;
@@ -41,25 +44,76 @@ export function calculateRecommendation(
   input: CalculationInput
 ): CalculationResult {
 
-  const coffeeCost =
+  /*
+   * Coste diario por persona
+   */
+
+  const dailyCoffeeCost =
     input.coffee * input.coffeePrice;
 
-  const waterCost =
+  const dailyWaterCost =
     input.water * input.waterPrice;
 
-  const sodaCost =
+  const dailySodaCost =
     input.soda * input.sodaPrice;
 
-  const beerCost =
+  const dailyBeerCost =
     input.beer * input.beerPrice;
 
-  const wineCost =
+  const dailyWineCost =
     input.wine * input.winePrice;
 
-  const cocktailCost =
+  const dailyCocktailCost =
     input.cocktail * input.cocktailPrice;
 
   const dailyDrinkCost =
+    dailyCoffeeCost +
+    dailyWaterCost +
+    dailySodaCost +
+    dailyBeerCost +
+    dailyWineCost +
+    dailyCocktailCost;
+
+  /*
+   * Coste total de cada bebida durante
+   * todo el crucero y para todas las personas
+   */
+
+  const coffeeCost =
+    dailyCoffeeCost *
+    input.days *
+    input.people;
+
+  const waterCost =
+    dailyWaterCost *
+    input.days *
+    input.people;
+
+  const sodaCost =
+    dailySodaCost *
+    input.days *
+    input.people;
+
+  const beerCost =
+    dailyBeerCost *
+    input.days *
+    input.people;
+
+  const wineCost =
+    dailyWineCost *
+    input.days *
+    input.people;
+
+  const cocktailCost =
+    dailyCocktailCost *
+    input.days *
+    input.people;
+
+  /*
+   * Coste total pagando bebidas individualmente
+   */
+
+  const drinksCost =
     coffeeCost +
     waterCost +
     sodaCost +
@@ -67,18 +121,29 @@ export function calculateRecommendation(
     wineCost +
     cocktailCost;
 
-  const drinksCost =
-    dailyDrinkCost *
-    input.days *
-    input.people;
+  /*
+   * Coste total del paquete
+   */
 
   const packageCost =
     input.packagePricePerDay *
     input.days *
     input.people;
 
+  /*
+   * Diferencia
+   *
+   * Positivo = el paquete ahorra dinero
+   * Negativo = pagar por separado es más barato
+   */
+
   const savings =
     drinksCost - packageCost;
+
+  /*
+   * Número total de bebidas consumidas
+   * por persona y día
+   */
 
   const totalDrinksPerDay =
     input.coffee +
@@ -88,10 +153,21 @@ export function calculateRecommendation(
     input.wine +
     input.cocktail;
 
+  /*
+   * Precio medio real de las bebidas
+   * según el patrón de consumo del usuario
+   */
+
   const averageDrinkPrice =
     totalDrinksPerDay > 0
       ? dailyDrinkCost / totalDrinksPerDay
       : 0;
+
+  /*
+   * Bebidas necesarias al día para que
+   * el coste estimado iguale el precio
+   * diario del paquete
+   */
 
   const breakEvenDrinksPerDay =
     averageDrinkPrice > 0
