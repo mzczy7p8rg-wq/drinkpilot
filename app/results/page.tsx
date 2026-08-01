@@ -138,29 +138,71 @@ export default function ResultsPage() {
 
               <tbody>
 
-                {result.breakdown.map((drink) => (
-                  <tr
-                    key={drink.name}
-                    className="border-t"
-                  >
-                    <td className="p-3">
-                      {drink.icon} {drink.name}
-                    </td>
+                <tr className="border-t">
+  <td className="p-3">☕ Café</td>
+  <td className="text-center">{data.coffee}</td>
+  <td className="text-center">
+    {selectedPackage.drinks.coffee.toFixed(2)} €
+  </td>
+  <td className="pr-4 text-right font-semibold">
+    {result.coffeeCost.toFixed(2)} €
+  </td>
+</tr>
 
-                    <td className="text-center">
-                      {drink.quantity}
-                    </td>
+<tr className="border-t">
+  <td className="p-3">💧 Agua</td>
+  <td className="text-center">{data.water}</td>
+  <td className="text-center">
+    {selectedPackage.drinks.water.toFixed(2)} €
+  </td>
+  <td className="pr-4 text-right font-semibold">
+    {result.waterCost.toFixed(2)} €
+  </td>
+</tr>
 
-                    <td className="text-center">
-                      {drink.unitPrice.toFixed(2)} €
-                    </td>
+<tr className="border-t">
+  <td className="p-3">🥤 Refrescos</td>
+  <td className="text-center">{data.soda}</td>
+  <td className="text-center">
+    {selectedPackage.drinks.soda.toFixed(2)} €
+  </td>
+  <td className="pr-4 text-right font-semibold">
+    {result.sodaCost.toFixed(2)} €
+  </td>
+</tr>
 
-                    <td className="pr-4 text-right font-semibold">
-                      {drink.cruiseCost.toFixed(2)} €
-                    </td>
+<tr className="border-t">
+  <td className="p-3">🍺 Cervezas</td>
+  <td className="text-center">{data.beer}</td>
+  <td className="text-center">
+    {selectedPackage.drinks.beer.toFixed(2)} €
+  </td>
+  <td className="pr-4 text-right font-semibold">
+    {result.beerCost.toFixed(2)} €
+  </td>
+</tr>
 
-                  </tr>
-                ))}
+<tr className="border-t">
+  <td className="p-3">🍷 Vinos</td>
+  <td className="text-center">{data.wine}</td>
+  <td className="text-center">
+    {selectedPackage.drinks.wine.toFixed(2)} €
+  </td>
+  <td className="pr-4 text-right font-semibold">
+    {result.wineCost.toFixed(2)} €
+  </td>
+</tr>
+
+<tr className="border-t">
+  <td className="p-3">🍸 Cócteles</td>
+  <td className="text-center">{data.cocktail}</td>
+  <td className="text-center">
+    {selectedPackage.drinks.cocktail.toFixed(2)} €
+  </td>
+  <td className="pr-4 text-right font-semibold">
+    {result.cocktailCost.toFixed(2)} €
+  </td>
+</tr>
 
               </tbody>
 

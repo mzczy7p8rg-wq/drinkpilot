@@ -19,131 +19,74 @@ export type CalculationInput = {
   cocktailPrice: number;
 };
 
-export type DrinkBreakdown = {
-  icon: string;
-  name: string;
-  quantity: number;
-  unitPrice: number;
-  dailyCost: number;
-  cruiseCost: number;
-};
-
 export type CalculationResult = {
   packageCost: number;
   drinksCost: number;
-  dailyDrinkCost: number;
-  totalDrinksPerDay: number;
   savings: number;
   recommended: boolean;
+
+  dailyDrinkCost: number;
+
+  coffeeCost: number;
+  waterCost: number;
+  sodaCost: number;
+  beerCost: number;
+  wineCost: number;
+  cocktailCost: number;
+
   breakEvenDrinksPerDay: number;
-  breakdown: DrinkBreakdown[];
 };
 
 export function calculateRecommendation(
   input: CalculationInput
 ): CalculationResult {
 
-  const breakdown: DrinkBreakdown[] = [
-    {
-      icon: "☕",
-      name: "Café",
-      quantity: input.coffee,
-      unitPrice: input.coffeePrice,
-      dailyCost: input.coffee * input.coffeePrice,
-      cruiseCost:
-        input.coffee *
-        input.coffeePrice *
-        input.days *
-        input.people,
-    },
+  const coffeeCost =
+    input.coffee * input.coffeePrice;
 
-    {
-      icon: "💧",
-      name: "Agua",
-      quantity: input.water,
-      unitPrice: input.waterPrice,
-      dailyCost: input.water * input.waterPrice,
-      cruiseCost:
-        input.water *
-        input.waterPrice *
-        input.days *
-        input.people,
-    },
+  const waterCost =
+    input.water * input.waterPrice;
 
-    {
-      icon: "🥤",
-      name: "Refrescos",
-      quantity: input.soda,
-      unitPrice: input.sodaPrice,
-      dailyCost: input.soda * input.sodaPrice,
-      cruiseCost:
-        input.soda *
-        input.sodaPrice *
-        input.days *
-        input.people,
-    },
+  const sodaCost =
+    input.soda * input.sodaPrice;
 
-    {
-      icon: "🍺",
-      name: "Cervezas",
-      quantity: input.beer,
-      unitPrice: input.beerPrice,
-      dailyCost: input.beer * input.beerPrice,
-      cruiseCost:
-        input.beer *
-        input.beerPrice *
-        input.days *
-        input.people,
-    },
+  const beerCost =
+    input.beer * input.beerPrice;
 
-    {
-      icon: "🍷",
-      name: "Vinos",
-      quantity: input.wine,
-      unitPrice: input.winePrice,
-      dailyCost: input.wine * input.winePrice,
-      cruiseCost:
-        input.wine *
-        input.winePrice *
-        input.days *
-        input.people,
-    },
+  const wineCost =
+    input.wine * input.winePrice;
 
-    {
-      icon: "🍸",
-      name: "Cócteles",
-      quantity: input.cocktail,
-      unitPrice: input.cocktailPrice,
-      dailyCost: input.cocktail * input.cocktailPrice,
-      cruiseCost:
-        input.cocktail *
-        input.cocktailPrice *
-        input.days *
-        input.people,
-    },
-  ];
+  const cocktailCost =
+    input.cocktail * input.cocktailPrice;
 
-  const dailyDrinkCost = breakdown.reduce(
-    (sum, drink) => sum + drink.dailyCost,
-    0
-  );
+  const dailyDrinkCost =
+    coffeeCost +
+    waterCost +
+    sodaCost +
+    beerCost +
+    wineCost +
+    cocktailCost;
 
-  const drinksCost = breakdown.reduce(
-    (sum, drink) => sum + drink.cruiseCost,
-    0
-  );
+  const drinksCost =
+    dailyDrinkCost *
+    input.days *
+    input.people;
 
   const packageCost =
     input.packagePricePerDay *
     input.days *
     input.people;
 
-  const savings = drinksCost - packageCost;
+  const savings =
+    drinksCost - packageCost;
 
-  const totalDrinksPerDay = breakdown.reduce(
-    (sum, drink) => sum + drink.quantity,
-    0
-  );
+  const totalDrinksPerDay =
+    input.coffee +
+    input.water +
+    input.soda +
+    input.beer +
+    input.wine +
+    input.cocktail;
 
   const averageDrinkPrice =
     totalDrinksPerDay > 0
@@ -158,11 +101,19 @@ export function calculateRecommendation(
   return {
     packageCost,
     drinksCost,
-    dailyDrinkCost,
-    totalDrinksPerDay,
     savings,
+
     recommended: savings > 0,
+
+    dailyDrinkCost,
+
+    coffeeCost,
+    waterCost,
+    sodaCost,
+    beerCost,
+    wineCost,
+    cocktailCost,
+
     breakEvenDrinksPerDay,
-    breakdown,
   };
 }
