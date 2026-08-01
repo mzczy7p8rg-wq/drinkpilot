@@ -1,3 +1,9 @@
+import {
+  myDrinksSoftRestrictions,
+  myDrinksRestrictions,
+  myDrinksPlusRestrictions,
+} from "./restrictions";
+
 export const costaPackages = {
   myDrinksSoft: {
     id: "myDrinksSoft",
@@ -7,7 +13,7 @@ export const costaPackages = {
     icon: "🥤",
 
     description:
-      "Paquete de bebidas sin alcohol. Pendiente de completar con información oficial.",
+      "Paquete de bebidas sin alcohol. Pendiente de completar con información oficial de Costa Cruceros.",
 
     pricePerDay: 0,
 
@@ -26,7 +32,11 @@ export const costaPackages = {
       cocktail: 0,
     },
 
+    restrictions: myDrinksSoftRestrictions,
+
     status: "pending",
+
+    lastVerified: null,
   },
 
   myDrinks: {
@@ -56,7 +66,11 @@ export const costaPackages = {
       cocktail: 9,
     },
 
+    restrictions: myDrinksRestrictions,
+
     status: "verified",
+
+    lastVerified: "2026-08-01",
   },
 
   myDrinksPlus: {
@@ -86,6 +100,10 @@ export const costaPackages = {
       cocktail: 12,
     },
 
+    restrictions: myDrinksPlusRestrictions,
+
     status: "verified",
+
+    lastVerified: "2026-08-01",
   },
 } as const;
