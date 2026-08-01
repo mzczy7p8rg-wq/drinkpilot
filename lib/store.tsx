@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
 export type WizardData = {
   days: number;
@@ -26,6 +32,27 @@ type StoreContextType = {
   setData: React.Dispatch<React.SetStateAction<WizardData>>;
 };
 
+const STORAGE_KEY = "drinkpilot-wizard";
+
+const initialData: WizardData = {
+  days: 0,
+
+  packageKey: "",
+  packageName: "",
+  packagePrice: 0,
+
+  coffee: 0,
+  water: 0,
+  soda: 0,
+  beer: 0,
+  wine: 0,
+  cocktail: 0,
+
+  drinksPerDay: 0,
+
+  people: 1,
+};
+
 const StoreContext = createContext<StoreContextType | null>(null);
 
 export function StoreProvider({
@@ -33,24 +60,59 @@ export function StoreProvider({
 }: {
   children: ReactNode;
 }) {
-  const [data, setData] = useState<WizardData>({
-    days: 0,
+  const [data, setData] = useState<WizardData>(initialData);
+  const [hydrated, setHydrated] = useState(false);
 
-    packageKey: "",
-    packageName: "",
-    packagePrice: 0,
+  /*
+   * Recuperamos los datos guardados cuando
+   * el navegador monta la aplicación.
+   */
+  useEffect(() => {
+    try {
+      const savedData = window.localStorage.getItem(STORAGE_KEY);
 
-    coffee: 0,
-    water: 0,
-    soda: 0,
-    beer: 0,
-    wine: 0,
-    cocktail: 0,
+      if (savedData) {
+        const parsedData = JSON.parse(savedData) as Partial<WizardData>;
 
-    drinksPerDay: 0,
+        setData({
+          ...initialData,
+          ...parsedData,
+        });
+      }
+    } catch (error) {
+      console.error(
+        "No se pudieron recuperar los datos de DrinkPilot:",
+        error
+      );
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
 
-    people: 1,
-  });
+  /*
+   * Guardamos automáticamente cualquier cambio.
+   *
+   * No guardamos nada hasta haber leído primero
+   * localStorage para evitar sobrescribir datos
+   * existentes con los valores iniciales.
+   */
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+      );
+    } catch (error) {
+      console.error(
+        "No se pudieron guardar los datos de DrinkPilot:",
+        error
+      );
+    }
+  }, [data, hydrated]);
 
   return (
     <StoreContext.Provider value={{ data, setData }}>
@@ -63,7 +125,9 @@ export function useStore() {
   const context = useContext(StoreContext);
 
   if (!context) {
-    throw new Error("useStore debe utilizarse dentro de StoreProvider");
+    throw new Error(
+      "useStore debe utilizarse dentro de StoreProvider"
+    );
   }
 
   return context;
