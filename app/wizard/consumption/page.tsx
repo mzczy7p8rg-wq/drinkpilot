@@ -21,7 +21,11 @@ export default function ConsumptionPage() {
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-lg">
-        <ProgressBar currentStep={3} totalSteps={4} />
+
+        <ProgressBar
+          currentStep={2}
+          totalSteps={3}
+        />
 
         <h1 className="text-3xl font-bold text-slate-900">
           ¿Cuántas bebidas consumes al día?
@@ -33,11 +37,12 @@ export default function ConsumptionPage() {
         </p>
 
         <div className="mt-6 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">
-          💡 Introduce las bebidas que consumirías aunque no contrataras un
-          paquete.
+          💡 Introduce las bebidas que consumirías aunque no contrataras
+          ningún paquete. DrinkPilot comparará después las opciones disponibles.
         </div>
 
         <div className="mt-8 space-y-4">
+
           <DrinkCounter
             label="☕ Cafés"
             value={data.coffee}
@@ -103,6 +108,7 @@ export default function ConsumptionPage() {
               }))
             }
           />
+
         </div>
 
         <div className="mt-6 rounded-xl bg-slate-100 p-4 text-center">
@@ -112,7 +118,9 @@ export default function ConsumptionPage() {
 
           <p className="mt-1 text-2xl font-bold text-slate-900">
             {totalDrinksPerDay}{" "}
-            {totalDrinksPerDay === 1 ? "bebida" : "bebidas"}
+            {totalDrinksPerDay === 1
+              ? "bebida"
+              : "bebidas"}
           </p>
 
           <p className="text-sm text-slate-500">
@@ -127,9 +135,10 @@ export default function ConsumptionPage() {
         )}
 
         <div className="mt-10 flex gap-4">
+
           <Link
-            href="/wizard/package"
-            className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold hover:bg-slate-100"
+            href="/wizard"
+            className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
           >
             Atrás
           </Link>
@@ -144,7 +153,8 @@ export default function ConsumptionPage() {
 
               setData((prev) => ({
                 ...prev,
-                drinksPerDay: totalDrinksPerDay,
+                drinksPerDay:
+                  totalDrinksPerDay,
               }));
             }}
             className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${
@@ -155,7 +165,9 @@ export default function ConsumptionPage() {
           >
             Continuar
           </Link>
+
         </div>
+
       </div>
     </main>
   );

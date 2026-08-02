@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { calculateRecommendation } from "@/lib/calculator";
 import { compareDrinkPackages } from "@/lib/comparison";
-import { getAllPackages } from "@/lib/packageService";
+import { costaOnboardPriceValues } from "@/data/onboardPrices";
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -16,14 +16,6 @@ export default function ResultsPage() {
     hydrated,
     resetData,
   } = useStore();
-
-  const packages = getAllPackages();
-
-  const selectedPackage = packages.find(
-    (pkg) =>
-      pkg.key === data.packageKey &&
-      pkg.status === "verified"
-  );
 
   const totalDrinksPerDay =
     data.coffee +
@@ -37,9 +29,6 @@ export default function ResultsPage() {
     Number.isInteger(data.days) &&
     data.days > 0;
 
-  const hasValidPackage =
-    Boolean(selectedPackage);
-
   const hasValidConsumption =
     totalDrinksPerDay > 0;
 
@@ -49,10 +38,15 @@ export default function ResultsPage() {
 
   const isComplete =
     hasValidDays &&
-    hasValidPackage &&
     hasValidConsumption &&
     hasValidPeople;
 
+  /*
+   * PROTECCIÓN DE RUTAS
+   *
+   * Ya no exigimos packageKey porque DrinkPilot
+   * recomienda automáticamente el mejor paquete.
+   */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -60,11 +54,6 @@ export default function ResultsPage() {
 
     if (!hasValidDays) {
       router.replace("/wizard");
-      return;
-    }
-
-    if (!hasValidPackage) {
-      router.replace("/wizard/package");
       return;
     }
 
@@ -79,7 +68,6 @@ export default function ResultsPage() {
   }, [
     hydrated,
     hasValidDays,
-    hasValidPackage,
     hasValidConsumption,
     hasValidPeople,
     router,
@@ -101,7 +89,7 @@ export default function ResultsPage() {
     );
   }
 
-  if (!isComplete || !selectedPackage) {
+  if (!isComplete) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-6">
         <div className="text-center">
@@ -117,12 +105,21 @@ export default function ResultsPage() {
     );
   }
 
-  const result = calculateRecommendation({
+  /*
+   * COSTE BASE DE LAS BEBIDAS
+   *
+   * Calculamos cuánto costaría pagar todo
+   * por separado usando una única carta
+   * de precios de referencia.
+   *
+   * packagePricePerDay = 0 porque aquí
+   * no estamos evaluando todavía ningún paquete.
+   */
+  const baseline = calculateRecommendation({
     days: data.days,
     people: data.people,
 
-    packagePricePerDay:
-      selectedPackage.pricePerDay,
+    packagePricePerDay: 0,
 
     coffee: data.coffee,
     water: data.water,
@@ -132,24 +129,27 @@ export default function ResultsPage() {
     cocktail: data.cocktail,
 
     coffeePrice:
-      selectedPackage.drinks.coffee,
+      costaOnboardPriceValues.coffee,
 
     waterPrice:
-      selectedPackage.drinks.water,
+      costaOnboardPriceValues.water,
 
     sodaPrice:
-      selectedPackage.drinks.soda,
+      costaOnboardPriceValues.soda,
 
     beerPrice:
-      selectedPackage.drinks.beer,
+      costaOnboardPriceValues.beer,
 
     winePrice:
-      selectedPackage.drinks.wine,
+      costaOnboardPriceValues.wine,
 
     cocktailPrice:
-      selectedPackage.drinks.cocktail,
+      costaOnboardPriceValues.cocktail,
   });
 
+  /*
+   * COMPARACIÓN AUTOMÁTICA DE PAQUETES
+   */
   const comparison = compareDrinkPackages({
     days: data.days,
     people: data.people,
@@ -162,60 +162,8 @@ export default function ResultsPage() {
     cocktail: data.cocktail,
   });
 
-  const recommendation =
-    (() => {
-      switch (result.recommendationLevel) {
-        case "not-worth-it":
-          return {
-            icon: "🔴",
-            title: "No parece compensar",
-            description:
-              "Con el consumo que has indicado, pagar las bebidas por separado sería más económico.",
-            className:
-              "border-red-200 bg-red-50",
-          };
-
-        case "very-close":
-          return {
-            icon: "🟠",
-            title: "La diferencia es muy ajustada",
-            description:
-              "El paquete podría ahorrar algo de dinero, pero el margen es pequeño.",
-            className:
-              "border-orange-200 bg-orange-50",
-          };
-
-        case "worth-considering":
-          return {
-            icon: "🟡",
-            title: "Puede compensarte",
-            description:
-              "Tu consumo estimado supera el precio del paquete con un margen razonable.",
-            className:
-              "border-yellow-200 bg-yellow-50",
-          };
-
-        case "worth-it":
-          return {
-            icon: "🟢",
-            title: "El paquete compensa",
-            description:
-              "Tu patrón de consumo indica un ahorro estimado significativo.",
-            className:
-              "border-green-200 bg-green-50",
-          };
-
-        case "strongly-worth-it":
-          return {
-            icon: "🟢",
-            title: "El paquete compensa claramente",
-            description:
-              "Tu consumo estimado está claramente por encima del coste diario del paquete.",
-            className:
-              "border-green-300 bg-green-100",
-          };
-      }
-    })();
+  const bestPackage =
+    comparison.bestPackage;
 
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-10">
@@ -224,180 +172,142 @@ export default function ResultsPage() {
         <div className="rounded-3xl bg-white p-10 shadow-xl">
 
           <h1 className="text-center text-4xl font-bold text-slate-900">
-            🍹 Resultado de tu análisis
+            🍹 Tu recomendación DrinkPilot
           </h1>
 
           <p className="mt-3 text-center text-slate-500">
-            Basado en el consumo diario que nos has indicado.
+            Hemos comparado automáticamente los paquetes disponibles
+            según tu consumo.
           </p>
 
-          {/* RECOMENDACIÓN */}
+          {/* RECOMENDACIÓN PRINCIPAL */}
 
-          <div
-            className={`mt-8 rounded-2xl border p-8 text-center ${recommendation.className}`}
-          >
-            <div className="text-4xl">
-              {recommendation.icon}
+          {bestPackage ? (
+            <div className="mt-8 rounded-2xl border border-green-300 bg-green-100 p-8 text-center">
+
+              <div className="text-4xl">
+                🟢
+              </div>
+
+              <h2 className="mt-3 text-3xl font-bold text-slate-900">
+                Mejor opción para ti
+              </h2>
+
+              <p className="mt-3 text-2xl font-bold text-green-800">
+                {bestPackage.packageName}
+              </p>
+
+              <p className="mx-auto mt-4 max-w-2xl text-slate-700">
+                De los paquetes disponibles, es el que ofrece
+                el mejor resultado económico para tu patrón de consumo.
+              </p>
+
+              <p className="mt-6 text-5xl font-bold text-sky-600">
+                {bestPackage.savings.toFixed(2)} €
+              </p>
+
+              <p className="mt-2 text-slate-600">
+                de ahorro estimado durante el crucero
+              </p>
+
             </div>
+          ) : (
+            <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
 
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">
-              {recommendation.title}
-            </h2>
+              <div className="text-4xl">
+                🔴
+              </div>
 
-            <p className="mt-3 text-xl font-semibold">
-              {selectedPackage.name}
-            </p>
+              <h2 className="mt-3 text-3xl font-bold text-slate-900">
+                Ningún paquete parece compensarte
+              </h2>
 
-            <p className="mx-auto mt-4 max-w-2xl text-slate-700">
-              {recommendation.description}
-            </p>
+              <p className="mx-auto mt-4 max-w-2xl text-slate-700">
+                Con el consumo que has indicado, pagar las bebidas
+                por separado sería la opción económicamente más favorable.
+              </p>
 
-            <p className="mt-6 text-5xl font-bold text-sky-600">
-              {Math.abs(result.savings).toFixed(2)} €
-            </p>
+              <p className="mt-6 text-5xl font-bold text-sky-600">
+                {baseline.drinksCost.toFixed(2)} €
+              </p>
 
-            <p className="mt-2 text-slate-600">
-              {result.savings >= 0
-                ? "de ahorro estimado durante el crucero"
-                : "más barato pagando las bebidas por separado"}
-            </p>
-          </div>
+              <p className="mt-2 text-slate-600">
+                coste estimado de tus bebidas durante el crucero
+              </p>
 
-          {/* RESUMEN */}
+            </div>
+          )}
+
+          {/* DATOS DEL VIAJE */}
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
 
-            <div className="rounded-2xl bg-slate-50 p-6 shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
               <p className="text-slate-500">
-                💰 Paquete
+                🗓️ Duración
               </p>
 
               <p className="mt-2 text-3xl font-bold">
-                {result.packageCost.toFixed(2)} €
+                {data.days}
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                días
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-6 shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
               <p className="text-slate-500">
-                🍹 Bebidas por separado
+                👥 Personas
               </p>
 
               <p className="mt-2 text-3xl font-bold">
-                {result.drinksCost.toFixed(2)} €
+                {data.people}
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                pasajeros
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-6 shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
               <p className="text-slate-500">
-                📈 Diferencia
+                🍹 Consumo
               </p>
 
-              <p
-                className={`mt-2 text-3xl font-bold ${
-                  result.savings >= 0
-                    ? "text-green-700"
-                    : "text-red-700"
-                }`}
-              >
-                {result.savings >= 0 ? "+" : ""}
-                {result.savings.toFixed(2)} €
+              <p className="mt-2 text-3xl font-bold">
+                {totalDrinksPerDay}
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                bebidas / persona / día
               </p>
             </div>
 
           </div>
 
-          {/* ANÁLISIS DIARIO */}
-
-          <div className="mt-6 grid gap-5 md:grid-cols-3">
-
-            <div className="rounded-2xl border border-slate-200 p-5">
-              <p className="text-sm text-slate-500">
-                Consumo estimado
-              </p>
-
-              <p className="mt-2 text-2xl font-bold">
-                {result.dailyDrinkCost.toFixed(2)} €
-              </p>
-
-              <p className="mt-1 text-sm text-slate-500">
-                por persona / día
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 p-5">
-              <p className="text-sm text-slate-500">
-                Precio del paquete
-              </p>
-
-              <p className="mt-2 text-2xl font-bold">
-                {selectedPackage.pricePerDay.toFixed(2)} €
-              </p>
-
-              <p className="mt-1 text-sm text-slate-500">
-                por persona / día
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 p-5">
-              <p className="text-sm text-slate-500">
-                Margen diario
-              </p>
-
-              <p
-                className={`mt-2 text-2xl font-bold ${
-                  result.dailyMargin >= 0
-                    ? "text-green-700"
-                    : "text-red-700"
-                }`}
-              >
-                {result.dailyMargin >= 0 ? "+" : ""}
-                {result.dailyMargin.toFixed(2)} €
-              </p>
-
-              <p className="mt-1 text-sm text-slate-500">
-                por persona / día
-              </p>
-            </div>
-
-          </div>
-
-          {/* PORCENTAJE */}
+          {/* COSTE SIN PAQUETE */}
 
           <div className="mt-6 rounded-2xl bg-slate-900 p-6 text-white">
+
             <p className="text-sm text-slate-300">
-              Ahorro estimado frente a pagar las bebidas por separado
+              Coste estimado pagando las bebidas por separado
             </p>
 
-            <p className="mt-2 text-3xl font-bold">
-              {result.savingsPercentage > 0
-                ? `${result.savingsPercentage.toFixed(1)} %`
-                : "0 %"}
+            <p className="mt-2 text-4xl font-bold">
+              {baseline.drinksCost.toFixed(2)} €
             </p>
+
+            <p className="mt-2 text-sm text-slate-300">
+              durante todo el crucero
+            </p>
+
           </div>
 
-          {/* AVISO DE PRECIOS */}
+          {/* COMPARATIVA */}
 
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <h3 className="font-semibold text-amber-900">
-              ℹ️ Estimación de referencia
-            </h3>
+          <div className="mt-10 rounded-2xl border border-slate-200 p-6">
 
-            <p className="mt-2 text-sm leading-6 text-amber-900">
-              El ahorro mostrado utiliza precios orientativos para estimar
-              cuánto costaría comprar las bebidas por separado. Los precios
-              reales a bordo y el coste del paquete pueden variar según el
-              crucero, la tarifa, el mercado y el momento de compra.
-            </p>
-
-            <p className="mt-2 text-sm leading-6 text-amber-900">
-              Comprueba siempre el precio definitivo en tu reserva o en
-              MyCosta antes de contratar el paquete.
-            </p>
-          </div>
-
-          {/* COMPARATIVA DE PAQUETES */}
-
-          <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
               <div>
@@ -406,19 +316,19 @@ export default function ResultsPage() {
                 </h3>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Hemos aplicado exactamente tu mismo patrón de consumo,
-                  número de pasajeros y duración del crucero a todos los
-                  paquetes disponibles.
+                  Todos los paquetes se comparan con exactamente
+                  el mismo consumo y los mismos precios de bebidas
+                  por separado.
                 </p>
               </div>
 
-              {comparison.bestPackage ? (
+              {bestPackage ? (
                 <span className="shrink-0 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
-                  Mejor opción: {comparison.bestPackage.packageName}
+                  Mejor opción: {bestPackage.packageName}
                 </span>
               ) : (
                 <span className="shrink-0 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
-                  Ningún paquete compensa
+                  Ninguno compensa
                 </span>
               )}
 
@@ -428,11 +338,8 @@ export default function ResultsPage() {
 
               {comparison.packages.map((pkg) => {
                 const isBest =
-                  comparison.bestPackage?.packageKey ===
+                  bestPackage?.packageKey ===
                   pkg.packageKey;
-
-                const isCurrent =
-                  data.packageKey === pkg.packageKey;
 
                 return (
                   <div
@@ -443,10 +350,11 @@ export default function ResultsPage() {
                         : "border-slate-200 bg-slate-50"
                     }`}
                   >
+
                     <div className="flex items-start justify-between gap-4">
 
                       <div>
-                        <p className="text-lg font-bold text-slate-900">
+                        <p className="text-xl font-bold text-slate-900">
                           {pkg.packageName}
                         </p>
 
@@ -456,21 +364,11 @@ export default function ResultsPage() {
                         </p>
                       </div>
 
-                      <div className="flex flex-col items-end gap-2">
-
-                        {isBest && (
-                          <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
-                            Mejor opción
-                          </span>
-                        )}
-
-                        {isCurrent && (
-                          <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
-                            Tu selección
-                          </span>
-                        )}
-
-                      </div>
+                      {isBest && (
+                        <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
+                          Mejor opción
+                        </span>
+                      )}
 
                     </div>
 
@@ -481,8 +379,18 @@ export default function ResultsPage() {
                           Coste paquete
                         </p>
 
-                        <p className="mt-1 text-xl font-bold text-slate-900">
+                        <p className="mt-1 text-xl font-bold">
                           {pkg.packageCost.toFixed(2)} €
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                          Bebidas aparte
+                        </p>
+
+                        <p className="mt-1 text-xl font-bold">
+                          {pkg.drinksCost.toFixed(2)} €
                         </p>
                       </div>
 
@@ -507,29 +415,10 @@ export default function ResultsPage() {
 
                       <div>
                         <p className="text-xs uppercase tracking-wide text-slate-500">
-                          Margen diario
-                        </p>
-
-                        <p
-                          className={`mt-1 font-semibold ${
-                            pkg.dailyMargin > 0
-                              ? "text-green-700"
-                              : pkg.dailyMargin < 0
-                              ? "text-red-700"
-                              : "text-slate-700"
-                          }`}
-                        >
-                          {pkg.dailyMargin > 0 ? "+" : ""}
-                          {pkg.dailyMargin.toFixed(2)} €
-                        </p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs uppercase tracking-wide text-slate-500">
                           Ahorro estimado
                         </p>
 
-                        <p className="mt-1 font-semibold text-slate-900">
+                        <p className="mt-1 text-xl font-bold">
                           {pkg.savingsPercentage > 0
                             ? `${pkg.savingsPercentage.toFixed(1)} %`
                             : "0 %"}
@@ -541,6 +430,21 @@ export default function ResultsPage() {
                     <div className="mt-5 border-t border-slate-200 pt-4">
 
                       <p className="text-sm text-slate-600">
+                        Margen diario:{" "}
+                        <strong
+                          className={
+                            pkg.dailyMargin > 0
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }
+                        >
+                          {pkg.dailyMargin > 0 ? "+" : ""}
+                          {pkg.dailyMargin.toFixed(2)} €
+                        </strong>{" "}
+                        por persona
+                      </p>
+
+                      <p className="mt-2 text-sm text-slate-600">
                         Punto de equilibrio:{" "}
                         <strong>
                           {pkg.breakEvenDrinksPerDay.toFixed(1)}
@@ -556,25 +460,48 @@ export default function ResultsPage() {
 
             </div>
 
-            {comparison.bestPackage ? (
+            {bestPackage ? (
               <div className="mt-6 rounded-xl bg-green-100 p-4 text-sm leading-6 text-green-900">
                 <strong>
-                  Según tu consumo, {comparison.bestPackage.packageName} es
-                  la opción económicamente más favorable.
+                  Recomendación DrinkPilot:
+                  {" "}
+                  {bestPackage.packageName}.
                 </strong>{" "}
-                La comparación utiliza exactamente los mismos datos para todos
-                los paquetes.
+                Es el paquete que genera el mayor ahorro estimado
+                con los datos que has introducido.
               </div>
             ) : (
               <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
                 <strong>
-                  Con el consumo indicado no encontramos ningún paquete que
-                  genere ahorro.
+                  Recomendación DrinkPilot:
+                  pagar las bebidas por separado.
                 </strong>{" "}
-                Pagar las bebidas por separado sería la opción económicamente
-                más favorable según esta estimación.
+                Ninguno de los paquetes analizados genera ahorro
+                con tu consumo estimado.
               </div>
             )}
+
+          </div>
+
+          {/* AVISO */}
+
+          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+
+            <h3 className="font-semibold text-amber-900">
+              ℹ️ Estimación de referencia
+            </h3>
+
+            <p className="mt-2 text-sm leading-6 text-amber-900">
+              DrinkPilot utiliza precios orientativos de bebidas
+              y paquetes para realizar esta comparación.
+              Los precios reales pueden variar según crucero,
+              tarifa, mercado y momento de compra.
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-amber-900">
+              Comprueba siempre el precio definitivo en tu reserva
+              o en MyCosta antes de contratar un paquete.
+            </p>
 
           </div>
 
@@ -583,7 +510,7 @@ export default function ResultsPage() {
           <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">
 
             <div className="bg-slate-800 px-6 py-4 font-bold text-white">
-              📊 Desglose del consumo
+              📊 Tu consumo estimado
             </div>
 
             <div className="overflow-x-auto">
@@ -624,11 +551,11 @@ export default function ResultsPage() {
                     </td>
 
                     <td className="text-center">
-                      {selectedPackage.drinks.coffee.toFixed(2)} €
+                      {costaOnboardPriceValues.coffee.toFixed(2)} €
                     </td>
 
                     <td className="pr-4 text-right font-semibold">
-                      {result.coffeeCost.toFixed(2)} €
+                      {baseline.coffeeCost.toFixed(2)} €
                     </td>
                   </tr>
 
@@ -642,11 +569,11 @@ export default function ResultsPage() {
                     </td>
 
                     <td className="text-center">
-                      {selectedPackage.drinks.water.toFixed(2)} €
+                      {costaOnboardPriceValues.water.toFixed(2)} €
                     </td>
 
                     <td className="pr-4 text-right font-semibold">
-                      {result.waterCost.toFixed(2)} €
+                      {baseline.waterCost.toFixed(2)} €
                     </td>
                   </tr>
 
@@ -660,11 +587,11 @@ export default function ResultsPage() {
                     </td>
 
                     <td className="text-center">
-                      {selectedPackage.drinks.soda.toFixed(2)} €
+                      {costaOnboardPriceValues.soda.toFixed(2)} €
                     </td>
 
                     <td className="pr-4 text-right font-semibold">
-                      {result.sodaCost.toFixed(2)} €
+                      {baseline.sodaCost.toFixed(2)} €
                     </td>
                   </tr>
 
@@ -678,11 +605,11 @@ export default function ResultsPage() {
                     </td>
 
                     <td className="text-center">
-                      {selectedPackage.drinks.beer.toFixed(2)} €
+                      {costaOnboardPriceValues.beer.toFixed(2)} €
                     </td>
 
                     <td className="pr-4 text-right font-semibold">
-                      {result.beerCost.toFixed(2)} €
+                      {baseline.beerCost.toFixed(2)} €
                     </td>
                   </tr>
 
@@ -696,11 +623,11 @@ export default function ResultsPage() {
                     </td>
 
                     <td className="text-center">
-                      {selectedPackage.drinks.wine.toFixed(2)} €
+                      {costaOnboardPriceValues.wine.toFixed(2)} €
                     </td>
 
                     <td className="pr-4 text-right font-semibold">
-                      {result.wineCost.toFixed(2)} €
+                      {baseline.wineCost.toFixed(2)} €
                     </td>
                   </tr>
 
@@ -714,11 +641,11 @@ export default function ResultsPage() {
                     </td>
 
                     <td className="text-center">
-                      {selectedPackage.drinks.cocktail.toFixed(2)} €
+                      {costaOnboardPriceValues.cocktail.toFixed(2)} €
                     </td>
 
                     <td className="pr-4 text-right font-semibold">
-                      {result.cocktailCost.toFixed(2)} €
+                      {baseline.cocktailCost.toFixed(2)} €
                     </td>
                   </tr>
 
@@ -727,23 +654,6 @@ export default function ResultsPage() {
               </table>
 
             </div>
-          </div>
-
-          {/* PUNTO DE EQUILIBRIO */}
-
-          <div className="mt-8 rounded-2xl bg-sky-50 p-6">
-            <h3 className="text-xl font-bold">
-              🎯 Punto de equilibrio
-            </h3>
-
-            <p className="mt-3 leading-7">
-              Con tu combinación habitual de bebidas, el paquete empieza a
-              compensar aproximadamente a partir de{" "}
-              <strong>
-                {result.breakEvenDrinksPerDay.toFixed(1)}
-              </strong>{" "}
-              bebidas por persona y día.
-            </p>
           </div>
 
           {/* REINICIO */}

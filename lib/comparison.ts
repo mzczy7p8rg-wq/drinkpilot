@@ -3,6 +3,7 @@ import {
   getAllPackages,
   PackageKey,
 } from "@/lib/packageService";
+import { costaOnboardPriceValues } from "@/data/onboardPrices";
 
 export type ComparisonInput = {
   days: number;
@@ -28,6 +29,8 @@ export type PackageComparisonResult = {
   drinksCost: number;
 
   savings: number;
+
+  dailyDrinkCost: number;
 
   dailyMargin: number;
 
@@ -57,17 +60,26 @@ export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
   /*
-   * Solo comparamos paquetes suficientemente
-   * verificados para participar en el cálculo.
+   * Solo participan paquetes habilitados
+   * para cálculo.
    *
    * My Drinks Soft queda fuera mientras
-   * permanezca con status "pending".
+   * continúe con status "pending".
    */
-
   const packages = getAllPackages().filter(
     (pkg) => pkg.status === "verified"
   );
 
+  /*
+   * MUY IMPORTANTE:
+   *
+   * Todas las opciones se comparan utilizando
+   * exactamente los mismos precios de bebidas
+   * por separado.
+   *
+   * El coste del café, agua, cerveza, etc.
+   * no depende del paquete analizado.
+   */
   const results: PackageComparisonResult[] =
     packages.map((pkg) => {
       const calculation =
@@ -86,22 +98,22 @@ export function compareDrinkPackages(
           cocktail: input.cocktail,
 
           coffeePrice:
-            pkg.drinks.coffee,
+            costaOnboardPriceValues.coffee,
 
           waterPrice:
-            pkg.drinks.water,
+            costaOnboardPriceValues.water,
 
           sodaPrice:
-            pkg.drinks.soda,
+            costaOnboardPriceValues.soda,
 
           beerPrice:
-            pkg.drinks.beer,
+            costaOnboardPriceValues.beer,
 
           winePrice:
-            pkg.drinks.wine,
+            costaOnboardPriceValues.wine,
 
           cocktailPrice:
-            pkg.drinks.cocktail,
+            costaOnboardPriceValues.cocktail,
         });
 
       return {
@@ -123,6 +135,9 @@ export function compareDrinkPackages(
         savings:
           calculation.savings,
 
+        dailyDrinkCost:
+          calculation.dailyDrinkCost,
+
         dailyMargin:
           calculation.dailyMargin,
 
@@ -141,20 +156,17 @@ export function compareDrinkPackages(
     });
 
   /*
-   * Ordenamos del paquete económicamente
-   * más favorable al menos favorable.
+   * Ordenamos de mayor a menor ahorro.
    */
-
   results.sort(
     (a, b) =>
       b.savings - a.savings
   );
 
   /*
-   * Si ninguno genera ahorro positivo,
-   * no recomendamos ningún paquete.
+   * Solo existe "mejor paquete" si alguno
+   * produce realmente un ahorro positivo.
    */
-
   const bestPackage =
     results.find(
       (pkg) => pkg.savings > 0
