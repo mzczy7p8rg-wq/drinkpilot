@@ -8,7 +8,6 @@ import ProgressBar from "@/components/ProgressBar";
 
 export default function ReviewPage() {
   const router = useRouter();
-
   const { data, hydrated } = useStore();
 
   const totalDrinksPerDay =
@@ -19,24 +18,12 @@ export default function ReviewPage() {
     data.wine +
     data.cocktail;
 
-  const premiumPreferences = [
-    {
-      label: "Cócteles premium",
-      selected: data.premiumCocktails,
-    },
-    {
-      label: "Cerveza embotellada",
-      selected: data.bottledBeer,
-    },
-    {
-      label: "Destilados premium",
-      selected: data.premiumSpirits,
-    },
-    {
-      label: "Agua embotellada sin límite",
-      selected: data.bottledWaterUnlimited,
-    },
-  ].filter((preference) => preference.selected);
+  const preferences = [
+    data.premiumCocktails && "Cócteles premium",
+    data.bottledBeer && "Cerveza embotellada",
+    data.premiumSpirits && "Destilados premium",
+    data.bottledWaterUnlimited && "Agua embotellada sin límite",
+  ].filter(Boolean) as string[];
 
   if (!hydrated) {
     return (
@@ -62,29 +49,19 @@ export default function ReviewPage() {
         </h1>
 
         <p className="mt-3 text-slate-500">
-          Comprueba los datos antes de que DrinkPilot compare
-          automáticamente los paquetes disponibles.
+          Comprueba los datos antes de ver la recomendación.
         </p>
 
-        {/* CRUCERO */}
-
         <section className="mt-8 rounded-2xl border border-slate-200 p-5">
-
           <div className="flex items-start justify-between gap-4">
-
             <div>
               <h2 className="font-bold text-slate-900">
-                🚢 Tu crucero
+                🚢 Duración del crucero
               </h2>
 
               <p className="mt-3 text-slate-700">
                 <strong>{data.days}</strong>{" "}
                 {data.days === 1 ? "día" : "días"}
-                {" · "}
-                <strong>{data.people}</strong>{" "}
-                {data.people === 1
-                  ? "persona"
-                  : "personas"}
               </p>
             </div>
 
@@ -94,89 +71,47 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
-
         </section>
 
-        {/* CONSUMO */}
-
         <section className="mt-4 rounded-2xl border border-slate-200 p-5">
-
           <div className="flex items-start justify-between gap-4">
-
             <div className="flex-1">
-
               <h2 className="font-bold text-slate-900">
                 🍹 Consumo diario
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
                 {totalDrinksPerDay}{" "}
-                {totalDrinksPerDay === 1
-                  ? "bebida"
-                  : "bebidas"}{" "}
+                {totalDrinksPerDay === 1 ? "bebida" : "bebidas"}{" "}
                 por persona / día
               </p>
 
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-
                 <div className="rounded-xl bg-slate-50 p-3">
-                  <p className="text-sm text-slate-500">
-                    ☕ Café
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {data.coffee}
-                  </p>
+                  ☕ Café: <strong>{data.coffee}</strong>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3">
-                  <p className="text-sm text-slate-500">
-                    💧 Agua
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {data.water}
-                  </p>
+                  💧 Agua: <strong>{data.water}</strong>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3">
-                  <p className="text-sm text-slate-500">
-                    🥤 Refrescos
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {data.soda}
-                  </p>
+                  🥤 Refrescos: <strong>{data.soda}</strong>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3">
-                  <p className="text-sm text-slate-500">
-                    🍺 Cerveza
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {data.beer}
-                  </p>
+                  🍺 Cerveza: <strong>{data.beer}</strong>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3">
-                  <p className="text-sm text-slate-500">
-                    🍷 Vino
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {data.wine}
-                  </p>
+                  🍷 Vino: <strong>{data.wine}</strong>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-3">
-                  <p className="text-sm text-slate-500">
-                    🍸 Cócteles
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {data.cocktail}
-                  </p>
+                  🍸 Cócteles: <strong>{data.cocktail}</strong>
                 </div>
-
               </div>
-
             </div>
 
             <Link
@@ -185,44 +120,32 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
-
         </section>
 
-        {/* PREFERENCIAS */}
-
         <section className="mt-4 rounded-2xl border border-slate-200 p-5">
-
           <div className="flex items-start justify-between gap-4">
-
             <div>
-
               <h2 className="font-bold text-slate-900">
                 ⭐ Preferencias
               </h2>
 
-              {premiumPreferences.length > 0 ? (
+              {preferences.length > 0 ? (
                 <div className="mt-3 space-y-2">
-
-                  {premiumPreferences.map(
-                    (preference) => (
-                      <p
-                        key={preference.label}
-                        className="text-sm text-slate-700"
-                      >
-                        ✓ {preference.label}
-                      </p>
-                    )
-                  )}
-
+                  {preferences.map((preference) => (
+                    <p
+                      key={preference}
+                      className="text-sm text-slate-700"
+                    >
+                      ✓ {preference}
+                    </p>
+                  ))}
                 </div>
               ) : (
                 <p className="mt-3 text-sm text-slate-500">
                   Sin preferencias premium adicionales.
                 </p>
               )}
-
             </div>
 
             <Link
@@ -231,111 +154,71 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
-
         </section>
 
-        {/* PRECIOS */}
-
         <section className="mt-4 rounded-2xl border border-slate-200 p-5">
-
           <div className="flex items-start justify-between gap-4">
-
             <div className="flex-1">
-
               <h2 className="font-bold text-slate-900">
                 🎟️ Precios de los paquetes
               </h2>
 
               <div className="mt-4 space-y-4">
-
                 <div className="flex items-center justify-between gap-4">
+                  <span className="font-medium text-slate-800">
+                    My Drinks
+                  </span>
 
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      My Drinks
+                  <div className="text-right">
+                    <p className="font-bold text-slate-900">
+                      {data.myDrinksCustomPrice !== null
+                        ? `${data.myDrinksCustomPrice.toFixed(2)} €`
+                        : "34.00 €"}
                     </p>
 
-                    <p className="mt-1 text-xs text-slate-500">
-                      por persona / día
+                    <p
+                      className={`mt-1 text-xs font-medium ${
+                        data.myDrinksCustomPrice !== null
+                          ? "text-sky-700"
+                          : "text-amber-700"
+                      }`}
+                    >
+                      {data.myDrinksCustomPrice !== null
+                        ? "✓ Precio de tu reserva"
+                        : "⚠ Precio de referencia"}
                     </p>
                   </div>
-
-                  {data.myDrinksCustomPrice !== null ? (
-                    <div className="text-right">
-
-                      <p className="font-bold text-slate-900">
-                        {data.myDrinksCustomPrice.toFixed(2)} €
-                      </p>
-
-                      <p className="mt-1 text-xs font-medium text-sky-700">
-                        ✓ Precio de tu reserva
-                      </p>
-
-                    </div>
-                  ) : (
-                    <div className="text-right">
-
-                      <p className="font-bold text-slate-900">
-                        34.00 €
-                      </p>
-
-                      <p className="mt-1 text-xs font-medium text-amber-700">
-                        ⚠ Precio de referencia
-                      </p>
-
-                    </div>
-                  )}
-
                 </div>
 
                 <div className="border-t border-slate-100 pt-4">
-
                   <div className="flex items-center justify-between gap-4">
+                    <span className="font-medium text-slate-800">
+                      My Drinks Plus
+                    </span>
 
-                    <div>
-                      <p className="font-medium text-slate-800">
-                        My Drinks Plus
+                    <div className="text-right">
+                      <p className="font-bold text-slate-900">
+                        {data.myDrinksPlusCustomPrice !== null
+                          ? `${data.myDrinksPlusCustomPrice.toFixed(2)} €`
+                          : "46.00 €"}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
-                        por persona / día
+                      <p
+                        className={`mt-1 text-xs font-medium ${
+                          data.myDrinksPlusCustomPrice !== null
+                            ? "text-sky-700"
+                            : "text-amber-700"
+                        }`}
+                      >
+                        {data.myDrinksPlusCustomPrice !== null
+                          ? "✓ Precio de tu reserva"
+                          : "⚠ Precio de referencia"}
                       </p>
                     </div>
-
-                    {data.myDrinksPlusCustomPrice !== null ? (
-                      <div className="text-right">
-
-                        <p className="font-bold text-slate-900">
-                          {data.myDrinksPlusCustomPrice.toFixed(2)} €
-                        </p>
-
-                        <p className="mt-1 text-xs font-medium text-sky-700">
-                          ✓ Precio de tu reserva
-                        </p>
-
-                      </div>
-                    ) : (
-                      <div className="text-right">
-
-                        <p className="font-bold text-slate-900">
-                          46.00 €
-                        </p>
-
-                        <p className="mt-1 text-xs font-medium text-amber-700">
-                          ⚠ Precio de referencia
-                        </p>
-
-                      </div>
-                    )}
-
                   </div>
-
                 </div>
-
               </div>
-
             </div>
 
             <Link
@@ -344,30 +227,20 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
-
         </section>
 
-        {/* PERSONAS */}
-
         <section className="mt-4 rounded-2xl border border-slate-200 p-5">
-
           <div className="flex items-start justify-between gap-4">
-
             <div>
-
               <h2 className="font-bold text-slate-900">
                 👥 Viajeros
               </h2>
 
               <p className="mt-3 text-slate-700">
                 <strong>{data.people}</strong>{" "}
-                {data.people === 1
-                  ? "persona"
-                  : "personas"}
+                {data.people === 1 ? "persona" : "personas"}
               </p>
-
             </div>
 
             <Link
@@ -376,22 +249,15 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
-
         </section>
-
-        {/* INFORMACIÓN */}
 
         <div className="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
           💡 DrinkPilot utilizará estos datos para comparar
-          automáticamente economía y cobertura de los paquetes.
+          automáticamente coste y cobertura.
         </div>
 
-        {/* NAVEGACIÓN */}
-
         <div className="mt-10 flex gap-4">
-
           <Link
             href="/wizard/people"
             className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
@@ -408,7 +274,6 @@ export default function ReviewPage() {
           >
             Ver recomendación
           </button>
-
         </div>
 
       </div>
