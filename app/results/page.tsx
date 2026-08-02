@@ -288,7 +288,7 @@ export default function ResultsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 sm:py-10">
+    <main className="min-h-screen bg-slate-100 px-4 pt-6 pb-28 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
 
         <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
@@ -800,46 +800,60 @@ export default function ResultsPage() {
 
             {/* VERSIÓN MÓVIL */}
 
-            <div className="divide-y divide-slate-200 sm:hidden">
-              {consumptionRows.map((row) => (
-                <div
-                  key={row.key}
-                  className="p-4"
-                >
-                  <div className="flex items-center justify-between gap-4">
-                    <p className="font-semibold text-slate-900">
-                      {row.label}
-                    </p>
+<div className="divide-y divide-slate-200 sm:hidden">
+  {consumptionRows.map((row) => (
+    <div
+      key={row.key}
+      className="p-4"
+    >
+      <p className="text-lg font-bold text-slate-900">
+        {row.label}
+      </p>
 
-                    <p className="font-bold text-slate-900">
-                      {row.total.toFixed(2)} €
-                    </p>
-                  </div>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
 
-                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                    <div className="rounded-lg bg-slate-50 p-3">
-                      <p className="text-xs text-slate-500">
-                        Cantidad / día
-                      </p>
+        {/* CANTIDAD */}
 
-                      <p className="mt-1 font-semibold text-slate-900">
-                        {row.quantity}
-                      </p>
-                    </div>
+        <div className="rounded-lg bg-slate-50 p-3">
+          <p className="text-xs text-slate-500">
+            Cantidad / día
+          </p>
 
-                    <div className="rounded-lg bg-slate-50 p-3">
-                      <p className="text-xs text-slate-500">
-                        Precio ref.
-                      </p>
+          <p className="mt-1 text-base font-bold text-slate-900">
+            {row.quantity}
+          </p>
+        </div>
 
-                      <p className="mt-1 font-semibold text-slate-900">
-                        {row.price.toFixed(2)} €
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* PRECIO + TOTAL */}
+
+        <div className="rounded-lg bg-slate-50 p-3">
+
+          <p className="text-xs text-slate-500">
+            Precio ref.
+          </p>
+
+          <p className="mt-1 text-base font-bold text-slate-900">
+            {row.price.toFixed(2)} €
+          </p>
+
+          <div className="mt-3 border-t border-slate-200 pt-3">
+
+            <p className="text-xs font-semibold text-sky-700">
+              Total crucero
+            </p>
+
+            <p className="mt-1 text-lg font-bold text-slate-900">
+              {row.total.toFixed(2)} €
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  ))}
+</div>
 
             {/* VERSIÓN TABLET / ESCRITORIO */}
 
