@@ -68,7 +68,7 @@ export default function PreferencesPage() {
 
         <ProgressBar
           currentStep={3}
-          totalSteps={5}
+          totalSteps={6}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">

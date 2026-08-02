@@ -43,7 +43,7 @@ export default function WizardPage() {
 
         <ProgressBar
           currentStep={1}
-          totalSteps={5}
+          totalSteps={6}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">
