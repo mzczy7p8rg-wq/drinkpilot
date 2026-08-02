@@ -38,63 +38,93 @@ export default function PeoplePage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-xl rounded-2xl bg-white p-10 shadow-lg">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
 
         <ProgressBar
           currentStep={5}
           totalSteps={6}
         />
 
-        <h1 className="text-3xl font-bold text-slate-900">
-          ¿Cuántas personas viajarán?
-        </h1>
-
-        <p className="mt-3 text-slate-500">
-          Calcularemos el coste total y compararemos
-          automáticamente los paquetes disponibles.
-        </p>
-
-        <input
-          type="number"
-          min="1"
-          step="1"
-          inputMode="numeric"
-          value={people}
-          onChange={(event) =>
-            setPeople(event.target.value)
-          }
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" &&
-              isValid
-            ) {
-              handleReview();
-            }
-          }}
-          className="mt-8 w-full rounded-xl border border-slate-300 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-        />
-
-        {people !== "" && !isValid && (
-          <p className="mt-3 text-sm font-medium text-red-600">
-            Introduce un número entero de personas mayor que 0.
+        <div className="mt-2 sm:mt-0">
+          <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+            Paso 5 de 6
           </p>
-        )}
 
-        <div className="mt-8 rounded-xl bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+          <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+            ¿Cuántas personas viajarán?
+          </h1>
+
+          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+            Calcularemos el coste total y compararemos
+            automáticamente los paquetes disponibles.
+          </p>
+        </div>
+
+        <div className="mt-7 sm:mt-8">
+
+          <label
+            htmlFor="people"
+            className="text-sm font-semibold text-slate-700"
+          >
+            Número de viajeros
+          </label>
+
+          <div className="relative mt-2">
+            <input
+              id="people"
+              type="number"
+              min="1"
+              step="1"
+              inputMode="numeric"
+              value={people}
+              onChange={(event) =>
+                setPeople(event.target.value)
+              }
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  isValid
+                ) {
+                  handleReview();
+                }
+              }}
+              className={`w-full rounded-xl border bg-white px-4 py-4 pr-24 text-xl font-semibold text-slate-900 outline-none transition ${
+                people !== "" && !isValid
+                  ? "border-red-300 focus:ring-2 focus:ring-red-400"
+                  : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+              }`}
+            />
+
+            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">
+              personas
+            </span>
+          </div>
+
+          {people !== "" && !isValid && (
+            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
+              <p className="text-sm font-medium text-red-700">
+                Introduce un número entero de personas mayor que 0.
+              </p>
+            </div>
+          )}
+
+        </div>
+
+        <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
           💡 DrinkPilot combinará consumo, preferencias
           y los precios de tu reserva cuando los hayas
           proporcionado.
         </div>
 
-        <div className="mt-8 flex gap-4">
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
 
           <button
             type="button"
             onClick={() =>
               router.push("/wizard/prices")
             }
-            className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
+            className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
           >
             Atrás
           </button>
@@ -103,9 +133,9 @@ export default function PeoplePage() {
             type="button"
             disabled={!isValid}
             onClick={handleReview}
-            className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${
+            className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
               isValid
-                ? "bg-sky-600 text-white hover:bg-sky-700"
+                ? "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800"
                 : "cursor-not-allowed bg-slate-300 text-slate-500"
             }`}
           >

@@ -21,29 +21,43 @@ export default function ConsumptionPage() {
     totalDrinksPerDay > 0;
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-lg">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
 
         <ProgressBar
           currentStep={2}
           totalSteps={6}
         />
 
-        <h1 className="text-3xl font-bold text-slate-900">
-          ¿Cuántas bebidas consumes al día?
-        </h1>
+        {/* CABECERA */}
 
-        <p className="mt-3 text-slate-500">
-          Indica el consumo aproximado de una persona durante
-          un día normal del crucero.
-        </p>
+        <div className="mt-2 sm:mt-0">
 
-        <div className="mt-6 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">
+          <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+            Paso 2 de 6
+          </p>
+
+          <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+            ¿Cuántas bebidas consumes al día?
+          </h1>
+
+          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+            Indica el consumo aproximado de una persona durante
+            un día normal del crucero.
+          </p>
+
+        </div>
+
+        {/* AYUDA */}
+
+        <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
           💡 Introduce las bebidas que consumirías aunque
           no contrataras ningún paquete.
         </div>
 
-        <div className="mt-8 space-y-4">
+        {/* CONTADORES */}
+
+        <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
 
           <DrinkCounter
             label="☕ Cafés"
@@ -113,34 +127,42 @@ export default function ConsumptionPage() {
 
         </div>
 
-        <div className="mt-6 rounded-xl bg-slate-100 p-4 text-center">
-          <span className="text-sm text-slate-500">
-            Consumo diario estimado
-          </span>
+        {/* TOTAL */}
 
-          <p className="mt-1 text-2xl font-bold text-slate-900">
-            {totalDrinksPerDay}{" "}
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center sm:p-5">
+
+          <p className="text-sm font-medium text-slate-500">
+            Consumo diario estimado
+          </p>
+
+          <p className="mt-1 text-3xl font-bold text-slate-900">
+            {totalDrinksPerDay}
+          </p>
+
+          <p className="mt-1 text-sm font-medium text-slate-600">
             {totalDrinksPerDay === 1
               ? "bebida"
-              : "bebidas"}
-          </p>
-
-          <p className="text-sm text-slate-500">
+              : "bebidas"}{" "}
             por persona / día
           </p>
+
         </div>
 
         {!hasConsumption && (
-          <p className="mt-4 text-center text-sm font-medium text-amber-700">
-            Añade al menos una bebida para continuar.
-          </p>
+          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-center">
+            <p className="text-sm font-medium text-amber-800">
+              Añade al menos una bebida para continuar.
+            </p>
+          </div>
         )}
 
-        <div className="mt-10 flex gap-4">
+        {/* NAVEGACIÓN */}
+
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4">
 
           <Link
             href="/wizard"
-            className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
+            className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
           >
             Atrás
           </Link>
@@ -163,9 +185,9 @@ export default function ConsumptionPage() {
                   totalDrinksPerDay,
               }));
             }}
-            className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${
+            className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
               hasConsumption
-                ? "bg-sky-600 text-white hover:bg-sky-700"
+                ? "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800"
                 : "pointer-events-none bg-slate-300 text-slate-500"
             }`}
           >

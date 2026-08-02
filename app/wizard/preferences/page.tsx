@@ -20,7 +20,7 @@ function PreferenceCard({
 }: PreferenceCardProps) {
   return (
     <label
-      className={`block cursor-pointer rounded-2xl border p-5 transition ${
+      className={`block cursor-pointer rounded-2xl border p-4 transition sm:p-5 ${
         checked
           ? "border-sky-500 bg-sky-50 shadow-sm"
           : "border-slate-200 bg-white hover:border-sky-300"
@@ -28,8 +28,8 @@ function PreferenceCard({
     >
       <div className="flex items-start justify-between gap-4">
 
-        <div>
-          <p className="font-semibold text-slate-900">
+        <div className="min-w-0">
+          <p className="text-base font-semibold text-slate-900 sm:text-lg">
             {title}
           </p>
 
@@ -44,7 +44,7 @@ function PreferenceCard({
           onChange={(event) =>
             onChange(event.target.checked)
           }
-          className="mt-1 h-5 w-5 accent-sky-600"
+          className="mt-1 h-6 w-6 shrink-0 accent-sky-600"
         />
 
       </div>
@@ -63,30 +63,36 @@ export default function PreferencesPage() {
   ].filter(Boolean).length;
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-lg">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
 
         <ProgressBar
           currentStep={3}
           totalSteps={6}
         />
 
-        <h1 className="text-3xl font-bold text-slate-900">
-          ¿Qué extras valoras a bordo?
-        </h1>
+        <div className="mt-2 sm:mt-0">
+          <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+            Paso 3 de 6
+          </p>
 
-        <p className="mt-3 text-slate-500">
-          Estas preferencias son opcionales.
-          Nos ayudan a distinguir mejor entre
-          un paquete estándar y uno premium.
-        </p>
+          <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+            ¿Qué extras valoras a bordo?
+          </h1>
 
-        <div className="mt-6 rounded-xl bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+            Estas preferencias son opcionales.
+            Nos ayudan a distinguir mejor entre
+            un paquete estándar y uno premium.
+          </p>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
           💡 Marca únicamente aquellas opciones
           que realmente valorarías durante el crucero.
         </div>
 
-        <div className="mt-8 space-y-4">
+        <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
 
           <PreferenceCard
             title="🍸 Cócteles premium"
@@ -138,36 +144,38 @@ export default function PreferencesPage() {
 
         </div>
 
-        <div className="mt-6 rounded-xl bg-slate-100 p-4 text-center">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm font-medium text-slate-500">
             Preferencias seleccionadas
           </p>
 
-          <p className="mt-1 text-2xl font-bold text-slate-900">
+          <p className="mt-1 text-3xl font-bold text-slate-900">
             {selectedPreferences}
           </p>
 
-          {selectedPreferences === 0 && (
-            <p className="mt-1 text-sm text-slate-500">
-              Sin preferencias premium
-            </p>
-          )}
+          <p className="mt-1 text-sm text-slate-500">
+            {selectedPreferences === 0
+              ? "Sin preferencias premium"
+              : selectedPreferences === 1
+              ? "preferencia premium"
+              : "preferencias premium"}
+          </p>
 
         </div>
 
-        <div className="mt-10 flex gap-4">
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4">
 
           <Link
             href="/wizard/consumption"
-            className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
+            className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
           >
             Atrás
           </Link>
 
           <Link
             href="/wizard/prices"
-            className="flex-1 rounded-xl bg-sky-600 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
+            className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
           >
             Continuar
           </Link>

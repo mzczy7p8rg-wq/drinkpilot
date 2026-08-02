@@ -114,36 +114,43 @@ export default function PricesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-10 shadow-lg">
+    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
 
         <ProgressBar
           currentStep={4}
           totalSteps={6}
         />
 
-        <h1 className="text-3xl font-bold text-slate-900">
-          ¿Tienes el precio de tu reserva?
-        </h1>
+        <div className="mt-2 sm:mt-0">
+          <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+            Paso 4 de 6
+          </p>
 
-        <p className="mt-3 text-slate-500">
-          Si Costa ya te muestra un precio para los paquetes,
-          introdúcelo aquí para mejorar la precisión del análisis.
-        </p>
+          <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+            ¿Tienes el precio de tu reserva?
+          </h1>
 
-        <div className="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+            Si Costa ya te muestra un precio para los paquetes,
+            introdúcelo aquí para mejorar la precisión del análisis.
+          </p>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
           💡 Este paso es opcional. Si dejas los campos vacíos,
           DrinkPilot utilizará sus precios de referencia.
         </div>
 
-        <div className="mt-8 space-y-6">
+        <div className="mt-6 space-y-5 sm:mt-8 sm:space-y-6">
 
           {/* MY DRINKS */}
 
-          <div>
+          <div className="rounded-2xl border border-slate-200 p-4 sm:p-5">
+
             <label
               htmlFor="myDrinksPrice"
-              className="block font-semibold text-slate-900"
+              className="block text-base font-semibold text-slate-900 sm:text-lg"
             >
               🍹 My Drinks
             </label>
@@ -166,45 +173,51 @@ export default function PricesPage() {
                   )
                 }
                 placeholder="Ej. 38.50"
-                className={`w-full rounded-xl border p-4 pr-14 text-lg focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border bg-white px-4 py-4 pr-14 text-lg font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
                   myDrinksValidation.error
-                    ? "border-red-300 focus:ring-red-400"
-                    : "border-slate-300 focus:ring-sky-500"
+                    ? "border-red-300 focus:ring-2 focus:ring-red-400"
+                    : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
                 }`}
               />
 
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
                 €
               </span>
             </div>
 
             {myDrinksValidation.error && (
-              <p className="mt-2 text-sm font-medium text-red-600">
-                {myDrinksValidation.error}
-              </p>
+              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
+                <p className="text-sm font-medium text-red-700">
+                  {myDrinksValidation.error}
+                </p>
+              </div>
             )}
 
             {myDrinksValidation.warning && (
-              <p className="mt-2 text-sm font-medium text-amber-700">
-                ⚠️ {myDrinksValidation.warning}
-              </p>
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p className="text-sm font-medium leading-6 text-amber-800">
+                  ⚠️ {myDrinksValidation.warning}
+                </p>
+              </div>
             )}
 
             {!myDrinksValidation.error &&
               !myDrinksValidation.warning && (
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-3 text-xs leading-5 text-slate-500">
                   Si queda vacío: DrinkPilot usará
                   34,00 € / día como referencia.
                 </p>
               )}
+
           </div>
 
           {/* MY DRINKS PLUS */}
 
-          <div>
+          <div className="rounded-2xl border border-slate-200 p-4 sm:p-5">
+
             <label
               htmlFor="myDrinksPlusPrice"
-              className="block font-semibold text-slate-900"
+              className="block text-base font-semibold text-slate-900 sm:text-lg"
             >
               🍸 My Drinks Plus
             </label>
@@ -227,52 +240,57 @@ export default function PricesPage() {
                   )
                 }
                 placeholder="Ej. 49.90"
-                className={`w-full rounded-xl border p-4 pr-14 text-lg focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border bg-white px-4 py-4 pr-14 text-lg font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
                   myDrinksPlusValidation.error
-                    ? "border-red-300 focus:ring-red-400"
-                    : "border-slate-300 focus:ring-sky-500"
+                    ? "border-red-300 focus:ring-2 focus:ring-red-400"
+                    : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
                 }`}
               />
 
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
                 €
               </span>
             </div>
 
             {myDrinksPlusValidation.error && (
-              <p className="mt-2 text-sm font-medium text-red-600">
-                {myDrinksPlusValidation.error}
-              </p>
+              <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
+                <p className="text-sm font-medium text-red-700">
+                  {myDrinksPlusValidation.error}
+                </p>
+              </div>
             )}
 
             {myDrinksPlusValidation.warning && (
-              <p className="mt-2 text-sm font-medium text-amber-700">
-                ⚠️ {myDrinksPlusValidation.warning}
-              </p>
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p className="text-sm font-medium leading-6 text-amber-800">
+                  ⚠️ {myDrinksPlusValidation.warning}
+                </p>
+              </div>
             )}
 
             {!myDrinksPlusValidation.error &&
               !myDrinksPlusValidation.warning && (
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="mt-3 text-xs leading-5 text-slate-500">
                   Si queda vacío: DrinkPilot usará
                   46,00 € / día como referencia.
                 </p>
               )}
+
           </div>
 
         </div>
 
-        <div className="mt-8 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-600">
+        <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-600 sm:mt-8">
           Los precios que introduzcas se utilizarán únicamente
           para este análisis y tendrán prioridad sobre los valores
           de referencia.
         </div>
 
-        <div className="mt-10 flex gap-4">
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4">
 
           <Link
             href="/wizard/preferences"
-            className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
+            className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
           >
             Atrás
           </Link>
@@ -281,7 +299,7 @@ export default function PricesPage() {
             <Link
               href="/wizard/people"
               onClick={savePrices}
-              className="flex-1 rounded-xl bg-sky-600 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
+              className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
             >
               Continuar
             </Link>
@@ -289,7 +307,7 @@ export default function PricesPage() {
             <button
               type="button"
               disabled
-              className="flex-1 cursor-not-allowed rounded-xl bg-slate-300 py-4 text-center font-semibold text-slate-500"
+              className="cursor-not-allowed rounded-xl bg-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-500 sm:text-base"
             >
               Continuar
             </button>
