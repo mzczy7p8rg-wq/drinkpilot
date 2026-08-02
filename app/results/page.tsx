@@ -9,6 +9,7 @@ import { compareDrinkPackages } from "@/lib/comparison";
 import { CoverageCategory } from "@/lib/coverage";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { costaOnboardPriceValues } from "@/data/onboardPrices";
+import DataConfidencePanel from "@/components/DataConfidencePanel";
 
 const coverageLabels: Record<CoverageCategory, string> = {
   coffee: "café",
@@ -180,12 +181,6 @@ export default function ResultsPage() {
   const bestPackage =
     comparison.bestPackage;
 
-  /*
-   * Explicación automática de la recomendación.
-   *
-   * Esta capa NO modifica la decisión del motor.
-   * Solo explica por qué se ha llegado a ella.
-   */
   const explanation =
     buildRecommendationExplanation(comparison);
 
@@ -442,6 +437,10 @@ export default function ResultsPage() {
                           {pkg.packagePricePerDay.toFixed(2)} €
                           {" "}por persona / día
                         </p>
+
+                        <p className="mt-1 text-xs font-semibold text-amber-700">
+                          Precio de referencia
+                        </p>
                       </div>
 
                       {isBest && (
@@ -601,8 +600,6 @@ export default function ResultsPage() {
 
             </div>
 
-            {/* EXPLICACIÓN RESUMIDA */}
-
             <div
               className={`mt-6 rounded-xl border p-5 text-sm leading-6 ${explanationStyle.container}`}
             >
@@ -623,26 +620,10 @@ export default function ResultsPage() {
 
           </div>
 
-          {/* AVISO */}
+          {/* CALIDAD DE LOS DATOS */}
 
-          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-
-            <h3 className="font-semibold text-amber-900">
-              ℹ️ Estimación de referencia
-            </h3>
-
-            <p className="mt-2 text-sm leading-6 text-amber-900">
-              DrinkPilot utiliza precios orientativos de bebidas
-              y paquetes para realizar esta comparación.
-              Los precios reales pueden variar según crucero,
-              tarifa, mercado y momento de compra.
-            </p>
-
-            <p className="mt-2 text-sm leading-6 text-amber-900">
-              Comprueba siempre el precio definitivo en tu reserva
-              o en MyCosta antes de contratar un paquete.
-            </p>
-
+          <div className="mt-8">
+            <DataConfidencePanel />
           </div>
 
           {/* TABLA DE CONSUMO */}
