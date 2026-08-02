@@ -10,7 +10,7 @@ import { getAllPackages } from "@/lib/packageService";
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { data, hydrated } = useStore();
+  const { data, hydrated, resetData } = useStore();
 
   const packages = getAllPackages();
 
@@ -367,12 +367,16 @@ export default function ResultsPage() {
             </p>
           </div>
 
-          <Link
-            href="/"
-            className="mt-10 block rounded-xl bg-sky-600 py-4 text-center text-lg font-semibold text-white transition hover:bg-sky-700"
-          >
-            Empezar de nuevo
-          </Link>
+          <button
+  type="button"
+  onClick={() => {
+    resetData();
+    router.push("/");
+  }}
+  className="mt-10 block w-full rounded-xl bg-sky-600 py-4 text-center text-lg font-semibold text-white transition hover:bg-sky-700"
+>
+  Empezar de nuevo
+</button>
 
         </div>
       </div>

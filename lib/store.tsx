@@ -31,6 +31,7 @@ type StoreContextType = {
   data: WizardData;
   setData: React.Dispatch<React.SetStateAction<WizardData>>;
   hydrated: boolean;
+  resetData: () => void;
 };
 
 const STORAGE_KEY = "drinkpilot-wizard";
@@ -69,7 +70,9 @@ export function StoreProvider({
       const savedData = window.localStorage.getItem(STORAGE_KEY);
 
       if (savedData) {
-        const parsedData = JSON.parse(savedData) as Partial<WizardData>;
+        const parsedData = JSON.parse(
+          savedData
+        ) as Partial<WizardData>;
 
         setData({
           ...initialData,
@@ -104,12 +107,26 @@ export function StoreProvider({
     }
   }, [data, hydrated]);
 
+  function resetData() {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error(
+        "No se pudieron borrar los datos de DrinkPilot:",
+        error
+      );
+    }
+
+    setData(initialData);
+  }
+
   return (
     <StoreContext.Provider
       value={{
         data,
         setData,
         hydrated,
+        resetData,
       }}
     >
       {children}
