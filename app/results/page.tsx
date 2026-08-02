@@ -7,6 +7,7 @@ import { useStore } from "@/lib/store";
 import { calculateRecommendation } from "@/lib/calculator";
 import { compareDrinkPackages } from "@/lib/comparison";
 import { CoverageCategory } from "@/lib/coverage";
+import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { costaOnboardPriceValues } from "@/data/onboardPrices";
 
 const coverageLabels: Record<CoverageCategory, string> = {
@@ -16,7 +17,6 @@ const coverageLabels: Record<CoverageCategory, string> = {
   beer: "cerveza",
   wine: "vino",
   cocktail: "cócteles",
-
   premiumCocktails: "cócteles premium",
   bottledBeer: "cerveza embotellada",
   premiumSpirits: "destilados premium",
@@ -40,13 +40,12 @@ export default function ResultsPage() {
     data.wine +
     data.cocktail;
 
-  const selectedPremiumPreferences =
-    [
-      data.premiumCocktails,
-      data.bottledBeer,
-      data.premiumSpirits,
-      data.bottledWaterUnlimited,
-    ].filter(Boolean).length;
+  const selectedPremiumPreferences = [
+    data.premiumCocktails,
+    data.bottledBeer,
+    data.premiumSpirits,
+    data.bottledWaterUnlimited,
+  ].filter(Boolean).length;
 
   const hasValidDays =
     Number.isInteger(data.days) &&
@@ -181,6 +180,44 @@ export default function ResultsPage() {
   const bestPackage =
     comparison.bestPackage;
 
+  /*
+   * Explicación automática de la recomendación.
+   *
+   * Esta capa NO modifica la decisión del motor.
+   * Solo explica por qué se ha llegado a ella.
+   */
+  const explanation =
+    buildRecommendationExplanation(comparison);
+
+  const explanationStyles = {
+    positive: {
+      container:
+        "border-green-300 bg-green-50",
+      icon: "🟢",
+      title: "text-green-900",
+      accent: "text-green-800",
+    },
+
+    warning: {
+      container:
+        "border-amber-300 bg-amber-50",
+      icon: "🟠",
+      title: "text-amber-950",
+      accent: "text-amber-900",
+    },
+
+    neutral: {
+      container:
+        "border-slate-300 bg-slate-50",
+      icon: "🔵",
+      title: "text-slate-900",
+      accent: "text-slate-700",
+    },
+  } as const;
+
+  const explanationStyle =
+    explanationStyles[explanation.tone];
+
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-10">
       <div className="mx-auto max-w-4xl">
@@ -196,78 +233,79 @@ export default function ResultsPage() {
             según tu consumo y tus preferencias.
           </p>
 
-          {bestPackage ? (
-            <div className="mt-8 rounded-2xl border border-green-300 bg-green-100 p-8 text-center">
+          {/* EXPLICACIÓN PRINCIPAL */}
 
-              <div className="text-4xl">
-                🟢
-              </div>
+          <div
+            className={`mt-8 rounded-2xl border p-8 text-center ${explanationStyle.container}`}
+          >
+            <div className="text-4xl">
+              {explanationStyle.icon}
+            </div>
 
-              <h2 className="mt-3 text-3xl font-bold text-slate-900">
-                Mejor opción para ti
-              </h2>
+            <h2
+              className={`mt-3 text-3xl font-bold ${explanationStyle.title}`}
+            >
+              {explanation.title}
+            </h2>
 
-              <p className="mt-3 text-2xl font-bold text-green-800">
-                {bestPackage.packageName}
+            <p className="mx-auto mt-4 max-w-2xl text-lg leading-7 text-slate-700">
+              {explanation.summary}
+            </p>
+
+            <div className="mx-auto mt-6 max-w-2xl rounded-xl bg-white/70 p-5 text-left">
+              <p
+                className={`font-semibold leading-6 ${explanationStyle.accent}`}
+              >
+                {explanation.reason}
               </p>
 
-              <p className="mx-auto mt-4 max-w-2xl text-slate-700">
-                De los paquetes disponibles, es el que ofrece
-                el mejor resultado económico entre los que cubren
-                completamente lo que has indicado.
-              </p>
+              {explanation.secondaryReason && (
+                <p className="mt-3 leading-6 text-slate-700">
+                  {explanation.secondaryReason}
+                </p>
+              )}
+            </div>
 
-              <p className="mt-6 text-5xl font-bold text-sky-600">
-                {bestPackage.savings.toFixed(2)} €
-              </p>
-
-              <p className="mt-2 text-slate-600">
-                de ahorro estimado durante el crucero
-              </p>
-
-              <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
-                <p className="text-sm text-slate-600">
-                  Cobertura de tu perfil
+            {bestPackage ? (
+              <>
+                <p className="mt-7 text-5xl font-bold text-sky-600">
+                  {bestPackage.savings.toFixed(2)} €
                 </p>
 
-                <p className="mt-1 text-2xl font-bold text-green-800">
-                  {bestPackage.coverageScore.toFixed(0)} %
+                <p className="mt-2 text-slate-600">
+                  de ahorro estimado durante el crucero
                 </p>
 
-                {bestPackage.fullyCovered && (
-                  <p className="mt-1 text-sm font-semibold text-green-700">
-                    ✓ Cubre todas las categorías y preferencias indicadas
+                <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
+                  <p className="text-sm text-slate-600">
+                    Cobertura de tu perfil
                   </p>
-                )}
-              </div>
 
-            </div>
-          ) : (
-            <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+                  <p className="mt-1 text-2xl font-bold text-green-800">
+                    {bestPackage.coverageScore.toFixed(0)} %
+                  </p>
 
-              <div className="text-4xl">
-                🔴
-              </div>
+                  {bestPackage.fullyCovered && (
+                    <p className="mt-1 text-sm font-semibold text-green-700">
+                      ✓ Cubre todas las categorías y preferencias indicadas
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="mt-7 text-5xl font-bold text-sky-600">
+                  {baseline.drinksCost.toFixed(2)} €
+                </p>
 
-              <h2 className="mt-3 text-3xl font-bold text-slate-900">
-                Ningún paquete parece compensarte
-              </h2>
+                <p className="mt-2 text-slate-600">
+                  coste estimado pagando las bebidas por separado
+                </p>
+              </>
+            )}
+          </div>
 
-              <p className="mx-auto mt-4 max-w-2xl text-slate-700">
-                No encontramos un paquete que cubra completamente
-                lo que has indicado y además genere ahorro.
-              </p>
-
-              <p className="mt-6 text-5xl font-bold text-sky-600">
-                {baseline.drinksCost.toFixed(2)} €
-              </p>
-
-              <p className="mt-2 text-slate-600">
-                coste estimado de tus bebidas durante el crucero
-              </p>
-
-            </div>
-          )}
+          {/* RESUMEN DEL PERFIL */}
 
           <div className="mt-10 grid gap-5 md:grid-cols-4">
 
@@ -329,6 +367,8 @@ export default function ResultsPage() {
 
           </div>
 
+          {/* COSTE SIN PAQUETE */}
+
           <div className="mt-6 rounded-2xl bg-slate-900 p-6 text-white">
 
             <p className="text-sm text-slate-300">
@@ -344,6 +384,8 @@ export default function ResultsPage() {
             </p>
 
           </div>
+
+          {/* COMPARATIVA */}
 
           <div className="mt-10 rounded-2xl border border-slate-200 p-6">
 
@@ -559,27 +601,29 @@ export default function ResultsPage() {
 
             </div>
 
-            {bestPackage ? (
-              <div className="mt-6 rounded-xl bg-green-100 p-4 text-sm leading-6 text-green-900">
-                <strong>
-                  Recomendación DrinkPilot:
-                  {" "}
-                  {bestPackage.packageName}.
-                </strong>{" "}
-                Es la opción con mejor resultado económico entre
-                las que cubren completamente tu perfil.
-              </div>
-            ) : (
-              <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
-                <strong>
-                  No recomendamos automáticamente un paquete.
-                </strong>{" "}
-                Ninguna opción combina cobertura completa
-                y ahorro positivo con tus datos actuales.
-              </div>
-            )}
+            {/* EXPLICACIÓN RESUMIDA */}
+
+            <div
+              className={`mt-6 rounded-xl border p-5 text-sm leading-6 ${explanationStyle.container}`}
+            >
+              <strong className={explanationStyle.title}>
+                {explanation.title}
+              </strong>
+
+              <p className="mt-2 text-slate-700">
+                {explanation.summary}
+              </p>
+
+              {explanation.secondaryReason && (
+                <p className="mt-2 text-slate-600">
+                  {explanation.secondaryReason}
+                </p>
+              )}
+            </div>
 
           </div>
+
+          {/* AVISO */}
 
           <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
 
@@ -600,6 +644,8 @@ export default function ResultsPage() {
             </p>
 
           </div>
+
+          {/* TABLA DE CONSUMO */}
 
           <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">
 
