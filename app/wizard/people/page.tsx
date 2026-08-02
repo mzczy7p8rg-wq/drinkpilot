@@ -17,15 +17,14 @@ export default function PeoplePage() {
       : "1"
   );
 
-  const parsedPeople =
-    Number(people);
+  const parsedPeople = Number(people);
 
   const isValid =
     people.trim() !== "" &&
     Number.isInteger(parsedPeople) &&
     parsedPeople > 0;
 
-  function handleResults() {
+  function handleReview() {
     if (!isValid) {
       return;
     }
@@ -35,7 +34,7 @@ export default function PeoplePage() {
       people: parsedPeople,
     }));
 
-    router.push("/results");
+    router.push("/wizard/review");
   }
 
   return (
@@ -70,7 +69,7 @@ export default function PeoplePage() {
               event.key === "Enter" &&
               isValid
             ) {
-              handleResults();
+              handleReview();
             }
           }}
           className="mt-8 w-full rounded-xl border border-slate-300 p-4 text-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
@@ -103,14 +102,14 @@ export default function PeoplePage() {
           <button
             type="button"
             disabled={!isValid}
-            onClick={handleResults}
+            onClick={handleReview}
             className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${
               isValid
                 ? "bg-sky-600 text-white hover:bg-sky-700"
                 : "cursor-not-allowed bg-slate-300 text-slate-500"
             }`}
           >
-            Ver recomendación
+            Revisar análisis
           </button>
 
         </div>
