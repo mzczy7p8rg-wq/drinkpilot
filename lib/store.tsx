@@ -11,10 +11,6 @@ import {
 export type WizardData = {
   days: number;
 
-  packageKey: string;
-  packageName: string;
-  packagePrice: number;
-
   coffee: number;
   water: number;
   soda: number;
@@ -39,10 +35,6 @@ const STORAGE_KEY = "drinkpilot-wizard";
 const initialData: WizardData = {
   days: 0,
 
-  packageKey: "",
-  packageName: "",
-  packagePrice: 0,
-
   coffee: 0,
   water: 0,
   soda: 0,
@@ -55,28 +47,85 @@ const initialData: WizardData = {
   people: 1,
 };
 
-const StoreContext = createContext<StoreContextType | null>(null);
+const StoreContext =
+  createContext<StoreContextType | null>(null);
 
 export function StoreProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [data, setData] = useState<WizardData>(initialData);
-  const [hydrated, setHydrated] = useState(false);
+  const [data, setData] =
+    useState<WizardData>(initialData);
 
+  const [hydrated, setHydrated] =
+    useState(false);
+
+  /*
+   * Recuperamos únicamente los campos
+   * que forman parte del wizard actual.
+   *
+   * Esto limpia automáticamente datos antiguos
+   * como packageKey, packageName y packagePrice
+   * que puedan seguir existiendo en localStorage.
+   */
   useEffect(() => {
     try {
-      const savedData = window.localStorage.getItem(STORAGE_KEY);
+      const savedData =
+        window.localStorage.getItem(
+          STORAGE_KEY
+        );
 
       if (savedData) {
-        const parsedData = JSON.parse(
-          savedData
-        ) as Partial<WizardData>;
+        const parsedData =
+          JSON.parse(savedData) as Partial<WizardData>;
 
         setData({
-          ...initialData,
-          ...parsedData,
+          days:
+            typeof parsedData.days === "number"
+              ? parsedData.days
+              : initialData.days,
+
+          coffee:
+            typeof parsedData.coffee === "number"
+              ? parsedData.coffee
+              : initialData.coffee,
+
+          water:
+            typeof parsedData.water === "number"
+              ? parsedData.water
+              : initialData.water,
+
+          soda:
+            typeof parsedData.soda === "number"
+              ? parsedData.soda
+              : initialData.soda,
+
+          beer:
+            typeof parsedData.beer === "number"
+              ? parsedData.beer
+              : initialData.beer,
+
+          wine:
+            typeof parsedData.wine === "number"
+              ? parsedData.wine
+              : initialData.wine,
+
+          cocktail:
+            typeof parsedData.cocktail === "number"
+              ? parsedData.cocktail
+              : initialData.cocktail,
+
+          drinksPerDay:
+            typeof parsedData.drinksPerDay ===
+            "number"
+              ? parsedData.drinksPerDay
+              : initialData.drinksPerDay,
+
+          people:
+            typeof parsedData.people === "number"
+              ? parsedData.people
+              : initialData.people,
         });
       }
     } catch (error) {
@@ -89,6 +138,9 @@ export function StoreProvider({
     }
   }, []);
 
+  /*
+   * Persistencia automática
+   */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -107,9 +159,14 @@ export function StoreProvider({
     }
   }, [data, hydrated]);
 
+  /*
+   * Reinicio completo
+   */
   function resetData() {
     try {
-      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(
+        STORAGE_KEY
+      );
     } catch (error) {
       console.error(
         "No se pudieron borrar los datos de DrinkPilot:",
@@ -135,7 +192,8 @@ export function StoreProvider({
 }
 
 export function useStore() {
-  const context = useContext(StoreContext);
+  const context =
+    useContext(StoreContext);
 
   if (!context) {
     throw new Error(

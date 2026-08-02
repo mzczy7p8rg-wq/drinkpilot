@@ -9,9 +9,6 @@ import {
 const COSTA_DRINKS_SOURCE =
   costaMetadata.sources.officialDrinksPage;
 
-const REFERENCE_PRICE_NOTE =
-  "Precio de referencia usado por DrinkPilot para estimar el coste de pagar la bebida por separado. No representa una carta oficial universal de Costa Cruceros.";
-
 export const costaPackages = {
   myDrinksSoft: {
     id: "myDrinksSoft",
@@ -33,46 +30,6 @@ export const costaPackages = {
     currency: "EUR",
 
     includesAlcohol: false,
-
-    maxDrinkPrice: 0,
-
-    maxDrinkPriceVerified: false,
-
-    drinks: {
-      coffee: 0,
-      water: 0,
-      soda: 0,
-      beer: 0,
-      wine: 0,
-      cocktail: 0,
-    },
-
-    drinkPriceMeta: {
-      coffee: {
-        status: "pending",
-        note: "Precio pendiente de verificación.",
-      },
-      water: {
-        status: "pending",
-        note: "Precio pendiente de verificación.",
-      },
-      soda: {
-        status: "pending",
-        note: "Precio pendiente de verificación.",
-      },
-      beer: {
-        status: "not-applicable",
-        note: "El paquete no incluye bebidas alcohólicas.",
-      },
-      wine: {
-        status: "not-applicable",
-        note: "El paquete no incluye bebidas alcohólicas.",
-      },
-      cocktail: {
-        status: "pending",
-        note: "Precio de cócteles sin alcohol pendiente de verificación.",
-      },
-    },
 
     restrictions: myDrinksSoftRestrictions,
 
@@ -104,46 +61,6 @@ export const costaPackages = {
 
     includesAlcohol: true,
 
-    maxDrinkPrice: 0,
-
-    maxDrinkPriceVerified: false,
-
-    drinks: {
-      coffee: 3.5,
-      water: 2.5,
-      soda: 3.5,
-      beer: 7,
-      wine: 8,
-      cocktail: 9,
-    },
-
-    drinkPriceMeta: {
-      coffee: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      water: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      soda: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      beer: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      wine: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      cocktail: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-    },
-
     restrictions: myDrinksRestrictions,
 
     status: "verified",
@@ -174,46 +91,6 @@ export const costaPackages = {
     currency: "EUR",
 
     includesAlcohol: true,
-
-    maxDrinkPrice: 0,
-
-    maxDrinkPriceVerified: false,
-
-    drinks: {
-      coffee: 4,
-      water: 3,
-      soda: 4,
-      beer: 8,
-      wine: 10,
-      cocktail: 12,
-    },
-
-    drinkPriceMeta: {
-      coffee: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      water: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      soda: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      beer: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      wine: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-      cocktail: {
-        status: "reference",
-        note: REFERENCE_PRICE_NOTE,
-      },
-    },
 
     restrictions: myDrinksPlusRestrictions,
 
