@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { getAllPackages } from "@/lib/packageService";
 import ProgressBar from "@/components/ProgressBar";
+import PackageRestrictions from "@/components/PackageRestrictions";
 
 export default function PackagePage() {
   const { data, setData } = useStore();
@@ -38,28 +39,14 @@ export default function PackagePage() {
             const isSelected = data.packageKey === pkg.key;
 
             return (
-              <button
+              <div
                 key={pkg.key}
-                type="button"
-                disabled={!isVerified}
-                onClick={() => {
-                  if (!isVerified) {
-                    return;
-                  }
-
-                  setData((prev) => ({
-                    ...prev,
-                    packageKey: pkg.key,
-                    packageName: pkg.name,
-                    packagePrice: pkg.pricePerDay,
-                  }));
-                }}
-                className={`w-full rounded-2xl border p-6 text-left transition-all ${
+                className={`rounded-2xl border p-6 transition-all ${
                   !isVerified
-                    ? "cursor-not-allowed border-slate-200 bg-slate-100 opacity-70"
+                    ? "border-slate-200 bg-slate-100 opacity-70"
                     : isSelected
                     ? "border-sky-600 bg-sky-50 shadow-md"
-                    : "border-slate-200 hover:border-sky-400 hover:shadow"
+                    : "border-slate-200 bg-white hover:border-sky-400 hover:shadow"
                 }`}
               >
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -133,7 +120,41 @@ export default function PackagePage() {
                     {pkg.priceNote}
                   </p>
                 )}
-              </button>
+
+                <PackageRestrictions
+                  restrictions={pkg.restrictions}
+                />
+
+                <button
+                  type="button"
+                  disabled={!isVerified}
+                  onClick={() => {
+                    if (!isVerified) {
+                      return;
+                    }
+
+                    setData((prev) => ({
+                      ...prev,
+                      packageKey: pkg.key,
+                      packageName: pkg.name,
+                      packagePrice: pkg.pricePerDay,
+                    }));
+                  }}
+                  className={`mt-5 w-full rounded-xl py-3 font-semibold transition ${
+                    !isVerified
+                      ? "cursor-not-allowed bg-slate-300 text-slate-500"
+                      : isSelected
+                      ? "bg-green-600 text-white"
+                      : "bg-sky-600 text-white hover:bg-sky-700"
+                  }`}
+                >
+                  {!isVerified
+                    ? "No disponible todavía"
+                    : isSelected
+                    ? "✓ Paquete seleccionado"
+                    : "Seleccionar paquete"}
+                </button>
+              </div>
             );
           })}
         </div>
