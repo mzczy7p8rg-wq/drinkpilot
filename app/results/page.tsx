@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useStore } from "@/lib/store";
 import { calculateRecommendation } from "@/lib/calculator";
+import { compareDrinkPackages } from "@/lib/comparison";
 import { getAllPackages } from "@/lib/packageService";
 
 export default function ResultsPage() {
@@ -147,6 +148,18 @@ export default function ResultsPage() {
 
     cocktailPrice:
       selectedPackage.drinks.cocktail,
+  });
+
+  const comparison = compareDrinkPackages({
+    days: data.days,
+    people: data.people,
+
+    coffee: data.coffee,
+    water: data.water,
+    soda: data.soda,
+    beer: data.beer,
+    wine: data.wine,
+    cocktail: data.cocktail,
   });
 
   const recommendation =
@@ -380,6 +393,189 @@ export default function ResultsPage() {
               Comprueba siempre el precio definitivo en tu reserva o en
               MyCosta antes de contratar el paquete.
             </p>
+          </div>
+
+          {/* COMPARATIVA DE PAQUETES */}
+
+          <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+
+              <div>
+                <h3 className="text-2xl font-bold text-slate-900">
+                  ⚖️ Comparativa de paquetes
+                </h3>
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  Hemos aplicado exactamente tu mismo patrón de consumo,
+                  número de pasajeros y duración del crucero a todos los
+                  paquetes disponibles.
+                </p>
+              </div>
+
+              {comparison.bestPackage ? (
+                <span className="shrink-0 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
+                  Mejor opción: {comparison.bestPackage.packageName}
+                </span>
+              ) : (
+                <span className="shrink-0 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
+                  Ningún paquete compensa
+                </span>
+              )}
+
+            </div>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+
+              {comparison.packages.map((pkg) => {
+                const isBest =
+                  comparison.bestPackage?.packageKey ===
+                  pkg.packageKey;
+
+                const isCurrent =
+                  data.packageKey === pkg.packageKey;
+
+                return (
+                  <div
+                    key={pkg.packageKey}
+                    className={`rounded-2xl border p-5 ${
+                      isBest
+                        ? "border-green-300 bg-green-50"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+
+                      <div>
+                        <p className="text-lg font-bold text-slate-900">
+                          {pkg.packageName}
+                        </p>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                          {pkg.packagePricePerDay.toFixed(2)} €
+                          {" "}por persona / día
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2">
+
+                        {isBest && (
+                          <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
+                            Mejor opción
+                          </span>
+                        )}
+
+                        {isCurrent && (
+                          <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                            Tu selección
+                          </span>
+                        )}
+
+                      </div>
+
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-2 gap-4">
+
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                          Coste paquete
+                        </p>
+
+                        <p className="mt-1 text-xl font-bold text-slate-900">
+                          {pkg.packageCost.toFixed(2)} €
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                          Diferencia
+                        </p>
+
+                        <p
+                          className={`mt-1 text-xl font-bold ${
+                            pkg.savings > 0
+                              ? "text-green-700"
+                              : pkg.savings < 0
+                              ? "text-red-700"
+                              : "text-slate-700"
+                          }`}
+                        >
+                          {pkg.savings > 0 ? "+" : ""}
+                          {pkg.savings.toFixed(2)} €
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                          Margen diario
+                        </p>
+
+                        <p
+                          className={`mt-1 font-semibold ${
+                            pkg.dailyMargin > 0
+                              ? "text-green-700"
+                              : pkg.dailyMargin < 0
+                              ? "text-red-700"
+                              : "text-slate-700"
+                          }`}
+                        >
+                          {pkg.dailyMargin > 0 ? "+" : ""}
+                          {pkg.dailyMargin.toFixed(2)} €
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-slate-500">
+                          Ahorro estimado
+                        </p>
+
+                        <p className="mt-1 font-semibold text-slate-900">
+                          {pkg.savingsPercentage > 0
+                            ? `${pkg.savingsPercentage.toFixed(1)} %`
+                            : "0 %"}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    <div className="mt-5 border-t border-slate-200 pt-4">
+
+                      <p className="text-sm text-slate-600">
+                        Punto de equilibrio:{" "}
+                        <strong>
+                          {pkg.breakEvenDrinksPerDay.toFixed(1)}
+                        </strong>{" "}
+                        bebidas por persona / día
+                      </p>
+
+                    </div>
+
+                  </div>
+                );
+              })}
+
+            </div>
+
+            {comparison.bestPackage ? (
+              <div className="mt-6 rounded-xl bg-green-100 p-4 text-sm leading-6 text-green-900">
+                <strong>
+                  Según tu consumo, {comparison.bestPackage.packageName} es
+                  la opción económicamente más favorable.
+                </strong>{" "}
+                La comparación utiliza exactamente los mismos datos para todos
+                los paquetes.
+              </div>
+            ) : (
+              <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
+                <strong>
+                  Con el consumo indicado no encontramos ningún paquete que
+                  genere ahorro.
+                </strong>{" "}
+                Pagar las bebidas por separado sería la opción económicamente
+                más favorable según esta estimación.
+              </div>
+            )}
+
           </div>
 
           {/* DESGLOSE */}
