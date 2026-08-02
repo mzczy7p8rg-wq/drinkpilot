@@ -30,6 +30,7 @@ export type WizardData = {
 type StoreContextType = {
   data: WizardData;
   setData: React.Dispatch<React.SetStateAction<WizardData>>;
+  hydrated: boolean;
 };
 
 const STORAGE_KEY = "drinkpilot-wizard";
@@ -63,10 +64,6 @@ export function StoreProvider({
   const [data, setData] = useState<WizardData>(initialData);
   const [hydrated, setHydrated] = useState(false);
 
-  /*
-   * Recuperamos los datos guardados cuando
-   * el navegador monta la aplicación.
-   */
   useEffect(() => {
     try {
       const savedData = window.localStorage.getItem(STORAGE_KEY);
@@ -89,13 +86,6 @@ export function StoreProvider({
     }
   }, []);
 
-  /*
-   * Guardamos automáticamente cualquier cambio.
-   *
-   * No guardamos nada hasta haber leído primero
-   * localStorage para evitar sobrescribir datos
-   * existentes con los valores iniciales.
-   */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -115,7 +105,13 @@ export function StoreProvider({
   }, [data, hydrated]);
 
   return (
-    <StoreContext.Provider value={{ data, setData }}>
+    <StoreContext.Provider
+      value={{
+        data,
+        setData,
+        hydrated,
+      }}
+    >
       {children}
     </StoreContext.Provider>
   );
