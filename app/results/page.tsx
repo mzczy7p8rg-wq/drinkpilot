@@ -173,12 +173,6 @@ export default function ResultsPage() {
 
   /*
    * COMPARACIÓN
-   *
-   * Aquí conectamos:
-   *
-   * - consumo
-   * - preferencias
-   * - precios reales de la reserva
    */
   const comparison = compareDrinkPackages({
     days: data.days,
@@ -248,19 +242,64 @@ export default function ResultsPage() {
   const explanationStyle =
     explanationStyles[explanation.tone];
 
+  const consumptionRows = [
+    {
+      key: "coffee",
+      label: "☕ Café",
+      quantity: data.coffee,
+      price: costaOnboardPriceValues.coffee,
+      total: baseline.coffeeCost,
+    },
+    {
+      key: "water",
+      label: "💧 Agua",
+      quantity: data.water,
+      price: costaOnboardPriceValues.water,
+      total: baseline.waterCost,
+    },
+    {
+      key: "soda",
+      label: "🥤 Refrescos",
+      quantity: data.soda,
+      price: costaOnboardPriceValues.soda,
+      total: baseline.sodaCost,
+    },
+    {
+      key: "beer",
+      label: "🍺 Cervezas",
+      quantity: data.beer,
+      price: costaOnboardPriceValues.beer,
+      total: baseline.beerCost,
+    },
+    {
+      key: "wine",
+      label: "🍷 Vinos",
+      quantity: data.wine,
+      price: costaOnboardPriceValues.wine,
+      total: baseline.wineCost,
+    },
+    {
+      key: "cocktail",
+      label: "🍸 Cócteles",
+      quantity: data.cocktail,
+      price: costaOnboardPriceValues.cocktail,
+      total: baseline.cocktailCost,
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-10">
+    <main className="min-h-screen bg-slate-100 px-4 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
 
-        <div className="rounded-3xl bg-white p-10 shadow-xl">
+        <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
 
           {/* CABECERA */}
 
-          <h1 className="text-center text-4xl font-bold text-slate-900">
+          <h1 className="text-center text-3xl font-bold text-slate-900 sm:text-4xl">
             🍹 Tu recomendación DrinkPilot
           </h1>
 
-          <p className="mt-3 text-center text-slate-500">
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-6 text-slate-500 sm:text-base">
             Hemos comparado automáticamente los paquetes disponibles
             según tu consumo, preferencias y precios disponibles.
           </p>
@@ -268,23 +307,23 @@ export default function ResultsPage() {
           {/* EXPLICACIÓN PRINCIPAL */}
 
           <div
-            className={`mt-8 rounded-2xl border p-8 text-center ${explanationStyle.container}`}
+            className={`mt-6 rounded-2xl border p-5 text-center sm:mt-8 sm:p-8 ${explanationStyle.container}`}
           >
             <div className="text-4xl">
               {explanationStyle.icon}
             </div>
 
             <h2
-              className={`mt-3 text-3xl font-bold ${explanationStyle.title}`}
+              className={`mt-3 text-2xl font-bold sm:text-3xl ${explanationStyle.title}`}
             >
               {explanation.title}
             </h2>
 
-            <p className="mx-auto mt-4 max-w-2xl text-lg leading-7 text-slate-700">
+            <p className="mx-auto mt-4 max-w-2xl leading-7 text-slate-700 sm:text-lg">
               {explanation.summary}
             </p>
 
-            <div className="mx-auto mt-6 max-w-2xl rounded-xl bg-white/70 p-5 text-left">
+            <div className="mx-auto mt-5 max-w-2xl rounded-xl bg-white/70 p-4 text-left sm:mt-6 sm:p-5">
 
               <p
                 className={`font-semibold leading-6 ${explanationStyle.accent}`}
@@ -302,11 +341,11 @@ export default function ResultsPage() {
 
             {bestPackage ? (
               <>
-                <p className="mt-7 text-5xl font-bold text-sky-600">
+                <p className="mt-6 text-4xl font-bold text-sky-600 sm:mt-7 sm:text-5xl">
                   {bestPackage.savings.toFixed(2)} €
                 </p>
 
-                <p className="mt-2 text-slate-600">
+                <p className="mt-2 text-sm text-slate-600 sm:text-base">
                   de ahorro estimado durante el crucero
                 </p>
 
@@ -330,11 +369,11 @@ export default function ResultsPage() {
               </>
             ) : (
               <>
-                <p className="mt-7 text-5xl font-bold text-sky-600">
+                <p className="mt-6 text-4xl font-bold text-sky-600 sm:mt-7 sm:text-5xl">
                   {baseline.drinksCost.toFixed(2)} €
                 </p>
 
-                <p className="mt-2 text-slate-600">
+                <p className="mt-2 text-sm text-slate-600 sm:text-base">
                   coste estimado pagando las bebidas por separado
                 </p>
               </>
@@ -344,99 +383,89 @@ export default function ResultsPage() {
 
           {/* RESUMEN */}
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:mt-10 sm:grid-cols-2 sm:gap-5 lg:grid-cols-5">
 
-            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
-
-              <p className="text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:p-5">
+              <p className="text-sm text-slate-500 sm:text-base">
                 🗓️ Duración
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
+              <p className="mt-2 text-2xl font-bold sm:text-3xl">
                 {data.days}
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                 días
               </p>
-
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
-
-              <p className="text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:p-5">
+              <p className="text-sm text-slate-500 sm:text-base">
                 👥 Personas
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
+              <p className="mt-2 text-2xl font-bold sm:text-3xl">
                 {data.people}
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                 pasajeros
               </p>
-
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
-
-              <p className="text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:p-5">
+              <p className="text-sm text-slate-500 sm:text-base">
                 🍹 Consumo
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
+              <p className="mt-2 text-2xl font-bold sm:text-3xl">
                 {totalDrinksPerDay}
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                 bebidas / día
               </p>
-
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
-
-              <p className="text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:p-5">
+              <p className="text-sm text-slate-500 sm:text-base">
                 ⭐ Premium
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
+              <p className="mt-2 text-2xl font-bold sm:text-3xl">
                 {selectedPremiumPreferences}
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                 preferencias
               </p>
-
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
-
-              <p className="text-slate-500">
+            <div className="col-span-2 rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:col-span-1 sm:p-5">
+              <p className="text-sm text-slate-500 sm:text-base">
                 🎟️ Precios reales
               </p>
 
-              <p className="mt-2 text-3xl font-bold">
+              <p className="mt-2 text-2xl font-bold sm:text-3xl">
                 {customPricesUsed}
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                 introducidos
               </p>
-
             </div>
 
           </div>
 
           {/* COSTE SIN PAQUETE */}
 
-          <div className="mt-6 rounded-2xl bg-slate-900 p-6 text-white">
+          <div className="mt-6 rounded-2xl bg-slate-900 p-5 text-white sm:p-6">
 
             <p className="text-sm text-slate-300">
               Coste estimado pagando las bebidas por separado
             </p>
 
-            <p className="mt-2 text-4xl font-bold">
+            <p className="mt-2 text-3xl font-bold sm:text-4xl">
               {baseline.drinksCost.toFixed(2)} €
             </p>
 
@@ -448,13 +477,13 @@ export default function ResultsPage() {
 
           {/* COMPARATIVA */}
 
-          <div className="mt-10 rounded-2xl border border-slate-200 p-6">
+          <div className="mt-8 rounded-2xl border border-slate-200 p-4 sm:mt-10 sm:p-6">
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
               <div>
 
-                <h3 className="text-2xl font-bold text-slate-900">
+                <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">
                   ⚖️ Comparativa de paquetes
                 </h3>
 
@@ -466,18 +495,18 @@ export default function ResultsPage() {
               </div>
 
               {bestPackage ? (
-                <span className="shrink-0 rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
+                <span className="self-start rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
                   Mejor opción: {bestPackage.packageName}
                 </span>
               ) : (
-                <span className="shrink-0 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
+                <span className="self-start rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
                   Sin opción completa con ahorro
                 </span>
               )}
 
             </div>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-5 grid gap-4 md:mt-6 md:grid-cols-2">
 
               {comparison.packages.map((pkg) => {
                 const isBest =
@@ -490,7 +519,7 @@ export default function ResultsPage() {
                 return (
                   <div
                     key={pkg.packageKey}
-                    className={`rounded-2xl border p-5 ${
+                    className={`rounded-2xl border p-4 sm:p-5 ${
                       isBest
                         ? "border-green-300 bg-green-50"
                         : "border-slate-200 bg-slate-50"
@@ -499,15 +528,15 @@ export default function ResultsPage() {
 
                     {/* CABECERA PAQUETE */}
 
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
                       <div>
 
-                        <p className="text-xl font-bold text-slate-900">
+                        <p className="text-lg font-bold text-slate-900 sm:text-xl">
                           {pkg.packageName}
                         </p>
 
-                        <p className="mt-1 text-lg font-bold text-slate-900">
+                        <p className="mt-1 font-bold text-slate-900 sm:text-lg">
                           {pkg.packagePricePerDay.toFixed(2)} €
                           {" "}por persona / día
                         </p>
@@ -538,7 +567,7 @@ export default function ResultsPage() {
                       </div>
 
                       {isBest && (
-                        <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
+                        <span className="self-start rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
                           Mejor opción
                         </span>
                       )}
@@ -555,7 +584,7 @@ export default function ResultsPage() {
                       }`}
                     >
 
-                      <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 
                         <div>
 
@@ -569,7 +598,7 @@ export default function ResultsPage() {
 
                         </div>
 
-                        <div className="text-right">
+                        <div className="sm:text-right">
 
                           {pkg.fullyCovered ? (
                             <p className="font-semibold text-green-800">
@@ -586,7 +615,7 @@ export default function ResultsPage() {
                       </div>
 
                       {pkg.coveredCategories.length > 0 && (
-                        <p className="mt-3 text-sm text-slate-700">
+                        <p className="mt-3 text-sm leading-6 text-slate-700">
                           <strong>
                             Cubre:
                           </strong>{" "}
@@ -600,7 +629,7 @@ export default function ResultsPage() {
                       )}
 
                       {pkg.uncoveredCategories.length > 0 && (
-                        <p className="mt-2 text-sm font-medium text-amber-900">
+                        <p className="mt-2 text-sm font-medium leading-6 text-amber-900">
                           <strong>
                             No cubre:
                           </strong>{" "}
@@ -617,40 +646,35 @@ export default function ResultsPage() {
 
                     {/* ECONOMÍA */}
 
-                    <div className="mt-5 grid grid-cols-2 gap-4">
+                    <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
 
                       <div>
-
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Coste paquete
                         </p>
 
-                        <p className="mt-1 text-xl font-bold">
+                        <p className="mt-1 text-lg font-bold sm:text-xl">
                           {pkg.packageCost.toFixed(2)} €
                         </p>
-
                       </div>
 
                       <div>
-
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Bebidas aparte
                         </p>
 
-                        <p className="mt-1 text-xl font-bold">
+                        <p className="mt-1 text-lg font-bold sm:text-xl">
                           {pkg.drinksCost.toFixed(2)} €
                         </p>
-
                       </div>
 
                       <div>
-
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Diferencia
                         </p>
 
                         <p
-                          className={`mt-1 text-xl font-bold ${
+                          className={`mt-1 text-lg font-bold sm:text-xl ${
                             pkg.savings > 0
                               ? "text-green-700"
                               : pkg.savings < 0
@@ -661,21 +685,18 @@ export default function ResultsPage() {
                           {pkg.savings > 0 ? "+" : ""}
                           {pkg.savings.toFixed(2)} €
                         </p>
-
                       </div>
 
                       <div>
-
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Ahorro estimado
                         </p>
 
-                        <p className="mt-1 text-xl font-bold">
+                        <p className="mt-1 text-lg font-bold sm:text-xl">
                           {pkg.savingsPercentage > 0
                             ? `${pkg.savingsPercentage.toFixed(1)} %`
                             : "0 %"}
                         </p>
-
                       </div>
 
                     </div>
@@ -684,7 +705,7 @@ export default function ResultsPage() {
 
                     <div className="mt-5 border-t border-slate-200 pt-4">
 
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm leading-6 text-slate-600">
                         Margen diario:{" "}
                         <strong
                           className={
@@ -699,7 +720,7 @@ export default function ResultsPage() {
                         por persona
                       </p>
 
-                      <p className="mt-2 text-sm text-slate-600">
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
                         Punto de equilibrio:{" "}
                         <strong>
                           {pkg.breakEvenDrinksPerDay.toFixed(1)}
@@ -718,7 +739,7 @@ export default function ResultsPage() {
             {/* EXPLICACIÓN RESUMIDA */}
 
             <div
-              className={`mt-6 rounded-xl border p-5 text-sm leading-6 ${explanationStyle.container}`}
+              className={`mt-6 rounded-xl border p-4 text-sm leading-6 sm:p-5 ${explanationStyle.container}`}
             >
 
               <strong className={explanationStyle.title}>
@@ -742,7 +763,7 @@ export default function ResultsPage() {
           {/* ORIGEN DE LOS PRECIOS */}
 
           {customPricesUsed > 0 && (
-            <div className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5">
+            <div className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-4 sm:p-5">
 
               <h3 className="font-semibold text-sky-950">
                 🎟️ Precios de tu reserva
@@ -771,20 +792,63 @@ export default function ResultsPage() {
 
           {/* CONSUMO */}
 
-          <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">
+          <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 sm:mt-10">
 
-            <div className="bg-slate-800 px-6 py-4 font-bold text-white">
+            <div className="bg-slate-800 px-4 py-4 font-bold text-white sm:px-6">
               📊 Tu consumo estimado
             </div>
 
-            <div className="overflow-x-auto">
+            {/* VERSIÓN MÓVIL */}
 
-              <table className="w-full min-w-[600px]">
+            <div className="divide-y divide-slate-200 sm:hidden">
+              {consumptionRows.map((row) => (
+                <div
+                  key={row.key}
+                  className="p-4"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-semibold text-slate-900">
+                      {row.label}
+                    </p>
+
+                    <p className="font-bold text-slate-900">
+                      {row.total.toFixed(2)} €
+                    </p>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">
+                        Cantidad / día
+                      </p>
+
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {row.quantity}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg bg-slate-50 p-3">
+                      <p className="text-xs text-slate-500">
+                        Precio ref.
+                      </p>
+
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {row.price.toFixed(2)} €
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* VERSIÓN TABLET / ESCRITORIO */}
+
+            <div className="hidden sm:block">
+
+              <table className="w-full">
 
                 <thead className="bg-slate-100">
-
                   <tr>
-
                     <th className="p-3 text-left">
                       Bebida
                     </th>
@@ -800,138 +864,38 @@ export default function ResultsPage() {
                     <th className="p-3 text-right">
                       Total crucero
                     </th>
-
                   </tr>
-
                 </thead>
 
                 <tbody>
+                  {consumptionRows.map((row) => (
+                    <tr
+                      key={row.key}
+                      className="border-t"
+                    >
+                      <td className="p-3">
+                        {row.label}
+                      </td>
 
-                  <tr className="border-t">
+                      <td className="p-3 text-center">
+                        {row.quantity}
+                      </td>
 
-                    <td className="p-3">
-                      ☕ Café
-                    </td>
+                      <td className="p-3 text-center">
+                        {row.price.toFixed(2)} €
+                      </td>
 
-                    <td className="text-center">
-                      {data.coffee}
-                    </td>
-
-                    <td className="text-center">
-                      {costaOnboardPriceValues.coffee.toFixed(2)} €
-                    </td>
-
-                    <td className="pr-4 text-right font-semibold">
-                      {baseline.coffeeCost.toFixed(2)} €
-                    </td>
-
-                  </tr>
-
-                  <tr className="border-t">
-
-                    <td className="p-3">
-                      💧 Agua
-                    </td>
-
-                    <td className="text-center">
-                      {data.water}
-                    </td>
-
-                    <td className="text-center">
-                      {costaOnboardPriceValues.water.toFixed(2)} €
-                    </td>
-
-                    <td className="pr-4 text-right font-semibold">
-                      {baseline.waterCost.toFixed(2)} €
-                    </td>
-
-                  </tr>
-
-                  <tr className="border-t">
-
-                    <td className="p-3">
-                      🥤 Refrescos
-                    </td>
-
-                    <td className="text-center">
-                      {data.soda}
-                    </td>
-
-                    <td className="text-center">
-                      {costaOnboardPriceValues.soda.toFixed(2)} €
-                    </td>
-
-                    <td className="pr-4 text-right font-semibold">
-                      {baseline.sodaCost.toFixed(2)} €
-                    </td>
-
-                  </tr>
-
-                  <tr className="border-t">
-
-                    <td className="p-3">
-                      🍺 Cervezas
-                    </td>
-
-                    <td className="text-center">
-                      {data.beer}
-                    </td>
-
-                    <td className="text-center">
-                      {costaOnboardPriceValues.beer.toFixed(2)} €
-                    </td>
-
-                    <td className="pr-4 text-right font-semibold">
-                      {baseline.beerCost.toFixed(2)} €
-                    </td>
-
-                  </tr>
-
-                  <tr className="border-t">
-
-                    <td className="p-3">
-                      🍷 Vinos
-                    </td>
-
-                    <td className="text-center">
-                      {data.wine}
-                    </td>
-
-                    <td className="text-center">
-                      {costaOnboardPriceValues.wine.toFixed(2)} €
-                    </td>
-
-                    <td className="pr-4 text-right font-semibold">
-                      {baseline.wineCost.toFixed(2)} €
-                    </td>
-
-                  </tr>
-
-                  <tr className="border-t">
-
-                    <td className="p-3">
-                      🍸 Cócteles
-                    </td>
-
-                    <td className="text-center">
-                      {data.cocktail}
-                    </td>
-
-                    <td className="text-center">
-                      {costaOnboardPriceValues.cocktail.toFixed(2)} €
-                    </td>
-
-                    <td className="pr-4 text-right font-semibold">
-                      {baseline.cocktailCost.toFixed(2)} €
-                    </td>
-
-                  </tr>
-
+                      <td className="p-3 text-right font-semibold">
+                        {row.total.toFixed(2)} €
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
 
               </table>
 
             </div>
+
           </div>
 
           {/* REINICIO */}
@@ -942,7 +906,7 @@ export default function ResultsPage() {
               resetData();
               router.push("/");
             }}
-            className="mt-10 block w-full rounded-xl bg-sky-600 py-4 text-center text-lg font-semibold text-white transition hover:bg-sky-700"
+            className="mt-8 block w-full rounded-xl bg-sky-600 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-700 sm:mt-10 sm:text-lg"
           >
             Empezar de nuevo
           </button>
