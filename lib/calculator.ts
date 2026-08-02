@@ -19,14 +19,32 @@ export type CalculationInput = {
   cocktailPrice: number;
 };
 
+export type RecommendationLevel =
+  | "not-worth-it"
+  | "very-close"
+  | "worth-considering"
+  | "worth-it"
+  | "strongly-worth-it";
+
 export type CalculationResult = {
   packageCost: number;
   drinksCost: number;
   savings: number;
+
   recommended: boolean;
 
-  // Coste diario por persona
+  recommendationLevel: RecommendationLevel;
+
+  // Coste diario de bebidas por persona
   dailyDrinkCost: number;
+
+  // Diferencia diaria entre consumo estimado
+  // y precio diario del paquete
+  dailyMargin: number;
+
+  // Porcentaje de ahorro respecto al coste
+  // estimado pagando bebidas por separado
+  savingsPercentage: number;
 
   // Coste total durante todo el crucero
   // para todas las personas
@@ -43,7 +61,6 @@ export type CalculationResult = {
 export function calculateRecommendation(
   input: CalculationInput
 ): CalculationResult {
-
   /*
    * Coste diario por persona
    */
@@ -75,42 +92,33 @@ export function calculateRecommendation(
     dailyCocktailCost;
 
   /*
-   * Coste total de cada bebida durante
-   * todo el crucero y para todas las personas
+   * Coste total de cada tipo de bebida
+   * durante todo el crucero
    */
 
+  const multiplier =
+    input.days * input.people;
+
   const coffeeCost =
-    dailyCoffeeCost *
-    input.days *
-    input.people;
+    dailyCoffeeCost * multiplier;
 
   const waterCost =
-    dailyWaterCost *
-    input.days *
-    input.people;
+    dailyWaterCost * multiplier;
 
   const sodaCost =
-    dailySodaCost *
-    input.days *
-    input.people;
+    dailySodaCost * multiplier;
 
   const beerCost =
-    dailyBeerCost *
-    input.days *
-    input.people;
+    dailyBeerCost * multiplier;
 
   const wineCost =
-    dailyWineCost *
-    input.days *
-    input.people;
+    dailyWineCost * multiplier;
 
   const cocktailCost =
-    dailyCocktailCost *
-    input.days *
-    input.people;
+    dailyCocktailCost * multiplier;
 
   /*
-   * Coste total pagando bebidas individualmente
+   * Coste total pagando bebidas por separado
    */
 
   const drinksCost =
@@ -127,22 +135,38 @@ export function calculateRecommendation(
 
   const packageCost =
     input.packagePricePerDay *
-    input.days *
-    input.people;
+    multiplier;
 
   /*
-   * Diferencia
+   * Diferencia total
    *
-   * Positivo = el paquete ahorra dinero
-   * Negativo = pagar por separado es más barato
+   * Positivo = paquete más barato
+   * Negativo = bebidas por separado más baratas
    */
 
   const savings =
     drinksCost - packageCost;
 
   /*
-   * Número total de bebidas consumidas
-   * por persona y día
+   * Diferencia diaria por persona
+   */
+
+  const dailyMargin =
+    dailyDrinkCost -
+    input.packagePricePerDay;
+
+  /*
+   * Porcentaje de ahorro sobre el coste
+   * estimado de las bebidas por separado
+   */
+
+  const savingsPercentage =
+    drinksCost > 0
+      ? (savings / drinksCost) * 100
+      : 0;
+
+  /*
+   * Consumo diario total
    */
 
   const totalDrinksPerDay =
@@ -154,8 +178,8 @@ export function calculateRecommendation(
     input.cocktail;
 
   /*
-   * Precio medio real de las bebidas
-   * según el patrón de consumo del usuario
+   * Precio medio de las bebidas según
+   * el patrón concreto del usuario
    */
 
   const averageDrinkPrice =
@@ -164,15 +188,38 @@ export function calculateRecommendation(
       : 0;
 
   /*
-   * Bebidas necesarias al día para que
-   * el coste estimado iguale el precio
-   * diario del paquete
+   * Punto de equilibrio
    */
 
   const breakEvenDrinksPerDay =
     averageDrinkPrice > 0
-      ? input.packagePricePerDay / averageDrinkPrice
+      ? input.packagePricePerDay /
+        averageDrinkPrice
       : 0;
+
+  /*
+   * Nivel de recomendación
+   *
+   * Se basa en el margen diario por persona,
+   * no en el ahorro total del crucero.
+   *
+   * Esto evita que un crucero largo parezca
+   * una gran oportunidad únicamente por duración.
+   */
+
+  let recommendationLevel: RecommendationLevel;
+
+  if (dailyMargin <= 0) {
+    recommendationLevel = "not-worth-it";
+  } else if (dailyMargin < 3) {
+    recommendationLevel = "very-close";
+  } else if (dailyMargin < 8) {
+    recommendationLevel = "worth-considering";
+  } else if (dailyMargin < 15) {
+    recommendationLevel = "worth-it";
+  } else {
+    recommendationLevel = "strongly-worth-it";
+  }
 
   return {
     packageCost,
@@ -181,7 +228,11 @@ export function calculateRecommendation(
 
     recommended: savings > 0,
 
+    recommendationLevel,
+
     dailyDrinkCost,
+    dailyMargin,
+    savingsPercentage,
 
     coffeeCost,
     waterCost,
