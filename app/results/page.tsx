@@ -174,7 +174,23 @@ export default function ResultsPage() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
+<div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+  <h3 className="font-semibold text-amber-900">
+    ℹ️ Estimación de referencia
+  </h3>
 
+  <p className="mt-2 text-sm leading-6 text-amber-900">
+    El ahorro mostrado utiliza precios orientativos para estimar cuánto
+    costaría comprar las bebidas por separado. Los precios reales a bordo y
+    el coste del paquete pueden variar según el crucero, la tarifa, el mercado
+    y el momento de compra.
+  </p>
+
+  <p className="mt-2 text-sm leading-6 text-amber-900">
+    Comprueba siempre el precio definitivo en tu reserva o en MyCosta antes de
+    contratar el paquete.
+  </p>
+</div>
             <div className="rounded-2xl bg-slate-50 p-6 shadow-sm">
               <p className="text-slate-500">
                 💰 Paquete
