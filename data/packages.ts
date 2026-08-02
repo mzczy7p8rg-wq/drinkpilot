@@ -4,6 +4,9 @@ import {
   myDrinksPlusRestrictions,
 } from "./restrictions";
 
+const COSTA_DRINKS_SOURCE =
+  "https://www.costacruceros.com/experiencia/paquetes-de-bebidas.html";
+
 export const costaPackages = {
   myDrinksSoft: {
     id: "myDrinksSoft",
@@ -13,15 +16,31 @@ export const costaPackages = {
     icon: "🥤",
 
     description:
-      "Paquete de bebidas sin alcohol. Pendiente de completar con información oficial de Costa Cruceros.",
+      "Opción sin alcohol. La información detallada y el precio están pendientes de verificación oficial para el mercado y crucero seleccionados.",
 
+    /*
+     * No utilizamos un precio inventado.
+     * Este paquete permanece bloqueado hasta disponer
+     * de información suficiente para calcularlo.
+     */
     pricePerDay: 0,
+
+    priceStatus: "pending",
+
+    priceNote:
+      "Precio pendiente de verificación para el crucero seleccionado.",
 
     currency: "EUR",
 
     includesAlcohol: false,
 
+    /*
+     * Costa no publica en la página oficial consultada
+     * un límite monetario universal por bebida.
+     */
     maxDrinkPrice: 0,
+
+    maxDrinkPriceVerified: false,
 
     drinks: {
       coffee: 0,
@@ -36,6 +55,8 @@ export const costaPackages = {
 
     status: "pending",
 
+    sourceUrl: COSTA_DRINKS_SOURCE,
+
     lastVerified: null,
   },
 
@@ -47,16 +68,37 @@ export const costaPackages = {
     icon: "🍹",
 
     description:
-      "Paquete de bebidas con alcohol para disfrutar de una amplia selección durante todo el crucero.",
+      "Paquete con bebidas alcohólicas y sin alcohol, cafetería, vinos por copa, cerveza de barril, refrescos, aperitivos, cócteles clásicos, licores y destilados incluidos según las condiciones de Costa.",
 
+    /*
+     * PRECIO DE REFERENCIA DE DRINKPILOT.
+     *
+     * Costa no publica un precio diario universal:
+     * puede variar según crucero, destino, tarifa
+     * y momento de compra.
+     */
     pricePerDay: 34,
+
+    priceStatus: "reference",
+
+    priceNote:
+      "Precio orientativo usado para el cálculo. El precio real puede variar y debe comprobarse en MyCosta o en la reserva.",
 
     currency: "EUR",
 
     includesAlcohol: true,
 
-    maxDrinkPrice: 9,
+    maxDrinkPrice: 0,
 
+    maxDrinkPriceVerified: false,
+
+    /*
+     * Estos importes son precios de referencia
+     * para estimar cuánto costaría comprar
+     * las bebidas por separado.
+     *
+     * NO son una carta oficial universal de Costa.
+     */
     drinks: {
       coffee: 3.5,
       water: 2.5,
@@ -70,7 +112,9 @@ export const costaPackages = {
 
     status: "verified",
 
-    lastVerified: "2026-08-01",
+    sourceUrl: COSTA_DRINKS_SOURCE,
+
+    lastVerified: "2026-08-02",
   },
 
   myDrinksPlus: {
@@ -81,15 +125,27 @@ export const costaPackages = {
     icon: "🍸",
 
     description:
-      "Incluye una selección más amplia de bebidas y marcas premium.",
+      "Paquete ampliado con cafetería, vinos seleccionados, cócteles especiales, licores y destilados de marcas superiores, además de agua embotellada y una selección más amplia de bebidas.",
 
+    /*
+     * PRECIO DE REFERENCIA DE DRINKPILOT.
+     *
+     * No representa una tarifa oficial universal.
+     */
     pricePerDay: 46,
+
+    priceStatus: "reference",
+
+    priceNote:
+      "Precio orientativo usado para el cálculo. El precio real puede variar y debe comprobarse en MyCosta o en la reserva.",
 
     currency: "EUR",
 
     includesAlcohol: true,
 
-    maxDrinkPrice: 15,
+    maxDrinkPrice: 0,
+
+    maxDrinkPriceVerified: false,
 
     drinks: {
       coffee: 4,
@@ -104,6 +160,8 @@ export const costaPackages = {
 
     status: "verified",
 
-    lastVerified: "2026-08-01",
+    sourceUrl: COSTA_DRINKS_SOURCE,
+
+    lastVerified: "2026-08-02",
   },
 } as const;
