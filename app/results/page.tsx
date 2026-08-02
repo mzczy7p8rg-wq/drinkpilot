@@ -6,7 +6,22 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { calculateRecommendation } from "@/lib/calculator";
 import { compareDrinkPackages } from "@/lib/comparison";
+import { CoverageCategory } from "@/lib/coverage";
 import { costaOnboardPriceValues } from "@/data/onboardPrices";
+
+const coverageLabels: Record<CoverageCategory, string> = {
+  coffee: "café",
+  water: "agua",
+  soda: "refrescos",
+  beer: "cerveza",
+  wine: "vino",
+  cocktail: "cócteles",
+
+  premiumCocktails: "cócteles premium",
+  bottledBeer: "cerveza embotellada",
+  premiumSpirits: "destilados premium",
+  bottledWaterUnlimited: "agua embotellada sin límite",
+};
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -25,6 +40,14 @@ export default function ResultsPage() {
     data.wine +
     data.cocktail;
 
+  const selectedPremiumPreferences =
+    [
+      data.premiumCocktails,
+      data.bottledBeer,
+      data.premiumSpirits,
+      data.bottledWaterUnlimited,
+    ].filter(Boolean).length;
+
   const hasValidDays =
     Number.isInteger(data.days) &&
     data.days > 0;
@@ -41,12 +64,6 @@ export default function ResultsPage() {
     hasValidConsumption &&
     hasValidPeople;
 
-  /*
-   * PROTECCIÓN DE RUTAS
-   *
-   * Ya no exigimos packageKey porque DrinkPilot
-   * recomienda automáticamente el mejor paquete.
-   */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -105,16 +122,6 @@ export default function ResultsPage() {
     );
   }
 
-  /*
-   * COSTE BASE DE LAS BEBIDAS
-   *
-   * Calculamos cuánto costaría pagar todo
-   * por separado usando una única carta
-   * de precios de referencia.
-   *
-   * packagePricePerDay = 0 porque aquí
-   * no estamos evaluando todavía ningún paquete.
-   */
   const baseline = calculateRecommendation({
     days: data.days,
     people: data.people,
@@ -147,9 +154,6 @@ export default function ResultsPage() {
       costaOnboardPriceValues.cocktail,
   });
 
-  /*
-   * COMPARACIÓN AUTOMÁTICA DE PAQUETES
-   */
   const comparison = compareDrinkPackages({
     days: data.days,
     people: data.people,
@@ -160,6 +164,18 @@ export default function ResultsPage() {
     beer: data.beer,
     wine: data.wine,
     cocktail: data.cocktail,
+
+    premiumCocktails:
+      data.premiumCocktails,
+
+    bottledBeer:
+      data.bottledBeer,
+
+    premiumSpirits:
+      data.premiumSpirits,
+
+    bottledWaterUnlimited:
+      data.bottledWaterUnlimited,
   });
 
   const bestPackage =
@@ -177,10 +193,8 @@ export default function ResultsPage() {
 
           <p className="mt-3 text-center text-slate-500">
             Hemos comparado automáticamente los paquetes disponibles
-            según tu consumo.
+            según tu consumo y tus preferencias.
           </p>
-
-          {/* RECOMENDACIÓN PRINCIPAL */}
 
           {bestPackage ? (
             <div className="mt-8 rounded-2xl border border-green-300 bg-green-100 p-8 text-center">
@@ -199,7 +213,8 @@ export default function ResultsPage() {
 
               <p className="mx-auto mt-4 max-w-2xl text-slate-700">
                 De los paquetes disponibles, es el que ofrece
-                el mejor resultado económico para tu patrón de consumo.
+                el mejor resultado económico entre los que cubren
+                completamente lo que has indicado.
               </p>
 
               <p className="mt-6 text-5xl font-bold text-sky-600">
@@ -209,6 +224,22 @@ export default function ResultsPage() {
               <p className="mt-2 text-slate-600">
                 de ahorro estimado durante el crucero
               </p>
+
+              <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
+                <p className="text-sm text-slate-600">
+                  Cobertura de tu perfil
+                </p>
+
+                <p className="mt-1 text-2xl font-bold text-green-800">
+                  {bestPackage.coverageScore.toFixed(0)} %
+                </p>
+
+                {bestPackage.fullyCovered && (
+                  <p className="mt-1 text-sm font-semibold text-green-700">
+                    ✓ Cubre todas las categorías y preferencias indicadas
+                  </p>
+                )}
+              </div>
 
             </div>
           ) : (
@@ -223,8 +254,8 @@ export default function ResultsPage() {
               </h2>
 
               <p className="mx-auto mt-4 max-w-2xl text-slate-700">
-                Con el consumo que has indicado, pagar las bebidas
-                por separado sería la opción económicamente más favorable.
+                No encontramos un paquete que cubra completamente
+                lo que has indicado y además genere ahorro.
               </p>
 
               <p className="mt-6 text-5xl font-bold text-sky-600">
@@ -238,9 +269,7 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* DATOS DEL VIAJE */}
-
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-10 grid gap-5 md:grid-cols-4">
 
             <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
               <p className="text-slate-500">
@@ -284,9 +313,21 @@ export default function ResultsPage() {
               </p>
             </div>
 
-          </div>
+            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+              <p className="text-slate-500">
+                ⭐ Premium
+              </p>
 
-          {/* COSTE SIN PAQUETE */}
+              <p className="mt-2 text-3xl font-bold">
+                {selectedPremiumPreferences}
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                preferencias
+              </p>
+            </div>
+
+          </div>
 
           <div className="mt-6 rounded-2xl bg-slate-900 p-6 text-white">
 
@@ -304,8 +345,6 @@ export default function ResultsPage() {
 
           </div>
 
-          {/* COMPARATIVA */}
-
           <div className="mt-10 rounded-2xl border border-slate-200 p-6">
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -316,9 +355,8 @@ export default function ResultsPage() {
                 </h3>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Todos los paquetes se comparan con exactamente
-                  el mismo consumo y los mismos precios de bebidas
-                  por separado.
+                  Comparamos economía y cobertura de las bebidas
+                  y preferencias que has indicado.
                 </p>
               </div>
 
@@ -328,7 +366,7 @@ export default function ResultsPage() {
                 </span>
               ) : (
                 <span className="shrink-0 rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
-                  Ninguno compensa
+                  Sin opción completa con ahorro
                 </span>
               )}
 
@@ -368,6 +406,67 @@ export default function ResultsPage() {
                         <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
                           Mejor opción
                         </span>
+                      )}
+
+                    </div>
+
+                    <div
+                      className={`mt-5 rounded-xl border p-4 ${
+                        pkg.fullyCovered
+                          ? "border-green-200 bg-green-100"
+                          : "border-amber-200 bg-amber-50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            Cobertura
+                          </p>
+
+                          <p className="mt-1 text-2xl font-bold text-slate-900">
+                            {pkg.coverageScore.toFixed(0)} %
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+
+                          {pkg.fullyCovered ? (
+                            <p className="font-semibold text-green-800">
+                              ✓ Cubre todo lo solicitado
+                            </p>
+                          ) : (
+                            <p className="font-semibold text-amber-800">
+                              ⚠️ Cobertura parcial
+                            </p>
+                          )}
+
+                        </div>
+
+                      </div>
+
+                      {pkg.coveredCategories.length > 0 && (
+                        <p className="mt-3 text-sm text-slate-700">
+                          <strong>Cubre:</strong>{" "}
+                          {pkg.coveredCategories
+                            .map(
+                              (category) =>
+                                coverageLabels[category]
+                            )
+                            .join(", ")}
+                        </p>
+                      )}
+
+                      {pkg.uncoveredCategories.length > 0 && (
+                        <p className="mt-2 text-sm font-medium text-amber-900">
+                          <strong>No cubre:</strong>{" "}
+                          {pkg.uncoveredCategories
+                            .map(
+                              (category) =>
+                                coverageLabels[category]
+                            )
+                            .join(", ")}
+                        </p>
                       )}
 
                     </div>
@@ -467,23 +566,20 @@ export default function ResultsPage() {
                   {" "}
                   {bestPackage.packageName}.
                 </strong>{" "}
-                Es el paquete que genera el mayor ahorro estimado
-                con los datos que has introducido.
+                Es la opción con mejor resultado económico entre
+                las que cubren completamente tu perfil.
               </div>
             ) : (
               <div className="mt-6 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
                 <strong>
-                  Recomendación DrinkPilot:
-                  pagar las bebidas por separado.
+                  No recomendamos automáticamente un paquete.
                 </strong>{" "}
-                Ninguno de los paquetes analizados genera ahorro
-                con tu consumo estimado.
+                Ninguna opción combina cobertura completa
+                y ahorro positivo con tus datos actuales.
               </div>
             )}
 
           </div>
-
-          {/* AVISO */}
 
           <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
 
@@ -505,8 +601,6 @@ export default function ResultsPage() {
 
           </div>
 
-          {/* DESGLOSE */}
-
           <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">
 
             <div className="bg-slate-800 px-6 py-4 font-bold text-white">
@@ -518,7 +612,6 @@ export default function ResultsPage() {
               <table className="w-full min-w-[600px]">
 
                 <thead className="bg-slate-100">
-
                   <tr>
                     <th className="p-3 text-left">
                       Bebida
@@ -536,7 +629,6 @@ export default function ResultsPage() {
                       Total crucero
                     </th>
                   </tr>
-
                 </thead>
 
                 <tbody>
@@ -655,8 +747,6 @@ export default function ResultsPage() {
 
             </div>
           </div>
-
-          {/* REINICIO */}
 
           <button
             type="button"

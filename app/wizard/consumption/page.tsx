@@ -24,7 +24,7 @@ export default function ConsumptionPage() {
 
         <ProgressBar
           currentStep={2}
-          totalSteps={3}
+          totalSteps={4}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">
@@ -144,7 +144,7 @@ export default function ConsumptionPage() {
           </Link>
 
           <Link
-            href={hasConsumption ? "/wizard/people" : "#"}
+            href={hasConsumption ? "/wizard/preferences" : "#"}
             onClick={(event) => {
               if (!hasConsumption) {
                 event.preventDefault();
@@ -153,8 +153,7 @@ export default function ConsumptionPage() {
 
               setData((prev) => ({
                 ...prev,
-                drinksPerDay:
-                  totalDrinksPerDay,
+                drinksPerDay: totalDrinksPerDay,
               }));
             }}
             className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${

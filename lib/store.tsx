@@ -20,6 +20,11 @@ export type WizardData = {
 
   drinksPerDay: number;
 
+  premiumCocktails: boolean;
+  bottledBeer: boolean;
+  premiumSpirits: boolean;
+  bottledWaterUnlimited: boolean;
+
   people: number;
 };
 
@@ -44,6 +49,11 @@ const initialData: WizardData = {
 
   drinksPerDay: 0,
 
+  premiumCocktails: false,
+  bottledBeer: false,
+  premiumSpirits: false,
+  bottledWaterUnlimited: false,
+
   people: 1,
 };
 
@@ -61,14 +71,6 @@ export function StoreProvider({
   const [hydrated, setHydrated] =
     useState(false);
 
-  /*
-   * Recuperamos únicamente los campos
-   * que forman parte del wizard actual.
-   *
-   * Esto limpia automáticamente datos antiguos
-   * como packageKey, packageName y packagePrice
-   * que puedan seguir existiendo en localStorage.
-   */
   useEffect(() => {
     try {
       const savedData =
@@ -117,10 +119,29 @@ export function StoreProvider({
               : initialData.cocktail,
 
           drinksPerDay:
-            typeof parsedData.drinksPerDay ===
-            "number"
+            typeof parsedData.drinksPerDay === "number"
               ? parsedData.drinksPerDay
               : initialData.drinksPerDay,
+
+          premiumCocktails:
+            typeof parsedData.premiumCocktails === "boolean"
+              ? parsedData.premiumCocktails
+              : initialData.premiumCocktails,
+
+          bottledBeer:
+            typeof parsedData.bottledBeer === "boolean"
+              ? parsedData.bottledBeer
+              : initialData.bottledBeer,
+
+          premiumSpirits:
+            typeof parsedData.premiumSpirits === "boolean"
+              ? parsedData.premiumSpirits
+              : initialData.premiumSpirits,
+
+          bottledWaterUnlimited:
+            typeof parsedData.bottledWaterUnlimited === "boolean"
+              ? parsedData.bottledWaterUnlimited
+              : initialData.bottledWaterUnlimited,
 
           people:
             typeof parsedData.people === "number"
@@ -138,9 +159,6 @@ export function StoreProvider({
     }
   }, []);
 
-  /*
-   * Persistencia automática
-   */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -159,9 +177,6 @@ export function StoreProvider({
     }
   }, [data, hydrated]);
 
-  /*
-   * Reinicio completo
-   */
   function resetData() {
     try {
       window.localStorage.removeItem(

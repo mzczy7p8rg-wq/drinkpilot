@@ -31,6 +31,23 @@ export const costaPackages = {
 
     includesAlcohol: false,
 
+    coverage: {
+      coffee: true,
+      water: true,
+      soda: true,
+
+      beer: false,
+      wine: false,
+      cocktail: false,
+
+      premiumCocktails: false,
+      bottledBeer: false,
+      premiumSpirits: false,
+      bottledWaterUnlimited: false,
+
+      status: "partial",
+    },
+
     restrictions: myDrinksSoftRestrictions,
 
     status: "pending",
@@ -60,6 +77,23 @@ export const costaPackages = {
     currency: "EUR",
 
     includesAlcohol: true,
+
+    coverage: {
+      coffee: true,
+      water: true,
+      soda: true,
+
+      beer: true,
+      wine: true,
+      cocktail: true,
+
+      premiumCocktails: false,
+      bottledBeer: false,
+      premiumSpirits: false,
+      bottledWaterUnlimited: false,
+
+      status: "verified",
+    },
 
     restrictions: myDrinksRestrictions,
 
@@ -91,6 +125,23 @@ export const costaPackages = {
     currency: "EUR",
 
     includesAlcohol: true,
+
+    coverage: {
+      coffee: true,
+      water: true,
+      soda: true,
+
+      beer: true,
+      wine: true,
+      cocktail: true,
+
+      premiumCocktails: true,
+      bottledBeer: true,
+      premiumSpirits: true,
+      bottledWaterUnlimited: true,
+
+      status: "verified",
+    },
 
     restrictions: myDrinksPlusRestrictions,
 

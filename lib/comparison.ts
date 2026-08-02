@@ -1,8 +1,15 @@
 import { calculateRecommendation } from "@/lib/calculator";
+
+import {
+  calculatePackageCoverage,
+  CoverageCategory,
+} from "@/lib/coverage";
+
 import {
   getAllPackages,
   PackageKey,
 } from "@/lib/packageService";
+
 import { costaOnboardPriceValues } from "@/data/onboardPrices";
 
 export type ComparisonInput = {
@@ -15,6 +22,19 @@ export type ComparisonInput = {
   beer: number;
   wine: number;
   cocktail: number;
+
+  /*
+   * Preferencias premium.
+   *
+   * Son opcionales temporalmente para mantener
+   * compatibilidad con llamadas existentes.
+   *
+   * Si no llegan, se consideran false.
+   */
+  premiumCocktails?: boolean;
+  bottledBeer?: boolean;
+  premiumSpirits?: boolean;
+  bottledWaterUnlimited?: boolean;
 };
 
 export type PackageComparisonResult = {
@@ -46,6 +66,18 @@ export type PackageComparisonResult = {
     | "strongly-worth-it";
 
   breakEvenDrinksPerDay: number;
+
+  /*
+   * Cobertura
+   */
+
+  coverageScore: number;
+
+  fullyCovered: boolean;
+
+  coveredCategories: CoverageCategory[];
+
+  uncoveredCategories: CoverageCategory[];
 };
 
 export type ComparisonResult = {
@@ -60,25 +92,52 @@ export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
   /*
-   * Solo participan paquetes habilitados
+   * Solo comparamos paquetes habilitados
    * para cálculo.
-   *
-   * My Drinks Soft queda fuera mientras
-   * continúe con status "pending".
    */
   const packages = getAllPackages().filter(
     (pkg) => pkg.status === "verified"
   );
 
   /*
-   * MUY IMPORTANTE:
+   * COBERTURA
    *
-   * Todas las opciones se comparan utilizando
-   * exactamente los mismos precios de bebidas
-   * por separado.
+   * Evaluamos:
    *
-   * El coste del café, agua, cerveza, etc.
-   * no depende del paquete analizado.
+   * - bebidas consumidas
+   * - preferencias premium
+   *
+   * Si una preferencia todavía no ha sido
+   * enviada por alguna pantalla antigua,
+   * utilizamos false.
+   */
+  const coverageResults =
+    calculatePackageCoverage({
+      coffee: input.coffee,
+      water: input.water,
+      soda: input.soda,
+      beer: input.beer,
+      wine: input.wine,
+      cocktail: input.cocktail,
+
+      premiumCocktails:
+        input.premiumCocktails ?? false,
+
+      bottledBeer:
+        input.bottledBeer ?? false,
+
+      premiumSpirits:
+        input.premiumSpirits ?? false,
+
+      bottledWaterUnlimited:
+        input.bottledWaterUnlimited ?? false,
+    });
+
+  /*
+   * RESULTADO ECONÓMICO
+   *
+   * Todos los paquetes utilizan exactamente
+   * los mismos precios de bebidas por separado.
    */
   const results: PackageComparisonResult[] =
     packages.map((pkg) => {
@@ -116,6 +175,12 @@ export function compareDrinkPackages(
             costaOnboardPriceValues.cocktail,
         });
 
+      const coverage =
+        coverageResults.find(
+          (result) =>
+            result.packageKey === pkg.key
+        );
+
       return {
         packageKey:
           pkg.key as PackageKey,
@@ -152,11 +217,29 @@ export function compareDrinkPackages(
 
         breakEvenDrinksPerDay:
           calculation.breakEvenDrinksPerDay,
+
+        coverageScore:
+          coverage?.coverageScore ?? 0,
+
+        fullyCovered:
+          coverage?.fullyCovered ?? false,
+
+        coveredCategories:
+          coverage?.coveredCategories ?? [],
+
+        uncoveredCategories:
+          coverage?.uncoveredCategories ?? [],
       };
     });
 
   /*
-   * Ordenamos de mayor a menor ahorro.
+   * ORDEN
+   *
+   * Por ahora mantenemos el orden económico:
+   * mayor ahorro primero.
+   *
+   * La cobertura actúa como requisito para
+   * poder convertirse en bestPackage.
    */
   results.sort(
     (a, b) =>
@@ -164,12 +247,19 @@ export function compareDrinkPackages(
   );
 
   /*
-   * Solo existe "mejor paquete" si alguno
-   * produce realmente un ahorro positivo.
+   * MEJOR PAQUETE
+   *
+   * Para ser recomendado tiene que:
+   *
+   * 1. generar ahorro;
+   * 2. cubrir completamente las categorías
+   *    y preferencias indicadas.
    */
   const bestPackage =
     results.find(
-      (pkg) => pkg.savings > 0
+      (pkg) =>
+        pkg.savings > 0 &&
+        pkg.fullyCovered
     ) ?? null;
 
   return {

@@ -34,13 +34,6 @@ export default function PeoplePage() {
       people: parsedPeople,
     }));
 
-    /*
-     * Ya no necesitamos que el usuario haya
-     * seleccionado previamente un paquete.
-     *
-     * En resultados, DrinkPilot comparará
-     * automáticamente todas las opciones.
-     */
     router.push("/results");
   }
 
@@ -49,8 +42,8 @@ export default function PeoplePage() {
       <div className="w-full max-w-xl rounded-2xl bg-white p-10 shadow-lg">
 
         <ProgressBar
-          currentStep={3}
-          totalSteps={3}
+          currentStep={4}
+          totalSteps={4}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">
@@ -89,9 +82,8 @@ export default function PeoplePage() {
         )}
 
         <div className="mt-8 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">
-          💡 DrinkPilot utilizará tu consumo para comparar
-          automáticamente los paquetes y mostrarte la opción
-          económicamente más favorable.
+          💡 DrinkPilot combinará tu consumo y tus preferencias
+          para comparar automáticamente los paquetes disponibles.
         </div>
 
         <div className="mt-8 flex gap-4">
@@ -99,7 +91,7 @@ export default function PeoplePage() {
           <button
             type="button"
             onClick={() =>
-              router.push("/wizard/consumption")
+              router.push("/wizard/preferences")
             }
             className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
           >
