@@ -25,6 +25,15 @@ export type WizardData = {
   premiumSpirits: boolean;
   bottledWaterUnlimited: boolean;
 
+  /*
+   * Precios personalizados introducidos
+   * por el usuario desde su reserva.
+   *
+   * null = usar precio de referencia.
+   */
+  myDrinksCustomPrice: number | null;
+  myDrinksPlusCustomPrice: number | null;
+
   people: number;
 };
 
@@ -53,6 +62,9 @@ const initialData: WizardData = {
   bottledBeer: false,
   premiumSpirits: false,
   bottledWaterUnlimited: false,
+
+  myDrinksCustomPrice: null,
+  myDrinksPlusCustomPrice: null,
 
   people: 1,
 };
@@ -142,6 +154,18 @@ export function StoreProvider({
             typeof parsedData.bottledWaterUnlimited === "boolean"
               ? parsedData.bottledWaterUnlimited
               : initialData.bottledWaterUnlimited,
+
+          myDrinksCustomPrice:
+            typeof parsedData.myDrinksCustomPrice === "number" &&
+            parsedData.myDrinksCustomPrice > 0
+              ? parsedData.myDrinksCustomPrice
+              : null,
+
+          myDrinksPlusCustomPrice:
+            typeof parsedData.myDrinksPlusCustomPrice === "number" &&
+            parsedData.myDrinksPlusCustomPrice > 0
+              ? parsedData.myDrinksPlusCustomPrice
+              : null,
 
           people:
             typeof parsedData.people === "number"

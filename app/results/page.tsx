@@ -9,6 +9,7 @@ import { compareDrinkPackages } from "@/lib/comparison";
 import { CoverageCategory } from "@/lib/coverage";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { costaOnboardPriceValues } from "@/data/onboardPrices";
+
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 
 const coverageLabels: Record<CoverageCategory, string> = {
@@ -18,6 +19,7 @@ const coverageLabels: Record<CoverageCategory, string> = {
   beer: "cerveza",
   wine: "vino",
   cocktail: "cócteles",
+
   premiumCocktails: "cócteles premium",
   bottledBeer: "cerveza embotellada",
   premiumSpirits: "destilados premium",
@@ -48,6 +50,15 @@ export default function ResultsPage() {
     data.bottledWaterUnlimited,
   ].filter(Boolean).length;
 
+  const customPricesUsed = [
+    data.myDrinksCustomPrice,
+    data.myDrinksPlusCustomPrice,
+  ].filter(
+    (price) =>
+      typeof price === "number" &&
+      price > 0
+  ).length;
+
   const hasValidDays =
     Number.isInteger(data.days) &&
     data.days > 0;
@@ -64,6 +75,9 @@ export default function ResultsPage() {
     hasValidConsumption &&
     hasValidPeople;
 
+  /*
+   * PROTECCIÓN DE RUTAS
+   */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -122,6 +136,9 @@ export default function ResultsPage() {
     );
   }
 
+  /*
+   * COSTE BASE DE BEBIDAS
+   */
   const baseline = calculateRecommendation({
     days: data.days,
     people: data.people,
@@ -154,6 +171,15 @@ export default function ResultsPage() {
       costaOnboardPriceValues.cocktail,
   });
 
+  /*
+   * COMPARACIÓN
+   *
+   * Aquí conectamos:
+   *
+   * - consumo
+   * - preferencias
+   * - precios reales de la reserva
+   */
   const comparison = compareDrinkPackages({
     days: data.days,
     people: data.people,
@@ -176,11 +202,20 @@ export default function ResultsPage() {
 
     bottledWaterUnlimited:
       data.bottledWaterUnlimited,
+
+    myDrinksCustomPrice:
+      data.myDrinksCustomPrice,
+
+    myDrinksPlusCustomPrice:
+      data.myDrinksPlusCustomPrice,
   });
 
   const bestPackage =
     comparison.bestPackage;
 
+  /*
+   * EXPLICACIÓN
+   */
   const explanation =
     buildRecommendationExplanation(comparison);
 
@@ -219,13 +254,15 @@ export default function ResultsPage() {
 
         <div className="rounded-3xl bg-white p-10 shadow-xl">
 
+          {/* CABECERA */}
+
           <h1 className="text-center text-4xl font-bold text-slate-900">
             🍹 Tu recomendación DrinkPilot
           </h1>
 
           <p className="mt-3 text-center text-slate-500">
             Hemos comparado automáticamente los paquetes disponibles
-            según tu consumo y tus preferencias.
+            según tu consumo, preferencias y precios disponibles.
           </p>
 
           {/* EXPLICACIÓN PRINCIPAL */}
@@ -248,6 +285,7 @@ export default function ResultsPage() {
             </p>
 
             <div className="mx-auto mt-6 max-w-2xl rounded-xl bg-white/70 p-5 text-left">
+
               <p
                 className={`font-semibold leading-6 ${explanationStyle.accent}`}
               >
@@ -259,6 +297,7 @@ export default function ResultsPage() {
                   {explanation.secondaryReason}
                 </p>
               )}
+
             </div>
 
             {bestPackage ? (
@@ -272,6 +311,7 @@ export default function ResultsPage() {
                 </p>
 
                 <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
+
                   <p className="text-sm text-slate-600">
                     Cobertura de tu perfil
                   </p>
@@ -285,6 +325,7 @@ export default function ResultsPage() {
                       ✓ Cubre todas las categorías y preferencias indicadas
                     </p>
                   )}
+
                 </div>
               </>
             ) : (
@@ -298,13 +339,15 @@ export default function ResultsPage() {
                 </p>
               </>
             )}
+
           </div>
 
-          {/* RESUMEN DEL PERFIL */}
+          {/* RESUMEN */}
 
-          <div className="mt-10 grid gap-5 md:grid-cols-4">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
 
-            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
+
               <p className="text-slate-500">
                 🗓️ Duración
               </p>
@@ -316,9 +359,11 @@ export default function ResultsPage() {
               <p className="mt-1 text-sm text-slate-500">
                 días
               </p>
+
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
+
               <p className="text-slate-500">
                 👥 Personas
               </p>
@@ -330,9 +375,11 @@ export default function ResultsPage() {
               <p className="mt-1 text-sm text-slate-500">
                 pasajeros
               </p>
+
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
+
               <p className="text-slate-500">
                 🍹 Consumo
               </p>
@@ -342,11 +389,13 @@ export default function ResultsPage() {
               </p>
 
               <p className="mt-1 text-sm text-slate-500">
-                bebidas / persona / día
+                bebidas / día
               </p>
+
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
+
               <p className="text-slate-500">
                 ⭐ Premium
               </p>
@@ -358,6 +407,23 @@ export default function ResultsPage() {
               <p className="mt-1 text-sm text-slate-500">
                 preferencias
               </p>
+
+            </div>
+
+            <div className="rounded-2xl bg-slate-50 p-5 text-center shadow-sm">
+
+              <p className="text-slate-500">
+                🎟️ Precios reales
+              </p>
+
+              <p className="mt-2 text-3xl font-bold">
+                {customPricesUsed}
+              </p>
+
+              <p className="mt-1 text-sm text-slate-500">
+                introducidos
+              </p>
+
             </div>
 
           </div>
@@ -387,14 +453,16 @@ export default function ResultsPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
               <div>
+
                 <h3 className="text-2xl font-bold text-slate-900">
                   ⚖️ Comparativa de paquetes
                 </h3>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                  Comparamos economía y cobertura de las bebidas
-                  y preferencias que has indicado.
+                  Comparamos economía y cobertura utilizando los precios
+                  de tu reserva cuando los has proporcionado.
                 </p>
+
               </div>
 
               {bestPackage ? (
@@ -416,6 +484,9 @@ export default function ResultsPage() {
                   bestPackage?.packageKey ===
                   pkg.packageKey;
 
+                const usesUserPrice =
+                  pkg.priceSource === "user";
+
                 return (
                   <div
                     key={pkg.packageKey}
@@ -426,21 +497,44 @@ export default function ResultsPage() {
                     }`}
                   >
 
+                    {/* CABECERA PAQUETE */}
+
                     <div className="flex items-start justify-between gap-4">
 
                       <div>
+
                         <p className="text-xl font-bold text-slate-900">
                           {pkg.packageName}
                         </p>
 
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-lg font-bold text-slate-900">
                           {pkg.packagePricePerDay.toFixed(2)} €
                           {" "}por persona / día
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-amber-700">
-                          Precio de referencia
-                        </p>
+                        {usesUserPrice ? (
+                          <div className="mt-2">
+
+                            <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                              ✓ Precio de tu reserva
+                            </span>
+
+                            {pkg.packagePricePerDay !==
+                              pkg.referencePricePerDay && (
+                              <p className="mt-2 text-xs text-slate-500">
+                                Referencia DrinkPilot:{" "}
+                                {pkg.referencePricePerDay.toFixed(2)} €
+                                {" "}/ día
+                              </p>
+                            )}
+
+                          </div>
+                        ) : (
+                          <span className="mt-2 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                            ⚠ Precio de referencia
+                          </span>
+                        )}
+
                       </div>
 
                       {isBest && (
@@ -451,6 +545,8 @@ export default function ResultsPage() {
 
                     </div>
 
+                    {/* COBERTURA */}
+
                     <div
                       className={`mt-5 rounded-xl border p-4 ${
                         pkg.fullyCovered
@@ -458,9 +554,11 @@ export default function ResultsPage() {
                           : "border-amber-200 bg-amber-50"
                       }`}
                     >
+
                       <div className="flex items-center justify-between gap-4">
 
                         <div>
+
                           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                             Cobertura
                           </p>
@@ -468,6 +566,7 @@ export default function ResultsPage() {
                           <p className="mt-1 text-2xl font-bold text-slate-900">
                             {pkg.coverageScore.toFixed(0)} %
                           </p>
+
                         </div>
 
                         <div className="text-right">
@@ -488,7 +587,9 @@ export default function ResultsPage() {
 
                       {pkg.coveredCategories.length > 0 && (
                         <p className="mt-3 text-sm text-slate-700">
-                          <strong>Cubre:</strong>{" "}
+                          <strong>
+                            Cubre:
+                          </strong>{" "}
                           {pkg.coveredCategories
                             .map(
                               (category) =>
@@ -500,7 +601,9 @@ export default function ResultsPage() {
 
                       {pkg.uncoveredCategories.length > 0 && (
                         <p className="mt-2 text-sm font-medium text-amber-900">
-                          <strong>No cubre:</strong>{" "}
+                          <strong>
+                            No cubre:
+                          </strong>{" "}
                           {pkg.uncoveredCategories
                             .map(
                               (category) =>
@@ -512,9 +615,12 @@ export default function ResultsPage() {
 
                     </div>
 
+                    {/* ECONOMÍA */}
+
                     <div className="mt-5 grid grid-cols-2 gap-4">
 
                       <div>
+
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Coste paquete
                         </p>
@@ -522,9 +628,11 @@ export default function ResultsPage() {
                         <p className="mt-1 text-xl font-bold">
                           {pkg.packageCost.toFixed(2)} €
                         </p>
+
                       </div>
 
                       <div>
+
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Bebidas aparte
                         </p>
@@ -532,9 +640,11 @@ export default function ResultsPage() {
                         <p className="mt-1 text-xl font-bold">
                           {pkg.drinksCost.toFixed(2)} €
                         </p>
+
                       </div>
 
                       <div>
+
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Diferencia
                         </p>
@@ -551,9 +661,11 @@ export default function ResultsPage() {
                           {pkg.savings > 0 ? "+" : ""}
                           {pkg.savings.toFixed(2)} €
                         </p>
+
                       </div>
 
                       <div>
+
                         <p className="text-xs uppercase tracking-wide text-slate-500">
                           Ahorro estimado
                         </p>
@@ -563,9 +675,12 @@ export default function ResultsPage() {
                             ? `${pkg.savingsPercentage.toFixed(1)} %`
                             : "0 %"}
                         </p>
+
                       </div>
 
                     </div>
+
+                    {/* DATOS ADICIONALES */}
 
                     <div className="mt-5 border-t border-slate-200 pt-4">
 
@@ -600,9 +715,12 @@ export default function ResultsPage() {
 
             </div>
 
+            {/* EXPLICACIÓN RESUMIDA */}
+
             <div
               className={`mt-6 rounded-xl border p-5 text-sm leading-6 ${explanationStyle.container}`}
             >
+
               <strong className={explanationStyle.title}>
                 {explanation.title}
               </strong>
@@ -616,17 +734,42 @@ export default function ResultsPage() {
                   {explanation.secondaryReason}
                 </p>
               )}
+
             </div>
 
           </div>
 
-          {/* CALIDAD DE LOS DATOS */}
+          {/* ORIGEN DE LOS PRECIOS */}
+
+          {customPricesUsed > 0 && (
+            <div className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5">
+
+              <h3 className="font-semibold text-sky-950">
+                🎟️ Precios de tu reserva
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-sky-900">
+                Has proporcionado{" "}
+                <strong>
+                  {customPricesUsed}
+                </strong>{" "}
+                {customPricesUsed === 1
+                  ? "precio real"
+                  : "precios reales"}.
+                DrinkPilot les ha dado prioridad sobre sus precios
+                de referencia al calcular la recomendación.
+              </p>
+
+            </div>
+          )}
+
+          {/* CALIDAD DE DATOS */}
 
           <div className="mt-8">
             <DataConfidencePanel />
           </div>
 
-          {/* TABLA DE CONSUMO */}
+          {/* CONSUMO */}
 
           <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200">
 
@@ -639,7 +782,9 @@ export default function ResultsPage() {
               <table className="w-full min-w-[600px]">
 
                 <thead className="bg-slate-100">
+
                   <tr>
+
                     <th className="p-3 text-left">
                       Bebida
                     </th>
@@ -655,12 +800,15 @@ export default function ResultsPage() {
                     <th className="p-3 text-right">
                       Total crucero
                     </th>
+
                   </tr>
+
                 </thead>
 
                 <tbody>
 
                   <tr className="border-t">
+
                     <td className="p-3">
                       ☕ Café
                     </td>
@@ -676,9 +824,11 @@ export default function ResultsPage() {
                     <td className="pr-4 text-right font-semibold">
                       {baseline.coffeeCost.toFixed(2)} €
                     </td>
+
                   </tr>
 
                   <tr className="border-t">
+
                     <td className="p-3">
                       💧 Agua
                     </td>
@@ -694,9 +844,11 @@ export default function ResultsPage() {
                     <td className="pr-4 text-right font-semibold">
                       {baseline.waterCost.toFixed(2)} €
                     </td>
+
                   </tr>
 
                   <tr className="border-t">
+
                     <td className="p-3">
                       🥤 Refrescos
                     </td>
@@ -712,9 +864,11 @@ export default function ResultsPage() {
                     <td className="pr-4 text-right font-semibold">
                       {baseline.sodaCost.toFixed(2)} €
                     </td>
+
                   </tr>
 
                   <tr className="border-t">
+
                     <td className="p-3">
                       🍺 Cervezas
                     </td>
@@ -730,9 +884,11 @@ export default function ResultsPage() {
                     <td className="pr-4 text-right font-semibold">
                       {baseline.beerCost.toFixed(2)} €
                     </td>
+
                   </tr>
 
                   <tr className="border-t">
+
                     <td className="p-3">
                       🍷 Vinos
                     </td>
@@ -748,9 +904,11 @@ export default function ResultsPage() {
                     <td className="pr-4 text-right font-semibold">
                       {baseline.wineCost.toFixed(2)} €
                     </td>
+
                   </tr>
 
                   <tr className="border-t">
+
                     <td className="p-3">
                       🍸 Cócteles
                     </td>
@@ -766,6 +924,7 @@ export default function ResultsPage() {
                     <td className="pr-4 text-right font-semibold">
                       {baseline.cocktailCost.toFixed(2)} €
                     </td>
+
                   </tr>
 
                 </tbody>
@@ -774,6 +933,8 @@ export default function ResultsPage() {
 
             </div>
           </div>
+
+          {/* REINICIO */}
 
           <button
             type="button"

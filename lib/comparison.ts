@@ -12,6 +12,10 @@ import {
 
 import { costaOnboardPriceValues } from "@/data/onboardPrices";
 
+export type PriceSource =
+  | "user"
+  | "reference";
+
 export type ComparisonInput = {
   days: number;
   people: number;
@@ -23,18 +27,19 @@ export type ComparisonInput = {
   wine: number;
   cocktail: number;
 
-  /*
-   * Preferencias premium.
-   *
-   * Son opcionales temporalmente para mantener
-   * compatibilidad con llamadas existentes.
-   *
-   * Si no llegan, se consideran false.
-   */
   premiumCocktails?: boolean;
   bottledBeer?: boolean;
   premiumSpirits?: boolean;
   bottledWaterUnlimited?: boolean;
+
+  /*
+   * Precios personalizados introducidos
+   * por el usuario desde su reserva.
+   *
+   * null o undefined = usar precio de referencia.
+   */
+  myDrinksCustomPrice?: number | null;
+  myDrinksPlusCustomPrice?: number | null;
 };
 
 export type PackageComparisonResult = {
@@ -42,7 +47,22 @@ export type PackageComparisonResult = {
 
   packageName: string;
 
+  /*
+   * Precio realmente utilizado
+   * en el cálculo.
+   */
   packagePricePerDay: number;
+
+  /*
+   * Indica de dónde procede ese precio.
+   */
+  priceSource: PriceSource;
+
+  /*
+   * Precio de referencia original
+   * definido por DrinkPilot.
+   */
+  referencePricePerDay: number;
 
   packageCost: number;
 
@@ -70,7 +90,6 @@ export type PackageComparisonResult = {
   /*
    * Cobertura
    */
-
   coverageScore: number;
 
   fullyCovered: boolean;
@@ -88,6 +107,69 @@ export type ComparisonResult = {
   anyPackageWorthIt: boolean;
 };
 
+/*
+ * Determina si un precio personalizado
+ * puede utilizarse de forma segura.
+ */
+function isValidCustomPrice(
+  value: number | null | undefined
+): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value > 0
+  );
+}
+
+/*
+ * Devuelve el precio que debe usar cada paquete.
+ *
+ * Si existe un precio válido de la reserva:
+ * → usa precio del usuario
+ *
+ * Si no:
+ * → usa precio de referencia
+ */
+function resolvePackagePrice(
+  packageKey: PackageKey,
+  referencePrice: number,
+  input: ComparisonInput
+): {
+  price: number;
+  source: PriceSource;
+} {
+  if (
+    packageKey === "myDrinks" &&
+    isValidCustomPrice(
+      input.myDrinksCustomPrice
+    )
+  ) {
+    return {
+      price:
+        input.myDrinksCustomPrice,
+      source: "user",
+    };
+  }
+
+  if (
+    packageKey === "myDrinksPlus" &&
+    isValidCustomPrice(
+      input.myDrinksPlusCustomPrice
+    )
+  ) {
+    return {
+      price:
+        input.myDrinksPlusCustomPrice,
+      source: "user",
+    };
+  }
+
+  return {
+    price: referencePrice,
+    source: "reference",
+  };
+}
+
 export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
@@ -101,15 +183,6 @@ export function compareDrinkPackages(
 
   /*
    * COBERTURA
-   *
-   * Evaluamos:
-   *
-   * - bebidas consumidas
-   * - preferencias premium
-   *
-   * Si una preferencia todavía no ha sido
-   * enviada por alguna pantalla antigua,
-   * utilizamos false.
    */
   const coverageResults =
     calculatePackageCoverage({
@@ -136,18 +209,34 @@ export function compareDrinkPackages(
   /*
    * RESULTADO ECONÓMICO
    *
-   * Todos los paquetes utilizan exactamente
-   * los mismos precios de bebidas por separado.
+   * Los precios de bebidas por separado
+   * permanecen comunes para todos los paquetes.
+   *
+   * El precio diario del paquete puede venir
+   * de:
+   *
+   * - la reserva del usuario
+   * - el precio de referencia
    */
   const results: PackageComparisonResult[] =
     packages.map((pkg) => {
+      const packageKey =
+        pkg.key as PackageKey;
+
+      const resolvedPrice =
+        resolvePackagePrice(
+          packageKey,
+          pkg.pricePerDay,
+          input
+        );
+
       const calculation =
         calculateRecommendation({
           days: input.days,
           people: input.people,
 
           packagePricePerDay:
-            pkg.pricePerDay,
+            resolvedPrice.price,
 
           coffee: input.coffee,
           water: input.water,
@@ -178,17 +267,22 @@ export function compareDrinkPackages(
       const coverage =
         coverageResults.find(
           (result) =>
-            result.packageKey === pkg.key
+            result.packageKey === packageKey
         );
 
       return {
-        packageKey:
-          pkg.key as PackageKey,
+        packageKey,
 
         packageName:
           pkg.name,
 
         packagePricePerDay:
+          resolvedPrice.price,
+
+        priceSource:
+          resolvedPrice.source,
+
+        referencePricePerDay:
           pkg.pricePerDay,
 
         packageCost:
@@ -233,13 +327,8 @@ export function compareDrinkPackages(
     });
 
   /*
-   * ORDEN
-   *
-   * Por ahora mantenemos el orden económico:
+   * Orden económico:
    * mayor ahorro primero.
-   *
-   * La cobertura actúa como requisito para
-   * poder convertirse en bestPackage.
    */
   results.sort(
     (a, b) =>
@@ -247,13 +336,10 @@ export function compareDrinkPackages(
   );
 
   /*
-   * MEJOR PAQUETE
+   * Para ser recomendado:
    *
-   * Para ser recomendado tiene que:
-   *
-   * 1. generar ahorro;
-   * 2. cubrir completamente las categorías
-   *    y preferencias indicadas.
+   * 1. ahorro positivo
+   * 2. cobertura completa
    */
   const bestPackage =
     results.find(

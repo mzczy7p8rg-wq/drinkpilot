@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import { useStore } from "@/lib/store";
 import DrinkCounter from "@/components/DrinkCounter";
 import ProgressBar from "@/components/ProgressBar";
@@ -16,7 +17,8 @@ export default function ConsumptionPage() {
     data.wine +
     data.cocktail;
 
-  const hasConsumption = totalDrinksPerDay > 0;
+  const hasConsumption =
+    totalDrinksPerDay > 0;
 
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
@@ -24,7 +26,7 @@ export default function ConsumptionPage() {
 
         <ProgressBar
           currentStep={2}
-          totalSteps={4}
+          totalSteps={5}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">
@@ -32,13 +34,13 @@ export default function ConsumptionPage() {
         </h1>
 
         <p className="mt-3 text-slate-500">
-          Indica el consumo aproximado de una persona durante un día normal
-          del crucero.
+          Indica el consumo aproximado de una persona durante
+          un día normal del crucero.
         </p>
 
         <div className="mt-6 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">
-          💡 Introduce las bebidas que consumirías aunque no contrataras
-          ningún paquete. DrinkPilot comparará después las opciones disponibles.
+          💡 Introduce las bebidas que consumirías aunque
+          no contrataras ningún paquete.
         </div>
 
         <div className="mt-8 space-y-4">
@@ -144,7 +146,11 @@ export default function ConsumptionPage() {
           </Link>
 
           <Link
-            href={hasConsumption ? "/wizard/preferences" : "#"}
+            href={
+              hasConsumption
+                ? "/wizard/preferences"
+                : "#"
+            }
             onClick={(event) => {
               if (!hasConsumption) {
                 event.preventDefault();
@@ -153,7 +159,8 @@ export default function ConsumptionPage() {
 
               setData((prev) => ({
                 ...prev,
-                drinksPerDay: totalDrinksPerDay,
+                drinksPerDay:
+                  totalDrinksPerDay,
               }));
             }}
             className={`flex-1 rounded-xl py-4 text-center font-semibold transition ${

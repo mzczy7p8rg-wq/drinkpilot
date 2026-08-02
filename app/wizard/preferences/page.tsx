@@ -27,6 +27,7 @@ function PreferenceCard({
       }`}
     >
       <div className="flex items-start justify-between gap-4">
+
         <div>
           <p className="font-semibold text-slate-900">
             {title}
@@ -45,6 +46,7 @@ function PreferenceCard({
           }
           className="mt-1 h-5 w-5 accent-sky-600"
         />
+
       </div>
     </label>
   );
@@ -53,13 +55,12 @@ function PreferenceCard({
 export default function PreferencesPage() {
   const { data, setData } = useStore();
 
-  const selectedPreferences =
-    [
-      data.premiumCocktails,
-      data.bottledBeer,
-      data.premiumSpirits,
-      data.bottledWaterUnlimited,
-    ].filter(Boolean).length;
+  const selectedPreferences = [
+    data.premiumCocktails,
+    data.bottledBeer,
+    data.premiumSpirits,
+    data.bottledWaterUnlimited,
+  ].filter(Boolean).length;
 
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
@@ -67,7 +68,7 @@ export default function PreferencesPage() {
 
         <ProgressBar
           currentStep={3}
-          totalSteps={4}
+          totalSteps={5}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">
@@ -81,9 +82,8 @@ export default function PreferencesPage() {
         </p>
 
         <div className="mt-6 rounded-xl bg-sky-50 p-4 text-sm leading-6 text-sky-900">
-          💡 No marques una opción solo porque
-          “suene mejor”. Marca únicamente lo que
-          realmente valorarías durante el crucero.
+          💡 Marca únicamente aquellas opciones
+          que realmente valorarías durante el crucero.
         </div>
 
         <div className="mt-8 space-y-4">
@@ -166,7 +166,7 @@ export default function PreferencesPage() {
           </Link>
 
           <Link
-            href="/wizard/people"
+            href="/wizard/prices"
             className="flex-1 rounded-xl bg-sky-600 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
           >
             Continuar

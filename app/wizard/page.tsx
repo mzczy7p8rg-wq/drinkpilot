@@ -34,13 +34,6 @@ export default function WizardPage() {
       days: parsedDays,
     }));
 
-    /*
-     * Ya no pedimos al usuario que elija
-     * un paquete antes de conocer su consumo.
-     *
-     * DrinkPilot decidirá automáticamente
-     * cuál es la mejor opción al final.
-     */
     router.push("/wizard/consumption");
   }
 
@@ -50,7 +43,7 @@ export default function WizardPage() {
 
         <ProgressBar
           currentStep={1}
-          totalSteps={3}
+          totalSteps={5}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">

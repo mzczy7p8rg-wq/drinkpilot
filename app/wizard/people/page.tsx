@@ -17,7 +17,8 @@ export default function PeoplePage() {
       : "1"
   );
 
-  const parsedPeople = Number(people);
+  const parsedPeople =
+    Number(people);
 
   const isValid =
     people.trim() !== "" &&
@@ -42,8 +43,8 @@ export default function PeoplePage() {
       <div className="w-full max-w-xl rounded-2xl bg-white p-10 shadow-lg">
 
         <ProgressBar
-          currentStep={4}
-          totalSteps={4}
+          currentStep={5}
+          totalSteps={5}
         />
 
         <h1 className="text-3xl font-bold text-slate-900">
@@ -81,9 +82,10 @@ export default function PeoplePage() {
           </p>
         )}
 
-        <div className="mt-8 rounded-xl bg-sky-50 p-4 text-sm text-sky-900">
-          💡 DrinkPilot combinará tu consumo y tus preferencias
-          para comparar automáticamente los paquetes disponibles.
+        <div className="mt-8 rounded-xl bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+          💡 DrinkPilot combinará consumo, preferencias
+          y los precios de tu reserva cuando los hayas
+          proporcionado.
         </div>
 
         <div className="mt-8 flex gap-4">
@@ -91,7 +93,7 @@ export default function PeoplePage() {
           <button
             type="button"
             onClick={() =>
-              router.push("/wizard/preferences")
+              router.push("/wizard/prices")
             }
             className="flex-1 rounded-xl border border-slate-300 py-4 text-center font-semibold transition hover:bg-slate-100"
           >
