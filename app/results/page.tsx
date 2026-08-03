@@ -63,7 +63,14 @@ export default function ResultsPage() {
     data.premiumCocktails,
     data.bottledBeer,
     data.premiumSpirits,
-    data.bottledWaterUnlimited,
+
+    /*
+     * El agua ilimitada implica también
+     * la asignación diaria, pero representa
+     * una única preferencia del usuario.
+     */
+    data.bottledWaterUnlimited ||
+      data.bottledWaterDailyAllowance,
   ].filter(Boolean).length;
 
   const customPricesUsed = [
@@ -209,6 +216,9 @@ export default function ResultsPage() {
 
     premiumSpirits:
       data.premiumSpirits,
+
+    bottledWaterDailyAllowance:
+      data.bottledWaterDailyAllowance,
 
     bottledWaterUnlimited:
       data.bottledWaterUnlimited,

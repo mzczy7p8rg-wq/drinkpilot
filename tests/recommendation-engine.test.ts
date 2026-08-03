@@ -1060,4 +1060,125 @@ describe("DrinkPilot recommendation engine", () => {
       myDrinksPlus?.fullyCovered
     ).toBe(true);
   });
+});describe("Bottled water integration", () => {
+  it("My Drinks cubre una botella diaria a través de compareDrinkPackages", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      bottledWaterDailyAllowance: true,
+      bottledWaterUnlimited: false,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.coveredCategories
+    ).toContain(
+      "bottledWaterDailyAllowance"
+    );
+
+    expect(
+      myDrinks?.uncoveredCategories
+    ).not.toContain(
+      "bottledWaterDailyAllowance"
+    );
+  });
+
+  it("My Drinks no cubre agua ilimitada a través de compareDrinkPackages", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      bottledWaterDailyAllowance: true,
+      bottledWaterUnlimited: true,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.coveredCategories
+    ).toContain(
+      "bottledWaterDailyAllowance"
+    );
+
+    expect(
+      myDrinks?.uncoveredCategories
+    ).toContain(
+      "bottledWaterUnlimited"
+    );
+
+    expect(
+      myDrinks?.fullyCovered
+    ).toBe(false);
+
+    expect(
+      myDrinks?.economicComparisonStatus
+    ).toBe("partial-unknown");
+  });
+
+  it("My Drinks Plus cubre agua diaria e ilimitada a través de compareDrinkPackages", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      bottledWaterDailyAllowance: true,
+      bottledWaterUnlimited: true,
+    });
+
+    const myDrinksPlus =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinksPlus"
+      );
+
+    expect(
+      myDrinksPlus?.coveredCategories
+    ).toContain(
+      "bottledWaterDailyAllowance"
+    );
+
+    expect(
+      myDrinksPlus?.coveredCategories
+    ).toContain(
+      "bottledWaterUnlimited"
+    );
+
+    expect(
+      myDrinksPlus?.fullyCovered
+    ).toBe(true);
+
+    expect(
+      myDrinksPlus?.economicComparisonStatus
+    ).toBe("complete");
+  });
 });

@@ -64,6 +64,10 @@ export default function ReviewPage() {
     data.premiumSpirits &&
       "Destilados premium",
 
+    data.bottledWaterDailyAllowance &&
+    !data.bottledWaterUnlimited &&
+      "Una botella de agua diaria",
+
     data.bottledWaterUnlimited &&
       "Agua embotellada sin límite",
   ].filter(Boolean) as string[];

@@ -23,6 +23,19 @@ export type WizardData = {
   premiumCocktails: boolean;
   bottledBeer: boolean;
   premiumSpirits: boolean;
+
+  /*
+   * Agua embotellada v2.
+   *
+   * dailyAllowance:
+   * el usuario valora disponer al menos
+   * de una botella diaria.
+   *
+   * unlimited:
+   * el usuario necesita agua embotellada
+   * sin límite.
+   */
+  bottledWaterDailyAllowance: boolean;
   bottledWaterUnlimited: boolean;
 
   /*
@@ -39,12 +52,15 @@ export type WizardData = {
 
 type StoreContextType = {
   data: WizardData;
-  setData: React.Dispatch<React.SetStateAction<WizardData>>;
+  setData: React.Dispatch<
+    React.SetStateAction<WizardData>
+  >;
   hydrated: boolean;
   resetData: () => void;
 };
 
-const STORAGE_KEY = "drinkpilot-wizard";
+const STORAGE_KEY =
+  "drinkpilot-wizard";
 
 const initialData: WizardData = {
   days: 0,
@@ -61,6 +77,8 @@ const initialData: WizardData = {
   premiumCocktails: false,
   bottledBeer: false,
   premiumSpirits: false,
+
+  bottledWaterDailyAllowance: false,
   bottledWaterUnlimited: false,
 
   myDrinksCustomPrice: null,
@@ -70,7 +88,9 @@ const initialData: WizardData = {
 };
 
 const StoreContext =
-  createContext<StoreContextType | null>(null);
+  createContext<StoreContextType | null>(
+    null
+  );
 
 export function StoreProvider({
   children,
@@ -92,83 +112,107 @@ export function StoreProvider({
 
       if (savedData) {
         const parsedData =
-          JSON.parse(savedData) as Partial<WizardData>;
+          JSON.parse(
+            savedData
+          ) as Partial<WizardData>;
 
         setData({
           days:
-            typeof parsedData.days === "number"
+            typeof parsedData.days ===
+            "number"
               ? parsedData.days
               : initialData.days,
 
           coffee:
-            typeof parsedData.coffee === "number"
+            typeof parsedData.coffee ===
+            "number"
               ? parsedData.coffee
               : initialData.coffee,
 
           water:
-            typeof parsedData.water === "number"
+            typeof parsedData.water ===
+            "number"
               ? parsedData.water
               : initialData.water,
 
           soda:
-            typeof parsedData.soda === "number"
+            typeof parsedData.soda ===
+            "number"
               ? parsedData.soda
               : initialData.soda,
 
           beer:
-            typeof parsedData.beer === "number"
+            typeof parsedData.beer ===
+            "number"
               ? parsedData.beer
               : initialData.beer,
 
           wine:
-            typeof parsedData.wine === "number"
+            typeof parsedData.wine ===
+            "number"
               ? parsedData.wine
               : initialData.wine,
 
           cocktail:
-            typeof parsedData.cocktail === "number"
+            typeof parsedData.cocktail ===
+            "number"
               ? parsedData.cocktail
               : initialData.cocktail,
 
           drinksPerDay:
-            typeof parsedData.drinksPerDay === "number"
+            typeof parsedData.drinksPerDay ===
+            "number"
               ? parsedData.drinksPerDay
               : initialData.drinksPerDay,
 
           premiumCocktails:
-            typeof parsedData.premiumCocktails === "boolean"
+            typeof parsedData.premiumCocktails ===
+            "boolean"
               ? parsedData.premiumCocktails
               : initialData.premiumCocktails,
 
           bottledBeer:
-            typeof parsedData.bottledBeer === "boolean"
+            typeof parsedData.bottledBeer ===
+            "boolean"
               ? parsedData.bottledBeer
               : initialData.bottledBeer,
 
           premiumSpirits:
-            typeof parsedData.premiumSpirits === "boolean"
+            typeof parsedData.premiumSpirits ===
+            "boolean"
               ? parsedData.premiumSpirits
               : initialData.premiumSpirits,
 
+          bottledWaterDailyAllowance:
+            typeof parsedData.bottledWaterDailyAllowance ===
+            "boolean"
+              ? parsedData.bottledWaterDailyAllowance
+              : initialData.bottledWaterDailyAllowance,
+
           bottledWaterUnlimited:
-            typeof parsedData.bottledWaterUnlimited === "boolean"
+            typeof parsedData.bottledWaterUnlimited ===
+            "boolean"
               ? parsedData.bottledWaterUnlimited
               : initialData.bottledWaterUnlimited,
 
           myDrinksCustomPrice:
-            typeof parsedData.myDrinksCustomPrice === "number" &&
+            typeof parsedData.myDrinksCustomPrice ===
+              "number" &&
             parsedData.myDrinksCustomPrice > 0
               ? parsedData.myDrinksCustomPrice
               : null,
 
           myDrinksPlusCustomPrice:
-            typeof parsedData.myDrinksPlusCustomPrice === "number" &&
-            parsedData.myDrinksPlusCustomPrice > 0
+            typeof parsedData.myDrinksPlusCustomPrice ===
+              "number" &&
+            parsedData.myDrinksPlusCustomPrice >
+              0
               ? parsedData.myDrinksPlusCustomPrice
               : null,
 
           people:
-            typeof parsedData.people === "number"
+            typeof parsedData.people ===
+            "number"
               ? parsedData.people
               : initialData.people,
         });

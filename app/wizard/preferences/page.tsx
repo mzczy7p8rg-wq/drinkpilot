@@ -9,7 +9,9 @@ type PreferenceCardProps = {
   title: string;
   description: string;
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  onChange: (
+    checked: boolean
+  ) => void;
 };
 
 function PreferenceCard({
@@ -27,7 +29,6 @@ function PreferenceCard({
       }`}
     >
       <div className="flex items-start justify-between gap-4">
-
         <div className="min-w-0">
           <p className="text-base font-semibold text-slate-900 sm:text-lg">
             {title}
@@ -42,30 +43,32 @@ function PreferenceCard({
           type="checkbox"
           checked={checked}
           onChange={(event) =>
-            onChange(event.target.checked)
+            onChange(
+              event.target.checked
+            )
           }
           className="mt-1 h-6 w-6 shrink-0 accent-sky-600"
         />
-
       </div>
     </label>
   );
 }
 
 export default function PreferencesPage() {
-  const { data, setData } = useStore();
+  const { data, setData } =
+    useStore();
 
   const selectedPreferences = [
     data.premiumCocktails,
     data.bottledBeer,
     data.premiumSpirits,
+    data.bottledWaterDailyAllowance,
     data.bottledWaterUnlimited,
   ].filter(Boolean).length;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
-
         <ProgressBar
           currentStep={3}
           totalSteps={6}
@@ -77,31 +80,37 @@ export default function PreferencesPage() {
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            ¿Qué extras valoras a bordo?
+            ¿Qué extras valoras a
+            bordo?
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Estas preferencias son opcionales.
-            Nos ayudan a distinguir mejor entre
-            un paquete estándar y uno premium.
+            Estas preferencias son
+            opcionales. Nos ayudan a
+            distinguir mejor entre un
+            paquete estándar y uno
+            premium.
           </p>
         </div>
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Marca únicamente aquellas opciones
-          que realmente valorarías durante el crucero.
+          💡 Marca únicamente aquellas
+          opciones que realmente
+          valorarías durante el crucero.
         </div>
 
         <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
-
           <PreferenceCard
             title="🍸 Cócteles premium"
             description="Valoras una selección más amplia de cócteles y opciones premium."
-            checked={data.premiumCocktails}
+            checked={
+              data.premiumCocktails
+            }
             onChange={(checked) =>
               setData((prev) => ({
                 ...prev,
-                premiumCocktails: checked,
+                premiumCocktails:
+                  checked,
               }))
             }
           />
@@ -109,7 +118,9 @@ export default function PreferencesPage() {
           <PreferenceCard
             title="🍺 Cerveza embotellada"
             description="Prefieres disponer también de cerveza embotellada además de las opciones básicas."
-            checked={data.bottledBeer}
+            checked={
+              data.bottledBeer
+            }
             onChange={(checked) =>
               setData((prev) => ({
                 ...prev,
@@ -121,31 +132,92 @@ export default function PreferencesPage() {
           <PreferenceCard
             title="🥃 Destilados premium"
             description="Te interesan marcas de mayor gama o una selección más amplia de destilados."
-            checked={data.premiumSpirits}
+            checked={
+              data.premiumSpirits
+            }
             onChange={(checked) =>
               setData((prev) => ({
                 ...prev,
-                premiumSpirits: checked,
+                premiumSpirits:
+                  checked,
               }))
             }
           />
 
-          <PreferenceCard
-            title="💧 Agua embotellada sin límite"
-            description="Valoras especialmente tener acceso amplio a agua embotellada durante el crucero."
-            checked={data.bottledWaterUnlimited}
-            onChange={(checked) =>
-              setData((prev) => ({
-                ...prev,
-                bottledWaterUnlimited: checked,
-              }))
-            }
-          />
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+            <div className="mb-3">
+              <p className="font-semibold text-slate-900">
+                💧 Agua embotellada
+              </p>
 
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Distingue entre disponer
+                de una botella diaria y
+                necesitar acceso sin
+                límite.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <PreferenceCard
+                title="Una botella de agua diaria"
+                description="Te resulta suficiente disponer al menos de una botella de agua embotellada incluida cada día."
+                checked={
+                  data.bottledWaterDailyAllowance
+                }
+                onChange={(checked) =>
+                  setData((prev) => ({
+                    ...prev,
+
+                    bottledWaterDailyAllowance:
+                      checked,
+
+                    /*
+                     * Si deja de valorar
+                     * incluso una botella
+                     * diaria, tampoco tiene
+                     * sentido conservar la
+                     * necesidad ilimitada.
+                     */
+                    bottledWaterUnlimited:
+                      checked
+                        ? prev.bottledWaterUnlimited
+                        : false,
+                  }))
+                }
+              />
+
+              <PreferenceCard
+                title="Agua embotellada sin límite"
+                description="Valoras disponer de agua embotellada ampliamente durante el crucero, sin limitarte a una asignación diaria."
+                checked={
+                  data.bottledWaterUnlimited
+                }
+                onChange={(checked) =>
+                  setData((prev) => ({
+                    ...prev,
+
+                    bottledWaterUnlimited:
+                      checked,
+
+                    /*
+                     * Agua ilimitada implica
+                     * necesariamente cubrir
+                     * al menos una botella
+                     * diaria.
+                     */
+                    bottledWaterDailyAllowance:
+                      checked
+                        ? true
+                        : prev.bottledWaterDailyAllowance,
+                  }))
+                }
+              />
+            </div>
+          </div>
         </div>
 
         <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-
           <p className="text-sm font-medium text-slate-500">
             Preferencias seleccionadas
           </p>
@@ -156,16 +228,15 @@ export default function PreferencesPage() {
 
           <p className="mt-1 text-sm text-slate-500">
             {selectedPreferences === 0
-              ? "Sin preferencias premium"
-              : selectedPreferences === 1
-              ? "preferencia premium"
-              : "preferencias premium"}
+              ? "Sin preferencias adicionales"
+              : selectedPreferences ===
+                1
+              ? "preferencia adicional"
+              : "preferencias adicionales"}
           </p>
-
         </div>
 
         <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4">
-
           <Link
             href="/wizard/consumption"
             className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
@@ -179,9 +250,7 @@ export default function PreferencesPage() {
           >
             Continuar
           </Link>
-
         </div>
-
       </div>
     </main>
   );

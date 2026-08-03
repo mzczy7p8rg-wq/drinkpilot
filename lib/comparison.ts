@@ -35,6 +35,7 @@ export type ComparisonInput = {
   premiumCocktails?: boolean;
   bottledBeer?: boolean;
   premiumSpirits?: boolean;
+  bottledWaterDailyAllowance?: boolean;
   bottledWaterUnlimited?: boolean;
 
   myDrinksCustomPrice?: number | null;
@@ -170,6 +171,7 @@ const nonQuantifiedCategories:
     "premiumCocktails",
     "bottledBeer",
     "premiumSpirits",
+    "bottledWaterDailyAllowance",
     "bottledWaterUnlimited",
   ];
 
@@ -269,6 +271,9 @@ export function compareDrinkPackages(
 
       premiumSpirits:
         input.premiumSpirits ?? false,
+
+      bottledWaterDailyAllowance:
+        input.bottledWaterDailyAllowance ?? false,
 
       bottledWaterUnlimited:
         input.bottledWaterUnlimited ?? false,
