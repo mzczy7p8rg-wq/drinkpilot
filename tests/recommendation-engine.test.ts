@@ -318,4 +318,231 @@ describe("DrinkPilot recommendation engine", () => {
       ).toBe(100);
     });
   });
+});describe("edge cases", () => {
+  it("mantiene coherencia entre savings, dailyMargin y recommended", () => {
+    const result = compareDrinkPackages({
+      days: 1,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+    });
+
+    for (const pkg of result.packages) {
+      expect(
+        Math.sign(pkg.savings)
+      ).toBe(
+        Math.sign(pkg.dailyMargin)
+      );
+
+      expect(pkg.recommended).toBe(
+        pkg.savings > 0
+      );
+    }
+  });
+
+  it("un céntimo por debajo del coste diario produce ahorro positivo", () => {
+    const result = compareDrinkPackages({
+      days: 1,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      myDrinksCustomPrice: 9.49,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(myDrinks?.dailyDrinkCost).toBe(9.5);
+    expect(myDrinks?.dailyMargin).toBeCloseTo(0.01);
+    expect(myDrinks?.savings).toBeCloseTo(0.01);
+    expect(myDrinks?.recommended).toBe(true);
+  });
+
+  it("un céntimo por encima del coste diario no recomienda el paquete", () => {
+    const result = compareDrinkPackages({
+      days: 1,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      myDrinksCustomPrice: 9.51,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(myDrinks?.dailyDrinkCost).toBe(9.5);
+    expect(myDrinks?.dailyMargin).toBeCloseTo(-0.01);
+    expect(myDrinks?.savings).toBeCloseTo(-0.01);
+    expect(myDrinks?.recommended).toBe(false);
+  });
+
+  it("todas las preferencias premium fuerzan cobertura completa solo en My Drinks Plus", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+
+      premiumCocktails: true,
+      bottledBeer: true,
+      premiumSpirits: true,
+      bottledWaterUnlimited: true,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    const myDrinksPlus =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinksPlus"
+      );
+
+    expect(myDrinks?.fullyCovered).toBe(false);
+
+    expect(
+      myDrinks?.coverageScore
+    ).toBeLessThan(100);
+
+    expect(
+      myDrinksPlus?.fullyCovered
+    ).toBe(true);
+
+    expect(
+      myDrinksPlus?.coverageScore
+    ).toBe(100);
+  });
+
+  it("muchos viajeros no alteran el margen diario ni el punto de equilibrio", () => {
+    const onePerson = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+    });
+
+    const manyPeople = compareDrinkPackages({
+      days: 7,
+      people: 100,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+    });
+
+    const onePersonBest =
+      onePerson.bestPackage;
+
+    const manyPeopleBest =
+      manyPeople.bestPackage;
+
+    expect(
+      manyPeopleBest?.packageKey
+    ).toBe(
+      onePersonBest?.packageKey
+    );
+
+    expect(
+      manyPeopleBest?.dailyMargin
+    ).toBe(
+      onePersonBest?.dailyMargin
+    );
+
+    expect(
+      manyPeopleBest?.breakEvenDrinksPerDay
+    ).toBe(
+      onePersonBest?.breakEvenDrinksPerDay
+    );
+
+    expect(
+      manyPeopleBest?.savings
+    ).toBe(
+      (onePersonBest?.savings ?? 0) *
+        100
+    );
+  });
+
+  it("ignora precios personalizados inválidos y usa la referencia", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+
+      myDrinksCustomPrice: -10,
+      myDrinksPlusCustomPrice: 0,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    const myDrinksPlus =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinksPlus"
+      );
+
+    expect(
+      myDrinks?.packagePricePerDay
+    ).toBe(34);
+
+    expect(
+      myDrinks?.priceSource
+    ).toBe("reference");
+
+    expect(
+      myDrinksPlus?.packagePricePerDay
+    ).toBe(46);
+
+    expect(
+      myDrinksPlus?.priceSource
+    ).toBe("reference");
+  });
 });
