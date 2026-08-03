@@ -43,6 +43,9 @@ const coverageLabels: Record<CoverageCategory, string> = {
   premiumSpirits:
     "destilados premium",
 
+  bottledWaterDailyAllowance:
+    "una botella de agua diaria",
+
   bottledWaterUnlimited:
     "agua embotellada sin límite",
 };

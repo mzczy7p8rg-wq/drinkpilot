@@ -20,17 +20,33 @@ export type CoverageInput = {
   cocktail: number;
 
   /*
-   * Nuevas categorías de Coverage v2.
+   * Coverage v2 — cócteles.
    *
-   * Son opcionales para mantener compatibilidad
-   * con todo el flujo actual.
+   * Opcionales para mantener compatibilidad
+   * con el flujo actual.
    */
   alcoholicCocktails?: boolean;
   nonAlcoholicCocktails?: boolean;
 
   premiumCocktails: boolean;
+
   bottledBeer: boolean;
+
   premiumSpirits: boolean;
+
+  /*
+   * Agua embotellada v2.
+   *
+   * bottledWaterDailyAllowance:
+   * el usuario valora disponer al menos de
+   * una botella de agua diaria incluida.
+   *
+   * bottledWaterUnlimited:
+   * el usuario valora disponer de agua
+   * embotellada sin límite.
+   */
+  bottledWaterDailyAllowance?: boolean;
+
   bottledWaterUnlimited: boolean;
 };
 
@@ -42,12 +58,12 @@ export type CoverageCategory =
   | "wine"
 
   /*
-   * Legacy.
+   * Categoría legacy.
    */
   | "cocktail"
 
   /*
-   * Coverage v2.
+   * Coverage v2 — cócteles.
    */
   | "alcoholicCocktails"
   | "nonAlcoholicCocktails"
@@ -55,6 +71,12 @@ export type CoverageCategory =
   | "premiumCocktails"
   | "bottledBeer"
   | "premiumSpirits"
+
+  /*
+   * Agua embotellada v2.
+   */
+  | "bottledWaterDailyAllowance"
+
   | "bottledWaterUnlimited";
 
 export type PackageCoverageResult = {
@@ -77,8 +99,95 @@ export type PackageCoverageResult = {
 };
 
 export type CoverageOptions = {
+  /*
+   * Por defecto solo analizamos paquetes
+   * completamente habilitados.
+   *
+   * Este modo permite inspeccionar paquetes
+   * pendientes, como My Drinks Soft,
+   * sin activarlos en comparison.ts.
+   */
   includePendingPackages?: boolean;
 };
+
+/*
+ * Comprueba una categoría de cobertura.
+ *
+ * La mayoría de categorías viven directamente
+ * dentro de pkg.coverage.
+ *
+ * La excepción actual es:
+ *
+ * bottledWaterDailyAllowance
+ *
+ * porque la cobertura de agua embotellada
+ * tiene más detalle que un simple booleano.
+ */
+function isCategoryCovered(
+  pkg: ReturnType<
+    typeof getAllPackages
+  >[number],
+  category: CoverageCategory
+): boolean {
+  /*
+   * AGUA EMBOTELLADA DIARIA
+   *
+   * My Drinks:
+   * observedCoverage.bottledWaterDailyAllowance = 1
+   *
+   * My Drinks Plus:
+   * bottledWaterUnlimited = true
+   *
+   * Cualquiera de esas dos condiciones
+   * cubre la petición de disponer al menos
+   * de una botella diaria.
+   */
+  if (
+    category ===
+    "bottledWaterDailyAllowance"
+  ) {
+    const observedCoverage =
+      pkg.observedCoverage;
+
+    if (
+      observedCoverage &&
+      "bottledWaterDailyAllowance" in
+        observedCoverage
+    ) {
+      const allowance =
+        observedCoverage
+          .bottledWaterDailyAllowance;
+
+      if (
+        typeof allowance === "number" &&
+        allowance >= 1
+      ) {
+        return true;
+      }
+    }
+
+    /*
+     * Un paquete con agua ilimitada también
+     * satisface naturalmente una necesidad
+     * de una botella diaria.
+     */
+    if (
+      pkg.coverage
+        .bottledWaterUnlimited === true
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /*
+   * RESTO DE CATEGORÍAS
+   */
+  return (
+    pkg.coverage[category] === true
+  );
+}
 
 export function calculatePackageCoverage(
   input: CoverageInput,
@@ -88,11 +197,20 @@ export function calculatePackageCoverage(
     getAllPackages().filter(
       (pkg) =>
         pkg.status === "verified" ||
-        options.includePendingPackages === true
+        options.includePendingPackages ===
+          true
     );
 
+  /*
+   * Categorías realmente solicitadas
+   * por el usuario.
+   */
   const requestedCategories:
     CoverageCategory[] = [];
+
+  /*
+   * CONSUMO BÁSICO
+   */
 
   if (input.coffee > 0) {
     requestedCategories.push(
@@ -125,10 +243,10 @@ export function calculatePackageCoverage(
   }
 
   /*
-   * Flujo actual.
+   * CÓCTEL LEGACY
    *
-   * No cambiamos todavía el significado
-   * de los datos existentes.
+   * Conservamos exactamente el comportamiento
+   * actual del wizard.
    */
   if (input.cocktail > 0) {
     requestedCategories.push(
@@ -137,11 +255,9 @@ export function calculatePackageCoverage(
   }
 
   /*
-   * Nuevas categorías.
-   *
-   * Solo participan si algún consumidor
-   * futuro del motor las envía explícitamente.
+   * COVERAGE V2 — CÓCTELES
    */
+
   if (input.alcoholicCocktails) {
     requestedCategories.push(
       "alcoholicCocktails"
@@ -160,6 +276,10 @@ export function calculatePackageCoverage(
     );
   }
 
+  /*
+   * CERVEZA / DESTILADOS PREMIUM
+   */
+
   if (input.bottledBeer) {
     requestedCategories.push(
       "bottledBeer"
@@ -172,6 +292,18 @@ export function calculatePackageCoverage(
     );
   }
 
+  /*
+   * AGUA EMBOTELLADA V2
+   */
+
+  if (
+    input.bottledWaterDailyAllowance
+  ) {
+    requestedCategories.push(
+      "bottledWaterDailyAllowance"
+    );
+  }
+
   if (
     input.bottledWaterUnlimited
   ) {
@@ -180,51 +312,55 @@ export function calculatePackageCoverage(
     );
   }
 
-  return packages.map(
-    (pkg) => {
-      const coveredCategories =
-        requestedCategories.filter(
-          (category) =>
-            pkg.coverage[
-              category
-            ] === true
-        );
+  /*
+   * COBERTURA POR PAQUETE
+   */
 
-      const uncoveredCategories =
-        requestedCategories.filter(
-          (category) =>
-            pkg.coverage[
-              category
-            ] !== true
-        );
+  return packages.map((pkg) => {
+    const coveredCategories =
+      requestedCategories.filter(
+        (category) =>
+          isCategoryCovered(
+            pkg,
+            category
+          )
+      );
 
-      const coverageScore =
-        requestedCategories.length > 0
-          ? (
-              coveredCategories.length /
-              requestedCategories.length
-            ) * 100
-          : 0;
+    const uncoveredCategories =
+      requestedCategories.filter(
+        (category) =>
+          !isCategoryCovered(
+            pkg,
+            category
+          )
+      );
 
-      return {
-        packageKey:
-          pkg.key as PackageKey,
+    const coverageScore =
+      requestedCategories.length > 0
+        ? (
+            coveredCategories.length /
+            requestedCategories.length
+          ) * 100
+        : 0;
 
-        packageName:
-          pkg.name,
+    return {
+      packageKey:
+        pkg.key as PackageKey,
 
-        requestedCategories,
+      packageName:
+        pkg.name,
 
-        coveredCategories,
+      requestedCategories,
 
-        uncoveredCategories,
+      coveredCategories,
 
-        coverageScore,
+      uncoveredCategories,
 
-        fullyCovered:
-          uncoveredCategories.length ===
-          0,
-      };
-    }
-  );
+      coverageScore,
+
+      fullyCovered:
+        uncoveredCategories.length ===
+        0,
+    };
+  });
 }
