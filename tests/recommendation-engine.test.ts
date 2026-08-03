@@ -1321,4 +1321,70 @@ describe("DrinkPilot recommendation engine", () => {
       "myDrinksSoft"
     );
   });
+});describe("Package economic safety", () => {
+  it("solo devuelve paquetes con precio económico válido", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 1,
+        wine: 1,
+        cocktail: 1,
+      });
+
+    for (
+      const pkg of
+      result.packages
+    ) {
+      expect(
+        Number.isFinite(
+          pkg.packagePricePerDay
+        )
+      ).toBe(true);
+
+      expect(
+        pkg.packagePricePerDay
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it("My Drinks Soft permanece fuera mientras su precio siga pendiente", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 4,
+        water: 4,
+        soda: 4,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        nonAlcoholicCocktails:
+          true,
+      });
+
+    const soft =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(
+      soft
+    ).toBeUndefined();
+
+    expect(
+      result.bestPackage
+        ?.packageKey
+    ).not.toBe(
+      "myDrinksSoft"
+    );
+  });
 });

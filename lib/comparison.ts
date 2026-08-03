@@ -36,6 +36,7 @@ export type ComparisonInput = {
   premiumCocktails?: boolean;
   bottledBeer?: boolean;
   premiumSpirits?: boolean;
+
   bottledWaterDailyAllowance?: boolean;
   bottledWaterUnlimited?: boolean;
 
@@ -61,15 +62,19 @@ export type PackageComparisonResult = {
   savings: number;
 
   /*
-   * Ahorro que podemos considerar realmente
-   * comparable teniendo en cuenta la cobertura.
+   * Ahorro que podemos considerar
+   * realmente comparable teniendo
+   * en cuenta la cobertura.
    *
-   * null = no podemos calcularlo con precisión.
+   * null = no podemos calcularlo
+   * con precisión.
    */
-  effectiveSavings: number | null;
+  effectiveSavings:
+    number | null;
 
   /*
-   * Calidad de la comparación económica.
+   * Calidad de la comparación
+   * económica.
    */
   economicComparisonStatus:
     EconomicComparisonStatus;
@@ -95,21 +100,32 @@ export type PackageComparisonResult = {
 
   fullyCovered: boolean;
 
-  coveredCategories: CoverageCategory[];
+  coveredCategories:
+    CoverageCategory[];
 
-  uncoveredCategories: CoverageCategory[];
+  uncoveredCategories:
+    CoverageCategory[];
 };
 
 export type ComparisonResult = {
-  packages: PackageComparisonResult[];
+  packages:
+    PackageComparisonResult[];
 
-  bestPackage: PackageComparisonResult | null;
+  bestPackage:
+    PackageComparisonResult | null;
 
   anyPackageWorthIt: boolean;
 };
 
+/*
+ * Determina si un precio personalizado
+ * puede utilizarse de forma segura.
+ */
 function isValidCustomPrice(
-  value: number | null | undefined
+  value:
+    | number
+    | null
+    | undefined
 ): value is number {
   return (
     typeof value === "number" &&
@@ -118,6 +134,59 @@ function isValidCustomPrice(
   );
 }
 
+/*
+ * SEGURIDAD ECONÓMICA DEL PAQUETE
+ *
+ * Un paquete solo puede entrar en
+ * comparison.ts cuando:
+ *
+ * 1. está habilitado;
+ * 2. su precio no está pendiente;
+ * 3. dispone de un precio de referencia
+ *    finito y mayor que 0.
+ *
+ * Esta protección evita que un paquete
+ * como My Drinks Soft pueda entrar
+ * accidentalmente con precio 0 €.
+ */
+function isPackageEligibleForEconomicComparison(
+  pkg: ReturnType<
+    typeof getAllPackages
+  >[number]
+): boolean {
+  /*
+   * Comprobamos primero el estado del precio
+   * antes de estrechar el tipo mediante status.
+   *
+   * Esto además mantiene la protección frente
+   * a futuros paquetes que pudieran quedar
+   * habilitados accidentalmente con precio
+   * todavía pendiente.
+   */
+  if (
+    pkg.priceStatus === "pending"
+  ) {
+    return false;
+  }
+
+  if (
+    pkg.status !== "verified"
+  ) {
+    return false;
+  }
+
+  return (
+    Number.isFinite(
+      pkg.pricePerDay
+    ) &&
+    pkg.pricePerDay > 0
+  );
+}
+
+/*
+ * Devuelve el precio que debe usar
+ * cada paquete.
+ */
 function resolvePackagePrice(
   packageKey: PackageKey,
   referencePrice: number,
@@ -127,7 +196,8 @@ function resolvePackagePrice(
   source: PriceSource;
 } {
   if (
-    packageKey === "myDrinks" &&
+    packageKey ===
+      "myDrinks" &&
     isValidCustomPrice(
       input.myDrinksCustomPrice
     )
@@ -140,7 +210,8 @@ function resolvePackagePrice(
   }
 
   if (
-    packageKey === "myDrinksPlus" &&
+    packageKey ===
+      "myDrinksPlus" &&
     isValidCustomPrice(
       input.myDrinksPlusCustomPrice
     )
@@ -159,13 +230,12 @@ function resolvePackagePrice(
 }
 
 /*
- * Categorías premium que actualmente
- * no tienen una cantidad diaria ni un
- * precio unitario asociado.
+ * Categorías sin cantidad diaria
+ * ni precio unitario específico.
  *
- * Si alguna de ellas queda fuera,
- * no podemos calcular el coste real
- * adicional de forma fiable.
+ * Si alguna queda fuera,
+ * no podemos conocer con precisión
+ * el coste adicional.
  */
 const nonQuantifiedCategories:
   CoverageCategory[] = [
@@ -181,246 +251,335 @@ function resolveEconomicComparison(
   coverage:
     | {
         fullyCovered: boolean;
+
         uncoveredCategories:
           CoverageCategory[];
       }
     | undefined,
+
   savings: number
 ): {
-  status: EconomicComparisonStatus;
-  effectiveSavings: number | null;
+  status:
+    EconomicComparisonStatus;
+
+  effectiveSavings:
+    number | null;
 } {
   /*
-   * Sin datos de cobertura no consideramos
-   * la comparación suficientemente fiable.
+   * Sin cobertura disponible,
+   * la comparación no puede
+   * considerarse completa.
    */
   if (!coverage) {
     return {
-      status: "partial-unknown",
-      effectiveSavings: null,
+      status:
+        "partial-unknown",
+
+      effectiveSavings:
+        null,
     };
   }
 
   /*
    * Cobertura completa:
-   * el ahorro bruto coincide con el ahorro
-   * económico realmente comparable.
+   *
+   * el ahorro bruto coincide con
+   * el ahorro económico comparable.
    */
-  if (coverage.fullyCovered) {
+  if (
+    coverage.fullyCovered
+  ) {
     return {
-      status: "complete",
-      effectiveSavings: savings,
+      status:
+        "complete",
+
+      effectiveSavings:
+        savings,
     };
   }
 
   /*
-   * Si falta alguna preferencia premium
-   * no cuantificada, desconocemos cuánto
-   * tendría que pagar el usuario aparte.
+   * Si falta una categoría cuyo
+   * coste no podemos cuantificar,
+   * el ahorro final es desconocido.
    */
   const hasUnknownUncoveredCategory =
-    coverage.uncoveredCategories.some(
-      (category) =>
-        nonQuantifiedCategories.includes(
-          category
-        )
-    );
+    coverage
+      .uncoveredCategories
+      .some(
+        (category) =>
+          nonQuantifiedCategories
+            .includes(category)
+      );
 
-  if (hasUnknownUncoveredCategory) {
+  if (
+    hasUnknownUncoveredCategory
+  ) {
     return {
-      status: "partial-unknown",
-      effectiveSavings: null,
+      status:
+        "partial-unknown",
+
+      effectiveSavings:
+        null,
     };
   }
 
   /*
-   * Preparado para un futuro escenario
-   * donde existan categorías cuantificadas
+   * Reservado para futuras
+   * categorías cuantificables
    * no cubiertas.
-   *
-   * Por ahora no tenemos paquetes verificados
-   * que entren aquí, así que mantenemos
-   * effectiveSavings en null hasta calcular
-   * explícitamente su coste adicional.
    */
   return {
-    status: "partial-calculable",
-    effectiveSavings: null,
+    status:
+      "partial-calculable",
+
+    effectiveSavings:
+      null,
   };
 }
 
 export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
-  const packages = getAllPackages().filter(
-    (pkg) => pkg.status === "verified"
-  );
+  /*
+   * Solo participan paquetes
+   * económicamente seguros.
+   */
+  const packages =
+    getAllPackages().filter(
+      isPackageEligibleForEconomicComparison
+    );
 
+  /*
+   * La cobertura continúa trabajando
+   * únicamente con paquetes habilitados.
+   *
+   * My Drinks Soft puede analizarse
+   * separadamente mediante el modo
+   * preview de coverage.ts.
+   */
   const coverageResults =
     calculatePackageCoverage({
-      coffee: input.coffee,
-      water: input.water,
-      soda: input.soda,
-      beer: input.beer,
-      wine: input.wine,
-      cocktail: input.cocktail,
+      coffee:
+        input.coffee,
+
+      water:
+        input.water,
+
+      soda:
+        input.soda,
+
+      beer:
+        input.beer,
+
+      wine:
+        input.wine,
+
+      cocktail:
+        input.cocktail,
 
       nonAlcoholicCocktails:
-        input.nonAlcoholicCocktails ?? false,
+        input.nonAlcoholicCocktails ??
+        false,
 
       premiumCocktails:
-        input.premiumCocktails ?? false,
+        input.premiumCocktails ??
+        false,
 
       bottledBeer:
-        input.bottledBeer ?? false,
+        input.bottledBeer ??
+        false,
 
       premiumSpirits:
-        input.premiumSpirits ?? false,
+        input.premiumSpirits ??
+        false,
 
       bottledWaterDailyAllowance:
-        input.bottledWaterDailyAllowance ?? false,
+        input.bottledWaterDailyAllowance ??
+        false,
 
       bottledWaterUnlimited:
-        input.bottledWaterUnlimited ?? false,
+        input.bottledWaterUnlimited ??
+        false,
     });
 
-  const results: PackageComparisonResult[] =
-    packages.map((pkg) => {
-      const packageKey =
-        pkg.key as PackageKey;
+  const results:
+    PackageComparisonResult[] =
+      packages.map((pkg) => {
+        const packageKey =
+          pkg.key as PackageKey;
 
-      const resolvedPrice =
-        resolvePackagePrice(
+        const resolvedPrice =
+          resolvePackagePrice(
+            packageKey,
+            pkg.pricePerDay,
+            input
+          );
+
+        /*
+         * Segunda protección.
+         *
+         * resolvePackagePrice nunca
+         * debería producir un valor
+         * inválido porque los precios
+         * personalizados ya se validan.
+         *
+         * Aun así mantenemos aquí
+         * la lógica simple y segura.
+         */
+        const calculation =
+          calculateRecommendation({
+            days:
+              input.days,
+
+            people:
+              input.people,
+
+            packagePricePerDay:
+              resolvedPrice.price,
+
+            coffee:
+              input.coffee,
+
+            water:
+              input.water,
+
+            soda:
+              input.soda,
+
+            beer:
+              input.beer,
+
+            wine:
+              input.wine,
+
+            cocktail:
+              input.cocktail,
+
+            coffeePrice:
+              costaOnboardPriceValues
+                .coffee,
+
+            waterPrice:
+              costaOnboardPriceValues
+                .water,
+
+            sodaPrice:
+              costaOnboardPriceValues
+                .soda,
+
+            beerPrice:
+              costaOnboardPriceValues
+                .beer,
+
+            winePrice:
+              costaOnboardPriceValues
+                .wine,
+
+            cocktailPrice:
+              costaOnboardPriceValues
+                .cocktail,
+          });
+
+        const coverage =
+          coverageResults.find(
+            (result) =>
+              result.packageKey ===
+              packageKey
+          );
+
+        const economicComparison =
+          resolveEconomicComparison(
+            coverage,
+            calculation.savings
+          );
+
+        return {
           packageKey,
-          pkg.pricePerDay,
-          input
-        );
 
-      const calculation =
-        calculateRecommendation({
-          days: input.days,
-          people: input.people,
+          packageName:
+            pkg.name,
 
           packagePricePerDay:
             resolvedPrice.price,
 
-          coffee: input.coffee,
-          water: input.water,
-          soda: input.soda,
-          beer: input.beer,
-          wine: input.wine,
-          cocktail: input.cocktail,
+          priceSource:
+            resolvedPrice.source,
 
-          coffeePrice:
-            costaOnboardPriceValues.coffee,
+          referencePricePerDay:
+            pkg.pricePerDay,
 
-          waterPrice:
-            costaOnboardPriceValues.water,
+          packageCost:
+            calculation.packageCost,
 
-          sodaPrice:
-            costaOnboardPriceValues.soda,
+          drinksCost:
+            calculation.drinksCost,
 
-          beerPrice:
-            costaOnboardPriceValues.beer,
+          savings:
+            calculation.savings,
 
-          winePrice:
-            costaOnboardPriceValues.wine,
+          effectiveSavings:
+            economicComparison
+              .effectiveSavings,
 
-          cocktailPrice:
-            costaOnboardPriceValues.cocktail,
-        });
+          economicComparisonStatus:
+            economicComparison.status,
 
-      const coverage =
-        coverageResults.find(
-          (result) =>
-            result.packageKey === packageKey
-        );
+          dailyDrinkCost:
+            calculation.dailyDrinkCost,
 
-      const economicComparison =
-        resolveEconomicComparison(
-          coverage,
-          calculation.savings
-        );
+          dailyMargin:
+            calculation.dailyMargin,
 
-      return {
-        packageKey,
+          savingsPercentage:
+            calculation
+              .savingsPercentage,
 
-        packageName:
-          pkg.name,
+          recommended:
+            calculation.recommended,
 
-        packagePricePerDay:
-          resolvedPrice.price,
+          recommendationLevel:
+            calculation
+              .recommendationLevel,
 
-        priceSource:
-          resolvedPrice.source,
+          breakEvenDrinksPerDay:
+            calculation
+              .breakEvenDrinksPerDay,
 
-        referencePricePerDay:
-          pkg.pricePerDay,
+          coverageScore:
+            coverage
+              ?.coverageScore ?? 0,
 
-        packageCost:
-          calculation.packageCost,
+          fullyCovered:
+            coverage
+              ?.fullyCovered ?? false,
 
-        drinksCost:
-          calculation.drinksCost,
+          coveredCategories:
+            coverage
+              ?.coveredCategories ??
+            [],
 
-        savings:
-          calculation.savings,
-
-        effectiveSavings:
-          economicComparison.effectiveSavings,
-
-        economicComparisonStatus:
-          economicComparison.status,
-
-        dailyDrinkCost:
-          calculation.dailyDrinkCost,
-
-        dailyMargin:
-          calculation.dailyMargin,
-
-        savingsPercentage:
-          calculation.savingsPercentage,
-
-        recommended:
-          calculation.recommended,
-
-        recommendationLevel:
-          calculation.recommendationLevel,
-
-        breakEvenDrinksPerDay:
-          calculation.breakEvenDrinksPerDay,
-
-        coverageScore:
-          coverage?.coverageScore ?? 0,
-
-        fullyCovered:
-          coverage?.fullyCovered ?? false,
-
-        coveredCategories:
-          coverage?.coveredCategories ?? [],
-
-        uncoveredCategories:
-          coverage?.uncoveredCategories ?? [],
-      };
-    });
+          uncoveredCategories:
+            coverage
+              ?.uncoveredCategories ??
+            [],
+        };
+      });
 
   /*
-   * Conservamos el orden económico actual.
-   *
-   * No cambiamos todavía la experiencia
-   * de resultados ni la elección final.
+   * Mayor ahorro primero.
    */
   results.sort(
     (a, b) =>
-      b.savings - a.savings
+      b.savings -
+      a.savings
   );
 
   /*
-   * La regla de recomendación permanece
-   * exactamente igual:
+   * Para ser recomendado:
    *
-   * 1. ahorro positivo
-   * 2. cobertura completa
+   * 1. ahorro positivo;
+   * 2. cobertura completa.
    */
   const bestPackage =
     results.find(
