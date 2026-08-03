@@ -1402,4 +1402,212 @@ describe("DrinkPilot recommendation engine", () => {
       "myDrinksSoft"
     );
   });
+});describe("My Drinks Soft manual price", () => {
+  it("sigue fuera de la comparación cuando no existe precio del usuario", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        nonAlcoholicCocktails:
+          true,
+
+        myDrinksSoftCustomPrice:
+          null,
+      });
+
+    expect(
+      result.packages.some(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      )
+    ).toBe(false);
+  });
+
+  it("entra en la comparación cuando el usuario introduce un precio válido", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        nonAlcoholicCocktails:
+          true,
+
+        myDrinksSoftCustomPrice:
+          20,
+      });
+
+    const soft =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(
+      soft
+    ).toBeDefined();
+
+    expect(
+      soft?.packagePricePerDay
+    ).toBe(20);
+
+    expect(
+      soft?.priceSource
+    ).toBe("user");
+
+    expect(
+      soft?.referencePricePerDay
+    ).toBeNull();
+  });
+
+  it("ignora precios inválidos de My Drinks Soft", () => {
+    const invalidPrices = [
+      0,
+      -1,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+    ];
+
+    for (
+      const price of
+      invalidPrices
+    ) {
+      const result =
+        compareDrinkPackages({
+          days: 7,
+          people: 1,
+
+          coffee: 2,
+          water: 2,
+          soda: 2,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+
+          nonAlcoholicCocktails:
+            true,
+
+          myDrinksSoftCustomPrice:
+            price,
+        });
+
+      expect(
+        result.packages.some(
+          (pkg) =>
+            pkg.packageKey ===
+            "myDrinksSoft"
+        )
+      ).toBe(false);
+    }
+  });
+
+  it("puede recomendar My Drinks Soft cuando cubre el perfil y genera ahorro", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 3,
+        water: 3,
+        soda: 3,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        nonAlcoholicCocktails:
+          true,
+
+        myDrinksSoftCustomPrice:
+          15,
+      });
+
+    const soft =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(
+      soft?.fullyCovered
+    ).toBe(true);
+
+    expect(
+      soft?.savings
+    ).toBeGreaterThan(0);
+
+    expect(
+      soft?.economicComparisonStatus
+    ).toBe("complete");
+
+    expect(
+      soft?.effectiveSavings
+    ).toBe(
+      soft?.savings
+    );
+
+    expect(
+      result.bestPackage?.packageKey
+    ).toBe(
+      "myDrinksSoft"
+    );
+  });
+
+  it("no recomienda My Drinks Soft cuando el perfil contiene alcohol", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 2,
+        wine: 1,
+        cocktail: 1,
+
+        nonAlcoholicCocktails:
+          true,
+
+        myDrinksSoftCustomPrice:
+          10,
+      });
+
+    const soft =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(
+      soft
+    ).toBeDefined();
+
+    expect(
+      soft?.fullyCovered
+    ).toBe(false);
+
+    expect(
+      result.bestPackage?.packageKey
+    ).not.toBe(
+      "myDrinksSoft"
+    );
+  });
 });

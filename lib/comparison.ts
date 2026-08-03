@@ -44,6 +44,17 @@ export type ComparisonInput = {
 
   bottledWaterUnlimited?: boolean;
 
+  /*
+   * Precio real de My Drinks Soft
+   * introducido por el usuario.
+   *
+   * Soft no dispone actualmente
+   * de un precio de referencia fiable.
+   */
+  myDrinksSoftCustomPrice?:
+    | number
+    | null;
+
   myDrinksCustomPrice?:
     | number
     | null;
@@ -58,16 +69,25 @@ export type PackageComparisonResult = {
 
   packageName: string;
 
+  /*
+   * Precio realmente utilizado
+   * en el cálculo.
+   */
   packagePricePerDay: number;
 
   priceSource: PriceSource;
 
   /*
-   * Todo paquete que llega al motor
-   * económico tiene obligatoriamente
-   * un precio numérico.
+   * Precio de referencia DrinkPilot.
+   *
+   * null = no existe actualmente
+   * una referencia suficientemente
+   * fiable para ese paquete.
+   *
+   * Este es el caso de My Drinks Soft.
    */
-  referencePricePerDay: number;
+  referencePricePerDay:
+    number | null;
 
   packageCost: number;
 
@@ -75,6 +95,12 @@ export type PackageComparisonResult = {
 
   savings: number;
 
+  /*
+   * Ahorro económicamente comparable.
+   *
+   * null = no puede calcularse con
+   * suficiente precisión.
+   */
   effectiveSavings:
     number | null;
 
@@ -129,28 +155,35 @@ type AllPackage =
   >[number];
 
 /*
- * Extraemos únicamente los paquetes
- * declarados explícitamente como
- * económicamente elegibles.
- *
- * Actualmente:
- * - My Drinks
- * - My Drinks Plus
- *
- * My Drinks Soft queda fuera.
+ * Paquete resuelto para poder
+ * participar en el cálculo económico.
  */
-type EconomicPackage =
-  Extract<
-    AllPackage,
-    {
-      economicEligibility:
-        "eligible";
-    }
-  >;
+type ResolvedEconomicPackage = {
+  pkg: AllPackage;
+
+  packageKey: PackageKey;
+
+  /*
+   * Soft no tiene referencia:
+   * null.
+   *
+   * My Drinks / Plus sí tienen
+   * referencia numérica.
+   */
+  referencePrice:
+    number | null;
+
+  resolvedPrice: {
+    price: number;
+
+    source: PriceSource;
+  };
+};
 
 /*
- * Valida un precio personalizado
- * introducido por el usuario.
+ * Comprueba que un precio
+ * introducido por el usuario
+ * puede utilizarse.
  */
 function isValidCustomPrice(
   value:
@@ -166,121 +199,206 @@ function isValidCustomPrice(
 }
 
 /*
- * SEGURIDAD ECONÓMICA
- *
- * Utilizamos variables ensanchadas
- * deliberadamente para evitar que
- * TypeScript convierta las comprobaciones
- * defensivas en comparaciones imposibles
- * debido a los literales `as const`.
+ * Obtiene el precio personalizado
+ * correspondiente a cada paquete.
  */
-function isPackageEligibleForEconomicComparison(
-  pkg: AllPackage
-): pkg is EconomicPackage {
-  const economicEligibility:
-    string =
-      pkg.economicEligibility;
+function getCustomPrice(
+  packageKey: PackageKey,
+  input: ComparisonInput
+):
+  | number
+  | null
+  | undefined {
+  if (
+    packageKey ===
+    "myDrinksSoft"
+  ) {
+    return (
+      input.myDrinksSoftCustomPrice
+    );
+  }
 
-  const priceStatus:
-    string =
-      pkg.priceStatus;
+  if (
+    packageKey ===
+    "myDrinks"
+  ) {
+    return (
+      input.myDrinksCustomPrice
+    );
+  }
 
-  const packageStatus:
-    string =
-      pkg.status;
+  if (
+    packageKey ===
+    "myDrinksPlus"
+  ) {
+    return (
+      input.myDrinksPlusCustomPrice
+    );
+  }
 
-  const pricePerDay:
-    number | null =
-      pkg.pricePerDay;
-
-  return (
-    economicEligibility ===
-      "eligible" &&
-
-    priceStatus !==
-      "pending" &&
-
-    packageStatus ===
-      "verified" &&
-
-    typeof pricePerDay ===
-      "number" &&
-
-    Number.isFinite(
-      pricePerDay
-    ) &&
-
-    pricePerDay > 0
-  );
+  return null;
 }
 
 /*
- * Selecciona precio real de reserva
- * cuando existe.
- *
- * Si no, utiliza el precio de
- * referencia del paquete.
+ * Decide si un paquete puede
+ * participar en la comparación
+ * económica y qué precio utilizar.
  */
-function resolvePackagePrice(
-  packageKey: PackageKey,
-
-  referencePrice: number,
-
+function resolveEconomicPackage(
+  pkg: AllPackage,
   input: ComparisonInput
-): {
-  price: number;
+):
+  | ResolvedEconomicPackage
+  | null {
+  const packageKey =
+    pkg.key as PackageKey;
 
-  source: PriceSource;
-} {
+  const customPrice =
+    getCustomPrice(
+      packageKey,
+      input
+    );
+
+  /*
+   * MY DRINKS SOFT
+   *
+   * Solo puede participar cuando
+   * el usuario introduce un precio
+   * real válido.
+   *
+   * Nunca utilizamos un precio
+   * de referencia inventado.
+   */
   if (
     packageKey ===
-      "myDrinks" &&
-
-    isValidCustomPrice(
-      input.myDrinksCustomPrice
-    )
+    "myDrinksSoft"
   ) {
-    return {
-      price:
-        input.myDrinksCustomPrice,
+    if (
+      pkg.existenceStatus !==
+      "verified"
+    ) {
+      return null;
+    }
 
-      source: "user",
+    if (
+      !isValidCustomPrice(
+        customPrice
+      )
+    ) {
+      return null;
+    }
+
+    return {
+      pkg,
+
+      packageKey,
+
+      referencePrice:
+        null,
+
+      resolvedPrice: {
+        price:
+          customPrice,
+
+        source:
+          "user",
+      },
     };
   }
 
+  /*
+   * MY DRINKS / MY DRINKS PLUS
+   *
+   * Mantienen la política
+   * económica normal.
+   */
   if (
-    packageKey ===
-      "myDrinksPlus" &&
+    pkg.economicEligibility !==
+    "eligible"
+  ) {
+    return null;
+  }
 
+  if (
+    pkg.status !==
+    "verified"
+  ) {
+    return null;
+  }
+
+  /*
+   * Deben disponer de precio
+   * de referencia numérico.
+   */
+  if (
+    typeof pkg.pricePerDay !==
+      "number" ||
+    !Number.isFinite(
+      pkg.pricePerDay
+    ) ||
+    pkg.pricePerDay <= 0
+  ) {
+    return null;
+  }
+
+  /*
+   * El precio real de la reserva
+   * tiene prioridad.
+   */
+  if (
     isValidCustomPrice(
-      input.myDrinksPlusCustomPrice
+      customPrice
     )
   ) {
     return {
-      price:
-        input.myDrinksPlusCustomPrice,
+      pkg,
 
-      source: "user",
+      packageKey,
+
+      referencePrice:
+        pkg.pricePerDay,
+
+      resolvedPrice: {
+        price:
+          customPrice,
+
+        source:
+          "user",
+      },
     };
   }
 
+  /*
+   * Sin precio personalizado:
+   * utilizamos referencia.
+   */
   return {
-    price:
-      referencePrice,
+    pkg,
 
-    source:
-      "reference",
+    packageKey,
+
+    referencePrice:
+      pkg.pricePerDay,
+
+    resolvedPrice: {
+      price:
+        pkg.pricePerDay,
+
+      source:
+        "reference",
+    },
   };
 }
 
 /*
- * Categorías cuyo coste adicional
- * no podemos cuantificar todavía.
+ * Categorías cuya falta de cobertura
+ * impide calcular un ahorro económico
+ * efectivo con precisión.
  *
- * Si una queda fuera del paquete,
- * el ahorro mostrado es teórico
- * y no puede considerarse ahorro
- * económico final.
+ * Actualmente no disponemos de una
+ * cantidad diaria + precio unitario
+ * suficientemente definidos para
+ * calcular su coste adicional.
  */
 const nonQuantifiedCategories:
   CoverageCategory[] = [
@@ -297,6 +415,10 @@ const nonQuantifiedCategories:
     "bottledWaterUnlimited",
   ];
 
+/*
+ * Determina la calidad real
+ * de la comparación económica.
+ */
 function resolveEconomicComparison(
   coverage:
     | {
@@ -316,8 +438,9 @@ function resolveEconomicComparison(
     number | null;
 } {
   /*
-   * Sin cobertura no existe una
-   * comparación económica fiable.
+   * Sin cobertura disponible
+   * no podemos confiar en
+   * el ahorro económico.
    */
   if (!coverage) {
     return {
@@ -330,7 +453,10 @@ function resolveEconomicComparison(
   }
 
   /*
-   * Cobertura completa.
+   * Cobertura completa:
+   *
+   * el ahorro bruto puede
+   * considerarse ahorro efectivo.
    */
   if (
     coverage.fullyCovered
@@ -345,8 +471,10 @@ function resolveEconomicComparison(
   }
 
   /*
-   * Detectamos categorías cuyo
-   * coste adicional desconocemos.
+   * Si falta una categoría cuyo
+   * coste adicional desconocemos,
+   * no podemos dar un ahorro
+   * efectivo.
    */
   const hasUnknownUncoveredCategory =
     coverage
@@ -371,7 +499,8 @@ function resolveEconomicComparison(
 
   /*
    * Preparado para futuras
-   * categorías cuantificables.
+   * categorías no cubiertas
+   * pero cuantificables.
    */
   return {
     status:
@@ -386,233 +515,250 @@ export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
   /*
-   * SOLO PAQUETES ECONÓMICAMENTE
-   * HABILITADOS.
+   * Resolvemos primero qué paquetes
+   * pueden participar realmente.
    *
-   * El type guard garantiza además
-   * que pricePerDay es number.
+   * Soft solo aparecerá aquí cuando
+   * haya precio válido del usuario.
    */
-  const packages =
-    getAllPackages().filter(
-      isPackageEligibleForEconomicComparison
+  const economicPackages =
+    getAllPackages()
+      .map((pkg) =>
+        resolveEconomicPackage(
+          pkg,
+          input
+        )
+      )
+      .filter(
+        (
+          result
+        ): result is ResolvedEconomicPackage =>
+          result !== null
+      );
+
+  /*
+   * Si Soft entra económicamente,
+   * necesitamos que coverage.ts
+   * permita analizar también ese
+   * paquete pendiente.
+   */
+  const softIsActive =
+    economicPackages.some(
+      (result) =>
+        result.packageKey ===
+        "myDrinksSoft"
     );
 
   /*
    * COBERTURA
    */
   const coverageResults =
-    calculatePackageCoverage({
-      coffee:
-        input.coffee,
+    calculatePackageCoverage(
+      {
+        coffee:
+          input.coffee,
 
-      water:
-        input.water,
+        water:
+          input.water,
 
-      soda:
-        input.soda,
+        soda:
+          input.soda,
 
-      beer:
-        input.beer,
+        beer:
+          input.beer,
 
-      wine:
-        input.wine,
+        wine:
+          input.wine,
 
-      cocktail:
-        input.cocktail,
+        cocktail:
+          input.cocktail,
 
-      nonAlcoholicCocktails:
-        input.nonAlcoholicCocktails ??
-        false,
+        nonAlcoholicCocktails:
+          input.nonAlcoholicCocktails ??
+          false,
 
-      premiumCocktails:
-        input.premiumCocktails ??
-        false,
+        premiumCocktails:
+          input.premiumCocktails ??
+          false,
 
-      bottledBeer:
-        input.bottledBeer ??
-        false,
+        bottledBeer:
+          input.bottledBeer ??
+          false,
 
-      premiumSpirits:
-        input.premiumSpirits ??
-        false,
+        premiumSpirits:
+          input.premiumSpirits ??
+          false,
 
-      bottledWaterDailyAllowance:
-        input.bottledWaterDailyAllowance ??
-        false,
+        bottledWaterDailyAllowance:
+          input.bottledWaterDailyAllowance ??
+          false,
 
-      bottledWaterUnlimited:
-        input.bottledWaterUnlimited ??
-        false,
-    });
+        bottledWaterUnlimited:
+          input.bottledWaterUnlimited ??
+          false,
+      },
+      {
+        includePendingPackages:
+          softIsActive,
+      }
+    );
 
   /*
-   * RESULTADOS ECONÓMICOS
+   * RESULTADOS
    */
   const results:
     PackageComparisonResult[] =
-      packages.map((pkg) => {
-        const packageKey =
-          pkg.key as PackageKey;
+      economicPackages.map(
+        ({
+          pkg,
+          packageKey,
+          referencePrice,
+          resolvedPrice,
+        }) => {
+          const calculation =
+            calculateRecommendation({
+              days:
+                input.days,
 
-        /*
-         * Gracias al type guard,
-         * este valor es siempre number.
-         */
-        const referencePrice =
-          pkg.pricePerDay;
+              people:
+                input.people,
 
-        const resolvedPrice =
-          resolvePackagePrice(
+              packagePricePerDay:
+                resolvedPrice.price,
+
+              coffee:
+                input.coffee,
+
+              water:
+                input.water,
+
+              soda:
+                input.soda,
+
+              beer:
+                input.beer,
+
+              wine:
+                input.wine,
+
+              cocktail:
+                input.cocktail,
+
+              coffeePrice:
+                costaOnboardPriceValues
+                  .coffee,
+
+              waterPrice:
+                costaOnboardPriceValues
+                  .water,
+
+              sodaPrice:
+                costaOnboardPriceValues
+                  .soda,
+
+              beerPrice:
+                costaOnboardPriceValues
+                  .beer,
+
+              winePrice:
+                costaOnboardPriceValues
+                  .wine,
+
+              cocktailPrice:
+                costaOnboardPriceValues
+                  .cocktail,
+            });
+
+          const coverage =
+            coverageResults.find(
+              (result) =>
+                result.packageKey ===
+                packageKey
+            );
+
+          const economicComparison =
+            resolveEconomicComparison(
+              coverage,
+              calculation.savings
+            );
+
+          return {
             packageKey,
 
-            referencePrice,
-
-            input
-          );
-
-        const calculation =
-          calculateRecommendation({
-            days:
-              input.days,
-
-            people:
-              input.people,
+            packageName:
+              pkg.name,
 
             packagePricePerDay:
               resolvedPrice.price,
 
-            coffee:
-              input.coffee,
+            priceSource:
+              resolvedPrice.source,
 
-            water:
-              input.water,
+            referencePricePerDay:
+              referencePrice,
 
-            soda:
-              input.soda,
+            packageCost:
+              calculation.packageCost,
 
-            beer:
-              input.beer,
+            drinksCost:
+              calculation.drinksCost,
 
-            wine:
-              input.wine,
+            savings:
+              calculation.savings,
 
-            cocktail:
-              input.cocktail,
+            effectiveSavings:
+              economicComparison
+                .effectiveSavings,
 
-            coffeePrice:
-              costaOnboardPriceValues
-                .coffee,
+            economicComparisonStatus:
+              economicComparison
+                .status,
 
-            waterPrice:
-              costaOnboardPriceValues
-                .water,
+            dailyDrinkCost:
+              calculation.dailyDrinkCost,
 
-            sodaPrice:
-              costaOnboardPriceValues
-                .soda,
+            dailyMargin:
+              calculation.dailyMargin,
 
-            beerPrice:
-              costaOnboardPriceValues
-                .beer,
+            savingsPercentage:
+              calculation
+                .savingsPercentage,
 
-            winePrice:
-              costaOnboardPriceValues
-                .wine,
+            recommended:
+              calculation.recommended,
 
-            cocktailPrice:
-              costaOnboardPriceValues
-                .cocktail,
-          });
+            recommendationLevel:
+              calculation
+                .recommendationLevel,
 
-        const coverage =
-          coverageResults.find(
-            (result) =>
-              result.packageKey ===
-              packageKey
-          );
+            breakEvenDrinksPerDay:
+              calculation
+                .breakEvenDrinksPerDay,
 
-        const economicComparison =
-          resolveEconomicComparison(
-            coverage,
+            coverageScore:
+              coverage
+                ?.coverageScore ?? 0,
 
-            calculation.savings
-          );
+            fullyCovered:
+              coverage
+                ?.fullyCovered ?? false,
 
-        return {
-          packageKey,
+            coveredCategories:
+              coverage
+                ?.coveredCategories ??
+              [],
 
-          packageName:
-            pkg.name,
-
-          packagePricePerDay:
-            resolvedPrice.price,
-
-          priceSource:
-            resolvedPrice.source,
-
-          referencePricePerDay:
-            referencePrice,
-
-          packageCost:
-            calculation.packageCost,
-
-          drinksCost:
-            calculation.drinksCost,
-
-          savings:
-            calculation.savings,
-
-          effectiveSavings:
-            economicComparison
-              .effectiveSavings,
-
-          economicComparisonStatus:
-            economicComparison
-              .status,
-
-          dailyDrinkCost:
-            calculation.dailyDrinkCost,
-
-          dailyMargin:
-            calculation.dailyMargin,
-
-          savingsPercentage:
-            calculation
-              .savingsPercentage,
-
-          recommended:
-            calculation.recommended,
-
-          recommendationLevel:
-            calculation
-              .recommendationLevel,
-
-          breakEvenDrinksPerDay:
-            calculation
-              .breakEvenDrinksPerDay,
-
-          coverageScore:
-            coverage
-              ?.coverageScore ?? 0,
-
-          fullyCovered:
-            coverage
-              ?.fullyCovered ?? false,
-
-          coveredCategories:
-            coverage
-              ?.coveredCategories ??
-            [],
-
-          uncoveredCategories:
-            coverage
-              ?.uncoveredCategories ??
-            [],
-        };
-      });
+            uncoveredCategories:
+              coverage
+                ?.uncoveredCategories ??
+              [],
+          };
+        }
+      );
 
   /*
-   * Mayor ahorro primero.
+   * Orden económico:
+   * mayor ahorro primero.
    */
   results.sort(
     (a, b) =>
@@ -621,12 +767,19 @@ export function compareDrinkPackages(
   );
 
   /*
-   * RECOMENDACIÓN
+   * RECOMENDACIÓN FINAL
    *
    * Para ser recomendado:
    *
    * 1. ahorro positivo;
    * 2. cobertura completa.
+   *
+   * My Drinks Soft puede ganar
+   * únicamente cuando:
+   *
+   * - el usuario introduce precio;
+   * - cubre completamente el perfil;
+   * - produce ahorro positivo.
    */
   const bestPackage =
     results.find(

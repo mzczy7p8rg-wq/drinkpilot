@@ -75,6 +75,7 @@ export default function ResultsPage() {
   ].filter(Boolean).length;
 
   const customPricesUsed = [
+    data.myDrinksSoftCustomPrice,
     data.myDrinksCustomPrice,
     data.myDrinksPlusCustomPrice,
   ].filter(
@@ -226,6 +227,9 @@ export default function ResultsPage() {
 
     bottledWaterUnlimited:
       data.bottledWaterUnlimited,
+
+    myDrinksSoftCustomPrice:
+      data.myDrinksSoftCustomPrice,
 
     myDrinksCustomPrice:
       data.myDrinksCustomPrice,
@@ -578,14 +582,15 @@ export default function ResultsPage() {
                               ✓ Precio de tu reserva
                             </span>
 
-                            {pkg.packagePricePerDay !==
-                              pkg.referencePricePerDay && (
-                              <p className="mt-2 text-xs text-slate-500">
-                                Referencia DrinkPilot:{" "}
-                                {pkg.referencePricePerDay.toFixed(2)} €
-                                {" "}/ día
-                              </p>
-                            )}
+                            {pkg.referencePricePerDay !== null &&
+                              pkg.packagePricePerDay !==
+                                pkg.referencePricePerDay && (
+                                <p className="mt-2 text-xs text-slate-500">
+                                  Referencia DrinkPilot:{" "}
+                                  {pkg.referencePricePerDay.toFixed(2)} €
+                                  {" "}/ día
+                                </p>
+                              )}
 
                           </div>
                         ) : (

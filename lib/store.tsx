@@ -30,14 +30,6 @@ export type WizardData = {
 
   /*
    * Agua embotellada v2.
-   *
-   * dailyAllowance:
-   * el usuario valora disponer al menos
-   * de una botella diaria.
-   *
-   * unlimited:
-   * el usuario necesita agua embotellada
-   * sin límite.
    */
   bottledWaterDailyAllowance: boolean;
   bottledWaterUnlimited: boolean;
@@ -46,8 +38,19 @@ export type WizardData = {
    * Precios personalizados introducidos
    * por el usuario desde su reserva.
    *
-   * null = usar precio de referencia.
+   * null = no existe precio personalizado.
+   *
+   * My Drinks y My Drinks Plus pueden
+   * utilizar precio de referencia cuando
+   * el usuario no introduce uno.
+   *
+   * My Drinks Soft NO tiene actualmente
+   * precio de referencia fiable:
+   * solo podrá entrar en la comparación
+   * económica cuando el usuario introduzca
+   * un precio válido de su reserva.
    */
+  myDrinksSoftCustomPrice: number | null;
   myDrinksCustomPrice: number | null;
   myDrinksPlusCustomPrice: number | null;
 
@@ -89,6 +92,7 @@ const initialData: WizardData = {
   bottledWaterDailyAllowance: false,
   bottledWaterUnlimited: false,
 
+  myDrinksSoftCustomPrice: null,
   myDrinksCustomPrice: null,
   myDrinksPlusCustomPrice: null,
 
@@ -209,6 +213,13 @@ export function StoreProvider({
               ? parsedData.bottledWaterUnlimited
               : initialData.bottledWaterUnlimited,
 
+          myDrinksSoftCustomPrice:
+            typeof parsedData.myDrinksSoftCustomPrice ===
+              "number" &&
+            parsedData.myDrinksSoftCustomPrice > 0
+              ? parsedData.myDrinksSoftCustomPrice
+              : null,
+
           myDrinksCustomPrice:
             typeof parsedData.myDrinksCustomPrice ===
               "number" &&
@@ -219,8 +230,7 @@ export function StoreProvider({
           myDrinksPlusCustomPrice:
             typeof parsedData.myDrinksPlusCustomPrice ===
               "number" &&
-            parsedData.myDrinksPlusCustomPrice >
-              0
+            parsedData.myDrinksPlusCustomPrice > 0
               ? parsedData.myDrinksPlusCustomPrice
               : null,
 

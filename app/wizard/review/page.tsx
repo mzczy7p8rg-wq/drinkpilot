@@ -297,6 +297,42 @@ export default function ReviewPage() {
 
           <div className="mt-4 space-y-4">
 
+            {/* MY DRINKS SOFT */}
+
+            <div className="rounded-xl bg-slate-50 p-3 sm:p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-800">
+                    My Drinks Soft
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    por persona / día
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="font-bold text-slate-900">
+                    {data.myDrinksSoftCustomPrice !== null
+                      ? `${data.myDrinksSoftCustomPrice.toFixed(2)} €`
+                      : "Pendiente"}
+                  </p>
+
+                  <p
+                    className={`mt-1 text-xs font-medium ${
+                      data.myDrinksSoftCustomPrice !== null
+                        ? "text-sky-700"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {data.myDrinksSoftCustomPrice !== null
+                      ? "✓ Tu reserva"
+                      : "Sin precio de referencia"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* MY DRINKS */}
 
             <div className="rounded-xl bg-slate-50 p-3 sm:p-4">
