@@ -16,6 +16,11 @@ export type PriceSource =
   | "user"
   | "reference";
 
+export type EconomicComparisonStatus =
+  | "complete"
+  | "partial-calculable"
+  | "partial-unknown";
+
 export type ComparisonInput = {
   days: number;
   people: number;
@@ -32,12 +37,6 @@ export type ComparisonInput = {
   premiumSpirits?: boolean;
   bottledWaterUnlimited?: boolean;
 
-  /*
-   * Precios personalizados introducidos
-   * por el usuario desde su reserva.
-   *
-   * null o undefined = usar precio de referencia.
-   */
   myDrinksCustomPrice?: number | null;
   myDrinksPlusCustomPrice?: number | null;
 };
@@ -47,21 +46,10 @@ export type PackageComparisonResult = {
 
   packageName: string;
 
-  /*
-   * Precio realmente utilizado
-   * en el cálculo.
-   */
   packagePricePerDay: number;
 
-  /*
-   * Indica de dónde procede ese precio.
-   */
   priceSource: PriceSource;
 
-  /*
-   * Precio de referencia original
-   * definido por DrinkPilot.
-   */
   referencePricePerDay: number;
 
   packageCost: number;
@@ -69,6 +57,20 @@ export type PackageComparisonResult = {
   drinksCost: number;
 
   savings: number;
+
+  /*
+   * Ahorro que podemos considerar realmente
+   * comparable teniendo en cuenta la cobertura.
+   *
+   * null = no podemos calcularlo con precisión.
+   */
+  effectiveSavings: number | null;
+
+  /*
+   * Calidad de la comparación económica.
+   */
+  economicComparisonStatus:
+    EconomicComparisonStatus;
 
   dailyDrinkCost: number;
 
@@ -87,9 +89,6 @@ export type PackageComparisonResult = {
 
   breakEvenDrinksPerDay: number;
 
-  /*
-   * Cobertura
-   */
   coverageScore: number;
 
   fullyCovered: boolean;
@@ -107,10 +106,6 @@ export type ComparisonResult = {
   anyPackageWorthIt: boolean;
 };
 
-/*
- * Determina si un precio personalizado
- * puede utilizarse de forma segura.
- */
 function isValidCustomPrice(
   value: number | null | undefined
 ): value is number {
@@ -121,15 +116,6 @@ function isValidCustomPrice(
   );
 }
 
-/*
- * Devuelve el precio que debe usar cada paquete.
- *
- * Si existe un precio válido de la reserva:
- * → usa precio del usuario
- *
- * Si no:
- * → usa precio de referencia
- */
 function resolvePackagePrice(
   packageKey: PackageKey,
   referencePrice: number,
@@ -170,20 +156,102 @@ function resolvePackagePrice(
   };
 }
 
+/*
+ * Categorías premium que actualmente
+ * no tienen una cantidad diaria ni un
+ * precio unitario asociado.
+ *
+ * Si alguna de ellas queda fuera,
+ * no podemos calcular el coste real
+ * adicional de forma fiable.
+ */
+const nonQuantifiedCategories:
+  CoverageCategory[] = [
+    "premiumCocktails",
+    "bottledBeer",
+    "premiumSpirits",
+    "bottledWaterUnlimited",
+  ];
+
+function resolveEconomicComparison(
+  coverage:
+    | {
+        fullyCovered: boolean;
+        uncoveredCategories:
+          CoverageCategory[];
+      }
+    | undefined,
+  savings: number
+): {
+  status: EconomicComparisonStatus;
+  effectiveSavings: number | null;
+} {
+  /*
+   * Sin datos de cobertura no consideramos
+   * la comparación suficientemente fiable.
+   */
+  if (!coverage) {
+    return {
+      status: "partial-unknown",
+      effectiveSavings: null,
+    };
+  }
+
+  /*
+   * Cobertura completa:
+   * el ahorro bruto coincide con el ahorro
+   * económico realmente comparable.
+   */
+  if (coverage.fullyCovered) {
+    return {
+      status: "complete",
+      effectiveSavings: savings,
+    };
+  }
+
+  /*
+   * Si falta alguna preferencia premium
+   * no cuantificada, desconocemos cuánto
+   * tendría que pagar el usuario aparte.
+   */
+  const hasUnknownUncoveredCategory =
+    coverage.uncoveredCategories.some(
+      (category) =>
+        nonQuantifiedCategories.includes(
+          category
+        )
+    );
+
+  if (hasUnknownUncoveredCategory) {
+    return {
+      status: "partial-unknown",
+      effectiveSavings: null,
+    };
+  }
+
+  /*
+   * Preparado para un futuro escenario
+   * donde existan categorías cuantificadas
+   * no cubiertas.
+   *
+   * Por ahora no tenemos paquetes verificados
+   * que entren aquí, así que mantenemos
+   * effectiveSavings en null hasta calcular
+   * explícitamente su coste adicional.
+   */
+  return {
+    status: "partial-calculable",
+    effectiveSavings: null,
+  };
+}
+
 export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
-  /*
-   * Solo comparamos paquetes habilitados
-   * para cálculo.
-   */
   const packages = getAllPackages().filter(
     (pkg) => pkg.status === "verified"
   );
 
-  /*
-   * COBERTURA
-   */
   const coverageResults =
     calculatePackageCoverage({
       coffee: input.coffee,
@@ -206,18 +274,6 @@ export function compareDrinkPackages(
         input.bottledWaterUnlimited ?? false,
     });
 
-  /*
-   * RESULTADO ECONÓMICO
-   *
-   * Los precios de bebidas por separado
-   * permanecen comunes para todos los paquetes.
-   *
-   * El precio diario del paquete puede venir
-   * de:
-   *
-   * - la reserva del usuario
-   * - el precio de referencia
-   */
   const results: PackageComparisonResult[] =
     packages.map((pkg) => {
       const packageKey =
@@ -270,6 +326,12 @@ export function compareDrinkPackages(
             result.packageKey === packageKey
         );
 
+      const economicComparison =
+        resolveEconomicComparison(
+          coverage,
+          calculation.savings
+        );
+
       return {
         packageKey,
 
@@ -293,6 +355,12 @@ export function compareDrinkPackages(
 
         savings:
           calculation.savings,
+
+        effectiveSavings:
+          economicComparison.effectiveSavings,
+
+        economicComparisonStatus:
+          economicComparison.status,
 
         dailyDrinkCost:
           calculation.dailyDrinkCost,
@@ -327,8 +395,10 @@ export function compareDrinkPackages(
     });
 
   /*
-   * Orden económico:
-   * mayor ahorro primero.
+   * Conservamos el orden económico actual.
+   *
+   * No cambiamos todavía la experiencia
+   * de resultados ni la elección final.
    */
   results.sort(
     (a, b) =>
@@ -336,7 +406,8 @@ export function compareDrinkPackages(
   );
 
   /*
-   * Para ser recomendado:
+   * La regla de recomendación permanece
+   * exactamente igual:
    *
    * 1. ahorro positivo
    * 2. cobertura completa

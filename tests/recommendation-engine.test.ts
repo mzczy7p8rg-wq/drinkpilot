@@ -545,4 +545,110 @@ describe("DrinkPilot recommendation engine", () => {
       myDrinksPlus?.priceSource
     ).toBe("reference");
   });
+});describe("effective economic comparison", () => {
+  it("marca como comparación completa un paquete con cobertura total", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.fullyCovered
+    ).toBe(true);
+
+    expect(
+      myDrinks?.economicComparisonStatus
+    ).toBe("complete");
+
+    expect(
+      myDrinks?.effectiveSavings
+    ).toBe(
+      myDrinks?.savings
+    );
+  });
+
+  it("marca como incompleta la comparación económica cuando faltan preferencias premium no cuantificadas", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 2,
+      wine: 2,
+      cocktail: 2,
+
+      premiumCocktails: true,
+      premiumSpirits: true,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.fullyCovered
+    ).toBe(false);
+
+    expect(
+      myDrinks?.economicComparisonStatus
+    ).toBe("partial-unknown");
+
+    expect(
+      myDrinks?.effectiveSavings
+    ).toBeNull();
+  });
+
+  it("mantiene ahorro efectivo para My Drinks Plus cuando cubre todo el perfil premium", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 2,
+      wine: 2,
+      cocktail: 2,
+
+      premiumCocktails: true,
+      premiumSpirits: true,
+    });
+
+    const myDrinksPlus =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinksPlus"
+      );
+
+    expect(
+      myDrinksPlus?.fullyCovered
+    ).toBe(true);
+
+    expect(
+      myDrinksPlus?.economicComparisonStatus
+    ).toBe("complete");
+
+    expect(
+      myDrinksPlus?.effectiveSavings
+    ).toBe(
+      myDrinksPlus?.savings
+    );
+  });
 });

@@ -644,7 +644,7 @@ export default function ResultsPage() {
 
                     </div>
 
-                    {/* ECONOMÍA */}
+                     {/* ECONOMÍA */}
 
                     <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4">
 
@@ -653,7 +653,7 @@ export default function ResultsPage() {
                           Coste paquete
                         </p>
 
-                        <p className="mt-1 text-lg font-bold sm:text-xl">
+                        <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
                           {pkg.packageCost.toFixed(2)} €
                         </p>
                       </div>
@@ -663,14 +663,16 @@ export default function ResultsPage() {
                           Bebidas aparte
                         </p>
 
-                        <p className="mt-1 text-lg font-bold sm:text-xl">
+                        <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
                           {pkg.drinksCost.toFixed(2)} €
                         </p>
                       </div>
 
                       <div>
                         <p className="text-xs uppercase tracking-wide text-slate-500">
-                          Diferencia
+                          {pkg.economicComparisonStatus === "complete"
+                            ? "Diferencia"
+                            : "Diferencia teórica"}
                         </p>
 
                         <p
@@ -689,10 +691,12 @@ export default function ResultsPage() {
 
                       <div>
                         <p className="text-xs uppercase tracking-wide text-slate-500">
-                          Ahorro estimado
+                          {pkg.economicComparisonStatus === "complete"
+                            ? "Ahorro estimado"
+                            : "Ahorro teórico"}
                         </p>
 
-                        <p className="mt-1 text-lg font-bold sm:text-xl">
+                        <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
                           {pkg.savingsPercentage > 0
                             ? `${pkg.savingsPercentage.toFixed(1)} %`
                             : "0 %"}
@@ -701,6 +705,65 @@ export default function ResultsPage() {
 
                     </div>
 
+                    {/* CALIDAD DE LA COMPARACIÓN ECONÓMICA */}
+
+                    {pkg.economicComparisonStatus === "complete" ? (
+                      <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3">
+
+                        <p className="text-sm font-semibold text-green-800">
+                          ✓ Comparación económica completa
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-green-800">
+                          El paquete cubre todo lo que has indicado,
+                          por lo que el ahorro mostrado puede compararse
+                          directamente con pagar las bebidas por separado.
+                        </p>
+
+                      </div>
+                    ) : pkg.economicComparisonStatus === "partial-unknown" ? (
+                      <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+
+                        <p className="text-sm font-semibold text-amber-900">
+                          ⚠️ Ahorro teórico
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-amber-900">
+                          Este importe no incluye el posible coste adicional
+                          de las preferencias que el paquete no cubre.
+                          Por eso no debe interpretarse como un ahorro final.
+                        </p>
+
+                        {pkg.uncoveredCategories.length > 0 && (
+                          <p className="mt-2 text-xs leading-5 text-amber-900">
+                            <strong>
+                              Fuera del cálculo:
+                            </strong>{" "}
+                            {pkg.uncoveredCategories
+                              .map(
+                                (category) =>
+                                  coverageLabels[category]
+                              )
+                              .join(", ")}
+                            .
+                          </p>
+                        )}
+
+                      </div>
+                    ) : (
+                      <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3">
+
+                        <p className="text-sm font-semibold text-sky-900">
+                          ℹ️ Comparación económica parcial
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-sky-900">
+                          Parte del consumo queda fuera del paquete.
+                          El ahorro final puede variar al añadir ese coste.
+                        </p>
+
+                      </div>
+                    )}
                     {/* DATOS ADICIONALES */}
 
                     <div className="mt-5 border-t border-slate-200 pt-4">
