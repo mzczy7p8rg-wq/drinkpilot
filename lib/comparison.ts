@@ -33,15 +33,24 @@ export type ComparisonInput = {
   cocktail: number;
 
   nonAlcoholicCocktails?: boolean;
+
   premiumCocktails?: boolean;
+
   bottledBeer?: boolean;
+
   premiumSpirits?: boolean;
 
   bottledWaterDailyAllowance?: boolean;
+
   bottledWaterUnlimited?: boolean;
 
-  myDrinksCustomPrice?: number | null;
-  myDrinksPlusCustomPrice?: number | null;
+  myDrinksCustomPrice?:
+    | number
+    | null;
+
+  myDrinksPlusCustomPrice?:
+    | number
+    | null;
 };
 
 export type PackageComparisonResult = {
@@ -53,6 +62,11 @@ export type PackageComparisonResult = {
 
   priceSource: PriceSource;
 
+  /*
+   * Todo paquete que llega al motor
+   * económico tiene obligatoriamente
+   * un precio numérico.
+   */
   referencePricePerDay: number;
 
   packageCost: number;
@@ -61,21 +75,9 @@ export type PackageComparisonResult = {
 
   savings: number;
 
-  /*
-   * Ahorro que podemos considerar
-   * realmente comparable teniendo
-   * en cuenta la cobertura.
-   *
-   * null = no podemos calcularlo
-   * con precisión.
-   */
   effectiveSavings:
     number | null;
 
-  /*
-   * Calidad de la comparación
-   * económica.
-   */
   economicComparisonStatus:
     EconomicComparisonStatus;
 
@@ -118,8 +120,37 @@ export type ComparisonResult = {
 };
 
 /*
- * Determina si un precio personalizado
- * puede utilizarse de forma segura.
+ * Unión completa de paquetes
+ * disponibles en la capa de datos.
+ */
+type AllPackage =
+  ReturnType<
+    typeof getAllPackages
+  >[number];
+
+/*
+ * Extraemos únicamente los paquetes
+ * declarados explícitamente como
+ * económicamente elegibles.
+ *
+ * Actualmente:
+ * - My Drinks
+ * - My Drinks Plus
+ *
+ * My Drinks Soft queda fuera.
+ */
+type EconomicPackage =
+  Extract<
+    AllPackage,
+    {
+      economicEligibility:
+        "eligible";
+    }
+  >;
+
+/*
+ * Valida un precio personalizado
+ * introducido por el usuario.
  */
 function isValidCustomPrice(
   value:
@@ -135,69 +166,76 @@ function isValidCustomPrice(
 }
 
 /*
- * SEGURIDAD ECONÓMICA DEL PAQUETE
+ * SEGURIDAD ECONÓMICA
  *
- * Un paquete solo puede entrar en
- * comparison.ts cuando:
- *
- * 1. está habilitado;
- * 2. su precio no está pendiente;
- * 3. dispone de un precio de referencia
- *    finito y mayor que 0.
- *
- * Esta protección evita que un paquete
- * como My Drinks Soft pueda entrar
- * accidentalmente con precio 0 €.
+ * Utilizamos variables ensanchadas
+ * deliberadamente para evitar que
+ * TypeScript convierta las comprobaciones
+ * defensivas en comparaciones imposibles
+ * debido a los literales `as const`.
  */
 function isPackageEligibleForEconomicComparison(
-  pkg: ReturnType<
-    typeof getAllPackages
-  >[number]
-): boolean {
-  /*
-   * Comprobamos primero el estado del precio
-   * antes de estrechar el tipo mediante status.
-   *
-   * Esto además mantiene la protección frente
-   * a futuros paquetes que pudieran quedar
-   * habilitados accidentalmente con precio
-   * todavía pendiente.
-   */
-  if (
-    pkg.priceStatus === "pending"
-  ) {
-    return false;
-  }
+  pkg: AllPackage
+): pkg is EconomicPackage {
+  const economicEligibility:
+    string =
+      pkg.economicEligibility;
 
-  if (
-    pkg.status !== "verified"
-  ) {
-    return false;
-  }
+  const priceStatus:
+    string =
+      pkg.priceStatus;
+
+  const packageStatus:
+    string =
+      pkg.status;
+
+  const pricePerDay:
+    number | null =
+      pkg.pricePerDay;
 
   return (
+    economicEligibility ===
+      "eligible" &&
+
+    priceStatus !==
+      "pending" &&
+
+    packageStatus ===
+      "verified" &&
+
+    typeof pricePerDay ===
+      "number" &&
+
     Number.isFinite(
-      pkg.pricePerDay
+      pricePerDay
     ) &&
-    pkg.pricePerDay > 0
+
+    pricePerDay > 0
   );
 }
 
 /*
- * Devuelve el precio que debe usar
- * cada paquete.
+ * Selecciona precio real de reserva
+ * cuando existe.
+ *
+ * Si no, utiliza el precio de
+ * referencia del paquete.
  */
 function resolvePackagePrice(
   packageKey: PackageKey,
+
   referencePrice: number,
+
   input: ComparisonInput
 ): {
   price: number;
+
   source: PriceSource;
 } {
   if (
     packageKey ===
       "myDrinks" &&
+
     isValidCustomPrice(
       input.myDrinksCustomPrice
     )
@@ -205,6 +243,7 @@ function resolvePackagePrice(
     return {
       price:
         input.myDrinksCustomPrice,
+
       source: "user",
     };
   }
@@ -212,6 +251,7 @@ function resolvePackagePrice(
   if (
     packageKey ===
       "myDrinksPlus" &&
+
     isValidCustomPrice(
       input.myDrinksPlusCustomPrice
     )
@@ -219,31 +259,41 @@ function resolvePackagePrice(
     return {
       price:
         input.myDrinksPlusCustomPrice,
+
       source: "user",
     };
   }
 
   return {
-    price: referencePrice,
-    source: "reference",
+    price:
+      referencePrice,
+
+    source:
+      "reference",
   };
 }
 
 /*
- * Categorías sin cantidad diaria
- * ni precio unitario específico.
+ * Categorías cuyo coste adicional
+ * no podemos cuantificar todavía.
  *
- * Si alguna queda fuera,
- * no podemos conocer con precisión
- * el coste adicional.
+ * Si una queda fuera del paquete,
+ * el ahorro mostrado es teórico
+ * y no puede considerarse ahorro
+ * económico final.
  */
 const nonQuantifiedCategories:
   CoverageCategory[] = [
     "nonAlcoholicCocktails",
+
     "premiumCocktails",
+
     "bottledBeer",
+
     "premiumSpirits",
+
     "bottledWaterDailyAllowance",
+
     "bottledWaterUnlimited",
   ];
 
@@ -266,9 +316,8 @@ function resolveEconomicComparison(
     number | null;
 } {
   /*
-   * Sin cobertura disponible,
-   * la comparación no puede
-   * considerarse completa.
+   * Sin cobertura no existe una
+   * comparación económica fiable.
    */
   if (!coverage) {
     return {
@@ -281,10 +330,7 @@ function resolveEconomicComparison(
   }
 
   /*
-   * Cobertura completa:
-   *
-   * el ahorro bruto coincide con
-   * el ahorro económico comparable.
+   * Cobertura completa.
    */
   if (
     coverage.fullyCovered
@@ -299,9 +345,8 @@ function resolveEconomicComparison(
   }
 
   /*
-   * Si falta una categoría cuyo
-   * coste no podemos cuantificar,
-   * el ahorro final es desconocido.
+   * Detectamos categorías cuyo
+   * coste adicional desconocemos.
    */
   const hasUnknownUncoveredCategory =
     coverage
@@ -325,9 +370,8 @@ function resolveEconomicComparison(
   }
 
   /*
-   * Reservado para futuras
-   * categorías cuantificables
-   * no cubiertas.
+   * Preparado para futuras
+   * categorías cuantificables.
    */
   return {
     status:
@@ -342,8 +386,11 @@ export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
   /*
-   * Solo participan paquetes
-   * económicamente seguros.
+   * SOLO PAQUETES ECONÓMICAMENTE
+   * HABILITADOS.
+   *
+   * El type guard garantiza además
+   * que pricePerDay es number.
    */
   const packages =
     getAllPackages().filter(
@@ -351,12 +398,7 @@ export function compareDrinkPackages(
     );
 
   /*
-   * La cobertura continúa trabajando
-   * únicamente con paquetes habilitados.
-   *
-   * My Drinks Soft puede analizarse
-   * separadamente mediante el modo
-   * preview de coverage.ts.
+   * COBERTURA
    */
   const coverageResults =
     calculatePackageCoverage({
@@ -403,30 +445,31 @@ export function compareDrinkPackages(
         false,
     });
 
+  /*
+   * RESULTADOS ECONÓMICOS
+   */
   const results:
     PackageComparisonResult[] =
       packages.map((pkg) => {
         const packageKey =
           pkg.key as PackageKey;
 
+        /*
+         * Gracias al type guard,
+         * este valor es siempre number.
+         */
+        const referencePrice =
+          pkg.pricePerDay;
+
         const resolvedPrice =
           resolvePackagePrice(
             packageKey,
-            pkg.pricePerDay,
+
+            referencePrice,
+
             input
           );
 
-        /*
-         * Segunda protección.
-         *
-         * resolvePackagePrice nunca
-         * debería producir un valor
-         * inválido porque los precios
-         * personalizados ya se validan.
-         *
-         * Aun así mantenemos aquí
-         * la lógica simple y segura.
-         */
         const calculation =
           calculateRecommendation({
             days:
@@ -491,6 +534,7 @@ export function compareDrinkPackages(
         const economicComparison =
           resolveEconomicComparison(
             coverage,
+
             calculation.savings
           );
 
@@ -507,7 +551,7 @@ export function compareDrinkPackages(
             resolvedPrice.source,
 
           referencePricePerDay:
-            pkg.pricePerDay,
+            referencePrice,
 
           packageCost:
             calculation.packageCost,
@@ -523,7 +567,8 @@ export function compareDrinkPackages(
               .effectiveSavings,
 
           economicComparisonStatus:
-            economicComparison.status,
+            economicComparison
+              .status,
 
           dailyDrinkCost:
             calculation.dailyDrinkCost,
@@ -576,6 +621,8 @@ export function compareDrinkPackages(
   );
 
   /*
+   * RECOMENDACIÓN
+   *
    * Para ser recomendado:
    *
    * 1. ahorro positivo;
@@ -589,7 +636,8 @@ export function compareDrinkPackages(
     ) ?? null;
 
   return {
-    packages: results,
+    packages:
+      results,
 
     bestPackage,
 

@@ -679,7 +679,22 @@ describe("DrinkPilot recommendation engine", () => {
 
     expect(
       costaPackages.myDrinksSoft.pricePerDay
-    ).toBe(0);
+    ).toBeNull();
+
+    expect(
+      costaPackages.myDrinksSoft
+        .economicEligibility
+    ).toBe("blocked");
+
+    expect(
+      costaPackages.myDrinks
+        .economicEligibility
+    ).toBe("eligible");
+
+    expect(
+      costaPackages.myDrinksPlus
+        .economicEligibility
+    ).toBe("eligible");
   });
 
   it("no entra todavía en la comparación económica", () => {

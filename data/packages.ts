@@ -21,90 +21,86 @@ export const costaPackages = {
       "Paquete sin alcohol observado en la carta de bebidas de Costa. Su existencia y parte de su cobertura están respaldadas, pero el precio vigente y algunas condiciones siguen pendientes de verificación suficiente.",
 
     /*
-     * El precio continúa pendiente.
+     * null = precio desconocido.
      *
-     * Muy importante:
-     * mientras el precio sea 0 no debe entrar
-     * en el motor económico.
+     * No utilizamos 0 porque 0 € sería
+     * conceptualmente un precio real.
      */
-    pricePerDay: 0,
+    pricePerDay: null,
 
     priceStatus: "pending",
 
     priceNote:
       "Precio pendiente de verificación para el crucero y mercado seleccionados.",
 
+    /*
+     * El paquete existe en nuestra capa
+     * de datos, pero todavía no puede
+     * participar en el cálculo económico.
+     */
+    economicEligibility: "blocked",
+
     currency: "EUR",
 
     includesAlcohol: false,
 
-    /*
-     * Estado separado por dimensión.
-     *
-     * Sabemos que el paquete existe,
-     * pero todavía no tenemos suficiente
-     * evidencia para considerarlo totalmente
-     * listo para cálculo.
-     */
     existenceStatus: "verified",
 
-    inclusionsStatus: "partial-verified",
+    inclusionsStatus:
+      "partial-verified",
 
     coverage: {
-      /*
-       * Cobertura básica observada
-       * en la carta histórica de Costa.
-       */
       coffee: true,
       water: true,
       soda: true,
 
-      /*
-       * El motor actual todavía no distingue
-       * mocktails de cócteles alcohólicos.
-       *
-       * Por seguridad mantenemos cocktail=false
-       * hasta ampliar el modelo de cobertura.
-       */
       beer: false,
       wine: false,
+
+      /*
+       * Categoría legacy de cócteles
+       * cuantificados por el wizard.
+       */
       cocktail: false,
+
       alcoholicCocktails: false,
+
       nonAlcoholicCocktails: true,
+
       premiumCocktails: false,
+
       bottledBeer: false,
+
       premiumSpirits: false,
+
       bottledWaterUnlimited: false,
 
       status: "partial-verified",
     },
 
     /*
-     * Información adicional que todavía
-     * no utiliza coverage.ts.
+     * Evidencia adicional observada
+     * en la carta estudiada.
      */
     observedCoverage: {
       nonAlcoholicCocktails: true,
     },
 
-    restrictions: myDrinksSoftRestrictions,
+    restrictions:
+      myDrinksSoftRestrictions,
 
     /*
-     * IMPORTANTE:
-     *
-     * comparison.ts filtra únicamente
-     * paquetes con status === "verified".
-     *
-     * Mantener "pending" impide que
-     * My Drinks Soft entre en el cálculo
-     * con precio 0 €.
+     * Sigue pendiente como paquete
+     * calculable.
      */
     status: "pending",
 
-    sourceUrl: COSTA_DRINKS_SOURCE,
+    sourceUrl:
+      COSTA_DRINKS_SOURCE,
 
     lastVerified:
-      costaMetadata.verification.inclusionsLastVerified,
+      costaMetadata.verification
+        .inclusionsLastVerified,
   },
 
   myDrinks: {
@@ -124,6 +120,9 @@ export const costaPackages = {
     priceNote:
       "Precio orientativo usado para el cálculo. El precio real puede variar y debe comprobarse en MyCosta o en la reserva.",
 
+    economicEligibility:
+      "eligible",
+
     currency: "EUR",
 
     includesAlcohol: true,
@@ -139,37 +138,45 @@ export const costaPackages = {
 
       beer: true,
       wine: true,
+
       cocktail: true,
+
       alcoholicCocktails: true,
+
       nonAlcoholicCocktails: true,
 
       premiumCocktails: false,
+
       bottledBeer: false,
+
       premiumSpirits: false,
+
       bottledWaterUnlimited: false,
 
       status: "verified",
     },
 
     /*
-     * La carta y documentación revisada
-     * respaldan una inclusión limitada
-     * de agua embotellada.
+     * My Drinks incluye una asignación
+     * limitada de agua embotellada.
      *
-     * Todavía no participa en coverage.ts.
+     * coverage.ts ya interpreta este dato.
      */
     observedCoverage: {
       bottledWaterDailyAllowance: 1,
     },
 
-    restrictions: myDrinksRestrictions,
+    restrictions:
+      myDrinksRestrictions,
 
     status: "verified",
 
-    sourceUrl: COSTA_DRINKS_SOURCE,
+    sourceUrl:
+      COSTA_DRINKS_SOURCE,
 
     lastVerified:
-      costaMetadata.verification.inclusionsLastVerified,
+      costaMetadata.verification
+        .inclusionsLastVerified,
   },
 
   myDrinksPlus: {
@@ -189,6 +196,9 @@ export const costaPackages = {
     priceNote:
       "Precio orientativo usado para el cálculo. El precio real puede variar y debe comprobarse en MyCosta o en la reserva.",
 
+    economicEligibility:
+      "eligible",
+
     currency: "EUR",
 
     includesAlcohol: true,
@@ -204,29 +214,41 @@ export const costaPackages = {
 
       beer: true,
       wine: true,
+
       cocktail: true,
+
       alcoholicCocktails: true,
+
       nonAlcoholicCocktails: true,
+
       premiumCocktails: true,
+
       bottledBeer: true,
+
       premiumSpirits: true,
+
       bottledWaterUnlimited: true,
 
       status: "verified",
     },
 
     observedCoverage: {
-      bottledWaterDailyAllowance: null,
+      bottledWaterDailyAllowance:
+        null,
+
       bottledWaterUnlimited: true,
     },
 
-    restrictions: myDrinksPlusRestrictions,
+    restrictions:
+      myDrinksPlusRestrictions,
 
     status: "verified",
 
-    sourceUrl: COSTA_DRINKS_SOURCE,
+    sourceUrl:
+      COSTA_DRINKS_SOURCE,
 
     lastVerified:
-      costaMetadata.verification.inclusionsLastVerified,
+      costaMetadata.verification
+        .inclusionsLastVerified,
   },
 } as const;
