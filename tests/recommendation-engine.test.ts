@@ -826,4 +826,118 @@ describe("DrinkPilot recommendation engine", () => {
       myDrinks?.fullyCovered
     ).toBe(false);
   });
+});describe("My Drinks Soft coverage preview", () => {
+  it("puede analizar My Drinks Soft sin activarlo económicamente", () => {
+    const result =
+      calculatePackageCoverage(
+        {
+          coffee: 1,
+          water: 1,
+          soda: 1,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+
+          alcoholicCocktails: false,
+          nonAlcoholicCocktails: true,
+
+          premiumCocktails: false,
+          bottledBeer: false,
+          premiumSpirits: false,
+          bottledWaterUnlimited: false,
+        },
+        {
+          includePendingPackages: true,
+        }
+      );
+
+    const soft =
+      result.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(soft).toBeDefined();
+
+    expect(
+      soft?.coveredCategories
+    ).toContain(
+      "nonAlcoholicCocktails"
+    );
+
+    expect(
+      soft?.fullyCovered
+    ).toBe(true);
+  });
+
+  it("My Drinks Soft no cubre cócteles alcohólicos", () => {
+    const result =
+      calculatePackageCoverage(
+        {
+          coffee: 0,
+          water: 0,
+          soda: 0,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+
+          alcoholicCocktails: true,
+          nonAlcoholicCocktails: false,
+
+          premiumCocktails: false,
+          bottledBeer: false,
+          premiumSpirits: false,
+          bottledWaterUnlimited: false,
+        },
+        {
+          includePendingPackages: true,
+        }
+      );
+
+    const soft =
+      result.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(
+      soft?.uncoveredCategories
+    ).toContain(
+      "alcoholicCocktails"
+    );
+
+    expect(
+      soft?.fullyCovered
+    ).toBe(false);
+  });
+
+  it("el modo normal continúa excluyendo My Drinks Soft", () => {
+    const result =
+      calculatePackageCoverage({
+        coffee: 1,
+        water: 1,
+        soda: 1,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        alcoholicCocktails: false,
+        nonAlcoholicCocktails: true,
+
+        premiumCocktails: false,
+        bottledBeer: false,
+        premiumSpirits: false,
+        bottledWaterUnlimited: false,
+      });
+
+    expect(
+      result.some(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      )
+    ).toBe(false);
+  });
 });

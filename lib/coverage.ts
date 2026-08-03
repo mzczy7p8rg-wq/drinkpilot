@@ -76,13 +76,19 @@ export type PackageCoverageResult = {
   fullyCovered: boolean;
 };
 
+export type CoverageOptions = {
+  includePendingPackages?: boolean;
+};
+
 export function calculatePackageCoverage(
-  input: CoverageInput
+  input: CoverageInput,
+  options: CoverageOptions = {}
 ): PackageCoverageResult[] {
   const packages =
     getAllPackages().filter(
       (pkg) =>
-        pkg.status === "verified"
+        pkg.status === "verified" ||
+        options.includePendingPackages === true
     );
 
   const requestedCategories:
