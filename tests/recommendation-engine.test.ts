@@ -651,4 +651,73 @@ describe("DrinkPilot recommendation engine", () => {
       myDrinksPlus?.savings
     );
   });
+});describe("My Drinks Soft safety", () => {
+  it("existe en la capa de datos", async () => {
+    const { costaPackages } =
+      await import("@/data/packages");
+
+    expect(
+      costaPackages.myDrinksSoft.existenceStatus
+    ).toBe("verified");
+
+    expect(
+      costaPackages.myDrinksSoft.inclusionsStatus
+    ).toBe("partial-verified");
+
+    expect(
+      costaPackages.myDrinksSoft.status
+    ).toBe("pending");
+  });
+
+  it("mantiene el precio pendiente", async () => {
+    const { costaPackages } =
+      await import("@/data/packages");
+
+    expect(
+      costaPackages.myDrinksSoft.priceStatus
+    ).toBe("pending");
+
+    expect(
+      costaPackages.myDrinksSoft.pricePerDay
+    ).toBe(0);
+  });
+
+  it("no entra todavía en la comparación económica", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+    });
+
+    expect(
+      result.packages.some(
+        (pkg) =>
+          pkg.packageKey === "myDrinksSoft"
+      )
+    ).toBe(false);
+  });
+
+  it("nunca puede convertirse en mejor opción con precio 0 mientras siga pendiente", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 4,
+      water: 4,
+      soda: 4,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+    });
+
+    expect(
+      result.bestPackage?.packageKey
+    ).not.toBe("myDrinksSoft");
+  });
 });
