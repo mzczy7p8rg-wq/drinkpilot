@@ -18,24 +18,54 @@ export const costaPackages = {
     icon: "🥤",
 
     description:
-      "Opción sin alcohol. La información detallada y el precio están pendientes de verificación oficial para el mercado y crucero seleccionados.",
+      "Paquete sin alcohol observado en la carta de bebidas de Costa. Su existencia y parte de su cobertura están respaldadas, pero el precio vigente y algunas condiciones siguen pendientes de verificación suficiente.",
 
+    /*
+     * El precio continúa pendiente.
+     *
+     * Muy importante:
+     * mientras el precio sea 0 no debe entrar
+     * en el motor económico.
+     */
     pricePerDay: 0,
 
     priceStatus: "pending",
 
     priceNote:
-      "Precio pendiente de verificación para el crucero seleccionado.",
+      "Precio pendiente de verificación para el crucero y mercado seleccionados.",
 
     currency: "EUR",
 
     includesAlcohol: false,
 
+    /*
+     * Estado separado por dimensión.
+     *
+     * Sabemos que el paquete existe,
+     * pero todavía no tenemos suficiente
+     * evidencia para considerarlo totalmente
+     * listo para cálculo.
+     */
+    existenceStatus: "verified",
+
+    inclusionsStatus: "partial-verified",
+
     coverage: {
+      /*
+       * Cobertura básica observada
+       * en la carta histórica de Costa.
+       */
       coffee: true,
       water: true,
       soda: true,
 
+      /*
+       * El motor actual todavía no distingue
+       * mocktails de cócteles alcohólicos.
+       *
+       * Por seguridad mantenemos cocktail=false
+       * hasta ampliar el modelo de cobertura.
+       */
       beer: false,
       wine: false,
       cocktail: false,
@@ -45,16 +75,35 @@ export const costaPackages = {
       premiumSpirits: false,
       bottledWaterUnlimited: false,
 
-      status: "partial",
+      status: "partial-verified",
+    },
+
+    /*
+     * Información adicional que todavía
+     * no utiliza coverage.ts.
+     */
+    observedCoverage: {
+      nonAlcoholicCocktails: true,
     },
 
     restrictions: myDrinksSoftRestrictions,
 
+    /*
+     * IMPORTANTE:
+     *
+     * comparison.ts filtra únicamente
+     * paquetes con status === "verified".
+     *
+     * Mantener "pending" impide que
+     * My Drinks Soft entre en el cálculo
+     * con precio 0 €.
+     */
     status: "pending",
 
     sourceUrl: COSTA_DRINKS_SOURCE,
 
-    lastVerified: null,
+    lastVerified:
+      costaMetadata.verification.inclusionsLastVerified,
   },
 
   myDrinks: {
@@ -78,6 +127,10 @@ export const costaPackages = {
 
     includesAlcohol: true,
 
+    existenceStatus: "verified",
+
+    inclusionsStatus: "verified",
+
     coverage: {
       coffee: true,
       water: true,
@@ -93,6 +146,17 @@ export const costaPackages = {
       bottledWaterUnlimited: false,
 
       status: "verified",
+    },
+
+    /*
+     * La carta y documentación revisada
+     * respaldan una inclusión limitada
+     * de agua embotellada.
+     *
+     * Todavía no participa en coverage.ts.
+     */
+    observedCoverage: {
+      bottledWaterDailyAllowance: 1,
     },
 
     restrictions: myDrinksRestrictions,
@@ -126,6 +190,10 @@ export const costaPackages = {
 
     includesAlcohol: true,
 
+    existenceStatus: "verified",
+
+    inclusionsStatus: "verified",
+
     coverage: {
       coffee: true,
       water: true,
@@ -141,6 +209,11 @@ export const costaPackages = {
       bottledWaterUnlimited: true,
 
       status: "verified",
+    },
+
+    observedCoverage: {
+      bottledWaterDailyAllowance: null,
+      bottledWaterUnlimited: true,
     },
 
     restrictions: myDrinksPlusRestrictions,
