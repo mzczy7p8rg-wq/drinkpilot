@@ -55,6 +55,9 @@ export default function ReviewPage() {
     );
 
   const preferences = [
+    data.nonAlcoholicCocktails &&
+      "Cócteles sin alcohol",
+
     data.premiumCocktails &&
       "Cócteles premium",
 

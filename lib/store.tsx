@@ -20,6 +20,10 @@ export type WizardData = {
 
   drinksPerDay: number;
 
+  /*
+   * Preferencias de cobertura.
+   */
+  nonAlcoholicCocktails: boolean;
   premiumCocktails: boolean;
   bottledBeer: boolean;
   premiumSpirits: boolean;
@@ -52,10 +56,13 @@ export type WizardData = {
 
 type StoreContextType = {
   data: WizardData;
+
   setData: React.Dispatch<
     React.SetStateAction<WizardData>
   >;
+
   hydrated: boolean;
+
   resetData: () => void;
 };
 
@@ -74,6 +81,7 @@ const initialData: WizardData = {
 
   drinksPerDay: 0,
 
+  nonAlcoholicCocktails: false,
   premiumCocktails: false,
   bottledBeer: false,
   premiumSpirits: false,
@@ -164,6 +172,12 @@ export function StoreProvider({
             "number"
               ? parsedData.drinksPerDay
               : initialData.drinksPerDay,
+
+          nonAlcoholicCocktails:
+            typeof parsedData.nonAlcoholicCocktails ===
+            "boolean"
+              ? parsedData.nonAlcoholicCocktails
+              : initialData.nonAlcoholicCocktails,
 
           premiumCocktails:
             typeof parsedData.premiumCocktails ===

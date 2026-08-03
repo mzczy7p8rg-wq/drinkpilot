@@ -1181,4 +1181,144 @@ describe("DrinkPilot recommendation engine", () => {
       myDrinksPlus?.economicComparisonStatus
     ).toBe("complete");
   });
+});describe("Non alcoholic cocktails integration", () => {
+  it("My Drinks cubre cócteles sin alcohol a través de compareDrinkPackages", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      nonAlcoholicCocktails: true,
+    });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.coveredCategories
+    ).toContain(
+      "nonAlcoholicCocktails"
+    );
+
+    expect(
+      myDrinks?.uncoveredCategories
+    ).not.toContain(
+      "nonAlcoholicCocktails"
+    );
+  });
+
+  it("My Drinks Plus cubre cócteles sin alcohol a través de compareDrinkPackages", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      nonAlcoholicCocktails: true,
+    });
+
+    const myDrinksPlus =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinksPlus"
+      );
+
+    expect(
+      myDrinksPlus?.coveredCategories
+    ).toContain(
+      "nonAlcoholicCocktails"
+    );
+
+    expect(
+      myDrinksPlus?.fullyCovered
+    ).toBe(true);
+  });
+
+  it("My Drinks Soft cubre cócteles sin alcohol únicamente en modo preview", () => {
+    const result =
+      calculatePackageCoverage(
+        {
+          coffee: 0,
+          water: 0,
+          soda: 0,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+
+          nonAlcoholicCocktails: true,
+
+          premiumCocktails: false,
+          bottledBeer: false,
+          premiumSpirits: false,
+          bottledWaterDailyAllowance: false,
+          bottledWaterUnlimited: false,
+        },
+        {
+          includePendingPackages: true,
+        }
+      );
+
+    const soft =
+      result.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(soft).toBeDefined();
+
+    expect(
+      soft?.coveredCategories
+    ).toContain(
+      "nonAlcoholicCocktails"
+    );
+
+    expect(
+      soft?.fullyCovered
+    ).toBe(true);
+  });
+
+  it("My Drinks Soft sigue excluido de la comparación económica", () => {
+    const result = compareDrinkPackages({
+      days: 7,
+      people: 1,
+
+      coffee: 1,
+      water: 1,
+      soda: 1,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+
+      nonAlcoholicCocktails: true,
+    });
+
+    expect(
+      result.packages.some(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      )
+    ).toBe(false);
+
+    expect(
+      result.bestPackage?.packageKey
+    ).not.toBe(
+      "myDrinksSoft"
+    );
+  });
 });

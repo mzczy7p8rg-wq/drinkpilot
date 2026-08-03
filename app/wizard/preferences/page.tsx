@@ -58,12 +58,20 @@ export default function PreferencesPage() {
   const { data, setData } =
     useStore();
 
+  /*
+   * Agua ilimitada implica internamente
+   * también cobertura diaria, pero para
+   * el usuario cuenta como una sola
+   * preferencia de agua.
+   */
   const selectedPreferences = [
+    data.nonAlcoholicCocktails,
     data.premiumCocktails,
     data.bottledBeer,
     data.premiumSpirits,
-    data.bottledWaterDailyAllowance,
-    data.bottledWaterUnlimited,
+
+    data.bottledWaterUnlimited ||
+      data.bottledWaterDailyAllowance,
   ].filter(Boolean).length;
 
   return (
@@ -80,26 +88,40 @@ export default function PreferencesPage() {
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            ¿Qué extras valoras a
-            bordo?
+            ¿Qué extras valoras a bordo?
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
             Estas preferencias son
             opcionales. Nos ayudan a
-            distinguir mejor entre un
-            paquete estándar y uno
-            premium.
+            distinguir mejor qué paquete
+            cubre realmente lo que buscas.
           </p>
         </div>
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
           💡 Marca únicamente aquellas
-          opciones que realmente
-          valorarías durante el crucero.
+          opciones que realmente valorarías
+          durante el crucero.
         </div>
 
         <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
+          <PreferenceCard
+            title="🍹 Cócteles sin alcohol"
+            description="Valoras disponer de cócteles y combinados sin alcohol incluidos en el paquete."
+            checked={
+              data.nonAlcoholicCocktails
+            }
+            onChange={(checked) =>
+              setData((prev) => ({
+                ...prev,
+
+                nonAlcoholicCocktails:
+                  checked,
+              }))
+            }
+          />
+
           <PreferenceCard
             title="🍸 Cócteles premium"
             description="Valoras una selección más amplia de cócteles y opciones premium."
@@ -109,6 +131,7 @@ export default function PreferencesPage() {
             onChange={(checked) =>
               setData((prev) => ({
                 ...prev,
+
                 premiumCocktails:
                   checked,
               }))
@@ -124,7 +147,9 @@ export default function PreferencesPage() {
             onChange={(checked) =>
               setData((prev) => ({
                 ...prev,
-                bottledBeer: checked,
+
+                bottledBeer:
+                  checked,
               }))
             }
           />
@@ -138,6 +163,7 @@ export default function PreferencesPage() {
             onChange={(checked) =>
               setData((prev) => ({
                 ...prev,
+
                 premiumSpirits:
                   checked,
               }))
@@ -172,13 +198,6 @@ export default function PreferencesPage() {
                     bottledWaterDailyAllowance:
                       checked,
 
-                    /*
-                     * Si deja de valorar
-                     * incluso una botella
-                     * diaria, tampoco tiene
-                     * sentido conservar la
-                     * necesidad ilimitada.
-                     */
                     bottledWaterUnlimited:
                       checked
                         ? prev.bottledWaterUnlimited
@@ -200,12 +219,6 @@ export default function PreferencesPage() {
                     bottledWaterUnlimited:
                       checked,
 
-                    /*
-                     * Agua ilimitada implica
-                     * necesariamente cubrir
-                     * al menos una botella
-                     * diaria.
-                     */
                     bottledWaterDailyAllowance:
                       checked
                         ? true

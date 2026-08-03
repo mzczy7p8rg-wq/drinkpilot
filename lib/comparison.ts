@@ -32,6 +32,7 @@ export type ComparisonInput = {
   wine: number;
   cocktail: number;
 
+  nonAlcoholicCocktails?: boolean;
   premiumCocktails?: boolean;
   bottledBeer?: boolean;
   premiumSpirits?: boolean;
@@ -168,6 +169,7 @@ function resolvePackagePrice(
  */
 const nonQuantifiedCategories:
   CoverageCategory[] = [
+    "nonAlcoholicCocktails",
     "premiumCocktails",
     "bottledBeer",
     "premiumSpirits",
@@ -262,6 +264,9 @@ export function compareDrinkPackages(
       beer: input.beer,
       wine: input.wine,
       cocktail: input.cocktail,
+
+      nonAlcoholicCocktails:
+        input.nonAlcoholicCocktails ?? false,
 
       premiumCocktails:
         input.premiumCocktails ?? false,
