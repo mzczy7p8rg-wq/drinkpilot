@@ -69,7 +69,8 @@ export const costaPackages = {
       beer: false,
       wine: false,
       cocktail: false,
-
+      alcoholicCocktails: false,
+      nonAlcoholicCocktails: true,
       premiumCocktails: false,
       bottledBeer: false,
       premiumSpirits: false,
@@ -139,6 +140,8 @@ export const costaPackages = {
       beer: true,
       wine: true,
       cocktail: true,
+      alcoholicCocktails: true,
+      nonAlcoholicCocktails: true,
 
       premiumCocktails: false,
       bottledBeer: false,
@@ -202,7 +205,8 @@ export const costaPackages = {
       beer: true,
       wine: true,
       cocktail: true,
-
+      alcoholicCocktails: true,
+      nonAlcoholicCocktails: true,
       premiumCocktails: true,
       bottledBeer: true,
       premiumSpirits: true,

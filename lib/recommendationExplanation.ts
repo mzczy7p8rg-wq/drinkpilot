@@ -28,9 +28,21 @@ const coverageLabels: Record<CoverageCategory, string> = {
   wine: "vino",
   cocktail: "cócteles",
 
-  premiumCocktails: "cócteles premium",
-  bottledBeer: "cerveza embotellada",
-  premiumSpirits: "destilados premium",
+  alcoholicCocktails:
+    "cócteles con alcohol",
+
+  nonAlcoholicCocktails:
+    "cócteles sin alcohol",
+
+  premiumCocktails:
+    "cócteles premium",
+
+  bottledBeer:
+    "cerveza embotellada",
+
+  premiumSpirits:
+    "destilados premium",
+
   bottledWaterUnlimited:
     "agua embotellada sin límite",
 };

@@ -1,4 +1,7 @@
-import { getAllPackages, PackageKey } from "@/lib/packageService";
+import {
+  getAllPackages,
+  PackageKey,
+} from "@/lib/packageService";
 
 export type CoverageInput = {
   coffee: number;
@@ -6,7 +9,24 @@ export type CoverageInput = {
   soda: number;
   beer: number;
   wine: number;
+
+  /*
+   * Categoría legacy.
+   *
+   * Sigue representando el consumo de
+   * cócteles introducido actualmente
+   * en el wizard.
+   */
   cocktail: number;
+
+  /*
+   * Nuevas categorías de Coverage v2.
+   *
+   * Son opcionales para mantener compatibilidad
+   * con todo el flujo actual.
+   */
+  alcoholicCocktails?: boolean;
+  nonAlcoholicCocktails?: boolean;
 
   premiumCocktails: boolean;
   bottledBeer: boolean;
@@ -20,7 +40,18 @@ export type CoverageCategory =
   | "soda"
   | "beer"
   | "wine"
+
+  /*
+   * Legacy.
+   */
   | "cocktail"
+
+  /*
+   * Coverage v2.
+   */
+  | "alcoholicCocktails"
+  | "nonAlcoholicCocktails"
+
   | "premiumCocktails"
   | "bottledBeer"
   | "premiumSpirits"
@@ -28,11 +59,17 @@ export type CoverageCategory =
 
 export type PackageCoverageResult = {
   packageKey: PackageKey;
+
   packageName: string;
 
-  requestedCategories: CoverageCategory[];
-  coveredCategories: CoverageCategory[];
-  uncoveredCategories: CoverageCategory[];
+  requestedCategories:
+    CoverageCategory[];
+
+  coveredCategories:
+    CoverageCategory[];
+
+  uncoveredCategories:
+    CoverageCategory[];
 
   coverageScore: number;
 
@@ -42,98 +79,146 @@ export type PackageCoverageResult = {
 export function calculatePackageCoverage(
   input: CoverageInput
 ): PackageCoverageResult[] {
-  const packages = getAllPackages().filter(
-    (pkg) => pkg.status === "verified"
-  );
+  const packages =
+    getAllPackages().filter(
+      (pkg) =>
+        pkg.status === "verified"
+    );
 
-  /*
-   * Categorías realmente relevantes
-   * para este usuario.
-   *
-   * Incluimos tanto:
-   * - consumo básico
-   * - preferencias premium
-   */
-  const requestedCategories: CoverageCategory[] = [];
+  const requestedCategories:
+    CoverageCategory[] = [];
 
   if (input.coffee > 0) {
-    requestedCategories.push("coffee");
+    requestedCategories.push(
+      "coffee"
+    );
   }
 
   if (input.water > 0) {
-    requestedCategories.push("water");
+    requestedCategories.push(
+      "water"
+    );
   }
 
   if (input.soda > 0) {
-    requestedCategories.push("soda");
+    requestedCategories.push(
+      "soda"
+    );
   }
 
   if (input.beer > 0) {
-    requestedCategories.push("beer");
+    requestedCategories.push(
+      "beer"
+    );
   }
 
   if (input.wine > 0) {
-    requestedCategories.push("wine");
+    requestedCategories.push(
+      "wine"
+    );
   }
 
+  /*
+   * Flujo actual.
+   *
+   * No cambiamos todavía el significado
+   * de los datos existentes.
+   */
   if (input.cocktail > 0) {
-    requestedCategories.push("cocktail");
+    requestedCategories.push(
+      "cocktail"
+    );
+  }
+
+  /*
+   * Nuevas categorías.
+   *
+   * Solo participan si algún consumidor
+   * futuro del motor las envía explícitamente.
+   */
+  if (input.alcoholicCocktails) {
+    requestedCategories.push(
+      "alcoholicCocktails"
+    );
+  }
+
+  if (input.nonAlcoholicCocktails) {
+    requestedCategories.push(
+      "nonAlcoholicCocktails"
+    );
   }
 
   if (input.premiumCocktails) {
-    requestedCategories.push("premiumCocktails");
+    requestedCategories.push(
+      "premiumCocktails"
+    );
   }
 
   if (input.bottledBeer) {
-    requestedCategories.push("bottledBeer");
+    requestedCategories.push(
+      "bottledBeer"
+    );
   }
 
   if (input.premiumSpirits) {
-    requestedCategories.push("premiumSpirits");
+    requestedCategories.push(
+      "premiumSpirits"
+    );
   }
 
-  if (input.bottledWaterUnlimited) {
-    requestedCategories.push("bottledWaterUnlimited");
+  if (
+    input.bottledWaterUnlimited
+  ) {
+    requestedCategories.push(
+      "bottledWaterUnlimited"
+    );
   }
 
-  return packages.map((pkg) => {
-    const coveredCategories =
-      requestedCategories.filter(
-        (category) =>
-          pkg.coverage[category] === true
-      );
+  return packages.map(
+    (pkg) => {
+      const coveredCategories =
+        requestedCategories.filter(
+          (category) =>
+            pkg.coverage[
+              category
+            ] === true
+        );
 
-    const uncoveredCategories =
-      requestedCategories.filter(
-        (category) =>
-          pkg.coverage[category] !== true
-      );
+      const uncoveredCategories =
+        requestedCategories.filter(
+          (category) =>
+            pkg.coverage[
+              category
+            ] !== true
+        );
 
-    const coverageScore =
-      requestedCategories.length > 0
-        ? (
-            coveredCategories.length /
-            requestedCategories.length
-          ) * 100
-        : 0;
+      const coverageScore =
+        requestedCategories.length > 0
+          ? (
+              coveredCategories.length /
+              requestedCategories.length
+            ) * 100
+          : 0;
 
-    return {
-      packageKey:
-        pkg.key as PackageKey,
+      return {
+        packageKey:
+          pkg.key as PackageKey,
 
-      packageName:
-        pkg.name,
+        packageName:
+          pkg.name,
 
-      requestedCategories,
+        requestedCategories,
 
-      coveredCategories,
+        coveredCategories,
 
-      uncoveredCategories,
+        uncoveredCategories,
 
-      coverageScore,
+        coverageScore,
 
-      fullyCovered:
-        uncoveredCategories.length === 0,
-    };
-  });
+        fullyCovered:
+          uncoveredCategories.length ===
+          0,
+      };
+    }
+  );
 }

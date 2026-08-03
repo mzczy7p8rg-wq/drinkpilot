@@ -720,4 +720,110 @@ describe("DrinkPilot recommendation engine", () => {
       result.bestPackage?.packageKey
     ).not.toBe("myDrinksSoft");
   });
+});describe("Coverage v2 cocktail categories", () => {
+  it("My Drinks cubre cócteles con y sin alcohol", () => {
+    const result =
+      calculatePackageCoverage({
+        coffee: 0,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        alcoholicCocktails: true,
+        nonAlcoholicCocktails: true,
+
+        premiumCocktails: false,
+        bottledBeer: false,
+        premiumSpirits: false,
+        bottledWaterUnlimited: false,
+      });
+
+    const myDrinks =
+      result.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.coveredCategories
+    ).toContain("alcoholicCocktails");
+
+    expect(
+      myDrinks?.coveredCategories
+    ).toContain("nonAlcoholicCocktails");
+
+    expect(
+      myDrinks?.fullyCovered
+    ).toBe(true);
+  });
+
+  it("My Drinks Plus cubre cócteles con alcohol, sin alcohol y premium", () => {
+    const result =
+      calculatePackageCoverage({
+        coffee: 0,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        alcoholicCocktails: true,
+        nonAlcoholicCocktails: true,
+
+        premiumCocktails: true,
+        bottledBeer: false,
+        premiumSpirits: false,
+        bottledWaterUnlimited: false,
+      });
+
+    const myDrinksPlus =
+      result.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinksPlus"
+      );
+
+    expect(
+      myDrinksPlus?.fullyCovered
+    ).toBe(true);
+
+    expect(
+      myDrinksPlus?.coveredCategories
+    ).toContain("premiumCocktails");
+  });
+
+  it("My Drinks no cubre cócteles premium", () => {
+    const result =
+      calculatePackageCoverage({
+        coffee: 0,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        alcoholicCocktails: true,
+        nonAlcoholicCocktails: true,
+
+        premiumCocktails: true,
+        bottledBeer: false,
+        premiumSpirits: false,
+        bottledWaterUnlimited: false,
+      });
+
+    const myDrinks =
+      result.find(
+        (pkg) =>
+          pkg.packageKey === "myDrinks"
+      );
+
+    expect(
+      myDrinks?.uncoveredCategories
+    ).toContain("premiumCocktails");
+
+    expect(
+      myDrinks?.fullyCovered
+    ).toBe(false);
+  });
 });
