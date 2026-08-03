@@ -121,10 +121,6 @@ export function buildRecommendationExplanation(
      * Hay otro paquete que ahorra más,
      * pero no cubre completamente
      * lo solicitado.
-     *
-     * Este es el caso típico de:
-     * My Drinks vs My Drinks Plus
-     * cuando existen preferencias premium.
      */
     if (
       highestSavingsPackage &&
@@ -165,7 +161,7 @@ export function buildRecommendationExplanation(
         `${bestPackage.packageName} es nuestra recomendación`,
 
       summary:
-        `Es la opción que combina cobertura completa y ahorro positivo para tu perfil.`,
+        "Es la opción que combina cobertura completa y ahorro positivo para tu perfil.",
 
       reason:
         `Su ahorro estimado es de ${bestPackage.savings.toFixed(
@@ -185,25 +181,51 @@ export function buildRecommendationExplanation(
    * - cobertura completa
    * - ahorro positivo
    */
-
   const fullyCoveredPackages =
     packages.filter(
       (pkg) => pkg.fullyCovered
     );
 
-  /*
-   * Existe al menos un paquete que
-   * cubre completamente al usuario,
-   * pero económicamente no compensa.
-   *
-   * Caso típico QA-4.
-   */
   if (fullyCoveredPackages.length > 0) {
     const bestCoveredPackage =
       [...fullyCoveredPackages].sort(
         (a, b) => b.savings - a.savings
       )[0];
 
+    /*
+     * EMPATE ECONÓMICO
+     *
+     * Si la diferencia es inferior a medio céntimo,
+     * la tratamos como empate para evitar mensajes
+     * incorrectos provocados por decimales.
+     */
+    const isEconomicTie =
+      Math.abs(bestCoveredPackage.savings) <
+      0.005;
+
+    if (isEconomicTie) {
+      return {
+        title:
+          "El paquete y las bebidas por separado quedan prácticamente empatados",
+
+        summary:
+          `${bestCoveredPackage.packageName} cubre completamente lo que has indicado y ambas opciones cuestan aproximadamente lo mismo.`,
+
+        reason:
+          "Con esta estimación no existe un ahorro económico claro al contratar el paquete.",
+
+        secondaryReason:
+          "En este caso puedes decidir en función de la comodidad del paquete y de las condiciones concretas de tu crucero.",
+
+        tone: "neutral",
+      };
+    }
+
+    /*
+     * Existe al menos un paquete que
+     * cubre completamente al usuario,
+     * pero económicamente cuesta más.
+     */
     const extraCost =
       Math.abs(bestCoveredPackage.savings);
 
