@@ -3,6 +3,7 @@ import { calculateRecommendation } from "@/lib/calculator";
 import {
   calculatePackageCoverage,
   CoverageCategory,
+  PackageCoverageResult,
 } from "@/lib/coverage";
 
 import {
@@ -15,6 +16,13 @@ import {
   CruiseLineKey,
   getCruiseLine,
 } from "@/data/cruiseLines";
+
+import {
+  getMissingOnboardPriceKeys,
+  hasCompleteOnboardPriceValues,
+  type OnboardPriceKey,
+  type PartialOnboardPriceValues,
+} from "@/lib/onboardPriceService";
 
 export type PriceSource =
   | "user"
@@ -140,6 +148,31 @@ export type PackageComparisonResult = {
 };
 
 export type ComparisonResult = {
+  /*
+   * true = existen precios individuales
+   * suficientes para ejecutar el cálculo
+   * económico.
+   *
+   * false = podemos analizar cobertura,
+   * pero no ahorro/rentabilidad.
+   */
+  economicDataAvailable: boolean;
+
+  /*
+   * Categorías cuyo precio individual
+   * todavía falta.
+   */
+  missingOnboardPriceKeys:
+    OnboardPriceKey[];
+
+  /*
+   * Cobertura disponible incluso cuando
+   * la comparación económica no puede
+   * ejecutarse.
+   */
+  coveragePackages:
+    PackageCoverageResult[];
+
   packages:
     PackageComparisonResult[];
 
@@ -493,8 +526,27 @@ export function compareDrinkPackages(
       activeCruiseLine
     );
 
+  /*
+   * PRECIOS INDIVIDUALES
+   *
+   * Algunas navieras pueden estar
+   * registradas aunque todavía no
+   * dispongamos de una cesta económica
+   * completa.
+   */
   const onboardPriceValues =
-    cruiseLine.onboardPriceValues;
+    cruiseLine.onboardPriceValues as
+      PartialOnboardPriceValues;
+
+  const economicDataAvailable =
+    hasCompleteOnboardPriceValues(
+      onboardPriceValues
+    );
+
+  const missingOnboardPriceKeys =
+    getMissingOnboardPriceKeys(
+      onboardPriceValues
+    );
 
   /*
    * PAQUETES
@@ -532,6 +584,7 @@ export function compareDrinkPackages(
    * de un packageKey concreto.
    */
   const includePendingPackages =
+    !economicDataAvailable ||
     economicPackages.some(
       (result) =>
         result.pkg.status ===
@@ -597,6 +650,42 @@ export function compareDrinkPackages(
         includePendingPackages,
       }
     );
+
+  /*
+   * DATOS ECONÓMICOS INCOMPLETOS
+   *
+   * No llamamos a calculator.ts con
+   * null, 0 ni valores inventados.
+   *
+   * La cobertura permanece disponible
+   * para la UI y para análisis futuros.
+   */
+  if (
+    !economicDataAvailable
+  ) {
+    return {
+      economicDataAvailable:
+        false,
+
+      missingOnboardPriceKeys,
+
+      coveragePackages:
+        coverageResults,
+
+      packages: [],
+
+      bestPackage: null,
+
+      anyPackageWorthIt:
+        false,
+    };
+  }
+
+  /*
+   * A partir de aquí el type guard ha
+   * confirmado que los seis precios son
+   * números válidos.
+   */
 
   /*
    * RESULTADOS ECONÓMICOS
@@ -780,6 +869,14 @@ export function compareDrinkPackages(
     ) ?? null;
 
   return {
+    economicDataAvailable:
+      true,
+
+    missingOnboardPriceKeys,
+
+    coveragePackages:
+      coverageResults,
+
     packages:
       results,
 

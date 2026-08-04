@@ -1,20 +1,42 @@
-import { costaPackages } from "@/data/packages";
+import {
+  costaPackages,
+} from "@/data/packages";
 
 import {
   costaOnboardPrices,
   costaOnboardPriceValues,
 } from "@/data/onboardPrices";
 
-import { costaMetadata } from "@/data/metadata";
+import {
+  costaMetadata,
+} from "@/data/metadata";
+
+import {
+  mscPackages,
+} from "@/data/msc/packages";
+
+import {
+  mscOnboardPrices,
+  mscOnboardPriceValues,
+} from "@/data/msc/onboardPrices";
+
+import {
+  mscMetadata,
+} from "@/data/msc/metadata";
 
 /*
- * Registro central de navieras
- * disponibles en DrinkPilot.
+ * REGISTRO CENTRAL DE NAVIERAS
  *
- * Las nuevas compañías se añaden aquí
- * sin necesidad de modificar directamente
- * el motor económico, Store o las páginas
- * dinámicas del wizard.
+ * Cada compañía aporta su propia:
+ *
+ * - metadata
+ * - definición de paquetes
+ * - información de precios a bordo
+ * - valores económicos
+ *
+ * Los motores de DrinkPilot consumen
+ * este registro sin depender directamente
+ * de una compañía concreta.
  */
 export const cruiseLines = {
   costa: {
@@ -22,11 +44,14 @@ export const cruiseLines = {
 
     name: "Costa Cruceros",
 
-    market: costaMetadata.market,
+    market:
+      costaMetadata.market,
 
-    currency: costaMetadata.currency,
+    currency:
+      costaMetadata.currency,
 
-    packages: costaPackages,
+    packages:
+      costaPackages,
 
     onboardPrices:
       costaOnboardPrices,
@@ -34,16 +59,50 @@ export const cruiseLines = {
     onboardPriceValues:
       costaOnboardPriceValues,
 
-    metadata: costaMetadata,
+    metadata:
+      costaMetadata,
+  },
+
+  msc: {
+    id: "msc",
+
+    name: "MSC Cruises",
+
+    market:
+      mscMetadata.market,
+
+    currency:
+      mscMetadata.currency,
+
+    packages:
+      mscPackages,
+
+    onboardPrices:
+      mscOnboardPrices,
+
+    /*
+     * MSC todavía puede contener
+     * precios individuales pendientes.
+     *
+     * comparison.ts detecta los null
+     * mediante onboardPriceService y
+     * evita fabricar resultados
+     * económicos.
+     */
+    onboardPriceValues:
+      mscOnboardPriceValues,
+
+    metadata:
+      mscMetadata,
   },
 } as const;
 
 /*
  * Clave universal de naviera.
  *
- * TypeScript ampliará automáticamente
- * esta unión cuando añadamos nuevas
- * compañías al registro.
+ * TypeScript genera automáticamente:
+ *
+ * "costa" | "msc"
  */
 export type CruiseLineKey =
   keyof typeof cruiseLines;
@@ -51,10 +110,10 @@ export type CruiseLineKey =
 /*
  * NAVIERA POR DEFECTO
  *
- * Este es el único lugar del proyecto
- * donde decidimos qué compañía se utiliza
- * cuando el usuario todavía no ha elegido
- * explícitamente una.
+ * Costa continúa siendo el valor
+ * utilizado mientras el usuario no
+ * seleccione explícitamente otra
+ * compañía.
  */
 export const DEFAULT_CRUISE_LINE:
   CruiseLineKey = "costa";
@@ -73,7 +132,11 @@ export function getCruiseLine(
 
 /*
  * Devuelve todas las navieras
- * disponibles.
+ * disponibles en DrinkPilot.
+ *
+ * Este helper permitirá construir
+ * dinámicamente la futura selección
+ * de compañía en el wizard.
  */
 export function getAllCruiseLines() {
   return Object.values(

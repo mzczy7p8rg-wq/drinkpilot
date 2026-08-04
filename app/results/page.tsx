@@ -10,6 +10,10 @@ import { CoverageCategory } from "@/lib/coverage";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 
 import {
+  hasCompleteOnboardPriceValues,
+} from "@/lib/onboardPriceService";
+
+import {
   getCruiseLine,
 } from "@/data/cruiseLines";
 
@@ -192,6 +196,267 @@ export default function ResultsPage() {
   }
 
   /*
+   * COMPARACIÓN
+   *
+   * Se ejecuta antes del baseline porque
+   * algunas navieras pueden tener cobertura
+   * verificada sin disponer todavía de una
+   * cesta completa de precios individuales.
+   */
+  const comparison =
+    compareDrinkPackages({
+      cruiseLine:
+        data.cruiseLine,
+
+      days:
+        data.days,
+
+      people:
+        data.people,
+
+      coffee:
+        data.coffee,
+
+      water:
+        data.water,
+
+      soda:
+        data.soda,
+
+      beer:
+        data.beer,
+
+      wine:
+        data.wine,
+
+      cocktail:
+        data.cocktail,
+
+      nonAlcoholicCocktails:
+        data.nonAlcoholicCocktails,
+
+      premiumCocktails:
+        data.premiumCocktails,
+
+      bottledBeer:
+        data.bottledBeer,
+
+      premiumSpirits:
+        data.premiumSpirits,
+
+      bottledWaterDailyAllowance:
+        data.bottledWaterDailyAllowance,
+
+      bottledWaterUnlimited:
+        data.bottledWaterUnlimited,
+
+      customPackagePrices:
+        data.customPackagePrices,
+    });
+
+  /*
+   * DATOS ECONÓMICOS INCOMPLETOS
+   *
+   * No fabricamos precios ni ejecutamos
+   * calculator.ts con valores desconocidos.
+   *
+   * Seguimos mostrando la cobertura que
+   * DrinkPilot sí puede verificar.
+   */
+  if (
+    !comparison.economicDataAvailable ||
+    !hasCompleteOnboardPriceValues(
+      onboardPriceValues
+    )
+  ) {
+    const missingPriceLabels = {
+      coffee: "café",
+      water: "agua",
+      soda: "refrescos",
+      beer: "cerveza",
+      wine: "vino",
+      cocktail: "cócteles",
+    } as const;
+
+    return (
+      <main className="min-h-screen bg-slate-100 px-4 py-6 pb-28 sm:px-6 sm:py-10">
+        <div className="mx-auto max-w-4xl">
+          <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+            <div className="text-center">
+              <div className="text-5xl">
+                🔎
+              </div>
+
+              <h1 className="mt-4 text-3xl font-bold text-slate-900 sm:text-4xl">
+                Análisis de cobertura disponible
+              </h1>
+
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                DrinkPilot puede analizar qué paquetes de{" "}
+                <strong>
+                  {cruiseLine.name}
+                </strong>{" "}
+                cubren tus preferencias, pero todavía no dispone de suficientes precios individuales fiables para calcular ahorro o rentabilidad.
+              </p>
+            </div>
+
+            <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+              <h2 className="font-bold text-amber-950">
+                ⚠️ Comparación económica pendiente
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-amber-900">
+                Faltan referencias económicas suficientemente fiables para:
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {comparison.missingOnboardPriceKeys.map(
+                  (key) => (
+                    <span
+                      key={key}
+                      className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-amber-900"
+                    >
+                      {
+                        missingPriceLabels[
+                          key
+                        ]
+                      }
+                    </span>
+                  )
+                )}
+              </div>
+
+              <p className="mt-4 text-xs leading-5 text-amber-800">
+                No utilizamos 0 € ni precios inventados para completar estos datos.
+              </p>
+            </div>
+
+            <section className="mt-8">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
+                  🎟️ Cobertura de los paquetes
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Esta parte del análisis sí puede realizarse con la información de inclusiones disponible.
+                </p>
+              </div>
+
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                {comparison.coveragePackages.map(
+                  (pkg) => (
+                    <div
+                      key={
+                        pkg.packageKey
+                      }
+                      className={`rounded-2xl border p-5 ${
+                        pkg.fullyCovered
+                          ? "border-green-200 bg-green-50"
+                          : "border-slate-200 bg-slate-50"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="font-bold text-slate-900">
+                            {
+                              pkg.packageName
+                            }
+                          </h3>
+
+                          <p className="mt-1 text-sm text-slate-500">
+                            Cobertura de tu perfil
+                          </p>
+                        </div>
+
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            pkg.fullyCovered
+                              ? "bg-green-100 text-green-800"
+                              : "bg-slate-200 text-slate-700"
+                          }`}
+                        >
+                          {pkg.coverageScore.toFixed(
+                            0
+                          )} %
+                        </span>
+                      </div>
+
+                      {pkg.fullyCovered ? (
+                        <p className="mt-4 text-sm font-semibold text-green-800">
+                          ✓ Cubre todas las categorías y preferencias indicadas.
+                        </p>
+                      ) : (
+                        <div className="mt-4">
+                          <p className="text-sm font-semibold text-slate-700">
+                            No cubre:
+                          </p>
+
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {pkg.uncoveredCategories.map(
+                              (
+                                category
+                              ) => (
+                                <span
+                                  key={
+                                    category
+                                  }
+                                  className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700"
+                                >
+                                  {
+                                    coverageLabels[
+                                      category
+                                    ]
+                                  }
+                                </span>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
+
+            <div className="mt-8">
+              <DataConfidencePanel />
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    "/wizard/prices"
+                  )
+                }
+                className="rounded-xl border border-slate-300 px-4 py-4 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Revisar precios
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  resetData();
+
+                  router.push(
+                    "/wizard"
+                  );
+                }}
+                className="rounded-xl bg-sky-600 px-4 py-4 font-semibold text-white transition hover:bg-sky-700"
+              >
+                Nuevo análisis
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  /*
    * COSTE BASE DE BEBIDAS
    *
    * Utiliza los precios individuales
@@ -243,63 +508,6 @@ export default function ResultsPage() {
 
       cocktailPrice:
         onboardPriceValues.cocktail,
-    });
-
-  /*
-   * COMPARACIÓN
-   *
-   * Results ya utiliza exclusivamente
-   * el contrato multi-naviera.
-   */
-  const comparison =
-    compareDrinkPackages({
-      cruiseLine:
-        data.cruiseLine,
-
-      days:
-        data.days,
-
-      people:
-        data.people,
-
-      coffee:
-        data.coffee,
-
-      water:
-        data.water,
-
-      soda:
-        data.soda,
-
-      beer:
-        data.beer,
-
-      wine:
-        data.wine,
-
-      cocktail:
-        data.cocktail,
-
-      nonAlcoholicCocktails:
-        data.nonAlcoholicCocktails,
-
-      premiumCocktails:
-        data.premiumCocktails,
-
-      bottledBeer:
-        data.bottledBeer,
-
-      premiumSpirits:
-        data.premiumSpirits,
-
-      bottledWaterDailyAllowance:
-        data.bottledWaterDailyAllowance,
-
-      bottledWaterUnlimited:
-        data.bottledWaterUnlimited,
-
-      customPackagePrices:
-        data.customPackagePrices,
     });
 
   const bestPackage =

@@ -583,17 +583,36 @@ export default function DataConfidencePanel() {
                   </span>
 
                   <span className="font-bold text-slate-900">
-                    {drink.price.toFixed(
-                      2
-                    )}{" "}
-                    {
-                      cruiseLine.currency
-                    }
+                    {typeof drink.price ===
+                      "number" &&
+                    Number.isFinite(
+                      drink.price
+                    )
+                      ? `${drink.price.toFixed(
+                          2
+                        )} ${cruiseLine.currency}`
+                      : "Pendiente"}
                   </span>
                 </div>
 
-                <p className="mt-2 text-xs font-medium text-amber-700">
-                  Precio de referencia
+                <p
+                  className={`mt-2 text-xs font-medium ${
+                    typeof drink.price ===
+                      "number" &&
+                    Number.isFinite(
+                      drink.price
+                    )
+                      ? "text-amber-700"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {typeof drink.price ===
+                    "number" &&
+                  Number.isFinite(
+                    drink.price
+                  )
+                    ? "Precio de referencia"
+                    : "Precio pendiente"}
                 </p>
               </div>
             )
