@@ -8,9 +8,15 @@ import {
   ReactNode,
 } from "react";
 
-import type {
-  CruiseLineKey,
+import {
+  cruiseLines,
+  type CruiseLineKey,
 } from "@/data/cruiseLines";
+
+import {
+  getAllPackages,
+  getDefaultCruiseLine,
+} from "@/lib/packageService";
 
 export type CustomPackagePrices = Record<
   string,
@@ -43,7 +49,7 @@ export type WizardData = {
   premiumSpirits: boolean;
 
   /*
-   * Agua embotellada v2.
+   * Agua embotellada.
    */
   bottledWaterDailyAllowance: boolean;
   bottledWaterUnlimited: boolean;
@@ -61,15 +67,14 @@ export type WizardData = {
 };
 
 /*
- * Estructura antigua almacenada
- * en localStorage.
+ * Estructura histórica almacenada
+ * por versiones anteriores.
  *
- * Estos campos NO forman parte del
- * estado actual de DrinkPilot.
+ * Estas propiedades NO forman parte
+ * del estado moderno.
  *
- * Existen exclusivamente para poder
- * migrar sesiones creadas antes del
- * modelo customPackagePrices.
+ * Existen únicamente para migrar
+ * sesiones antiguas.
  */
 type LegacyStoredWizardData =
   Partial<WizardData> & {
@@ -99,47 +104,95 @@ const STORAGE_KEY =
   "drinkpilot-wizard";
 
 /*
- * Precios iniciales de Costa.
+ * NAVIERA POR DEFECTO
  *
- * Cuando incorporemos nuevas navieras,
- * esta inicialización podrá generarse
- * desde la configuración activa.
+ * Store ya no conoce el literal
+ * de ninguna compañía.
  */
-const initialCustomPackagePrices:
-  CustomPackagePrices = {
-    myDrinksSoft: null,
-    myDrinks: null,
-    myDrinksPlus: null,
+const DEFAULT_CRUISE_LINE =
+  getDefaultCruiseLine();
+
+/*
+ * Crea el mapa vacío de precios
+ * correspondiente a una naviera.
+ *
+ * Si mañana una naviera tiene:
+ *
+ * packageA
+ * packageB
+ * packageC
+ *
+ * devolverá automáticamente:
+ *
+ * {
+ *   packageA: null,
+ *   packageB: null,
+ *   packageC: null
+ * }
+ */
+function createEmptyPackagePrices(
+  cruiseLine: CruiseLineKey
+): CustomPackagePrices {
+  return Object.fromEntries(
+    getAllPackages(
+      cruiseLine
+    ).map(
+      (pkg) => [
+        pkg.key,
+        null,
+      ]
+    )
+  );
+}
+
+function createInitialData(
+  cruiseLine:
+    CruiseLineKey =
+      DEFAULT_CRUISE_LINE
+): WizardData {
+  return {
+    cruiseLine,
+
+    days: 0,
+
+    coffee: 0,
+    water: 0,
+    soda: 0,
+    beer: 0,
+    wine: 0,
+    cocktail: 0,
+
+    drinksPerDay: 0,
+
+    nonAlcoholicCocktails:
+      false,
+
+    premiumCocktails:
+      false,
+
+    bottledBeer:
+      false,
+
+    premiumSpirits:
+      false,
+
+    bottledWaterDailyAllowance:
+      false,
+
+    bottledWaterUnlimited:
+      false,
+
+    customPackagePrices:
+      createEmptyPackagePrices(
+        cruiseLine
+      ),
+
+    people: 1,
   };
+}
 
-const initialData: WizardData = {
-  cruiseLine: "costa",
-
-  days: 0,
-
-  coffee: 0,
-  water: 0,
-  soda: 0,
-  beer: 0,
-  wine: 0,
-  cocktail: 0,
-
-  drinksPerDay: 0,
-
-  nonAlcoholicCocktails: false,
-  premiumCocktails: false,
-  bottledBeer: false,
-  premiumSpirits: false,
-
-  bottledWaterDailyAllowance: false,
-  bottledWaterUnlimited: false,
-
-  customPackagePrices: {
-    ...initialCustomPackagePrices,
-  },
-
-  people: 1,
-};
+const initialData =
+  createInitialData();
 
 const StoreContext =
   createContext<StoreContextType | null>(
@@ -156,6 +209,20 @@ function sanitizePrice(
   )
     ? value
     : null;
+}
+
+/*
+ * Comprueba que una clave almacenada
+ * corresponde realmente a una naviera
+ * registrada.
+ */
+function isCruiseLineKey(
+  value: unknown
+): value is CruiseLineKey {
+  return (
+    typeof value === "string" &&
+    value in cruiseLines
+  );
 }
 
 function sanitizeCustomPackagePrices(
@@ -177,7 +244,52 @@ function sanitizeCustomPackagePrices(
     Object.entries(value)
   ) {
     result[key] =
-      sanitizePrice(rawValue);
+      sanitizePrice(
+        rawValue
+      );
+  }
+
+  return result;
+}
+
+/*
+ * Filtra los precios almacenados para
+ * conservar únicamente packageKeys que
+ * pertenecen a la naviera activa.
+ *
+ * Esto evita mezclar accidentalmente
+ * paquetes de compañías diferentes.
+ */
+function resolvePackagePrices(
+  cruiseLine: CruiseLineKey,
+  storedPrices:
+    CustomPackagePrices
+): CustomPackagePrices {
+  const emptyPrices =
+    createEmptyPackagePrices(
+      cruiseLine
+    );
+
+  const result:
+    CustomPackagePrices = {
+      ...emptyPrices,
+  };
+
+  for (
+    const packageKey of
+    Object.keys(
+      emptyPrices
+    )
+  ) {
+    if (
+      packageKey in
+      storedPrices
+    ) {
+      result[packageKey] =
+        storedPrices[
+          packageKey
+        ];
+    }
   }
 
   return result;
@@ -188,10 +300,12 @@ export function StoreProvider({
 }: {
   children: ReactNode;
 }) {
-  const [data, setData] =
-    useState<WizardData>(
-      initialData
-    );
+  const [
+    data,
+    setData,
+  ] = useState<WizardData>(
+    initialData
+  );
 
   const [
     hydrated,
@@ -212,32 +326,30 @@ export function StoreProvider({
           ) as LegacyStoredWizardData;
 
         /*
-         * MIGRACIÓN LEGACY
+         * NAVIERA GUARDADA
          *
-         * Recuperamos precios guardados
-         * antes de customPackagePrices.
+         * Si la clave ya no existe o
+         * la sesión es antigua,
+         * utilizamos la naviera
+         * configurada por defecto.
          */
-        const legacySoftPrice =
-          sanitizePrice(
-            parsedData
-              .myDrinksSoftCustomPrice
-          );
+        const cruiseLine:
+          CruiseLineKey =
+            isCruiseLineKey(
+              parsedData.cruiseLine
+            )
+              ? parsedData
+                  .cruiseLine
+              : DEFAULT_CRUISE_LINE;
 
-        const legacyMyDrinksPrice =
-          sanitizePrice(
-            parsedData
-              .myDrinksCustomPrice
-          );
-
-        const legacyPlusPrice =
-          sanitizePrice(
-            parsedData
-              .myDrinksPlusCustomPrice
+        const baseData =
+          createInitialData(
+            cruiseLine
           );
 
         /*
-         * Recuperamos el nuevo modelo
-         * si la sesión ya lo contiene.
+         * Recuperamos precios del
+         * modelo moderno.
          */
         const storedCustomPrices =
           sanitizeCustomPackagePrices(
@@ -246,135 +358,202 @@ export function StoreProvider({
           );
 
         /*
-         * El modelo nuevo tiene
-         * prioridad.
+         * MIGRACIÓN HISTÓRICA
          *
-         * Si una clave concreta no
-         * existe todavía, utilizamos
-         * el precio legacy correspondiente.
+         * Las sesiones anteriores al
+         * mapa customPackagePrices
+         * almacenaban tres propiedades
+         * independientes.
+         *
+         * Esa estructura pertenecía a
+         * la antigua naviera por defecto.
+         *
+         * Solo aplicamos esta migración
+         * cuando la sesión corresponde
+         * precisamente a esa naviera.
          */
-        const customPackagePrices:
-          CustomPackagePrices = {
-            ...initialCustomPackagePrices,
+        if (
+          cruiseLine ===
+          DEFAULT_CRUISE_LINE
+        ) {
+          const legacySoftPrice =
+            sanitizePrice(
+              parsedData
+                .myDrinksSoftCustomPrice
+            );
 
-            myDrinksSoft:
+          const legacyStandardPrice =
+            sanitizePrice(
+              parsedData
+                .myDrinksCustomPrice
+            );
+
+          const legacyPlusPrice =
+            sanitizePrice(
+              parsedData
+                .myDrinksPlusCustomPrice
+            );
+
+          /*
+           * IMPORTANTE:
+           *
+           * Estas tres claves solo
+           * aparecen aquí porque son
+           * nombres históricos que
+           * debemos reconocer.
+           *
+           * Store no las utiliza para
+           * crear el estado moderno.
+           */
+          if (
+            !(
               "myDrinksSoft" in
               storedCustomPrices
-                ? storedCustomPrices
-                    .myDrinksSoft
-                : legacySoftPrice,
+            ) &&
+            legacySoftPrice !==
+              null
+          ) {
+            storedCustomPrices
+              .myDrinksSoft =
+              legacySoftPrice;
+          }
 
-            myDrinks:
+          if (
+            !(
               "myDrinks" in
               storedCustomPrices
-                ? storedCustomPrices
-                    .myDrinks
-                : legacyMyDrinksPrice,
+            ) &&
+            legacyStandardPrice !==
+              null
+          ) {
+            storedCustomPrices
+              .myDrinks =
+              legacyStandardPrice;
+          }
 
-            myDrinksPlus:
+          if (
+            !(
               "myDrinksPlus" in
               storedCustomPrices
-                ? storedCustomPrices
-                    .myDrinksPlus
-                : legacyPlusPrice,
+            ) &&
+            legacyPlusPrice !==
+              null
+          ) {
+            storedCustomPrices
+              .myDrinksPlus =
+              legacyPlusPrice;
+          }
+        }
 
-            ...storedCustomPrices,
-          };
+        /*
+         * Solo dejamos pasar precios
+         * pertenecientes a los paquetes
+         * de la naviera activa.
+         */
+        const customPackagePrices =
+          resolvePackagePrices(
+            cruiseLine,
+            storedCustomPrices
+          );
 
         setData({
-          /*
-           * Actualmente solo Costa está
-           * registrada como opción válida.
-           */
-          cruiseLine:
-            parsedData.cruiseLine ===
-            "costa"
-              ? parsedData.cruiseLine
-              : initialData.cruiseLine,
+          cruiseLine,
 
           days:
             typeof parsedData.days ===
             "number"
               ? parsedData.days
-              : initialData.days,
+              : baseData.days,
 
           coffee:
             typeof parsedData.coffee ===
             "number"
               ? parsedData.coffee
-              : initialData.coffee,
+              : baseData.coffee,
 
           water:
             typeof parsedData.water ===
             "number"
               ? parsedData.water
-              : initialData.water,
+              : baseData.water,
 
           soda:
             typeof parsedData.soda ===
             "number"
               ? parsedData.soda
-              : initialData.soda,
+              : baseData.soda,
 
           beer:
             typeof parsedData.beer ===
             "number"
               ? parsedData.beer
-              : initialData.beer,
+              : baseData.beer,
 
           wine:
             typeof parsedData.wine ===
             "number"
               ? parsedData.wine
-              : initialData.wine,
+              : baseData.wine,
 
           cocktail:
             typeof parsedData.cocktail ===
             "number"
               ? parsedData.cocktail
-              : initialData.cocktail,
+              : baseData.cocktail,
 
           drinksPerDay:
             typeof parsedData.drinksPerDay ===
             "number"
               ? parsedData.drinksPerDay
-              : initialData.drinksPerDay,
+              : baseData.drinksPerDay,
 
           nonAlcoholicCocktails:
             typeof parsedData.nonAlcoholicCocktails ===
             "boolean"
-              ? parsedData.nonAlcoholicCocktails
-              : initialData.nonAlcoholicCocktails,
+              ? parsedData
+                  .nonAlcoholicCocktails
+              : baseData
+                  .nonAlcoholicCocktails,
 
           premiumCocktails:
             typeof parsedData.premiumCocktails ===
             "boolean"
-              ? parsedData.premiumCocktails
-              : initialData.premiumCocktails,
+              ? parsedData
+                  .premiumCocktails
+              : baseData
+                  .premiumCocktails,
 
           bottledBeer:
             typeof parsedData.bottledBeer ===
             "boolean"
-              ? parsedData.bottledBeer
-              : initialData.bottledBeer,
+              ? parsedData
+                  .bottledBeer
+              : baseData
+                  .bottledBeer,
 
           premiumSpirits:
             typeof parsedData.premiumSpirits ===
             "boolean"
-              ? parsedData.premiumSpirits
-              : initialData.premiumSpirits,
+              ? parsedData
+                  .premiumSpirits
+              : baseData
+                  .premiumSpirits,
 
           bottledWaterDailyAllowance:
             typeof parsedData.bottledWaterDailyAllowance ===
             "boolean"
-              ? parsedData.bottledWaterDailyAllowance
-              : initialData.bottledWaterDailyAllowance,
+              ? parsedData
+                  .bottledWaterDailyAllowance
+              : baseData
+                  .bottledWaterDailyAllowance,
 
           bottledWaterUnlimited:
             typeof parsedData.bottledWaterUnlimited ===
             "boolean"
-              ? parsedData.bottledWaterUnlimited
-              : initialData.bottledWaterUnlimited,
+              ? parsedData
+                  .bottledWaterUnlimited
+              : baseData
+                  .bottledWaterUnlimited,
 
           customPackagePrices,
 
@@ -382,7 +561,7 @@ export function StoreProvider({
             typeof parsedData.people ===
             "number"
               ? parsedData.people
-              : initialData.people,
+              : baseData.people,
         });
       }
     } catch (error) {
@@ -402,16 +581,17 @@ export function StoreProvider({
 
     try {
       /*
-       * A partir de esta versión,
-       * solo se persiste WizardData
-       * moderno.
+       * Persistimos únicamente
+       * WizardData moderno.
        *
-       * Los campos legacy dejan de
-       * escribirse en localStorage.
+       * Los campos históricos no
+       * vuelven a escribirse.
        */
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(data)
+        JSON.stringify(
+          data
+        )
       );
     } catch (error) {
       console.error(
@@ -436,13 +616,9 @@ export function StoreProvider({
       );
     }
 
-    setData({
-      ...initialData,
-
-      customPackagePrices: {
-        ...initialCustomPackagePrices,
-      },
-    });
+    setData(
+      createInitialData()
+    );
   }
 
   return (

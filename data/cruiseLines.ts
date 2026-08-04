@@ -11,11 +11,10 @@ import { costaMetadata } from "@/data/metadata";
  * Registro central de navieras
  * disponibles en DrinkPilot.
  *
- * Por ahora únicamente existe Costa.
- *
- * Las siguientes navieras se añadirán
- * aquí sin necesidad de modificar
- * directamente el motor económico.
+ * Las nuevas compañías se añaden aquí
+ * sin necesidad de modificar directamente
+ * el motor económico, Store o las páginas
+ * dinámicas del wizard.
  */
 export const cruiseLines = {
   costa: {
@@ -42,16 +41,23 @@ export const cruiseLines = {
 /*
  * Clave universal de naviera.
  *
- * Actualmente:
- *
- * "costa"
- *
- * En el futuro TypeScript ampliará
- * automáticamente esta unión cuando
- * añadamos nuevas navieras al registro.
+ * TypeScript ampliará automáticamente
+ * esta unión cuando añadamos nuevas
+ * compañías al registro.
  */
 export type CruiseLineKey =
   keyof typeof cruiseLines;
+
+/*
+ * NAVIERA POR DEFECTO
+ *
+ * Este es el único lugar del proyecto
+ * donde decidimos qué compañía se utiliza
+ * cuando el usuario todavía no ha elegido
+ * explícitamente una.
+ */
+export const DEFAULT_CRUISE_LINE:
+  CruiseLineKey = "costa";
 
 /*
  * Devuelve la configuración completa
@@ -60,7 +66,9 @@ export type CruiseLineKey =
 export function getCruiseLine(
   cruiseLine: CruiseLineKey
 ) {
-  return cruiseLines[cruiseLine];
+  return cruiseLines[
+    cruiseLine
+  ];
 }
 
 /*

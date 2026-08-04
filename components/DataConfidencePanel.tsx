@@ -1,6 +1,12 @@
-import { costaMetadata } from "@/data/metadata";
-import { costaOnboardPrices } from "@/data/onboardPrices";
-import { costaPackages } from "@/data/packages";
+"use client";
+
+import {
+  getCruiseLine,
+} from "@/data/cruiseLines";
+
+import {
+  useStore,
+} from "@/lib/store";
 
 type ConfidenceLevel =
   | "verified"
@@ -53,10 +59,97 @@ function ConfidenceBadge({
   );
 }
 
+function getPackageConfidenceLevel(
+  inclusionsStatus: string
+): ConfidenceLevel {
+  if (
+    inclusionsStatus ===
+    "verified"
+  ) {
+    return "verified";
+  }
+
+  if (
+    inclusionsStatus ===
+    "partial-verified"
+  ) {
+    return "partial";
+  }
+
+  return "pending";
+}
+
+function getEconomicConfidenceLevel(
+  economicActivation: string,
+  status: string
+): ConfidenceLevel {
+  if (
+    economicActivation ===
+    "user-price-only"
+  ) {
+    return "pending";
+  }
+
+  if (
+    status ===
+    "verified"
+  ) {
+    return "verified";
+  }
+
+  return "pending";
+}
+
+function getPriceLabel(
+  priceStatus: string
+): string {
+  if (
+    priceStatus ===
+    "reference"
+  ) {
+    return "Precio de referencia";
+  }
+
+  if (
+    priceStatus ===
+    "pending"
+  ) {
+    return "Precio pendiente";
+  }
+
+  return priceStatus;
+}
+
 export default function DataConfidencePanel() {
+  const {
+    data,
+  } = useStore();
+
+  /*
+   * NAVIERA ACTIVA
+   *
+   * El panel ya no importa directamente
+   * datos de ninguna compañía concreta.
+   */
+  const cruiseLine =
+    getCruiseLine(
+      data.cruiseLine
+    );
+
+  const metadata =
+    cruiseLine.metadata;
+
+  const onboardPrices =
+    cruiseLine.onboardPrices;
+
+  const packages =
+    Object.values(
+      cruiseLine.packages
+    );
+
   const referenceDrinkPrices =
     Object.values(
-      costaOnboardPrices
+      onboardPrices
     ).filter(
       (drink) =>
         drink.status ===
@@ -66,17 +159,17 @@ export default function DataConfidencePanel() {
   const allDrinkPricesAreReference =
     referenceDrinkPrices.length ===
     Object.keys(
-      costaOnboardPrices
+      onboardPrices
     ).length;
 
-  const soft =
-    costaPackages.myDrinksSoft;
-
-  const myDrinks =
-    costaPackages.myDrinks;
-
-  const myDrinksPlus =
-    costaPackages.myDrinksPlus;
+  const verifiedPackages =
+    packages.filter(
+      (pkg) =>
+        pkg.existenceStatus ===
+          "verified" &&
+        pkg.inclusionsStatus ===
+          "verified"
+    );
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -97,7 +190,7 @@ export default function DataConfidencePanel() {
         </p>
       </div>
 
-      {/* RESUMEN DE CONFIANZA */}
+      {/* RESUMEN */}
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {/* DATOS VERIFICADOS */}
@@ -120,29 +213,28 @@ export default function DataConfidencePanel() {
           </div>
 
           <ul className="mt-4 space-y-3 text-sm leading-6 text-green-950">
-            <li>
-              <strong>
-                My Drinks
-              </strong>
-              <br />
-              Existencia e inclusiones
-              verificadas.
-            </li>
+            {verifiedPackages.map(
+              (pkg) => (
+                <li key={pkg.id}>
+                  <strong>
+                    {pkg.name}
+                  </strong>
 
-            <li>
-              <strong>
-                My Drinks Plus
-              </strong>
-              <br />
-              Existencia e inclusiones
-              verificadas.
-            </li>
+                  <br />
+
+                  Existencia e inclusiones
+                  verificadas.
+                </li>
+              )
+            )}
 
             <li>
               <strong>
                 Restricciones
               </strong>
+
               <br />
+
               Contrastadas con la
               documentación utilizada
               por DrinkPilot.
@@ -154,7 +246,7 @@ export default function DataConfidencePanel() {
               Inclusiones revisadas:{" "}
               <strong>
                 {
-                  costaMetadata
+                  metadata
                     .verification
                     .inclusionsLastVerified
                 }
@@ -165,7 +257,7 @@ export default function DataConfidencePanel() {
               Restricciones revisadas:{" "}
               <strong>
                 {
-                  costaMetadata
+                  metadata
                     .verification
                     .restrictionsLastVerified
                 }
@@ -199,9 +291,11 @@ export default function DataConfidencePanel() {
                 Precio diario de los
                 paquetes
               </strong>
+
               <br />
-              Los importes de My Drinks
-              y My Drinks Plus son
+
+              Los importes utilizados
+              como referencia son
               orientativos y pueden
               variar según reserva.
             </li>
@@ -210,7 +304,9 @@ export default function DataConfidencePanel() {
               <strong>
                 Precios individuales
               </strong>
+
               <br />
+
               Se utilizan para estimar
               cuánto costaría pagar el
               consumo por separado.
@@ -221,12 +317,12 @@ export default function DataConfidencePanel() {
             <p>
               Estado paquetes:{" "}
               <strong>
-                {costaMetadata
+                {metadata
                   .verification
                   .packagePricesStatus ===
                 "reference"
                   ? "Referencia"
-                  : costaMetadata
+                  : metadata
                       .verification
                       .packagePricesStatus}
               </strong>
@@ -237,7 +333,7 @@ export default function DataConfidencePanel() {
               <strong>
                 {allDrinkPricesAreReference
                   ? "Referencia"
-                  : costaMetadata
+                  : metadata
                       .verification
                       .individualDrinkPricesStatus}
               </strong>
@@ -261,212 +357,187 @@ export default function DataConfidencePanel() {
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          {/* MY DRINKS SOFT */}
+          {packages.map(
+            (pkg) => {
+              const packageConfidence =
+                getPackageConfidenceLevel(
+                  pkg.inclusionsStatus
+                );
 
-          <div className="rounded-xl border border-sky-200 bg-sky-50 p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-bold text-slate-900">
-                  {soft.icon}{" "}
-                  {soft.name}
-                </p>
+              const economicConfidence =
+                getEconomicConfidenceLevel(
+                  pkg.economicActivation,
+                  pkg.status
+                );
 
-                <p className="mt-1 text-xs font-medium text-slate-600">
-                  Sin alcohol
-                </p>
-              </div>
+              const hasReferencePrice =
+                typeof pkg.pricePerDay ===
+                  "number" &&
+                Number.isFinite(
+                  pkg.pricePerDay
+                ) &&
+                pkg.pricePerDay >
+                  0;
 
-              <ConfidenceBadge
-                level="partial"
-              />
-            </div>
+              const isUserPriceOnly =
+                pkg.economicActivation ===
+                "user-price-only";
 
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Existencia
-                </p>
+              return (
+                <div
+                  key={pkg.id}
+                  className={`rounded-xl border p-5 ${
+                    packageConfidence ===
+                    "verified"
+                      ? "border-green-200 bg-green-50"
+                      : packageConfidence ===
+                        "partial"
+                      ? "border-sky-200 bg-sky-50"
+                      : "border-slate-200 bg-slate-50"
+                  }`}
+                >
+                  {/* CABECERA */}
 
-                <p>
-                  Verificada.
-                </p>
-              </div>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-bold text-slate-900">
+                        {
+                          pkg.icon
+                        }{" "}
+                        {
+                          pkg.name
+                        }
+                      </p>
 
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Inclusiones
-                </p>
+                      {!pkg.includesAlcohol && (
+                        <p className="mt-1 text-xs font-medium text-slate-600">
+                          Sin alcohol
+                        </p>
+                      )}
+                    </div>
 
-                <p>
-                  Verificadas
-                  parcialmente mediante
-                  la evidencia disponible.
-                </p>
-              </div>
+                    <ConfidenceBadge
+                      level={
+                        packageConfidence
+                      }
+                    />
+                  </div>
 
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Precio
-                </p>
+                  {/* ESTADO */}
 
-                <p>
-                  Pendiente de
-                  verificación.
-                </p>
-              </div>
-            </div>
+                  <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        Existencia
+                      </p>
 
-            <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-slate-700">
-                  Comparación económica
-                </span>
+                      <p>
+                        {pkg.existenceStatus ===
+                        "verified"
+                          ? "Verificada."
+                          : "Pendiente de verificación."}
+                      </p>
+                    </div>
 
-                <ConfidenceBadge
-                  level="pending"
-                />
-              </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        Inclusiones
+                      </p>
 
-              <p className="mt-2 text-xs leading-5 text-slate-600">
-                My Drinks Soft está
-                identificado, pero no se
-                utiliza todavía para
-                recomendar el paquete más
-                rentable porque no
-                disponemos de un precio
-                suficientemente fiable.
-              </p>
-            </div>
-          </div>
+                      <p>
+                        {pkg.inclusionsStatus ===
+                        "verified"
+                          ? "Verificadas."
+                          : pkg.inclusionsStatus ===
+                            "partial-verified"
+                          ? "Verificadas parcialmente mediante la evidencia disponible."
+                          : "Pendientes de verificación."}
+                      </p>
+                    </div>
 
-          {/* MY DRINKS */}
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        Precio
+                      </p>
 
-          <div className="rounded-xl border border-green-200 bg-green-50 p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-bold text-slate-900">
-                  {myDrinks.icon}{" "}
-                  {myDrinks.name}
-                </p>
-              </div>
+                      {hasReferencePrice ? (
+                        <p>
+                          {
+                            pkg.pricePerDay
+                          }{" "}
+                          {
+                            pkg.currency
+                          }{" "}
+                          / día como
+                          referencia.
+                        </p>
+                      ) : (
+                        <p>
+                          {
+                            getPriceLabel(
+                              pkg.priceStatus
+                            )
+                          }
+                          .
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-              <ConfidenceBadge
-                level="verified"
-              />
-            </div>
+                  {/* COMPARACIÓN ECONÓMICA */}
 
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Existencia e
-                  inclusiones
-                </p>
+                  <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-semibold text-slate-700">
+                        Comparación
+                        económica
+                      </span>
 
-                <p>
-                  Verificadas.
-                </p>
-              </div>
+                      <ConfidenceBadge
+                        level={
+                          economicConfidence
+                        }
+                      />
+                    </div>
 
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Precio utilizado
-                </p>
+                    {isUserPriceOnly ? (
+                      <p className="mt-2 text-xs leading-5 text-slate-600">
+                        El paquete está
+                        identificado, pero
+                        necesita un precio
+                        real introducido
+                        por el usuario
+                        para participar en
+                        la comparación
+                        económica.
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-xs leading-5 text-slate-600">
+                        Habilitado para la
+                        comparación. Si
+                        introduces el
+                        precio real de tu
+                        reserva,
+                        DrinkPilot lo
+                        utiliza con
+                        prioridad.
+                      </p>
+                    )}
+                  </div>
 
-                <p>
-                  {
-                    myDrinks.pricePerDay
-                  }
-                  {" € / día "}
-                  como referencia.
-                </p>
-              </div>
-            </div>
+                  {/* NOTA */}
 
-            <div className="mt-4 rounded-lg border border-green-200 bg-white p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-slate-700">
-                  Comparación económica
-                </span>
-
-                <ConfidenceBadge
-                  level="verified"
-                />
-              </div>
-
-              <p className="mt-2 text-xs leading-5 text-slate-600">
-                Habilitado para la
-                comparación. Si introduces
-                el precio real de tu
-                reserva, DrinkPilot lo
-                utiliza con prioridad.
-              </p>
-            </div>
-          </div>
-
-          {/* MY DRINKS PLUS */}
-
-          <div className="rounded-xl border border-green-200 bg-green-50 p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-bold text-slate-900">
-                  {myDrinksPlus.icon}{" "}
-                  {myDrinksPlus.name}
-                </p>
-              </div>
-
-              <ConfidenceBadge
-                level="verified"
-              />
-            </div>
-
-            <div className="mt-4 space-y-3 text-sm leading-6 text-slate-700">
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Existencia e
-                  inclusiones
-                </p>
-
-                <p>
-                  Verificadas.
-                </p>
-              </div>
-
-              <div>
-                <p className="font-semibold text-slate-900">
-                  Precio utilizado
-                </p>
-
-                <p>
-                  {
-                    myDrinksPlus
-                      .pricePerDay
-                  }
-                  {" € / día "}
-                  como referencia.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-lg border border-green-200 bg-white p-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold text-slate-700">
-                  Comparación económica
-                </span>
-
-                <ConfidenceBadge
-                  level="verified"
-                />
-              </div>
-
-              <p className="mt-2 text-xs leading-5 text-slate-600">
-                Habilitado para la
-                comparación. Si introduces
-                el precio real de tu
-                reserva, DrinkPilot lo
-                utiliza con prioridad.
-              </p>
-            </div>
-          </div>
+                  {pkg.priceNote && (
+                    <p className="mt-3 text-xs leading-5 text-slate-500">
+                      {
+                        pkg.priceNote
+                      }
+                    </p>
+                  )}
+                </div>
+              );
+            }
+          )}
         </div>
       </div>
 
@@ -494,31 +565,39 @@ export default function DataConfidencePanel() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {Object.values(
-            costaOnboardPrices
-          ).map((drink) => (
-            <div
-              key={drink.name}
-              className="rounded-lg border border-slate-200 bg-white p-3"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-slate-800">
-                  {drink.icon}{" "}
-                  {drink.name}
-                </span>
+            onboardPrices
+          ).map(
+            (drink) => (
+              <div
+                key={drink.name}
+                className="rounded-lg border border-slate-200 bg-white p-3"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium text-slate-800">
+                    {
+                      drink.icon
+                    }{" "}
+                    {
+                      drink.name
+                    }
+                  </span>
 
-                <span className="font-bold text-slate-900">
-                  {drink.price.toFixed(
-                    2
-                  )}{" "}
-                  €
-                </span>
+                  <span className="font-bold text-slate-900">
+                    {drink.price.toFixed(
+                      2
+                    )}{" "}
+                    {
+                      cruiseLine.currency
+                    }
+                  </span>
+                </div>
+
+                <p className="mt-2 text-xs font-medium text-amber-700">
+                  Precio de referencia
+                </p>
               </div>
-
-              <p className="mt-2 text-xs font-medium text-amber-700">
-                Precio de referencia
-              </p>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
 
@@ -573,7 +652,8 @@ export default function DataConfidencePanel() {
 
             <p className="mt-2 text-xs leading-5 text-slate-600">
               Información que todavía no
-              participa en el cálculo o la
+              participa automáticamente en
+              el cálculo o la
               recomendación.
             </p>
           </div>
@@ -588,15 +668,20 @@ export default function DataConfidencePanel() {
         </p>
 
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Costa Cruceros — información
-          oficial de paquetes de bebidas
-          para el mercado de{" "}
-          {costaMetadata.market}.
+          {
+            cruiseLine.name
+          }{" "}
+          — información oficial de
+          paquetes de bebidas para el
+          mercado de{" "}
+          {
+            metadata.market
+          }.
         </p>
 
         <a
           href={
-            costaMetadata.sources
+            metadata.sources
               .officialDrinksPage
           }
           target="_blank"
