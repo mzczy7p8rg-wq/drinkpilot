@@ -192,7 +192,9 @@ describe("DrinkPilot recommendation engine", () => {
         wine: 0,
         cocktail: 0,
 
-        myDrinksCustomPrice: 8,
+        customPackagePrices: {
+          myDrinks: 8,
+        },
       });
 
       const myDrinks =
@@ -357,7 +359,9 @@ describe("DrinkPilot recommendation engine", () => {
       wine: 0,
       cocktail: 0,
 
-      myDrinksCustomPrice: 9.49,
+      customPackagePrices: {
+        myDrinks: 9.49,
+      },
     });
 
     const myDrinks =
@@ -384,7 +388,9 @@ describe("DrinkPilot recommendation engine", () => {
       wine: 0,
       cocktail: 0,
 
-      myDrinksCustomPrice: 9.51,
+      customPackagePrices: {
+        myDrinks: 9.51,
+      },
     });
 
     const myDrinks =
@@ -513,8 +519,10 @@ describe("DrinkPilot recommendation engine", () => {
       wine: 1,
       cocktail: 1,
 
-      myDrinksCustomPrice: -10,
-      myDrinksPlusCustomPrice: 0,
+      customPackagePrices: {
+        myDrinks: -10,
+        myDrinksPlus: 0,
+      },
     });
 
     const myDrinks =
@@ -1419,8 +1427,9 @@ describe("DrinkPilot recommendation engine", () => {
         nonAlcoholicCocktails:
           true,
 
-        myDrinksSoftCustomPrice:
-          null,
+        customPackagePrices: {
+          myDrinksSoft: null,
+        },
       });
 
     expect(
@@ -1448,8 +1457,9 @@ describe("DrinkPilot recommendation engine", () => {
         nonAlcoholicCocktails:
           true,
 
-        myDrinksSoftCustomPrice:
-          20,
+        customPackagePrices: {
+          myDrinksSoft: 20,
+        },
       });
 
     const soft =
@@ -1503,8 +1513,9 @@ describe("DrinkPilot recommendation engine", () => {
           nonAlcoholicCocktails:
             true,
 
-          myDrinksSoftCustomPrice:
-            price,
+          customPackagePrices: {
+            myDrinksSoft: price,
+          },
         });
 
       expect(
@@ -1533,8 +1544,9 @@ describe("DrinkPilot recommendation engine", () => {
         nonAlcoholicCocktails:
           true,
 
-        myDrinksSoftCustomPrice:
-          15,
+        customPackagePrices: {
+          myDrinksSoft: 15,
+        },
       });
 
     const soft =
@@ -1585,8 +1597,9 @@ describe("DrinkPilot recommendation engine", () => {
         nonAlcoholicCocktails:
           true,
 
-        myDrinksSoftCustomPrice:
-          10,
+        customPackagePrices: {
+          myDrinksSoft: 10,
+        },
       });
 
     const soft =
@@ -1609,5 +1622,116 @@ describe("DrinkPilot recommendation engine", () => {
     ).not.toBe(
       "myDrinksSoft"
     );
+  });
+});describe("Generic custom package prices", () => {
+  it("utiliza customPackagePrices para My Drinks", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 1,
+        wine: 1,
+        cocktail: 1,
+
+        customPackagePrices: {
+          myDrinks: 20,
+        },
+      });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinks"
+      );
+
+    expect(
+      myDrinks?.packagePricePerDay
+    ).toBe(20);
+
+    expect(
+      myDrinks?.priceSource
+    ).toBe("user");
+  });
+
+  it("utiliza exactamente el precio indicado en customPackagePrices", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 1,
+        wine: 1,
+        cocktail: 1,
+
+        customPackagePrices: {
+          myDrinks: 18,
+        },
+      });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinks"
+      );
+
+    expect(
+      myDrinks?.packagePricePerDay
+    ).toBe(18);
+
+    expect(
+      myDrinks?.priceSource
+    ).toBe("user");
+  });
+
+  it("puede activar My Drinks Soft mediante customPackagePrices", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        nonAlcoholicCocktails:
+          true,
+
+        customPackagePrices: {
+          myDrinksSoft: 15,
+        },
+      });
+
+    const soft =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinksSoft"
+      );
+
+    expect(soft).toBeDefined();
+
+    expect(
+      soft?.packagePricePerDay
+    ).toBe(15);
+
+    expect(
+      soft?.priceSource
+    ).toBe("user");
+
+    expect(
+      soft?.referencePricePerDay
+    ).toBeNull();
   });
 });

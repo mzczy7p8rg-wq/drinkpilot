@@ -8,7 +8,11 @@ import ProgressBar from "@/components/ProgressBar";
 
 export default function ReviewPage() {
   const router = useRouter();
-  const { data, hydrated } = useStore();
+
+  const {
+    data,
+    hydrated,
+  } = useStore();
 
   const drinks = [
     {
@@ -43,14 +47,20 @@ export default function ReviewPage() {
     },
   ];
 
-  const activeDrinks = drinks.filter(
-    (drink) => drink.value > 0
-  );
+  const activeDrinks =
+    drinks.filter(
+      (drink) =>
+        drink.value > 0
+    );
 
   const totalDrinksPerDay =
     activeDrinks.reduce(
-      (total, drink) =>
-        total + drink.value,
+      (
+        total,
+        drink
+      ) =>
+        total +
+        drink.value,
       0
     );
 
@@ -75,6 +85,27 @@ export default function ReviewPage() {
       "Agua embotellada sin límite",
   ].filter(Boolean) as string[];
 
+  /*
+   * PRECIOS GENÉRICOS
+   *
+   * Review deja de depender
+   * de los campos legacy del Store.
+   */
+  const softPrice =
+    data.customPackagePrices
+      .myDrinksSoft ??
+    null;
+
+  const myDrinksPrice =
+    data.customPackagePrices
+      .myDrinks ??
+    null;
+
+  const myDrinksPlusPrice =
+    data.customPackagePrices
+      .myDrinksPlus ??
+    null;
+
   if (!hydrated) {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
@@ -88,7 +119,6 @@ export default function ReviewPage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-6 pb-24 sm:px-6 sm:py-10 sm:pb-10">
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
-
         <ProgressBar
           currentStep={6}
           totalSteps={6}
@@ -97,7 +127,6 @@ export default function ReviewPage() {
         {/* CABECERA */}
 
         <div className="mt-2 sm:mt-0">
-
           <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
             Paso 6 de 6
           </p>
@@ -107,22 +136,17 @@ export default function ReviewPage() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Comprueba los datos antes de ver
-            la recomendación.
+            Comprueba los datos antes
+            de ver la recomendación.
           </p>
-
         </div>
 
         {/* DATOS BÁSICOS */}
 
         <section className="mt-6 rounded-2xl border border-slate-200 p-4 sm:mt-8 sm:p-5">
-
           <div className="grid grid-cols-2 gap-4 sm:gap-5">
-
             <div className="min-w-0">
-
               <div className="flex items-start justify-between gap-2">
-
                 <p className="text-sm text-slate-500">
                   🚢 Duración
                 </p>
@@ -133,7 +157,6 @@ export default function ReviewPage() {
                 >
                   Editar
                 </Link>
-
               </div>
 
               <p className="mt-2 text-lg font-bold text-slate-900 sm:text-xl">
@@ -142,13 +165,10 @@ export default function ReviewPage() {
                   ? "día"
                   : "días"}
               </p>
-
             </div>
 
             <div className="min-w-0 border-l border-slate-200 pl-4 sm:pl-5">
-
               <div className="flex items-start justify-between gap-2">
-
                 <p className="text-sm text-slate-500">
                   👥 Viajeros
                 </p>
@@ -159,7 +179,6 @@ export default function ReviewPage() {
                 >
                   Editar
                 </Link>
-
               </div>
 
               <p className="mt-2 text-lg font-bold text-slate-900 sm:text-xl">
@@ -168,21 +187,15 @@ export default function ReviewPage() {
                   ? "persona"
                   : "personas"}
               </p>
-
             </div>
-
           </div>
-
         </section>
 
         {/* CONSUMO */}
 
         <section className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
-
           <div className="flex items-start justify-between gap-3">
-
             <div className="min-w-0 flex-1">
-
               <h2 className="font-bold text-slate-900">
                 🍹 Consumo diario
               </h2>
@@ -194,7 +207,6 @@ export default function ReviewPage() {
                   : "bebidas"}{" "}
                 por persona / día
               </p>
-
             </div>
 
             <Link
@@ -203,11 +215,9 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
-
             {activeDrinks.map(
               (drink) => (
                 <div
@@ -225,44 +235,45 @@ export default function ReviewPage() {
                 </div>
               )
             )}
-
           </div>
-
         </section>
 
         {/* PREFERENCIAS */}
 
         <section className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
-
           <div className="flex items-start justify-between gap-3">
-
             <div className="min-w-0">
-
               <h2 className="font-bold text-slate-900">
                 ⭐ Preferencias
               </h2>
 
-              {preferences.length > 0 ? (
+              {preferences.length >
+              0 ? (
                 <div className="mt-3 space-y-2">
-
                   {preferences.map(
-                    (preference) => (
+                    (
+                      preference
+                    ) => (
                       <p
-                        key={preference}
+                        key={
+                          preference
+                        }
                         className="text-sm leading-5 text-slate-700"
                       >
-                        ✓ {preference}
+                        ✓{" "}
+                        {
+                          preference
+                        }
                       </p>
                     )
                   )}
-
                 </div>
               ) : (
                 <p className="mt-3 text-sm leading-5 text-slate-500">
-                  Sin preferencias premium adicionales.
+                  Sin preferencias
+                  premium adicionales.
                 </p>
               )}
-
             </div>
 
             <Link
@@ -271,19 +282,16 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
-
         </section>
 
         {/* PRECIOS */}
 
         <section className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
-
           <div className="flex items-start justify-between gap-3">
-
             <h2 className="font-bold text-slate-900">
-              🎟️ Precios de los paquetes
+              🎟️ Precios de los
+              paquetes
             </h2>
 
             <Link
@@ -292,11 +300,9 @@ export default function ReviewPage() {
             >
               Editar
             </Link>
-
           </div>
 
           <div className="mt-4 space-y-4">
-
             {/* MY DRINKS SOFT */}
 
             <div className="rounded-xl bg-slate-50 p-3 sm:p-4">
@@ -307,25 +313,31 @@ export default function ReviewPage() {
                   </p>
 
                   <p className="mt-1 text-xs text-slate-500">
-                    por persona / día
+                    por persona /
+                    día
                   </p>
                 </div>
 
                 <div className="text-right">
                   <p className="font-bold text-slate-900">
-                    {data.myDrinksSoftCustomPrice !== null
-                      ? `${data.myDrinksSoftCustomPrice.toFixed(2)} €`
+                    {softPrice !==
+                    null
+                      ? `${softPrice.toFixed(
+                          2
+                        )} €`
                       : "Pendiente"}
                   </p>
 
                   <p
                     className={`mt-1 text-xs font-medium ${
-                      data.myDrinksSoftCustomPrice !== null
+                      softPrice !==
+                      null
                         ? "text-sky-700"
                         : "text-slate-500"
                     }`}
                   >
-                    {data.myDrinksSoftCustomPrice !== null
+                    {softPrice !==
+                    null
                       ? "✓ Tu reserva"
                       : "Sin precio de referencia"}
                   </p>
@@ -336,102 +348,100 @@ export default function ReviewPage() {
             {/* MY DRINKS */}
 
             <div className="rounded-xl bg-slate-50 p-3 sm:p-4">
-
               <div className="flex items-start justify-between gap-3">
-
                 <div>
                   <p className="font-semibold text-slate-800">
                     My Drinks
                   </p>
 
                   <p className="mt-1 text-xs text-slate-500">
-                    por persona / día
+                    por persona /
+                    día
                   </p>
                 </div>
 
                 <div className="text-right">
-
                   <p className="font-bold text-slate-900">
-                    {data.myDrinksCustomPrice !== null
-                      ? `${data.myDrinksCustomPrice.toFixed(2)} €`
+                    {myDrinksPrice !==
+                    null
+                      ? `${myDrinksPrice.toFixed(
+                          2
+                        )} €`
                       : "34.00 €"}
                   </p>
 
                   <p
                     className={`mt-1 text-xs font-medium ${
-                      data.myDrinksCustomPrice !== null
+                      myDrinksPrice !==
+                      null
                         ? "text-sky-700"
                         : "text-amber-700"
                     }`}
                   >
-                    {data.myDrinksCustomPrice !== null
+                    {myDrinksPrice !==
+                    null
                       ? "✓ Tu reserva"
                       : "⚠ Referencia"}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
             {/* MY DRINKS PLUS */}
 
             <div className="rounded-xl bg-slate-50 p-3 sm:p-4">
-
               <div className="flex items-start justify-between gap-3">
-
                 <div>
                   <p className="font-semibold text-slate-800">
                     My Drinks Plus
                   </p>
 
                   <p className="mt-1 text-xs text-slate-500">
-                    por persona / día
+                    por persona /
+                    día
                   </p>
                 </div>
 
                 <div className="text-right">
-
                   <p className="font-bold text-slate-900">
-                    {data.myDrinksPlusCustomPrice !== null
-                      ? `${data.myDrinksPlusCustomPrice.toFixed(2)} €`
+                    {myDrinksPlusPrice !==
+                    null
+                      ? `${myDrinksPlusPrice.toFixed(
+                          2
+                        )} €`
                       : "46.00 €"}
                   </p>
 
                   <p
                     className={`mt-1 text-xs font-medium ${
-                      data.myDrinksPlusCustomPrice !== null
+                      myDrinksPlusPrice !==
+                      null
                         ? "text-sky-700"
                         : "text-amber-700"
                     }`}
                   >
-                    {data.myDrinksPlusCustomPrice !== null
+                    {myDrinksPlusPrice !==
+                    null
                       ? "✓ Tu reserva"
                       : "⚠ Referencia"}
                   </p>
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </section>
 
         {/* CONFIRMACIÓN */}
 
         <div className="mt-5 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Todo listo. DrinkPilot utilizará
-          estos datos para comparar coste y cobertura.
+          💡 Todo listo. DrinkPilot
+          utilizará estos datos para
+          comparar coste y cobertura.
         </div>
 
         {/* NAVEGACIÓN */}
 
         <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-10 sm:gap-4">
-
           <Link
             href="/wizard/people"
             className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
@@ -442,15 +452,15 @@ export default function ReviewPage() {
           <button
             type="button"
             onClick={() =>
-              router.push("/results")
+              router.push(
+                "/results"
+              )
             }
             className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
           >
             Ver recomendación
           </button>
-
         </div>
-
       </div>
     </main>
   );

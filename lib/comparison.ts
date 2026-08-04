@@ -7,10 +7,14 @@ import {
 
 import {
   getAllPackages,
+  getDefaultCruiseLine,
   PackageKey,
 } from "@/lib/packageService";
 
-import { costaOnboardPriceValues } from "@/data/onboardPrices";
+import {
+  CruiseLineKey,
+  getCruiseLine,
+} from "@/data/cruiseLines";
 
 export type PriceSource =
   | "user"
@@ -22,6 +26,16 @@ export type EconomicComparisonStatus =
   | "partial-unknown";
 
 export type ComparisonInput = {
+  /*
+   * Naviera que debe utilizar
+   * el motor.
+   *
+   * Mientras el wizard todavía no
+   * permita seleccionarla, Costa
+   * continúa siendo el valor por defecto.
+   */
+  cruiseLine?: CruiseLineKey;
+
   days: number;
   people: number;
 
@@ -45,23 +59,21 @@ export type ComparisonInput = {
   bottledWaterUnlimited?: boolean;
 
   /*
-   * Precio real de My Drinks Soft
-   * introducido por el usuario.
+   * Precios reales de paquetes
+   * introducidos por el usuario.
    *
-   * Soft no dispone actualmente
-   * de un precio de referencia fiable.
+   * Contrato universal:
+   *
+   * packageKey -> precio personalizado
+   *
+   * El motor no necesita conocer
+   * nombres específicos de paquetes
+   * de ninguna naviera.
    */
-  myDrinksSoftCustomPrice?:
-    | number
-    | null;
-
-  myDrinksCustomPrice?:
-    | number
-    | null;
-
-  myDrinksPlusCustomPrice?:
-    | number
-    | null;
+  customPackagePrices?: Record<
+    string,
+    number | null | undefined
+  >;
 };
 
 export type PackageComparisonResult = {
@@ -83,8 +95,6 @@ export type PackageComparisonResult = {
    * null = no existe actualmente
    * una referencia suficientemente
    * fiable para ese paquete.
-   *
-   * Este es el caso de My Drinks Soft.
    */
   referencePricePerDay:
     number | null;
@@ -95,12 +105,6 @@ export type PackageComparisonResult = {
 
   savings: number;
 
-  /*
-   * Ahorro económicamente comparable.
-   *
-   * null = no puede calcularse con
-   * suficiente precisión.
-   */
   effectiveSavings:
     number | null;
 
@@ -147,7 +151,8 @@ export type ComparisonResult = {
 
 /*
  * Unión completa de paquetes
- * disponibles en la capa de datos.
+ * disponibles mediante la capa
+ * de servicio.
  */
 type AllPackage =
   ReturnType<
@@ -163,13 +168,6 @@ type ResolvedEconomicPackage = {
 
   packageKey: PackageKey;
 
-  /*
-   * Soft no tiene referencia:
-   * null.
-   *
-   * My Drinks / Plus sí tienen
-   * referencia numérica.
-   */
   referencePrice:
     number | null;
 
@@ -200,7 +198,10 @@ function isValidCustomPrice(
 
 /*
  * Obtiene el precio personalizado
- * correspondiente a cada paquete.
+ * correspondiente al packageKey.
+ *
+ * Esta función es completamente
+ * independiente de la naviera.
  */
 function getCustomPrice(
   packageKey: PackageKey,
@@ -209,34 +210,11 @@ function getCustomPrice(
   | number
   | null
   | undefined {
-  if (
-    packageKey ===
-    "myDrinksSoft"
-  ) {
-    return (
-      input.myDrinksSoftCustomPrice
-    );
-  }
-
-  if (
-    packageKey ===
-    "myDrinks"
-  ) {
-    return (
-      input.myDrinksCustomPrice
-    );
-  }
-
-  if (
-    packageKey ===
-    "myDrinksPlus"
-  ) {
-    return (
-      input.myDrinksPlusCustomPrice
-    );
-  }
-
-  return null;
+  return (
+    input.customPackagePrices?.[
+      packageKey
+    ]
+  );
 }
 
 /*
@@ -260,18 +238,15 @@ function resolveEconomicPackage(
     );
 
   /*
-   * MY DRINKS SOFT
+   * PAQUETES ACTIVABLES SOLO
+   * CON PRECIO DEL USUARIO
    *
-   * Solo puede participar cuando
-   * el usuario introduce un precio
-   * real válido.
-   *
-   * Nunca utilizamos un precio
-   * de referencia inventado.
+   * Esta regla ya no depende
+   * de ningún packageKey concreto.
    */
   if (
-    packageKey ===
-    "myDrinksSoft"
+    pkg.economicActivation ===
+    "user-price-only"
   ) {
     if (
       pkg.existenceStatus !==
@@ -307,10 +282,8 @@ function resolveEconomicPackage(
   }
 
   /*
-   * MY DRINKS / MY DRINKS PLUS
-   *
-   * Mantienen la política
-   * económica normal.
+   * PAQUETES NORMALMENTE
+   * HABILITADOS.
    */
   if (
     pkg.economicEligibility !==
@@ -342,7 +315,7 @@ function resolveEconomicPackage(
   }
 
   /*
-   * El precio real de la reserva
+   * Precio real del usuario
    * tiene prioridad.
    */
   if (
@@ -394,11 +367,6 @@ function resolveEconomicPackage(
  * Categorías cuya falta de cobertura
  * impide calcular un ahorro económico
  * efectivo con precisión.
- *
- * Actualmente no disponemos de una
- * cantidad diaria + precio unitario
- * suficientemente definidos para
- * calcular su coste adicional.
  */
 const nonQuantifiedCategories:
   CoverageCategory[] = [
@@ -437,11 +405,6 @@ function resolveEconomicComparison(
   effectiveSavings:
     number | null;
 } {
-  /*
-   * Sin cobertura disponible
-   * no podemos confiar en
-   * el ahorro económico.
-   */
   if (!coverage) {
     return {
       status:
@@ -454,9 +417,7 @@ function resolveEconomicComparison(
 
   /*
    * Cobertura completa:
-   *
-   * el ahorro bruto puede
-   * considerarse ahorro efectivo.
+   * ahorro bruto = ahorro efectivo.
    */
   if (
     coverage.fullyCovered
@@ -471,10 +432,9 @@ function resolveEconomicComparison(
   }
 
   /*
-   * Si falta una categoría cuyo
-   * coste adicional desconocemos,
-   * no podemos dar un ahorro
-   * efectivo.
+   * Si falta una categoría cuyo coste
+   * todavía no podemos cuantificar,
+   * el ahorro final es desconocido.
    */
   const hasUnknownUncoveredCategory =
     coverage
@@ -499,8 +459,7 @@ function resolveEconomicComparison(
 
   /*
    * Preparado para futuras
-   * categorías no cubiertas
-   * pero cuantificables.
+   * categorías cuantificables.
    */
   return {
     status:
@@ -515,14 +474,41 @@ export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
   /*
-   * Resolvemos primero qué paquetes
-   * pueden participar realmente.
+   * NAVIERA ACTIVA
    *
-   * Soft solo aparecerá aquí cuando
-   * haya precio válido del usuario.
+   * Comparison, Coverage, Packages
+   * y Onboard Prices utilizarán
+   * exactamente la misma naviera.
+   */
+  const activeCruiseLine =
+    input.cruiseLine ??
+    getDefaultCruiseLine();
+
+  /*
+   * Configuración completa de
+   * la naviera seleccionada.
+   */
+  const cruiseLine =
+    getCruiseLine(
+      activeCruiseLine
+    );
+
+  const onboardPriceValues =
+    cruiseLine.onboardPriceValues;
+
+  /*
+   * PAQUETES
+   *
+   * Ya no pedimos implícitamente
+   * los paquetes de Costa.
+   *
+   * Utilizamos explícitamente
+   * la naviera activa.
    */
   const economicPackages =
-    getAllPackages()
+    getAllPackages(
+      activeCruiseLine
+    )
       .map((pkg) =>
         resolveEconomicPackage(
           pkg,
@@ -537,20 +523,27 @@ export function compareDrinkPackages(
       );
 
   /*
-   * Si Soft entra económicamente,
-   * necesitamos que coverage.ts
-   * permita analizar también ese
-   * paquete pendiente.
+   * Si existe un paquete económico
+   * activo cuyo estado general sigue
+   * pendiente, también debe incluirse
+   * en el análisis de cobertura.
+   *
+   * La regla es universal y no depende
+   * de un packageKey concreto.
    */
-  const softIsActive =
+  const includePendingPackages =
     economicPackages.some(
       (result) =>
-        result.packageKey ===
-        "myDrinksSoft"
+        result.pkg.status ===
+        "pending"
     );
 
   /*
    * COBERTURA
+   *
+   * Muy importante:
+   * pasamos la MISMA naviera utilizada
+   * por packages y onboard prices.
    */
   const coverageResults =
     calculatePackageCoverage(
@@ -598,13 +591,15 @@ export function compareDrinkPackages(
           false,
       },
       {
-        includePendingPackages:
-          softIsActive,
+        cruiseLine:
+          activeCruiseLine,
+
+        includePendingPackages,
       }
     );
 
   /*
-   * RESULTADOS
+   * RESULTADOS ECONÓMICOS
    */
   const results:
     PackageComparisonResult[] =
@@ -644,28 +639,32 @@ export function compareDrinkPackages(
               cocktail:
                 input.cocktail,
 
+              /*
+               * Estos precios ya proceden
+               * de la naviera activa.
+               */
               coffeePrice:
-                costaOnboardPriceValues
+                onboardPriceValues
                   .coffee,
 
               waterPrice:
-                costaOnboardPriceValues
+                onboardPriceValues
                   .water,
 
               sodaPrice:
-                costaOnboardPriceValues
+                onboardPriceValues
                   .soda,
 
               beerPrice:
-                costaOnboardPriceValues
+                onboardPriceValues
                   .beer,
 
               winePrice:
-                costaOnboardPriceValues
+                onboardPriceValues
                   .wine,
 
               cocktailPrice:
-                costaOnboardPriceValues
+                onboardPriceValues
                   .cocktail,
             });
 
@@ -757,8 +756,7 @@ export function compareDrinkPackages(
       );
 
   /*
-   * Orden económico:
-   * mayor ahorro primero.
+   * Mayor ahorro primero.
    */
   results.sort(
     (a, b) =>
@@ -773,13 +771,6 @@ export function compareDrinkPackages(
    *
    * 1. ahorro positivo;
    * 2. cobertura completa.
-   *
-   * My Drinks Soft puede ganar
-   * únicamente cuando:
-   *
-   * - el usuario introduce precio;
-   * - cubre completamente el perfil;
-   * - produce ahorro positivo.
    */
   const bestPackage =
     results.find(

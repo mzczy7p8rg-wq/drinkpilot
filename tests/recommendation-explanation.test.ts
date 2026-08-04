@@ -147,7 +147,9 @@ describe("DrinkPilot recommendation explanations", () => {
       wine: 0,
       cocktail: 0,
 
-      myDrinksCustomPrice: 9.5,
+      customPackagePrices: {
+        myDrinks: 9.5,
+      },
     });
 
     const myDrinks =
@@ -194,7 +196,9 @@ describe("DrinkPilot recommendation explanations", () => {
       wine: 0,
       cocktail: 0,
 
-      myDrinksCustomPrice: 8,
+      customPackagePrices: {
+        myDrinks: 8,
+      },
     });
 
     const explanation =

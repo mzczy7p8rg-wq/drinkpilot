@@ -8,7 +8,21 @@ import {
   ReactNode,
 } from "react";
 
+import type {
+  CruiseLineKey,
+} from "@/data/cruiseLines";
+
+export type CustomPackagePrices = Record<
+  string,
+  number | null
+>;
+
 export type WizardData = {
+  /*
+   * Naviera activa.
+   */
+  cruiseLine: CruiseLineKey;
+
   days: number;
 
   coffee: number;
@@ -35,27 +49,39 @@ export type WizardData = {
   bottledWaterUnlimited: boolean;
 
   /*
-   * Precios personalizados introducidos
-   * por el usuario desde su reserva.
+   * MODELO UNIVERSAL DE PRECIOS
    *
-   * null = no existe precio personalizado.
-   *
-   * My Drinks y My Drinks Plus pueden
-   * utilizar precio de referencia cuando
-   * el usuario no introduce uno.
-   *
-   * My Drinks Soft NO tiene actualmente
-   * precio de referencia fiable:
-   * solo podrá entrar en la comparación
-   * económica cuando el usuario introduzca
-   * un precio válido de su reserva.
+   * packageKey -> precio real
+   * introducido por el usuario.
    */
-  myDrinksSoftCustomPrice: number | null;
-  myDrinksCustomPrice: number | null;
-  myDrinksPlusCustomPrice: number | null;
+  customPackagePrices:
+    CustomPackagePrices;
 
   people: number;
 };
+
+/*
+ * Estructura antigua almacenada
+ * en localStorage.
+ *
+ * Estos campos NO forman parte del
+ * estado actual de DrinkPilot.
+ *
+ * Existen exclusivamente para poder
+ * migrar sesiones creadas antes del
+ * modelo customPackagePrices.
+ */
+type LegacyStoredWizardData =
+  Partial<WizardData> & {
+    myDrinksSoftCustomPrice?:
+      number | null;
+
+    myDrinksCustomPrice?:
+      number | null;
+
+    myDrinksPlusCustomPrice?:
+      number | null;
+  };
 
 type StoreContextType = {
   data: WizardData;
@@ -72,7 +98,23 @@ type StoreContextType = {
 const STORAGE_KEY =
   "drinkpilot-wizard";
 
+/*
+ * Precios iniciales de Costa.
+ *
+ * Cuando incorporemos nuevas navieras,
+ * esta inicialización podrá generarse
+ * desde la configuración activa.
+ */
+const initialCustomPackagePrices:
+  CustomPackagePrices = {
+    myDrinksSoft: null,
+    myDrinks: null,
+    myDrinksPlus: null,
+  };
+
 const initialData: WizardData = {
+  cruiseLine: "costa",
+
   days: 0,
 
   coffee: 0,
@@ -92,9 +134,9 @@ const initialData: WizardData = {
   bottledWaterDailyAllowance: false,
   bottledWaterUnlimited: false,
 
-  myDrinksSoftCustomPrice: null,
-  myDrinksCustomPrice: null,
-  myDrinksPlusCustomPrice: null,
+  customPackagePrices: {
+    ...initialCustomPackagePrices,
+  },
 
   people: 1,
 };
@@ -104,16 +146,57 @@ const StoreContext =
     null
   );
 
+function sanitizePrice(
+  value: unknown
+): number | null {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value > 0
+  )
+    ? value
+    : null;
+}
+
+function sanitizeCustomPackagePrices(
+  value: unknown
+): CustomPackagePrices {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return {};
+  }
+
+  const result:
+    CustomPackagePrices = {};
+
+  for (
+    const [key, rawValue] of
+    Object.entries(value)
+  ) {
+    result[key] =
+      sanitizePrice(rawValue);
+  }
+
+  return result;
+}
+
 export function StoreProvider({
   children,
 }: {
   children: ReactNode;
 }) {
   const [data, setData] =
-    useState<WizardData>(initialData);
+    useState<WizardData>(
+      initialData
+    );
 
-  const [hydrated, setHydrated] =
-    useState(false);
+  const [
+    hydrated,
+    setHydrated,
+  ] = useState(false);
 
   useEffect(() => {
     try {
@@ -126,9 +209,89 @@ export function StoreProvider({
         const parsedData =
           JSON.parse(
             savedData
-          ) as Partial<WizardData>;
+          ) as LegacyStoredWizardData;
+
+        /*
+         * MIGRACIÓN LEGACY
+         *
+         * Recuperamos precios guardados
+         * antes de customPackagePrices.
+         */
+        const legacySoftPrice =
+          sanitizePrice(
+            parsedData
+              .myDrinksSoftCustomPrice
+          );
+
+        const legacyMyDrinksPrice =
+          sanitizePrice(
+            parsedData
+              .myDrinksCustomPrice
+          );
+
+        const legacyPlusPrice =
+          sanitizePrice(
+            parsedData
+              .myDrinksPlusCustomPrice
+          );
+
+        /*
+         * Recuperamos el nuevo modelo
+         * si la sesión ya lo contiene.
+         */
+        const storedCustomPrices =
+          sanitizeCustomPackagePrices(
+            parsedData
+              .customPackagePrices
+          );
+
+        /*
+         * El modelo nuevo tiene
+         * prioridad.
+         *
+         * Si una clave concreta no
+         * existe todavía, utilizamos
+         * el precio legacy correspondiente.
+         */
+        const customPackagePrices:
+          CustomPackagePrices = {
+            ...initialCustomPackagePrices,
+
+            myDrinksSoft:
+              "myDrinksSoft" in
+              storedCustomPrices
+                ? storedCustomPrices
+                    .myDrinksSoft
+                : legacySoftPrice,
+
+            myDrinks:
+              "myDrinks" in
+              storedCustomPrices
+                ? storedCustomPrices
+                    .myDrinks
+                : legacyMyDrinksPrice,
+
+            myDrinksPlus:
+              "myDrinksPlus" in
+              storedCustomPrices
+                ? storedCustomPrices
+                    .myDrinksPlus
+                : legacyPlusPrice,
+
+            ...storedCustomPrices,
+          };
 
         setData({
+          /*
+           * Actualmente solo Costa está
+           * registrada como opción válida.
+           */
+          cruiseLine:
+            parsedData.cruiseLine ===
+            "costa"
+              ? parsedData.cruiseLine
+              : initialData.cruiseLine,
+
           days:
             typeof parsedData.days ===
             "number"
@@ -213,26 +376,7 @@ export function StoreProvider({
               ? parsedData.bottledWaterUnlimited
               : initialData.bottledWaterUnlimited,
 
-          myDrinksSoftCustomPrice:
-            typeof parsedData.myDrinksSoftCustomPrice ===
-              "number" &&
-            parsedData.myDrinksSoftCustomPrice > 0
-              ? parsedData.myDrinksSoftCustomPrice
-              : null,
-
-          myDrinksCustomPrice:
-            typeof parsedData.myDrinksCustomPrice ===
-              "number" &&
-            parsedData.myDrinksCustomPrice > 0
-              ? parsedData.myDrinksCustomPrice
-              : null,
-
-          myDrinksPlusCustomPrice:
-            typeof parsedData.myDrinksPlusCustomPrice ===
-              "number" &&
-            parsedData.myDrinksPlusCustomPrice > 0
-              ? parsedData.myDrinksPlusCustomPrice
-              : null,
+          customPackagePrices,
 
           people:
             typeof parsedData.people ===
@@ -257,6 +401,14 @@ export function StoreProvider({
     }
 
     try {
+      /*
+       * A partir de esta versión,
+       * solo se persiste WizardData
+       * moderno.
+       *
+       * Los campos legacy dejan de
+       * escribirse en localStorage.
+       */
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(data)
@@ -267,7 +419,10 @@ export function StoreProvider({
         error
       );
     }
-  }, [data, hydrated]);
+  }, [
+    data,
+    hydrated,
+  ]);
 
   function resetData() {
     try {
@@ -281,7 +436,13 @@ export function StoreProvider({
       );
     }
 
-    setData(initialData);
+    setData({
+      ...initialData,
+
+      customPackagePrices: {
+        ...initialCustomPackagePrices,
+      },
+    });
   }
 
   return (
@@ -300,7 +461,9 @@ export function StoreProvider({
 
 export function useStore() {
   const context =
-    useContext(StoreContext);
+    useContext(
+      StoreContext
+    );
 
   if (!context) {
     throw new Error(

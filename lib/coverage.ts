@@ -1,7 +1,12 @@
 import {
   getAllPackages,
+  getDefaultCruiseLine,
   PackageKey,
 } from "@/lib/packageService";
+
+import type {
+  CruiseLineKey,
+} from "@/data/cruiseLines";
 
 export type CoverageInput = {
   coffee: number;
@@ -100,15 +105,38 @@ export type PackageCoverageResult = {
 
 export type CoverageOptions = {
   /*
+   * Naviera cuyos paquetes queremos
+   * analizar.
+   *
+   * Mientras el wizard todavía no
+   * permita elegir compañía, usamos
+   * la naviera por defecto.
+   */
+  cruiseLine?: CruiseLineKey;
+
+  /*
    * Por defecto solo analizamos paquetes
    * completamente habilitados.
    *
    * Este modo permite inspeccionar paquetes
    * pendientes, como My Drinks Soft,
-   * sin activarlos en comparison.ts.
+   * sin activarlos automáticamente en
+   * comparison.ts.
    */
   includePendingPackages?: boolean;
 };
+
+/*
+ * Tipo de paquete devuelto por la
+ * capa de servicio.
+ *
+ * coverage.ts no necesita conocer
+ * directamente los datos de Costa.
+ */
+type CoveragePackage =
+  ReturnType<
+    typeof getAllPackages
+  >[number];
 
 /*
  * Comprueba una categoría de cobertura.
@@ -124,23 +152,20 @@ export type CoverageOptions = {
  * tiene más detalle que un simple booleano.
  */
 function isCategoryCovered(
-  pkg: ReturnType<
-    typeof getAllPackages
-  >[number],
+  pkg: CoveragePackage,
   category: CoverageCategory
 ): boolean {
   /*
    * AGUA EMBOTELLADA DIARIA
    *
-   * My Drinks:
-   * observedCoverage.bottledWaterDailyAllowance = 1
+   * Un paquete puede satisfacer esta
+   * necesidad mediante:
    *
-   * My Drinks Plus:
-   * bottledWaterUnlimited = true
+   * - una asignación diaria observada;
+   * - agua embotellada ilimitada.
    *
-   * Cualquiera de esas dos condiciones
-   * cubre la petición de disponer al menos
-   * de una botella diaria.
+   * La lógica es universal y no depende
+   * del nombre de una naviera concreta.
    */
   if (
     category ===
@@ -167,9 +192,9 @@ function isCategoryCovered(
     }
 
     /*
-     * Un paquete con agua ilimitada también
-     * satisface naturalmente una necesidad
-     * de una botella diaria.
+     * Un paquete con agua ilimitada
+     * satisface naturalmente una
+     * necesidad de una botella diaria.
      */
     if (
       pkg.coverage
@@ -193,8 +218,21 @@ export function calculatePackageCoverage(
   input: CoverageInput,
   options: CoverageOptions = {}
 ): PackageCoverageResult[] {
+  /*
+   * Determinamos explícitamente la
+   * naviera que debe analizarse.
+   *
+   * Actualmente el valor por defecto
+   * sigue siendo Costa.
+   */
+  const cruiseLine =
+    options.cruiseLine ??
+    getDefaultCruiseLine();
+
   const packages =
-    getAllPackages().filter(
+    getAllPackages(
+      cruiseLine
+    ).filter(
       (pkg) =>
         pkg.status === "verified" ||
         options.includePendingPackages ===
@@ -258,19 +296,25 @@ export function calculatePackageCoverage(
    * COVERAGE V2 — CÓCTELES
    */
 
-  if (input.alcoholicCocktails) {
+  if (
+    input.alcoholicCocktails
+  ) {
     requestedCategories.push(
       "alcoholicCocktails"
     );
   }
 
-  if (input.nonAlcoholicCocktails) {
+  if (
+    input.nonAlcoholicCocktails
+  ) {
     requestedCategories.push(
       "nonAlcoholicCocktails"
     );
   }
 
-  if (input.premiumCocktails) {
+  if (
+    input.premiumCocktails
+  ) {
     requestedCategories.push(
       "premiumCocktails"
     );
@@ -280,13 +324,17 @@ export function calculatePackageCoverage(
    * CERVEZA / DESTILADOS PREMIUM
    */
 
-  if (input.bottledBeer) {
+  if (
+    input.bottledBeer
+  ) {
     requestedCategories.push(
       "bottledBeer"
     );
   }
 
-  if (input.premiumSpirits) {
+  if (
+    input.premiumSpirits
+  ) {
     requestedCategories.push(
       "premiumSpirits"
     );
@@ -316,51 +364,53 @@ export function calculatePackageCoverage(
    * COBERTURA POR PAQUETE
    */
 
-  return packages.map((pkg) => {
-    const coveredCategories =
-      requestedCategories.filter(
-        (category) =>
-          isCategoryCovered(
-            pkg,
-            category
-          )
-      );
+  return packages.map(
+    (pkg) => {
+      const coveredCategories =
+        requestedCategories.filter(
+          (category) =>
+            isCategoryCovered(
+              pkg,
+              category
+            )
+        );
 
-    const uncoveredCategories =
-      requestedCategories.filter(
-        (category) =>
-          !isCategoryCovered(
-            pkg,
-            category
-          )
-      );
+      const uncoveredCategories =
+        requestedCategories.filter(
+          (category) =>
+            !isCategoryCovered(
+              pkg,
+              category
+            )
+        );
 
-    const coverageScore =
-      requestedCategories.length > 0
-        ? (
-            coveredCategories.length /
-            requestedCategories.length
-          ) * 100
-        : 0;
+      const coverageScore =
+        requestedCategories.length > 0
+          ? (
+              coveredCategories.length /
+              requestedCategories.length
+            ) * 100
+          : 0;
 
-    return {
-      packageKey:
-        pkg.key as PackageKey,
+      return {
+        packageKey:
+          pkg.key as PackageKey,
 
-      packageName:
-        pkg.name,
+        packageName:
+          pkg.name,
 
-      requestedCategories,
+        requestedCategories,
 
-      coveredCategories,
+        coveredCategories,
 
-      uncoveredCategories,
+        uncoveredCategories,
 
-      coverageScore,
+        coverageScore,
 
-      fullyCovered:
-        uncoveredCategories.length ===
-        0,
-    };
-  });
+        fullyCovered:
+          uncoveredCategories.length ===
+          0,
+      };
+    }
+  );
 }

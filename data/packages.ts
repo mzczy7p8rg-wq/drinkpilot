@@ -40,6 +40,14 @@ export const costaPackages = {
      */
     economicEligibility: "blocked",
 
+    /*
+     * Solo puede participar económicamente
+     * cuando el usuario aporta un precio
+     * real de su reserva.
+     */
+    economicActivation:
+      "user-price-only",
+
     currency: "EUR",
 
     includesAlcohol: false,
@@ -123,6 +131,9 @@ export const costaPackages = {
     economicEligibility:
       "eligible",
 
+    economicActivation:
+      "reference-or-user",
+
     currency: "EUR",
 
     includesAlcohol: true,
@@ -198,6 +209,9 @@ export const costaPackages = {
 
     economicEligibility:
       "eligible",
+
+    economicActivation:
+      "reference-or-user",
 
     currency: "EUR",
 

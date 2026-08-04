@@ -43,12 +43,16 @@ function validateOptionalPrice(
     return {
       valid: false,
       value: null,
-      error: "El precio debe ser mayor que 0 €.",
+      error:
+        "El precio debe ser mayor que 0 €.",
       warning: null,
     };
   }
 
-  if (parsed > highPriceThreshold) {
+  if (
+    parsed >
+    highPriceThreshold
+  ) {
     return {
       valid: true,
       value: parsed,
@@ -70,15 +74,33 @@ export default function PricesPage() {
   const { data, setData } =
     useStore();
 
+  /*
+   * MODELO UNIVERSAL
+   *
+   * Prices ya utiliza únicamente
+   * customPackagePrices.
+   */
+  const storedSoftPrice =
+    data.customPackagePrices
+      .myDrinksSoft ??
+    null;
+
+  const storedMyDrinksPrice =
+    data.customPackagePrices
+      .myDrinks ??
+    null;
+
+  const storedPlusPrice =
+    data.customPackagePrices
+      .myDrinksPlus ??
+    null;
+
   const [
     myDrinksSoftPrice,
     setMyDrinksSoftPrice,
   ] = useState(
-    data.myDrinksSoftCustomPrice !==
-      null
-      ? String(
-          data.myDrinksSoftCustomPrice
-        )
+    storedSoftPrice !== null
+      ? String(storedSoftPrice)
       : ""
   );
 
@@ -86,11 +108,8 @@ export default function PricesPage() {
     myDrinksPrice,
     setMyDrinksPrice,
   ] = useState(
-    data.myDrinksCustomPrice !==
-      null
-      ? String(
-          data.myDrinksCustomPrice
-        )
+    storedMyDrinksPrice !== null
+      ? String(storedMyDrinksPrice)
       : ""
   );
 
@@ -98,11 +117,8 @@ export default function PricesPage() {
     myDrinksPlusPrice,
     setMyDrinksPlusPrice,
   ] = useState(
-    data.myDrinksPlusCustomPrice !==
-      null
-      ? String(
-          data.myDrinksPlusCustomPrice
-        )
+    storedPlusPrice !== null
+      ? String(storedPlusPrice)
       : ""
   );
 
@@ -137,14 +153,18 @@ export default function PricesPage() {
     setData((prev) => ({
       ...prev,
 
-      myDrinksSoftCustomPrice:
-        myDrinksSoftValidation.value,
+      customPackagePrices: {
+        ...prev.customPackagePrices,
 
-      myDrinksCustomPrice:
-        myDrinksValidation.value,
+        myDrinksSoft:
+          myDrinksSoftValidation.value,
 
-      myDrinksPlusCustomPrice:
-        myDrinksPlusValidation.value,
+        myDrinks:
+          myDrinksValidation.value,
+
+        myDrinksPlus:
+          myDrinksPlusValidation.value,
+      },
     }));
   }
 
