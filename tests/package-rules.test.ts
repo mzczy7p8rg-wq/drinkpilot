@@ -42,7 +42,7 @@ describe(
     );
 
     it(
-      "extrae el umbral europeo de Premium Extra",
+      "no inventa un umbral europeo universal para Premium Extra",
       () => {
         const rule =
           getPackageOperationalRule(
@@ -120,6 +120,102 @@ describe(
           expect(
             rule.minorsOnly
           ).toBe(false);
+        }
+      }
+    );
+
+    it(
+      "mantiene compatibilidad con el uso simple por naviera",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            "msc",
+            "mscEasy"
+          );
+
+        expect(
+          rule?.context
+        ).toEqual({
+          cruiseLine: "msc",
+          market: null,
+          sailingDate: null,
+        });
+      }
+    );
+
+    it(
+      "acepta un CruiseContext completo sin perder mercado ni fecha",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscEasy"
+          );
+
+        expect(
+          rule?.context
+        ).toEqual({
+          cruiseLine: "msc",
+          market: "ES",
+          sailingDate:
+            "2026-08-15",
+        });
+
+        /*
+         * Tener contexto todavía no
+         * debe inventar reglas nuevas.
+         */
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimit
+        ).toBe(15);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdEurope
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "utiliza la naviera contenida en CruiseContext",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+            market: "ES",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        expect(
+          rules.length
+        ).toBeGreaterThan(0);
+
+        expect(
+          rules.some(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          )
+        ).toBe(false);
+
+        for (
+          const rule of
+          rules
+        ) {
+          expect(
+            rule.context.cruiseLine
+          ).toBe("costa");
+
+          expect(
+            rule.context.market
+          ).toBe("ES");
         }
       }
     );

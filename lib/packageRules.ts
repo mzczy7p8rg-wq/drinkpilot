@@ -7,10 +7,43 @@ import type {
   CruiseLineKey,
 } from "@/data/cruiseLines";
 
+import {
+  createCruiseContext,
+  type CruiseContext,
+} from "@/lib/cruiseContext";
+
+/*
+ * Entrada compatible con ambos modelos:
+ *
+ * Antiguo:
+ *   "msc"
+ *
+ * Nuevo:
+ *   {
+ *     cruiseLine: "msc",
+ *     market: "ES",
+ *     sailingDate: "2026-08-15"
+ *   }
+ */
+export type PackageRulesContext =
+  | CruiseLineKey
+  | CruiseContext;
+
 export type PackageOperationalRules = {
   packageKey: PackageKey;
 
   packageName: string;
+
+  /*
+   * Contexto utilizado para evaluar
+   * las reglas.
+   *
+   * Aunque todavía no tengamos reglas
+   * dependientes de mercado o fecha,
+   * lo conservamos para que el resultado
+   * sea trazable.
+   */
+  context: CruiseContext;
 
   /*
    * Máximo diario de bebidas alcohólicas.
@@ -22,11 +55,13 @@ export type PackageOperationalRules = {
     number | null;
 
   /*
-   * Umbral máximo por bebida cubierto
-   * por el paquete para el mercado
-   * europeo.
+   * Umbral máximo por bebida.
    *
-   * null = no existe o no está modelado.
+   * Actualmente no existe ningún
+   * umbral universal activo para MSC.
+   *
+   * Se mantiene preparado para futuras
+   * reglas contextualizadas.
    */
   drinkPriceThresholdEurope:
     number | null;
@@ -54,6 +89,20 @@ type RulesPackage =
     typeof getAllPackages
   >[number];
 
+function normalizeCruiseContext(
+  input: PackageRulesContext
+): CruiseContext {
+  if (
+    typeof input === "string"
+  ) {
+    return createCruiseContext(
+      input
+    );
+  }
+
+  return input;
+}
+
 function readPositiveNumber(
   value: unknown
 ): number | null {
@@ -67,7 +116,8 @@ function readPositiveNumber(
 }
 
 function resolvePackageRules(
-  pkg: RulesPackage
+  pkg: RulesPackage,
+  context: CruiseContext
 ): PackageOperationalRules {
   const observed =
     pkg.observedCoverage;
@@ -96,6 +146,14 @@ function resolvePackageRules(
         );
     }
 
+    /*
+     * Este lector continúa existiendo
+     * para futuras reglas contextualizadas.
+     *
+     * Actualmente los datos MSC activos
+     * no contienen un umbral europeo
+     * universal.
+     */
     if (
       "drinkPriceThresholdEurope" in
       observed
@@ -136,6 +194,8 @@ function resolvePackageRules(
     packageName:
       pkg.name,
 
+    context,
+
     alcoholicDrinksDailyLimit,
 
     drinkPriceThresholdEurope,
@@ -147,22 +207,31 @@ function resolvePackageRules(
 }
 
 export function getPackageOperationalRules(
-  cruiseLine: CruiseLineKey
+  input: PackageRulesContext
 ): PackageOperationalRules[] {
+  const context =
+    normalizeCruiseContext(
+      input
+    );
+
   return getAllPackages(
-    cruiseLine
+    context.cruiseLine
   ).map(
-    resolvePackageRules
+    (pkg) =>
+      resolvePackageRules(
+        pkg,
+        context
+      )
   );
 }
 
 export function getPackageOperationalRule(
-  cruiseLine: CruiseLineKey,
+  input: PackageRulesContext,
   packageKey: PackageKey
 ): PackageOperationalRules | null {
   return (
     getPackageOperationalRules(
-      cruiseLine
+      input
     ).find(
       (rule) =>
         rule.packageKey ===
