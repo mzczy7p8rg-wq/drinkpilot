@@ -89,6 +89,7 @@ export default function ResultsPage() {
     data.cocktail;
 
   const selectedPremiumPreferences = [
+    data.alcoholicCocktails,
     data.nonAlcoholicCocktails,
     data.premiumCocktails,
     data.bottledBeer,
@@ -242,6 +243,9 @@ export default function ResultsPage() {
 
       cocktail:
         data.cocktail,
+
+      alcoholicCocktails:
+        data.alcoholicCocktails,
 
       nonAlcoholicCocktails:
         data.nonAlcoholicCocktails,

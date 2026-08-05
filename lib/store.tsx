@@ -60,6 +60,7 @@ export type WizardData = {
   /*
    * Preferencias de cobertura.
    */
+  alcoholicCocktails: boolean;
   nonAlcoholicCocktails: boolean;
   premiumCocktails: boolean;
   bottledBeer: boolean;
@@ -184,6 +185,9 @@ function createInitialData(
     cocktail: 0,
 
     drinksPerDay: 0,
+
+    alcoholicCocktails:
+      false,
 
     nonAlcoholicCocktails:
       false,
@@ -544,6 +548,14 @@ export function StoreProvider({
             "number"
               ? parsedData.drinksPerDay
               : baseData.drinksPerDay,
+
+          alcoholicCocktails:
+            typeof parsedData.alcoholicCocktails ===
+            "boolean"
+              ? parsedData
+                  .alcoholicCocktails
+              : baseData
+                  .alcoholicCocktails,
 
           nonAlcoholicCocktails:
             typeof parsedData.nonAlcoholicCocktails ===

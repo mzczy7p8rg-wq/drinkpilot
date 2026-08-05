@@ -71,6 +71,8 @@ export type ComparisonInput = {
   wine: number;
   cocktail: number;
 
+  alcoholicCocktails?: boolean;
+
   nonAlcoholicCocktails?: boolean;
 
   premiumCocktails?: boolean;
@@ -667,6 +669,10 @@ export function compareDrinkPackages(
 
         cocktail:
           input.cocktail,
+
+        alcoholicCocktails:
+          input.alcoholicCocktails ??
+          false,
 
         nonAlcoholicCocktails:
           input.nonAlcoholicCocktails ??

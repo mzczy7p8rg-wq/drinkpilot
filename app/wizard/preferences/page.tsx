@@ -65,6 +65,7 @@ export default function PreferencesPage() {
    * preferencia de agua.
    */
   const selectedPreferences = [
+    data.alcoholicCocktails,
     data.nonAlcoholicCocktails,
     data.premiumCocktails,
     data.bottledBeer,
@@ -106,6 +107,22 @@ export default function PreferencesPage() {
         </div>
 
         <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
+          <PreferenceCard
+            title="🍸 Cócteles con alcohol"
+            description="Valoras que el paquete incluya cócteles y combinados con alcohol."
+            checked={
+              data.alcoholicCocktails
+            }
+            onChange={(checked) =>
+              setData((prev) => ({
+                ...prev,
+
+                alcoholicCocktails:
+                  checked,
+              }))
+            }
+          />
+
           <PreferenceCard
             title="🍹 Cócteles sin alcohol"
             description="Valoras disponer de cócteles y combinados sin alcohol incluidos en el paquete."

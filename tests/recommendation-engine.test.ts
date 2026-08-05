@@ -1735,3 +1735,153 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBeNull();
   });
 });
+describe(
+  "alcoholic cocktails integration",
+  () => {
+    it(
+      "transporta alcoholicCocktails hasta Coverage v2",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "costa",
+
+            days: 7,
+            people: 1,
+
+            coffee: 1,
+            water: 1,
+            soda: 1,
+            beer: 0,
+            wine: 0,
+            cocktail: 0,
+
+            alcoholicCocktails:
+              true,
+
+            nonAlcoholicCocktails:
+              false,
+
+            premiumCocktails:
+              false,
+
+            bottledBeer:
+              false,
+
+            premiumSpirits:
+              false,
+
+            bottledWaterUnlimited:
+              false,
+          });
+
+        const myDrinks =
+          result.coveragePackages.find(
+            (pkg) =>
+              pkg.packageKey ===
+              "myDrinks"
+          );
+
+        expect(
+          myDrinks
+            ?.requestedCategories
+        ).toContain(
+          "alcoholicCocktails"
+        );
+
+        expect(
+          myDrinks
+            ?.coveredCategories
+        ).toContain(
+          "alcoholicCocktails"
+        );
+      }
+    );
+
+    it(
+      "no cambia el cálculo económico por activar una preferencia de cobertura",
+      () => {
+        const baseInput = {
+          cruiseLine:
+            "costa" as const,
+
+          days: 7,
+          people: 1,
+
+          coffee: 2,
+          water: 2,
+          soda: 1,
+          beer: 1,
+          wine: 1,
+          cocktail: 1,
+
+          nonAlcoholicCocktails:
+            false,
+
+          premiumCocktails:
+            false,
+
+          bottledBeer:
+            false,
+
+          premiumSpirits:
+            false,
+
+          bottledWaterUnlimited:
+            false,
+        };
+
+        const withoutPreference =
+          compareDrinkPackages({
+            ...baseInput,
+
+            alcoholicCocktails:
+              false,
+          });
+
+        const withPreference =
+          compareDrinkPackages({
+            ...baseInput,
+
+            alcoholicCocktails:
+              true,
+          });
+
+        const withoutMyDrinks =
+          withoutPreference
+            .packages.find(
+              (pkg) =>
+                pkg.packageKey ===
+                "myDrinks"
+            );
+
+        const withMyDrinks =
+          withPreference
+            .packages.find(
+              (pkg) =>
+                pkg.packageKey ===
+                "myDrinks"
+            );
+
+        expect(
+          withMyDrinks?.drinksCost
+        ).toBe(
+          withoutMyDrinks
+            ?.drinksCost
+        );
+
+        expect(
+          withMyDrinks?.packageCost
+        ).toBe(
+          withoutMyDrinks
+            ?.packageCost
+        );
+
+        expect(
+          withMyDrinks?.savings
+        ).toBe(
+          withoutMyDrinks?.savings
+        );
+      }
+    );
+  }
+);
