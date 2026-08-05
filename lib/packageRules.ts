@@ -40,6 +40,16 @@ export type PackageRulesOptions = {
     ContextualPackageRule[];
 };
 
+export type OperationalRuleSource = {
+  source:
+    | "base"
+    | "contextual"
+    | "none";
+
+  contextualRuleIds:
+    string[];
+};
+
 export type PackageOperationalRules = {
   packageKey: PackageKey;
 
@@ -58,6 +68,9 @@ export type PackageOperationalRules = {
   alcoholicDrinksDailyLimit:
     number | null;
 
+  alcoholicDrinksDailyLimitSource:
+    OperationalRuleSource;
+
   /*
    * Umbral máximo por bebida.
    *
@@ -67,16 +80,25 @@ export type PackageOperationalRules = {
   drinkPriceThreshold:
     number | null;
 
+  drinkPriceThresholdSource:
+    OperationalRuleSource;
+
   /*
    * AQUA u otra cobertura específica
    * expresamente modelada.
    */
   aquaUnlimited: boolean;
 
+  aquaUnlimitedSource:
+    OperationalRuleSource;
+
   /*
    * Paquete reservado a menores.
    */
   minorsOnly: boolean;
+
+  minorsOnlySource:
+    OperationalRuleSource;
 
   /*
    * IDs de reglas contextuales que
@@ -143,6 +165,70 @@ function applyContextualRules(
     const values =
       rule.rules;
 
+    const alcoholicDrinksDailyLimitSource =
+      values.alcoholicDrinksDailyLimit !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .alcoholicDrinksDailyLimitSource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .alcoholicDrinksDailyLimitSource;
+
+    const drinkPriceThresholdSource =
+      values.drinkPriceThreshold !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .drinkPriceThresholdSource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .drinkPriceThresholdSource;
+
+    const aquaUnlimitedSource =
+      values.aquaUnlimited !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .aquaUnlimitedSource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .aquaUnlimitedSource;
+
+    const minorsOnlySource =
+      values.minorsOnly !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .minorsOnlySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .minorsOnlySource;
+
     result = {
       ...result,
 
@@ -179,6 +265,14 @@ function applyContextualRules(
         undefined
           ? values.minorsOnly
           : result.minorsOnly,
+
+      alcoholicDrinksDailyLimitSource,
+
+      drinkPriceThresholdSource,
+
+      aquaUnlimitedSource,
+
+      minorsOnlySource,
 
       appliedContextualRuleIds: [
         ...result
@@ -263,6 +357,17 @@ function resolvePackageRules(
 
       alcoholicDrinksDailyLimit,
 
+      alcoholicDrinksDailyLimitSource:
+        alcoholicDrinksDailyLimit !== null
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
       /*
        * Los umbrales no se consideran
        * universales.
@@ -273,9 +378,36 @@ function resolvePackageRules(
       drinkPriceThreshold:
         null,
 
+      drinkPriceThresholdSource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
+
       aquaUnlimited,
 
+      aquaUnlimitedSource:
+        aquaUnlimited
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
       minorsOnly,
+
+      minorsOnlySource:
+        minorsOnly
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
 
       appliedContextualRuleIds:
         [],

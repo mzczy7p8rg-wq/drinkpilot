@@ -223,3 +223,85 @@ describe(
     );
   }
 );
+
+describe(
+  "operational notice provenance",
+  () => {
+    it(
+      "distingue avisos base de avisos contextuales",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-threshold-contextual",
+                  cruiseLine:
+                    "msc",
+                  packageKey:
+                    "mscPremiumExtra",
+                  markets: [
+                    "ES",
+                  ],
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const alcoholNotice =
+          notices.find(
+            (notice) =>
+              notice.packageKey ===
+                "mscPremiumExtra" &&
+              notice.type ===
+                "alcohol-daily-limit"
+          );
+
+        const thresholdNotice =
+          notices.find(
+            (notice) =>
+              notice.packageKey ===
+                "mscPremiumExtra" &&
+              notice.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          alcoholNotice?.source
+        ).toBe("base");
+
+        expect(
+          alcoholNotice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+
+        expect(
+          thresholdNotice?.source
+        ).toBe("contextual");
+
+        expect(
+          thresholdNotice
+            ?.appliedContextualRuleIds
+        ).toEqual([
+          "test-threshold-contextual",
+        ]);
+      }
+    );
+  }
+);

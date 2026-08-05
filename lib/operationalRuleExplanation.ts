@@ -25,6 +25,10 @@ export type OperationalRuleNotice = {
    * Puede estar vacío cuando la regla
    * procede de evidencia base observada.
    */
+  source:
+    | "base"
+    | "contextual";
+
   appliedContextualRuleIds:
     string[];
 };
@@ -56,8 +60,17 @@ export function buildOperationalRuleNotices(
         message:
           `${rule.packageName}: límite conocido de ${rule.alcoholicDrinksDailyLimit} bebidas alcohólicas por huésped y día.`,
 
+        source:
+          rule
+            .alcoholicDrinksDailyLimitSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
         appliedContextualRuleIds:
-          rule.appliedContextualRuleIds,
+          rule
+            .alcoholicDrinksDailyLimitSource
+            .contextualRuleIds,
       });
     }
 
@@ -83,8 +96,17 @@ export function buildOperationalRuleNotices(
             2
           )} € por bebida.`,
 
+        source:
+          rule
+            .drinkPriceThresholdSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
         appliedContextualRuleIds:
-          rule.appliedContextualRuleIds,
+          rule
+            .drinkPriceThresholdSource
+            .contextualRuleIds,
       });
     }
 
@@ -105,8 +127,17 @@ export function buildOperationalRuleNotices(
         message:
           `${rule.packageName}: incluye cobertura AQUA según los datos operativos disponibles.`,
 
+        source:
+          rule
+            .aquaUnlimitedSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
         appliedContextualRuleIds:
-          rule.appliedContextualRuleIds,
+          rule
+            .aquaUnlimitedSource
+            .contextualRuleIds,
       });
     }
 
@@ -127,8 +158,17 @@ export function buildOperationalRuleNotices(
         message:
           `${rule.packageName}: paquete reservado a menores y no aplicable como paquete adulto.`,
 
+        source:
+          rule
+            .minorsOnlySource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
         appliedContextualRuleIds:
-          rule.appliedContextualRuleIds,
+          rule
+            .minorsOnlySource
+            .contextualRuleIds,
       });
     }
   }

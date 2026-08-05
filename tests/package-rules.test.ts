@@ -445,5 +445,75 @@ describe(
         ).toEqual([]);
       }
     );
+
+    it(
+      "mantiene procedencia por propiedad al aplicar una regla contextual",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-threshold-only",
+                  cruiseLine: "msc",
+                  packageKey:
+                    "mscPremiumExtra",
+                  markets: ["ES"],
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimit
+        ).toBe(15);
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitSource
+        ).toEqual({
+          source: "base",
+          contextualRuleIds: [],
+        });
+
+        expect(
+          rule?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdSource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "test-threshold-only",
+          ],
+        });
+
+        /*
+         * El resumen del paquete continúa
+         * disponible por compatibilidad.
+         */
+        expect(
+          rule
+            ?.appliedContextualRuleIds
+        ).toEqual([
+          "test-threshold-only",
+        ]);
+      }
+    );
   }
 );
