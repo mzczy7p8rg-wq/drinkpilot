@@ -12,19 +12,15 @@ import {
   type CruiseContext,
 } from "@/lib/cruiseContext";
 
-/*
- * Entrada compatible con ambos modelos:
- *
- * Antiguo:
- *   "msc"
- *
- * Nuevo:
- *   {
- *     cruiseLine: "msc",
- *     market: "ES",
- *     sailingDate: "2026-08-15"
- *   }
- */
+import {
+  getContextualRulesForCruiseLine,
+} from "@/data/contextualRules";
+
+import {
+  getContextualPackageRulesForPackage,
+  type ContextualPackageRule,
+} from "@/lib/contextualPackageRules";
+
 export type PackageRulesContext =
   | CruiseLineKey
   | CruiseContext;
@@ -35,21 +31,14 @@ export type PackageOperationalRules = {
   packageName: string;
 
   /*
-   * Contexto utilizado para evaluar
-   * las reglas.
-   *
-   * Aunque todavía no tengamos reglas
-   * dependientes de mercado o fecha,
-   * lo conservamos para que el resultado
-   * sea trazable.
+   * Contexto exacto utilizado
+   * para resolver las reglas.
    */
   context: CruiseContext;
 
   /*
-   * Máximo diario de bebidas alcohólicas.
-   *
-   * null = no existe una regla conocida
-   * o no está modelada todavía.
+   * Máximo diario de bebidas
+   * alcohólicas.
    */
   alcoholicDrinksDailyLimit:
     number | null;
@@ -57,31 +46,33 @@ export type PackageOperationalRules = {
   /*
    * Umbral máximo por bebida.
    *
-   * Actualmente no existe ningún
-   * umbral universal activo para MSC.
-   *
-   * Se mantiene preparado para futuras
-   * reglas contextualizadas.
+   * null = ninguna regla válida
+   * conocida para este contexto.
    */
-  drinkPriceThresholdEurope:
+  drinkPriceThreshold:
     number | null;
 
   /*
-   * Cobertura específica AQUA by MSC.
-   *
-   * Se mantiene separada de
-   * bottledWaterUnlimited porque no
-   * representa exactamente el mismo
-   * producto.
+   * AQUA u otra cobertura específica
+   * expresamente modelada.
    */
   aquaUnlimited: boolean;
 
   /*
-   * Indica que el paquete está reservado
-   * a menores y no debe tratarse como
-   * paquete adulto.
+   * Paquete reservado a menores.
    */
   minorsOnly: boolean;
+
+  /*
+   * IDs de reglas contextuales que
+   * realmente participaron en la
+   * resolución.
+   *
+   * Esto permite auditar posteriormente
+   * de dónde procede cada comportamiento.
+   */
+  appliedContextualRuleIds:
+    string[];
 };
 
 type RulesPackage =
@@ -115,6 +106,77 @@ function readPositiveNumber(
     : null;
 }
 
+/*
+ * Aplica reglas contextuales sobre
+ * las reglas base.
+ *
+ * Solo una propiedad expresamente
+ * definida en la regla contextual
+ * puede reemplazar el valor anterior.
+ */
+function applyContextualRules(
+  base: PackageOperationalRules,
+  rules: ContextualPackageRule[]
+): PackageOperationalRules {
+  let result =
+    base;
+
+  for (
+    const rule of
+    rules
+  ) {
+    const values =
+      rule.rules;
+
+    result = {
+      ...result,
+
+      alcoholicDrinksDailyLimit:
+        values
+          .alcoholicDrinksDailyLimit !==
+        undefined
+          ? readPositiveNumber(
+              values
+                .alcoholicDrinksDailyLimit
+            )
+          : result
+              .alcoholicDrinksDailyLimit,
+
+      drinkPriceThreshold:
+        values
+          .drinkPriceThreshold !==
+        undefined
+          ? readPositiveNumber(
+              values
+                .drinkPriceThreshold
+            )
+          : result
+              .drinkPriceThreshold,
+
+      aquaUnlimited:
+        values.aquaUnlimited !==
+        undefined
+          ? values.aquaUnlimited
+          : result.aquaUnlimited,
+
+      minorsOnly:
+        values.minorsOnly !==
+        undefined
+          ? values.minorsOnly
+          : result.minorsOnly,
+
+      appliedContextualRuleIds: [
+        ...result
+          .appliedContextualRuleIds,
+
+        rule.id,
+      ],
+    };
+  }
+
+  return result;
+}
+
 function resolvePackageRules(
   pkg: RulesPackage,
   context: CruiseContext
@@ -125,15 +187,19 @@ function resolvePackageRules(
   let alcoholicDrinksDailyLimit:
     number | null = null;
 
-  let drinkPriceThresholdEurope:
-    number | null = null;
-
   let aquaUnlimited =
     false;
 
   let minorsOnly =
     false;
 
+  /*
+   * REGLAS BASE
+   *
+   * Solo utilizamos aquí condiciones
+   * que ya forman parte de los datos
+   * generales del paquete.
+   */
   if (observed) {
     if (
       "alcoholicDrinksDailyLimit" in
@@ -143,25 +209,6 @@ function resolvePackageRules(
         readPositiveNumber(
           observed
             .alcoholicDrinksDailyLimit
-        );
-    }
-
-    /*
-     * Este lector continúa existiendo
-     * para futuras reglas contextualizadas.
-     *
-     * Actualmente los datos MSC activos
-     * no contienen un umbral europeo
-     * universal.
-     */
-    if (
-      "drinkPriceThresholdEurope" in
-      observed
-    ) {
-      drinkPriceThresholdEurope =
-        readPositiveNumber(
-          observed
-            .drinkPriceThresholdEurope
         );
     }
 
@@ -187,23 +234,60 @@ function resolvePackageRules(
     }
   }
 
-  return {
-    packageKey:
-      pkg.key as PackageKey,
+  const baseRules:
+    PackageOperationalRules = {
+      packageKey:
+        pkg.key as PackageKey,
 
-    packageName:
-      pkg.name,
+      packageName:
+        pkg.name,
 
-    context,
+      context,
 
-    alcoholicDrinksDailyLimit,
+      alcoholicDrinksDailyLimit,
 
-    drinkPriceThresholdEurope,
+      /*
+       * Los umbrales no se consideran
+       * universales.
+       *
+       * Deben proceder de una regla
+       * contextual explícita.
+       */
+      drinkPriceThreshold:
+        null,
 
-    aquaUnlimited,
+      aquaUnlimited,
 
-    minorsOnly,
-  };
+      minorsOnly,
+
+      appliedContextualRuleIds:
+        [],
+    };
+
+  /*
+   * REGLAS CONTEXTUALES
+   *
+   * Primero obtenemos exclusivamente
+   * las registradas para la naviera.
+   *
+   * Después filtramos por:
+   *
+   * - contexto
+   * - packageKey
+   */
+  const contextualRules =
+    getContextualPackageRulesForPackage(
+      getContextualRulesForCruiseLine(
+        context.cruiseLine
+      ),
+      context,
+      pkg.key as PackageKey
+    );
+
+  return applyContextualRules(
+    baseRules,
+    contextualRules
+  );
 }
 
 export function getPackageOperationalRules(

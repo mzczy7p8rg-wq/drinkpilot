@@ -28,7 +28,7 @@ describe(
 
         expect(
           rule
-            ?.drinkPriceThresholdEurope
+            ?.drinkPriceThreshold
         ).toBeNull();
 
         expect(
@@ -57,7 +57,7 @@ describe(
 
         expect(
           rule
-            ?.drinkPriceThresholdEurope
+            ?.drinkPriceThreshold
         ).toBeNull();
 
         expect(
@@ -86,7 +86,7 @@ describe(
 
         expect(
           rule
-            ?.drinkPriceThresholdEurope
+            ?.drinkPriceThreshold
         ).toBeNull();
       }
     );
@@ -114,7 +114,7 @@ describe(
 
           expect(
             rule
-              .drinkPriceThresholdEurope
+              .drinkPriceThreshold
           ).toBeNull();
 
           expect(
@@ -177,7 +177,7 @@ describe(
 
         expect(
           rule
-            ?.drinkPriceThresholdEurope
+            ?.drinkPriceThreshold
         ).toBeNull();
       }
     );
@@ -217,6 +217,66 @@ describe(
             rule.context.market
           ).toBe("ES");
         }
+      }
+    );
+    it(
+      "no aplica reglas contextuales cuando el registro MSC está vacío",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.drinkPriceThreshold
+        ).toBeNull();
+
+        expect(
+          rule
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "conserva las reglas base cuando no existe coincidencia contextual",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscEasy"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimit
+        ).toBe(15);
+
+        expect(
+          rule?.aquaUnlimited
+        ).toBe(true);
+
+        expect(
+          rule
+            ?.drinkPriceThreshold
+        ).toBeNull();
+
+        expect(
+          rule
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
       }
     );
   }
