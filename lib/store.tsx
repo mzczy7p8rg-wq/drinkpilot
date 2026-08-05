@@ -18,6 +18,10 @@ import {
   getDefaultCruiseLine,
 } from "@/lib/packageService";
 
+import {
+  resolveStoredCruiseContext,
+} from "@/lib/cruiseContextStorage";
+
 export type CustomPackagePrices = Record<
   string,
   number | null
@@ -28,6 +32,19 @@ export type WizardData = {
    * Naviera activa.
    */
   cruiseLine: CruiseLineKey;
+
+  /*
+   * Contexto de la navegación.
+   *
+   * null = todavía desconocido.
+   *
+   * Estos campos permitirán resolver
+   * reglas dependientes de mercado
+   * y fecha sin inventar contexto.
+   */
+  market: string | null;
+
+  sailingDate: string | null;
 
   days: number;
 
@@ -152,6 +169,10 @@ function createInitialData(
 ): WizardData {
   return {
     cruiseLine,
+
+    market: null,
+
+    sailingDate: null,
 
     days: 0,
 
@@ -456,8 +477,25 @@ export function StoreProvider({
             storedCustomPrices
           );
 
+        const storedCruiseContext =
+          resolveStoredCruiseContext({
+            market:
+              parsedData.market,
+
+            sailingDate:
+              parsedData.sailingDate,
+          });
+
         setData({
           cruiseLine,
+
+          market:
+            storedCruiseContext
+              .market,
+
+          sailingDate:
+            storedCruiseContext
+              .sailingDate,
 
           days:
             typeof parsedData.days ===
