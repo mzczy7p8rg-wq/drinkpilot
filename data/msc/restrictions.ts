@@ -31,9 +31,7 @@ export const mscPremiumExtraRestrictions = [
 
   "Máximo de 15 bebidas alcohólicas por huésped y día.",
 
-  "Las bebidas que superen el límite de precio publicado para la región quedan fuera del paquete.",
-
-  "En determinadas regiones europeas MSC publica un límite de 14 EUR por bebida.",
+  "La cobertura de bebidas puede estar sujeta a límites de precio específicos según la región, fecha de navegación y versión del paquete.",
 
   "Puede utilizarse en restaurantes de especialidad y determinadas islas privadas según las condiciones publicadas.",
 

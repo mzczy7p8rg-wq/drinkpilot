@@ -50,7 +50,6 @@ export const mscMetadata = {
           "same-cabin-requirement",
           "speciality-restaurant-rules",
           "private-island-rules",
-          "premium-extra-price-threshold",
           "minors-package-requirement",
 
           "aqua-by-msc-inclusion",
@@ -78,7 +77,6 @@ export const mscMetadata = {
           "pricing-days-excluding-disembarkation",
           "same-cabin-requirement",
           "package-exclusions",
-          "premium-extra-price-threshold",
           "15-alcoholic-drinks-daily-limit",
         ],
 
@@ -160,7 +158,7 @@ export const mscMetadata = {
 
     "Easy y Premium Extra permiten hasta 15 bebidas alcohólicas por huésped y día.",
 
-    "Premium Extra cubre bebidas hasta el límite publicado para la región; en determinados itinerarios europeos MSC publica 14 EUR.",
+    "Los límites de precio por bebida pueden depender de la región, fecha de navegación y versión concreta del paquete; DrinkPilot no aplica todavía un umbral universal a Premium Extra.",
 
     "AQUA by MSC es agua mineralizada producida a bordo y no debe tratarse automáticamente como agua mineral embotellada tradicional.",
 

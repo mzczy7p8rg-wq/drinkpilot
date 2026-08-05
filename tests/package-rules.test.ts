@@ -58,7 +58,7 @@ describe(
         expect(
           rule
             ?.drinkPriceThresholdEurope
-        ).toBe(14);
+        ).toBeNull();
 
         expect(
           rule?.aquaUnlimited

@@ -179,9 +179,6 @@ export const mscPackages = {
 
       alcoholicDrinksDailyLimit:
         15,
-
-      drinkPriceThresholdEurope:
-        14,
     },
 
     restrictions:
