@@ -117,5 +117,50 @@ describe(
         }
       }
     );
+    it(
+      "mantiene Minors Package deshabilitado para el análisis económico adulto",
+      () => {
+        const msc =
+          getCruiseLine("msc");
+
+        const minors =
+          msc.packages.mscMinors;
+
+        expect(
+          minors.economicActivation
+        ).toBe("disabled");
+
+        expect(
+          minors.economicEligibility
+        ).toBe("blocked");
+
+        expect(
+          minors.includesAlcohol
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "mantiene los paquetes adultos MSC activables únicamente con precio real del usuario",
+      () => {
+        const msc =
+          getCruiseLine("msc");
+
+        expect(
+          msc.packages.mscEasy
+            .economicActivation
+        ).toBe("user-price-only");
+
+        expect(
+          msc.packages.mscPremiumExtra
+            .economicActivation
+        ).toBe("user-price-only");
+
+        expect(
+          msc.packages.mscAlcoholFree
+            .economicActivation
+        ).toBe("user-price-only");
+      }
+    );
   }
 );

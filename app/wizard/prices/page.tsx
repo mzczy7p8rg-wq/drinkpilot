@@ -391,6 +391,10 @@ export default function PricesPage() {
                 pkg.economicActivation ===
                 "user-price-only";
 
+              const isEconomicallyDisabled =
+                pkg.economicActivation ===
+                "disabled";
+
               const inputId =
                 `package-price-${pkg.key}`;
 
@@ -446,58 +450,79 @@ export default function PricesPage() {
                     )}
                   </div>
 
-                  {/* INPUT */}
+                  {/* INPUT / ESTADO DESHABILITADO */}
 
-                  <div className="relative mt-3">
-                    <input
-                      id={
-                        inputId
-                      }
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      inputMode="decimal"
-                      value={
-                        inputValue
-                      }
-                      onChange={(
-                        event
-                      ) =>
-                        updatePriceInput(
-                          pkg.key,
+                  {isEconomicallyDisabled ? (
+                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-100 p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-xl">
+                          ℹ️
+                        </span>
+
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800">
+                            No incluido en el análisis adulto
+                          </p>
+
+                          <p className="mt-1 text-xs leading-5 text-slate-600">
+                            Este paquete está registrado para mostrar su existencia y cobertura, pero no participa actualmente en la comparación económica de adultos.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative mt-3">
+                      <input
+                        id={
+                          inputId
+                        }
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        inputMode="decimal"
+                        value={
+                          inputValue
+                        }
+                        onChange={(
                           event
-                            .target
-                            .value
-                        )
-                      }
-                      placeholder={
-                        hasReferencePrice
-                          ? `Ej. ${(
-                              pkg.pricePerDay as number
-                            ).toFixed(
-                              2
-                            )}`
-                          : "Introduce el precio"
-                      }
-                      className={`w-full rounded-xl border bg-white px-4 py-4 pr-14 text-lg font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
-                        validation
-                          ?.error
-                          ? "border-red-300 focus:ring-2 focus:ring-red-400"
-                          : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
-                      }`}
-                    />
+                        ) =>
+                          updatePriceInput(
+                            pkg.key,
+                            event
+                              .target
+                              .value
+                          )
+                        }
+                        placeholder={
+                          hasReferencePrice
+                            ? `Ej. ${(
+                                pkg.pricePerDay as number
+                              ).toFixed(
+                                2
+                              )}`
+                            : "Introduce el precio"
+                        }
+                        className={`w-full rounded-xl border bg-white px-4 py-4 pr-14 text-lg font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
+                          validation
+                            ?.error
+                            ? "border-red-300 focus:ring-2 focus:ring-red-400"
+                            : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+                        }`}
+                      />
 
-                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
-                      {
-                        currencySymbol
-                      }
-                    </span>
-                  </div>
+                      <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
+                        {
+                          currencySymbol
+                        }
+                      </span>
+                    </div>
+                  )}
 
                   {/* ERROR */}
 
-                  {validation
-                    ?.error && (
+                  {!isEconomicallyDisabled &&
+                    validation
+                      ?.error && (
                     <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
                       <p className="text-sm font-medium text-red-700">
                         {
@@ -509,8 +534,9 @@ export default function PricesPage() {
 
                   {/* WARNING */}
 
-                  {validation
-                    ?.warning && (
+                  {!isEconomicallyDisabled &&
+                    validation
+                      ?.warning && (
                     <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
                       <p className="text-sm font-medium leading-6 text-amber-800">
                         ⚠️{" "}
@@ -523,8 +549,9 @@ export default function PricesPage() {
 
                   {/* AYUDA */}
 
-                  {!validation
-                    ?.error &&
+                  {!isEconomicallyDisabled &&
+                    !validation
+                      ?.error &&
                     !validation
                       ?.warning && (
                       <>
