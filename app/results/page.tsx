@@ -10,6 +10,10 @@ import { CoverageCategory } from "@/lib/coverage";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 
 import {
+  buildOperationalRuleNotices,
+} from "@/lib/operationalRuleExplanation";
+
+import {
   hasCompleteOnboardPriceValues,
 } from "@/lib/onboardPriceService";
 
@@ -261,6 +265,19 @@ export default function ResultsPage() {
     });
 
   /*
+   * AVISOS OPERATIVOS
+   *
+   * Se resuelven antes de cualquier
+   * salida temprana para que también
+   * estén disponibles cuando solo
+   * podemos ofrecer análisis de cobertura.
+   */
+  const allOperationalNotices =
+    buildOperationalRuleNotices(
+      comparison.operationalRules
+    );
+
+  /*
    * DATOS ECONÓMICOS INCOMPLETOS
    *
    * No fabricamos precios ni ejecutamos
@@ -275,6 +292,36 @@ export default function ResultsPage() {
       onboardPriceValues
     )
   ) {
+    /*
+     * El análisis actual está orientado
+     * a paquetes adultos.
+     *
+     * No basta con ocultar el aviso
+     * "minors-only": debemos excluir
+     * todos los avisos pertenecientes
+     * a un paquete reservado a menores.
+     */
+    const minorsOnlyPackageKeys =
+      new Set(
+        comparison.operationalRules
+          .filter(
+            (rule) =>
+              rule.minorsOnly
+          )
+          .map(
+            (rule) =>
+              rule.packageKey
+          )
+      );
+
+    const adultOperationalNotices =
+      allOperationalNotices.filter(
+        (notice) =>
+          !minorsOnlyPackageKeys.has(
+            notice.packageKey
+          )
+      );
+
     const missingPriceLabels = {
       coffee: "café",
       water: "agua",
@@ -425,6 +472,33 @@ export default function ResultsPage() {
               </div>
             </section>
 
+            {adultOperationalNotices.length > 0 && (
+              <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+                <h2 className="text-lg font-bold text-sky-950 sm:text-xl">
+                  ℹ️ Condiciones importantes de los paquetes
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-sky-900">
+                  Estas condiciones forman parte de las reglas operativas conocidas y no modifican todavía el cálculo económico de DrinkPilot.
+                </p>
+
+                <div className="mt-4 grid gap-3">
+                  {adultOperationalNotices.map(
+                    (notice) => (
+                      <div
+                        key={notice.id}
+                        className="rounded-xl border border-sky-100 bg-white p-4"
+                      >
+                        <p className="text-sm leading-6 text-slate-700">
+                          {notice.message}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </section>
+            )}
+
             <div className="mt-8">
               <DataConfidencePanel />
             </div>
@@ -518,6 +592,59 @@ export default function ResultsPage() {
 
   const bestPackage =
     comparison.bestPackage;
+
+  const comparedPackageKeys =
+    new Set(
+      comparison.packages.map(
+        (pkg) =>
+          pkg.packageKey
+      )
+    );
+
+  const minorsOnlyPackageKeys =
+    new Set(
+      comparison.operationalRules
+        .filter(
+          (rule) =>
+            rule.minorsOnly
+        )
+        .map(
+          (rule) =>
+            rule.packageKey
+        )
+    );
+
+  const operationalNotices =
+    allOperationalNotices.filter(
+      (notice) => {
+        /*
+         * El flujo actual compara
+         * paquetes adultos.
+         *
+         * Un paquete reservado a menores
+         * no debe aportar ningún aviso
+         * a este resultado.
+         */
+        if (
+          minorsOnlyPackageKeys.has(
+            notice.packageKey
+          )
+        ) {
+          return false;
+        }
+
+        if (bestPackage) {
+          return (
+            notice.packageKey ===
+            bestPackage.packageKey
+          );
+        }
+
+        return comparedPackageKeys.has(
+          notice.packageKey
+        );
+      }
+    );
 
   /*
    * EXPLICACIÓN
@@ -1355,6 +1482,35 @@ export default function ResultsPage() {
                 recomendación.
               </p>
             </div>
+          )}
+
+          {/* CONDICIONES OPERATIVAS */}
+
+          {operationalNotices.length > 0 && (
+            <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+              <h3 className="font-bold text-sky-950 sm:text-lg">
+                ℹ️ Condiciones importantes del paquete
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-sky-900">
+                Ten en cuenta estas condiciones además de la comparación económica.
+              </p>
+
+              <div className="mt-4 grid gap-3">
+                {operationalNotices.map(
+                  (notice) => (
+                    <div
+                      key={notice.id}
+                      className="rounded-xl border border-sky-100 bg-white p-4"
+                    >
+                      <p className="text-sm leading-6 text-slate-700">
+                        {notice.message}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
           )}
 
           {/* CALIDAD DE DATOS */}
