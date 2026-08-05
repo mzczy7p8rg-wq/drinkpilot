@@ -13,6 +13,10 @@ import {
 } from "@/data/cruiseLines";
 
 import {
+  isIsoSailingDate,
+} from "@/lib/cruiseContext";
+
+import {
   useStore,
 } from "@/lib/store";
 
@@ -48,6 +52,22 @@ export default function WizardPage() {
       : ""
   );
 
+  /*
+   * FECHA DE SALIDA
+   *
+   * Sigue siendo opcional.
+   *
+   * Cuando exista podremos utilizarla
+   * para resolver reglas dependientes
+   * de la fecha de navegación.
+   */
+  const [
+    sailingDate,
+    setSailingDate,
+  ] = useState(
+    data.sailingDate ?? ""
+  );
+
   const parsedDays =
     Number(days);
 
@@ -58,11 +78,22 @@ export default function WizardPage() {
     ) &&
     parsedDays > 0;
 
+  /*
+   * Vacío = válido porque todavía
+   * permitimos continuar sin fecha.
+   */
+  const isValidSailingDate =
+    sailingDate === "" ||
+    isIsoSailingDate(
+      sailingDate
+    );
+
   const isValid =
     Boolean(
       selectedCruiseLine
     ) &&
-    isValidDays;
+    isValidDays &&
+    isValidSailingDate;
 
   function handleContinue() {
     if (!isValid) {
@@ -87,6 +118,26 @@ export default function WizardPage() {
 
           cruiseLine:
             selectedCruiseLine,
+
+          /*
+           * Todavía no inferimos el mercado
+           * de la reserva a partir de la
+           * naviera.
+           *
+           * El market de cruiseLines es
+           * informativo y no necesariamente
+           * coincide con el mercado real
+           * de compra del usuario.
+           */
+          market:
+            cruiseLineChanged
+              ? null
+              : previous.market,
+
+          sailingDate:
+            sailingDate === ""
+              ? null
+              : sailingDate,
 
           days:
             parsedDays,
@@ -125,9 +176,10 @@ export default function WizardPage() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Selecciona tu naviera e
-            introduce la duración total
-            de la reserva.
+            Selecciona tu naviera,
+            introduce la duración y,
+            si la conoces, la fecha de
+            salida.
           </p>
         </div>
 
@@ -186,7 +238,8 @@ export default function WizardPage() {
                         </p>
 
                         <p className="mt-1 text-sm text-slate-500">
-                          Mercado:{" "}
+                          Mercado de
+                          referencia:{" "}
                           {
                             cruiseLine.market
                           }
@@ -278,12 +331,60 @@ export default function WizardPage() {
                 que 0.
               </p>
             )}
+        </section>
+
+        {/* FECHA DE SALIDA */}
+
+        <section className="mt-7">
+          <div className="flex items-center justify-between gap-3">
+            <label
+              htmlFor="sailingDate"
+              className="text-sm font-semibold text-slate-700"
+            >
+              Fecha de salida
+            </label>
+
+            <span className="text-xs font-medium text-slate-400">
+              Opcional
+            </span>
+          </div>
+
+          <input
+            id="sailingDate"
+            type="date"
+            value={
+              sailingDate
+            }
+            onChange={(
+              event
+            ) =>
+              setSailingDate(
+                event.target.value
+              )
+            }
+            className={`mt-2 w-full rounded-xl border bg-white px-4 py-4 text-base font-semibold text-slate-900 outline-none transition ${
+              !isValidSailingDate
+                ? "border-red-300 focus:ring-2 focus:ring-red-400"
+                : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+            }`}
+          />
+
+          {!isValidSailingDate && (
+            <p className="mt-3 text-sm font-medium text-red-600">
+              Introduce una fecha de
+              salida válida.
+            </p>
+          )}
 
           <div className="mt-4 rounded-xl bg-slate-50 p-4">
             <p className="text-sm leading-6 text-slate-600">
-              💡 Introduce la duración
-              total que aparece en tu
-              reserva.
+              💡 La fecha nos permitirá
+              aplicar correctamente
+              condiciones que puedan
+              cambiar según la temporada
+              o versión del paquete.
+              Puedes dejarla vacía si
+              todavía no la conoces.
             </p>
           </div>
         </section>
