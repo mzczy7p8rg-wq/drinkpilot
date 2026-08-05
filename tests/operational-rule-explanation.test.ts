@@ -112,3 +112,114 @@ describe(
     );
   }
 );
+
+describe(
+  "adult operational rule notices",
+  () => {
+    it(
+      "excluye todos los avisos de paquetes exclusivos para menores",
+      async () => {
+        const {
+          filterAdultOperationalRuleNotices,
+        } = await import(
+          "@/lib/operationalRuleExplanation"
+        );
+
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        /*
+         * Minors Package genera más de
+         * un aviso, incluido AQUA.
+         *
+         * El filtro debe eliminar todos,
+         * no únicamente "minors-only".
+         */
+        expect(
+          notices.some(
+            (notice) =>
+              notice.packageKey ===
+              "mscMinors"
+          )
+        ).toBe(true);
+
+        const adultNotices =
+          filterAdultOperationalRuleNotices(
+            notices,
+            rules
+          );
+
+        expect(
+          adultNotices.some(
+            (notice) =>
+              notice.packageKey ===
+              "mscMinors"
+          )
+        ).toBe(false);
+
+        expect(
+          adultNotices.some(
+            (notice) =>
+              notice.packageKey ===
+                "mscEasy" &&
+              notice.type ===
+                "aqua-unlimited"
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "no elimina avisos de paquetes adultos",
+      async () => {
+        const {
+          filterAdultOperationalRuleNotices,
+        } = await import(
+          "@/lib/operationalRuleExplanation"
+        );
+
+        const rules =
+          getPackageOperationalRules(
+            "msc"
+          );
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const adultNotices =
+          filterAdultOperationalRuleNotices(
+            notices,
+            rules
+          );
+
+        expect(
+          adultNotices.some(
+            (notice) =>
+              notice.packageKey ===
+              "mscEasy"
+          )
+        ).toBe(true);
+
+        expect(
+          adultNotices.some(
+            (notice) =>
+              notice.packageKey ===
+              "mscPremiumExtra"
+          )
+        ).toBe(true);
+      }
+    );
+  }
+);

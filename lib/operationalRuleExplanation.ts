@@ -135,3 +135,37 @@ export function buildOperationalRuleNotices(
 
   return notices;
 }
+
+/*
+ * El flujo actual de DrinkPilot analiza
+ * paquetes adultos.
+ *
+ * Un paquete marcado como minorsOnly no
+ * debe aportar ningún aviso al resultado,
+ * aunque también tenga otras propiedades
+ * operativas como AQUA.
+ */
+export function filterAdultOperationalRuleNotices(
+  notices: OperationalRuleNotice[],
+  rules: PackageOperationalRules[]
+): OperationalRuleNotice[] {
+  const minorsOnlyPackageKeys =
+    new Set(
+      rules
+        .filter(
+          (rule) =>
+            rule.minorsOnly
+        )
+        .map(
+          (rule) =>
+            rule.packageKey
+        )
+    );
+
+  return notices.filter(
+    (notice) =>
+      !minorsOnlyPackageKeys.has(
+        notice.packageKey
+      )
+  );
+}

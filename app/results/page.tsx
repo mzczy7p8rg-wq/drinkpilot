@@ -11,6 +11,7 @@ import { buildRecommendationExplanation } from "@/lib/recommendationExplanation"
 
 import {
   buildOperationalRuleNotices,
+  filterAdultOperationalRuleNotices,
 } from "@/lib/operationalRuleExplanation";
 
 import {
@@ -292,34 +293,10 @@ export default function ResultsPage() {
       onboardPriceValues
     )
   ) {
-    /*
-     * El análisis actual está orientado
-     * a paquetes adultos.
-     *
-     * No basta con ocultar el aviso
-     * "minors-only": debemos excluir
-     * todos los avisos pertenecientes
-     * a un paquete reservado a menores.
-     */
-    const minorsOnlyPackageKeys =
-      new Set(
-        comparison.operationalRules
-          .filter(
-            (rule) =>
-              rule.minorsOnly
-          )
-          .map(
-            (rule) =>
-              rule.packageKey
-          )
-      );
-
     const adultOperationalNotices =
-      allOperationalNotices.filter(
-        (notice) =>
-          !minorsOnlyPackageKeys.has(
-            notice.packageKey
-          )
+      filterAdultOperationalRuleNotices(
+        allOperationalNotices,
+        comparison.operationalRules
       );
 
     const missingPriceLabels = {
@@ -601,38 +578,15 @@ export default function ResultsPage() {
       )
     );
 
-  const minorsOnlyPackageKeys =
-    new Set(
+  const adultOperationalNotices =
+    filterAdultOperationalRuleNotices(
+      allOperationalNotices,
       comparison.operationalRules
-        .filter(
-          (rule) =>
-            rule.minorsOnly
-        )
-        .map(
-          (rule) =>
-            rule.packageKey
-        )
     );
 
   const operationalNotices =
-    allOperationalNotices.filter(
+    adultOperationalNotices.filter(
       (notice) => {
-        /*
-         * El flujo actual compara
-         * paquetes adultos.
-         *
-         * Un paquete reservado a menores
-         * no debe aportar ningún aviso
-         * a este resultado.
-         */
-        if (
-          minorsOnlyPackageKeys.has(
-            notice.packageKey
-          )
-        ) {
-          return false;
-        }
-
         if (bestPackage) {
           return (
             notice.packageKey ===
