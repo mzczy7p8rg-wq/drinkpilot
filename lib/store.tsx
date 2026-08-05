@@ -22,6 +22,10 @@ import {
   resolveStoredCruiseContext,
 } from "@/lib/cruiseContextStorage";
 
+import {
+  resolveStoredCocktailConsumption,
+} from "@/lib/cocktailConsumptionStorage";
+
 export type CustomPackagePrices = Record<
   string,
   number | null
@@ -54,6 +58,18 @@ export type WizardData = {
   beer: number;
   wine: number;
   cocktail: number;
+
+  /*
+   * Consumption v2.
+   *
+   * null = composición de cócteles
+   * todavía desconocida.
+   */
+  alcoholicCocktail:
+    number | null;
+
+  nonAlcoholicCocktail:
+    number | null;
 
   drinksPerDay: number;
 
@@ -183,6 +199,12 @@ function createInitialData(
     beer: 0,
     wine: 0,
     cocktail: 0,
+
+    alcoholicCocktail:
+      null,
+
+    nonAlcoholicCocktail:
+      null,
 
     drinksPerDay: 0,
 
@@ -490,6 +512,23 @@ export function StoreProvider({
               parsedData.sailingDate,
           });
 
+        const storedCocktailConsumption =
+          resolveStoredCocktailConsumption(
+            {
+              cocktail:
+                parsedData.cocktail,
+
+              alcoholicCocktail:
+                parsedData
+                  .alcoholicCocktail,
+
+              nonAlcoholicCocktail:
+                parsedData
+                  .nonAlcoholicCocktail,
+            },
+            baseData.cocktail
+          );
+
         setData({
           cruiseLine,
 
@@ -538,10 +577,16 @@ export function StoreProvider({
               : baseData.wine,
 
           cocktail:
-            typeof parsedData.cocktail ===
-            "number"
-              ? parsedData.cocktail
-              : baseData.cocktail,
+            storedCocktailConsumption
+              .cocktail,
+
+          alcoholicCocktail:
+            storedCocktailConsumption
+              .alcoholicCocktail,
+
+          nonAlcoholicCocktail:
+            storedCocktailConsumption
+              .nonAlcoholicCocktail,
 
           drinksPerDay:
             typeof parsedData.drinksPerDay ===
