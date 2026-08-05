@@ -208,6 +208,12 @@ export default function ResultsPage() {
       cruiseLine:
         data.cruiseLine,
 
+      market:
+        data.market,
+
+      sailingDate:
+        data.sailingDate,
+
       days:
         data.days,
 

@@ -24,6 +24,11 @@ import {
   type PartialOnboardPriceValues,
 } from "@/lib/onboardPriceService";
 
+import {
+  getPackageOperationalRules,
+  type PackageOperationalRules,
+} from "@/lib/packageRules";
+
 export type PriceSource =
   | "user"
   | "reference";
@@ -43,6 +48,18 @@ export type ComparisonInput = {
    * continúa siendo el valor por defecto.
    */
   cruiseLine?: CruiseLineKey;
+
+  /*
+   * Contexto opcional de la navegación.
+   *
+   * null/undefined = desconocido.
+   *
+   * No modifica por sí solo ningún
+   * cálculo económico.
+   */
+  market?: string | null;
+
+  sailingDate?: string | null;
 
   days: number;
   people: number;
@@ -172,6 +189,16 @@ export type ComparisonResult = {
    */
   coveragePackages:
     PackageCoverageResult[];
+
+  /*
+   * Reglas operativas resueltas para
+   * todos los paquetes de la naviera.
+   *
+   * Siempre están disponibles aunque
+   * falten datos económicos.
+   */
+  operationalRules:
+    PackageOperationalRules[];
 
   packages:
     PackageComparisonResult[];
@@ -527,6 +554,28 @@ export function compareDrinkPackages(
     );
 
   /*
+   * REGLAS OPERATIVAS
+   *
+   * Construimos el contexto real recibido
+   * desde el wizard.
+   *
+   * Todavía no utilizamos estas reglas
+   * para alterar cálculo, cobertura ni
+   * recomendación.
+   */
+  const operationalRules =
+    getPackageOperationalRules({
+      cruiseLine:
+        activeCruiseLine,
+
+      market:
+        input.market ?? null,
+
+      sailingDate:
+        input.sailingDate ?? null,
+    });
+
+  /*
    * PRECIOS INDIVIDUALES
    *
    * Algunas navieras pueden estar
@@ -671,6 +720,8 @@ export function compareDrinkPackages(
 
       coveragePackages:
         coverageResults,
+
+      operationalRules,
 
       packages: [],
 
@@ -876,6 +927,8 @@ export function compareDrinkPackages(
 
     coveragePackages:
       coverageResults,
+
+    operationalRules,
 
     packages:
       results,

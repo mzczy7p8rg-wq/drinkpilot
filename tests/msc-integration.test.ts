@@ -162,5 +162,90 @@ describe(
         ).toBe("user-price-only");
       }
     );
+    it(
+      "transporta el contexto real hasta las reglas operativas MSC",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "msc",
+
+            market: "ES",
+
+            sailingDate:
+              "2026-08-15",
+
+            days: 7,
+            people: 1,
+
+            coffee: 2,
+            water: 2,
+            soda: 2,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+          });
+
+        const easyRule =
+          result.operationalRules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        expect(
+          easyRule?.context
+        ).toEqual({
+          cruiseLine: "msc",
+          market: "ES",
+          sailingDate:
+            "2026-08-15",
+        });
+
+        expect(
+          easyRule
+            ?.alcoholicDrinksDailyLimit
+        ).toBe(15);
+
+        expect(
+          easyRule
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "no inventa contexto cuando market y sailingDate son desconocidos",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "msc",
+
+            days: 7,
+            people: 1,
+
+            coffee: 2,
+            water: 2,
+            soda: 2,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+          });
+
+        const easyRule =
+          result.operationalRules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        expect(
+          easyRule?.context
+        ).toEqual({
+          cruiseLine: "msc",
+          market: null,
+          sailingDate: null,
+        });
+      }
+    );
   }
 );
