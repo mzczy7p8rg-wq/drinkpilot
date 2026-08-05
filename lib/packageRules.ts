@@ -25,6 +25,21 @@ export type PackageRulesContext =
   | CruiseLineKey
   | CruiseContext;
 
+export type PackageRulesOptions = {
+  /*
+   * Permite inyectar reglas contextuales
+   * explícitas.
+   *
+   * Principalmente útil para tests y
+   * futuras capas de resolución.
+   *
+   * undefined = utilizar el registro
+   * normal de la naviera.
+   */
+  contextualRules?:
+    ContextualPackageRule[];
+};
+
 export type PackageOperationalRules = {
   packageKey: PackageKey;
 
@@ -179,7 +194,9 @@ function applyContextualRules(
 
 function resolvePackageRules(
   pkg: RulesPackage,
-  context: CruiseContext
+  context: CruiseContext,
+  contextualRuleRegistry:
+    ContextualPackageRule[]
 ): PackageOperationalRules {
   const observed =
     pkg.observedCoverage;
@@ -277,9 +294,7 @@ function resolvePackageRules(
    */
   const contextualRules =
     getContextualPackageRulesForPackage(
-      getContextualRulesForCruiseLine(
-        context.cruiseLine
-      ),
+      contextualRuleRegistry,
       context,
       pkg.key as PackageKey
     );
@@ -291,11 +306,18 @@ function resolvePackageRules(
 }
 
 export function getPackageOperationalRules(
-  input: PackageRulesContext
+  input: PackageRulesContext,
+  options: PackageRulesOptions = {}
 ): PackageOperationalRules[] {
   const context =
     normalizeCruiseContext(
       input
+    );
+
+  const contextualRuleRegistry =
+    options.contextualRules ??
+    getContextualRulesForCruiseLine(
+      context.cruiseLine
     );
 
   return getAllPackages(
@@ -304,18 +326,21 @@ export function getPackageOperationalRules(
     (pkg) =>
       resolvePackageRules(
         pkg,
-        context
+        context,
+        contextualRuleRegistry
       )
   );
 }
 
 export function getPackageOperationalRule(
   input: PackageRulesContext,
-  packageKey: PackageKey
+  packageKey: PackageKey,
+  options: PackageRulesOptions = {}
 ): PackageOperationalRules | null {
   return (
     getPackageOperationalRules(
-      input
+      input,
+      options
     ).find(
       (rule) =>
         rule.packageKey ===

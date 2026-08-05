@@ -279,5 +279,171 @@ describe(
         ).toEqual([]);
       }
     );
+    it(
+      "aplica una regla contextual inyectada cuando coincide el contexto",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-07-15",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-premium-threshold",
+
+                  cruiseLine:
+                    "msc",
+
+                  packageKey:
+                    "mscPremiumExtra",
+
+                  markets: [
+                    "ES",
+                  ],
+
+                  validFrom:
+                    "2026-06-01",
+
+                  validUntil:
+                    "2026-08-31",
+
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        expect(
+          rule
+            ?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rule
+            ?.appliedContextualRuleIds
+        ).toEqual([
+          "test-premium-threshold",
+        ]);
+      }
+    );
+
+    it(
+      "no aplica una regla contextual inyectada fuera de su mercado",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingDate:
+                "2026-07-15",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-es-only",
+
+                  cruiseLine:
+                    "msc",
+
+                  packageKey:
+                    "mscPremiumExtra",
+
+                  markets: [
+                    "ES",
+                  ],
+
+                  validFrom:
+                    "2026-06-01",
+
+                  validUntil:
+                    "2026-08-31",
+
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        expect(
+          rule
+            ?.drinkPriceThreshold
+        ).toBeNull();
+
+        expect(
+          rule
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "no aplica una regla contextual inyectada fuera de su ventana temporal",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-09-01",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-summer-only",
+
+                  cruiseLine:
+                    "msc",
+
+                  packageKey:
+                    "mscPremiumExtra",
+
+                  markets: [
+                    "ES",
+                  ],
+
+                  validFrom:
+                    "2026-06-01",
+
+                  validUntil:
+                    "2026-08-31",
+
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        expect(
+          rule
+            ?.drinkPriceThreshold
+        ).toBeNull();
+
+        expect(
+          rule
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
   }
 );
