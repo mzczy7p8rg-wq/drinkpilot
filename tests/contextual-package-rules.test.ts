@@ -1,0 +1,317 @@
+import {
+  describe,
+  expect,
+  it,
+} from "vitest";
+
+import {
+  getContextualPackageRulesForPackage,
+  getMatchingContextualPackageRules,
+  matchesContextualPackageRule,
+  type ContextualPackageRule,
+} from "@/lib/contextualPackageRules";
+
+const rule:
+  ContextualPackageRule = {
+    id:
+      "msc-example-rule",
+
+    cruiseLine:
+      "msc",
+
+    packageKey:
+      "mscPremiumExtra",
+
+    markets: [
+      "ES",
+      "EU",
+    ],
+
+    validFrom:
+      "2026-06-01",
+
+    validUntil:
+      "2026-08-31",
+
+    rules: {
+      drinkPriceThreshold:
+        14,
+    },
+  };
+
+describe(
+  "contextual package rules",
+  () => {
+    it(
+      "aplica la fecha inicial de forma inclusiva",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-06-01",
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "aplica la fecha final de forma inclusiva",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-08-31",
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "rechaza fechas anteriores a validFrom",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-05-31",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "rechaza fechas posteriores a validUntil",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-09-01",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no aplica una regla temporal si desconocemos la fecha",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no aplica una regla de mercado si desconocemos el mercado",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingDate:
+                "2026-07-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "rechaza una naviera distinta",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "costa",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-07-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "acepta reglas sin restricciones de mercado ni fecha",
+      () => {
+        const universalRule:
+          ContextualPackageRule = {
+            id:
+              "universal-example",
+
+            cruiseLine:
+              "msc",
+
+            packageKey:
+              "mscEasy",
+
+            rules: {
+              alcoholicDrinksDailyLimit:
+                15,
+            },
+          };
+
+        expect(
+          matchesContextualPackageRule(
+            universalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "filtra únicamente las reglas que coinciden con el contexto",
+      () => {
+        const matches =
+          getMatchingContextualPackageRules(
+            [
+              rule,
+
+              {
+                ...rule,
+
+                id:
+                  "other-market",
+
+                markets: [
+                  "US",
+                ],
+              },
+            ],
+
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-07-15",
+            }
+          );
+
+        expect(
+          matches.map(
+            (item) =>
+              item.id
+          )
+        ).toEqual([
+          "msc-example-rule",
+        ]);
+      }
+    );
+
+    it(
+      "filtra reglas por packageKey después de aplicar contexto",
+      () => {
+        const matches =
+          getContextualPackageRulesForPackage(
+            [
+              rule,
+
+              {
+                ...rule,
+
+                id:
+                  "msc-easy-rule",
+
+                packageKey:
+                  "mscEasy",
+              },
+            ],
+
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-07-15",
+            },
+
+            "mscPremiumExtra"
+          );
+
+        expect(
+          matches.map(
+            (item) =>
+              item.id
+          )
+        ).toEqual([
+          "msc-example-rule",
+        ]);
+      }
+    );
+  }
+);
