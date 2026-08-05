@@ -305,3 +305,198 @@ describe(
     );
   }
 );
+
+describe(
+  "operational notice calculation impact",
+  () => {
+    it(
+      "marca las reglas operativas actuales como informativas",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        expect(
+          notices.length
+        ).toBeGreaterThan(0);
+
+        for (
+          const notice of
+          notices
+        ) {
+          expect(
+            notice.calculationImpact
+          ).toBe(
+            "informational"
+          );
+        }
+      }
+    );
+
+    it(
+      "no convierte un umbral contextual ficticio en impacto económico antes de que el motor lo utilice",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-threshold-impact",
+                  cruiseLine:
+                    "msc",
+                  packageKey:
+                    "mscPremiumExtra",
+                  markets: ["ES"],
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        const thresholdNotice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (notice) =>
+              notice.type ===
+                "drink-price-threshold" &&
+              notice.packageKey ===
+                "mscPremiumExtra"
+          );
+
+        expect(
+          thresholdNotice
+            ?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+
+        expect(
+          thresholdNotice?.source
+        ).toBe(
+          "contextual"
+        );
+      }
+    );
+  }
+);
+
+describe(
+  "operational notice calculation impact",
+  () => {
+    it(
+      "marca las reglas operativas actuales como informativas",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        expect(
+          notices.length
+        ).toBeGreaterThan(0);
+
+        for (
+          const notice of
+          notices
+        ) {
+          expect(
+            notice.calculationImpact
+          ).toBe(
+            "informational"
+          );
+        }
+      }
+    );
+
+    it(
+      "mantiene informativo un umbral contextual mientras el motor no lo utilice",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingDate:
+                "2026-08-15",
+            },
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-threshold-impact",
+                  cruiseLine:
+                    "msc",
+                  packageKey:
+                    "mscPremiumExtra",
+                  markets: ["ES"],
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+                  },
+                },
+              ],
+            }
+          );
+
+        const thresholdNotice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (notice) =>
+              notice.packageKey ===
+                "mscPremiumExtra" &&
+              notice.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          thresholdNotice
+            ?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+
+        expect(
+          thresholdNotice?.source
+        ).toBe(
+          "contextual"
+        );
+
+        expect(
+          thresholdNotice
+            ?.appliedContextualRuleIds
+        ).toEqual([
+          "test-threshold-impact",
+        ]);
+      }
+    );
+  }
+);

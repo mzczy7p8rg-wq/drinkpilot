@@ -29,6 +29,23 @@ export type OperationalRuleNotice = {
     | "base"
     | "contextual";
 
+  /*
+   * Indica si esta condición modifica
+   * actualmente el cálculo de DrinkPilot.
+   *
+   * informational:
+   * la mostramos al usuario, pero el
+   * motor todavía no altera ahorro,
+   * cobertura ni recomendación por ella.
+   *
+   * economic:
+   * reservado para reglas que realmente
+   * participen en el cálculo económico.
+   */
+  calculationImpact:
+    | "informational"
+    | "economic";
+
   appliedContextualRuleIds:
     string[];
 };
@@ -56,6 +73,9 @@ export function buildOperationalRuleNotices(
 
         type:
           "alcohol-daily-limit",
+
+        calculationImpact:
+          "informational",
 
         message:
           `${rule.packageName}: límite conocido de ${rule.alcoholicDrinksDailyLimit} bebidas alcohólicas por huésped y día.`,
@@ -91,6 +111,9 @@ export function buildOperationalRuleNotices(
         type:
           "drink-price-threshold",
 
+        calculationImpact:
+          "informational",
+
         message:
           `${rule.packageName}: para el contexto indicado se ha resuelto un límite de ${rule.drinkPriceThreshold.toFixed(
             2
@@ -124,6 +147,9 @@ export function buildOperationalRuleNotices(
         type:
           "aqua-unlimited",
 
+        calculationImpact:
+          "informational",
+
         message:
           `${rule.packageName}: incluye cobertura AQUA según los datos operativos disponibles.`,
 
@@ -154,6 +180,9 @@ export function buildOperationalRuleNotices(
 
         type:
           "minors-only",
+
+        calculationImpact:
+          "informational",
 
         message:
           `${rule.packageName}: paquete reservado a menores y no aplicable como paquete adulto.`,
