@@ -6,6 +6,10 @@ import { useStore } from "@/lib/store";
 import DrinkCounter from "@/components/DrinkCounter";
 import ProgressBar from "@/components/ProgressBar";
 
+import {
+  updateCocktailComposition,
+} from "@/lib/cocktailComposition";
+
 export default function ConsumptionPage() {
   const { data, setData } = useStore();
 
@@ -19,6 +23,22 @@ export default function ConsumptionPage() {
 
   const hasConsumption =
     totalDrinksPerDay > 0;
+
+  const hasCocktails =
+    data.cocktail > 0;
+
+  const hasCocktailComposition =
+    data.alcoholicCocktail !== null &&
+    data.nonAlcoholicCocktail !== null;
+
+  const cocktailCompositionTotal =
+    (data.alcoholicCocktail ?? 0) +
+    (data.nonAlcoholicCocktail ?? 0);
+
+  const isCocktailCompositionValid =
+    hasCocktailComposition &&
+    cocktailCompositionTotal ===
+      data.cocktail;
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
@@ -120,10 +140,128 @@ export default function ConsumptionPage() {
             onChange={(value) =>
               setData((prev) => ({
                 ...prev,
-                cocktail: Math.max(0, value),
+
+                cocktail:
+                  Math.max(0, value),
+
+                /*
+                 * Si cambia el total,
+                 * el reparto anterior
+                 * deja de ser fiable.
+                 */
+                alcoholicCocktail:
+                  null,
+
+                nonAlcoholicCocktail:
+                  null,
               }))
             }
           />
+
+          {hasCocktails && (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-4 sm:p-5">
+              <div>
+                <p className="font-semibold text-slate-900">
+                  ¿Qué tipo de cócteles consumes?
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Opcional. Reparte tus{" "}
+                  <strong>
+                    {data.cocktail}
+                  </strong>{" "}
+                  {data.cocktail === 1
+                    ? "cóctel"
+                    : "cócteles"}{" "}
+                  entre las dos categorías.
+                </p>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                <DrinkCounter
+                  label="🍸 Con alcohol"
+                  value={
+                    data.alcoholicCocktail ??
+                    0
+                  }
+                  onChange={(value) =>
+                    setData((prev) => {
+                      const composition =
+                        updateCocktailComposition(
+                          prev.cocktail,
+                          {
+                            alcoholicCocktail:
+                              prev
+                                .alcoholicCocktail ??
+                              0,
+
+                            nonAlcoholicCocktail:
+                              prev
+                                .nonAlcoholicCocktail ??
+                              0,
+                          },
+                          "alcoholicCocktail",
+                          value
+                        );
+
+                      return {
+                        ...prev,
+                        ...composition,
+                      };
+                    })
+                  }
+                />
+
+                <DrinkCounter
+                  label="🍹 Sin alcohol"
+                  value={
+                    data.nonAlcoholicCocktail ??
+                    0
+                  }
+                  onChange={(value) =>
+                    setData((prev) => {
+                      const composition =
+                        updateCocktailComposition(
+                          prev.cocktail,
+                          {
+                            alcoholicCocktail:
+                              prev
+                                .alcoholicCocktail ??
+                              0,
+
+                            nonAlcoholicCocktail:
+                              prev
+                                .nonAlcoholicCocktail ??
+                              0,
+                          },
+                          "nonAlcoholicCocktail",
+                          value
+                        );
+
+                      return {
+                        ...prev,
+                        ...composition,
+                      };
+                    })
+                  }
+                />
+              </div>
+
+              {hasCocktailComposition && (
+                <div
+                  className={`mt-4 rounded-xl border p-3 text-sm ${
+                    isCocktailCompositionValid
+                      ? "border-green-200 bg-green-50 text-green-800"
+                      : "border-amber-200 bg-amber-50 text-amber-800"
+                  }`}
+                >
+                  {isCocktailCompositionValid
+                    ? `✓ Reparto completo: ${cocktailCompositionTotal} de ${data.cocktail}.`
+                    : `El reparto suma ${cocktailCompositionTotal} de ${data.cocktail}. Ajusta las cantidades si quieres completar la composición.`}
+                </div>
+              )}
+            </div>
+          )}
 
         </div>
 
