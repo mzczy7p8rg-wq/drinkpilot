@@ -29,6 +29,16 @@ import {
   type PackageOperationalRules,
 } from "@/lib/packageRules";
 
+import {
+  resolveAlcoholConsumption,
+  type AlcoholConsumptionResolution,
+} from "@/lib/alcoholConsumption";
+
+import {
+  evaluateOperationalRuleImpacts,
+  type PackageOperationalRuleImpact,
+} from "@/lib/operationalRuleImpact";
+
 export type PriceSource =
   | "user"
   | "reference";
@@ -70,6 +80,19 @@ export type ComparisonInput = {
   beer: number;
   wine: number;
   cocktail: number;
+
+  /*
+   * Composición V2 de los cócteles.
+   *
+   * null/undefined = desconocida.
+   *
+   * Estos valores permiten resolver el
+   * consumo alcohólico real sin inferir
+   * que todos los cócteles llevan alcohol.
+   */
+  alcoholicCocktail?: number | null;
+
+  nonAlcoholicCocktail?: number | null;
 
   alcoholicCocktails?: boolean;
 
@@ -201,6 +224,27 @@ export type ComparisonResult = {
    */
   operationalRules:
     PackageOperationalRules[];
+
+  /*
+   * Resolución del consumo alcohólico
+   * diario conocido.
+   *
+   * Por ahora es únicamente informativa:
+   * no modifica cálculo, cobertura ni
+   * recomendación.
+   */
+  alcoholConsumption:
+    AlcoholConsumptionResolution;
+
+  /*
+   * Impacto descriptivo de las reglas
+   * operativas sobre el consumo conocido.
+   *
+   * No modifica todavía cobertura,
+   * economía ni recomendación.
+   */
+  operationalRuleImpacts:
+    PackageOperationalRuleImpact[];
 
   packages:
     PackageComparisonResult[];
@@ -578,6 +622,52 @@ export function compareDrinkPackages(
     });
 
   /*
+   * CONSUMO ALCOHÓLICO V2
+   *
+   * Resolvemos únicamente lo que podemos
+   * conocer con certeza.
+   *
+   * Si la composición de los cócteles no
+   * está completa, alcoholicDrinksPerDay
+   * permanecerá en null.
+   *
+   * Todavía no aplicamos límites
+   * operativos sobre este valor.
+   */
+  const alcoholConsumption =
+    resolveAlcoholConsumption({
+      beer:
+        input.beer,
+
+      wine:
+        input.wine,
+
+      cocktail:
+        input.cocktail,
+
+      alcoholicCocktail:
+        input.alcoholicCocktail,
+
+      nonAlcoholicCocktail:
+        input.nonAlcoholicCocktail,
+    });
+
+  /*
+   * IMPACTO DE REGLAS OPERATIVAS
+   *
+   * Cruzamos las reglas de cada paquete
+   * con el consumo alcohólico conocido.
+   *
+   * El resultado sigue siendo únicamente
+   * descriptivo.
+   */
+  const operationalRuleImpacts =
+    evaluateOperationalRuleImpacts(
+      alcoholConsumption,
+      operationalRules
+    );
+
+  /*
    * PRECIOS INDIVIDUALES
    *
    * Algunas navieras pueden estar
@@ -728,6 +818,10 @@ export function compareDrinkPackages(
         coverageResults,
 
       operationalRules,
+
+      alcoholConsumption,
+
+      operationalRuleImpacts,
 
       packages: [],
 
@@ -935,6 +1029,10 @@ export function compareDrinkPackages(
       coverageResults,
 
     operationalRules,
+
+    alcoholConsumption,
+
+    operationalRuleImpacts,
 
     packages:
       results,

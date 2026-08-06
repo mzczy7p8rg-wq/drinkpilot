@@ -1885,3 +1885,390 @@ describe(
     );
   }
 );
+
+describe(
+  "alcohol consumption integration",
+  () => {
+    it(
+      "resuelve el consumo alcohólico cuando conoce toda la composición de cócteles",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "costa",
+
+            days: 7,
+            people: 1,
+
+            coffee: 0,
+            water: 0,
+            soda: 0,
+
+            beer: 2,
+            wine: 1,
+            cocktail: 4,
+
+            alcoholicCocktail: 3,
+            nonAlcoholicCocktail: 1,
+
+            alcoholicCocktails: true,
+            nonAlcoholicCocktails: true,
+
+            premiumCocktails: false,
+            bottledBeer: false,
+            premiumSpirits: false,
+            bottledWaterUnlimited: false,
+          });
+
+        expect(
+          result
+            .alcoholConsumption
+            .cocktailCompositionKnown
+        ).toBe(true);
+
+        expect(
+          result
+            .alcoholConsumption
+            .knownAlcoholicDrinksPerDay
+        ).toBe(6);
+
+        expect(
+          result
+            .alcoholConsumption
+            .alcoholicDrinksPerDay
+        ).toBe(6);
+      }
+    );
+
+    it(
+      "mantiene desconocido el total alcohólico con composición legacy incompleta",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "costa",
+
+            days: 7,
+            people: 1,
+
+            coffee: 0,
+            water: 0,
+            soda: 0,
+
+            beer: 2,
+            wine: 1,
+            cocktail: 4,
+
+            alcoholicCocktails: true,
+            nonAlcoholicCocktails: true,
+
+            premiumCocktails: false,
+            bottledBeer: false,
+            premiumSpirits: false,
+            bottledWaterUnlimited: false,
+          });
+
+        expect(
+          result
+            .alcoholConsumption
+            .cocktailCompositionKnown
+        ).toBe(false);
+
+        expect(
+          result
+            .alcoholConsumption
+            .knownAlcoholicDrinksPerDay
+        ).toBe(3);
+
+        expect(
+          result
+            .alcoholConsumption
+            .alcoholicDrinksPerDay
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "no modifica el cálculo económico por conocer la composición alcohólica",
+      () => {
+        const baseInput = {
+          cruiseLine:
+            "costa" as const,
+
+          days: 7,
+          people: 1,
+
+          coffee: 2,
+          water: 2,
+          soda: 1,
+          beer: 2,
+          wine: 1,
+          cocktail: 4,
+
+          alcoholicCocktails:
+            true,
+
+          nonAlcoholicCocktails:
+            true,
+
+          premiumCocktails:
+            false,
+
+          bottledBeer:
+            false,
+
+          premiumSpirits:
+            false,
+
+          bottledWaterUnlimited:
+            false,
+        };
+
+        const legacy =
+          compareDrinkPackages({
+            ...baseInput,
+          });
+
+        const v2 =
+          compareDrinkPackages({
+            ...baseInput,
+
+            alcoholicCocktail: 3,
+            nonAlcoholicCocktail: 1,
+          });
+
+        const legacyPackage =
+          legacy.packages.find(
+            (pkg) =>
+              pkg.packageKey ===
+              "myDrinks"
+          );
+
+        const v2Package =
+          v2.packages.find(
+            (pkg) =>
+              pkg.packageKey ===
+              "myDrinks"
+          );
+
+        expect(
+          v2Package?.drinksCost
+        ).toBe(
+          legacyPackage?.drinksCost
+        );
+
+        expect(
+          v2Package?.packageCost
+        ).toBe(
+          legacyPackage?.packageCost
+        );
+
+        expect(
+          v2Package?.savings
+        ).toBe(
+          legacyPackage?.savings
+        );
+      }
+    );
+  }
+);
+
+describe(
+  "operational rule impacts integration",
+  () => {
+    const createMscInput = (
+      alcoholicCocktail: number
+    ) => ({
+      cruiseLine:
+        "msc" as const,
+
+      days: 7,
+      people: 1,
+
+      coffee: 0,
+      water: 0,
+      soda: 0,
+
+      beer: 5,
+      wine: 5,
+      cocktail: 10,
+
+      alcoholicCocktail,
+      nonAlcoholicCocktail:
+        10 - alcoholicCocktail,
+
+      alcoholicCocktails:
+        true,
+
+      nonAlcoholicCocktails:
+        true,
+
+      premiumCocktails:
+        false,
+
+      bottledBeer:
+        false,
+
+      premiumSpirits:
+        false,
+
+      bottledWaterUnlimited:
+        false,
+    });
+
+    it(
+      "expone impacto within-limit para MSC",
+      () => {
+        /*
+         * 5 cerveza + 5 vino +
+         * 4 cócteles alcohólicos = 14.
+         */
+        const result =
+          compareDrinkPackages(
+            createMscInput(4)
+          );
+
+        const easy =
+          result
+            .operationalRuleImpacts
+            .find(
+              (impact) =>
+                impact.packageKey ===
+                "mscEasy"
+            );
+
+        expect(
+          easy?.alcoholDailyLimit
+            .status
+        ).toBe("within-limit");
+
+        expect(
+          easy?.alcoholDailyLimit
+            .alcoholicDrinksPerDay
+        ).toBe(14);
+
+        expect(
+          easy?.alcoholDailyLimit
+            .alcoholicDrinksDailyLimit
+        ).toBe(15);
+      }
+    );
+
+    it(
+      "expone impacto at-limit para MSC",
+      () => {
+        /*
+         * 5 + 5 + 5 = 15.
+         */
+        const result =
+          compareDrinkPackages(
+            createMscInput(5)
+          );
+
+        const easy =
+          result
+            .operationalRuleImpacts
+            .find(
+              (impact) =>
+                impact.packageKey ===
+                "mscEasy"
+            );
+
+        expect(
+          easy?.alcoholDailyLimit
+            .status
+        ).toBe("at-limit");
+
+        expect(
+          easy?.alcoholDailyLimit
+            .excessDrinksPerDay
+        ).toBe(0);
+      }
+    );
+
+    it(
+      "expone impacto over-limit para MSC",
+      () => {
+        /*
+         * 5 + 5 + 8 = 18.
+         */
+        const result =
+          compareDrinkPackages(
+            createMscInput(8)
+          );
+
+        const easy =
+          result
+            .operationalRuleImpacts
+            .find(
+              (impact) =>
+                impact.packageKey ===
+                "mscEasy"
+            );
+
+        expect(
+          easy?.alcoholDailyLimit
+            .status
+        ).toBe("over-limit");
+
+        expect(
+          easy?.alcoholDailyLimit
+            .excessDrinksPerDay
+        ).toBe(3);
+      }
+    );
+
+    it(
+      "mantiene unknown cuando Costa no tiene límite diario conocido",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine:
+              "costa",
+
+            days: 7,
+            people: 1,
+
+            coffee: 0,
+            water: 0,
+            soda: 0,
+
+            beer: 5,
+            wine: 5,
+            cocktail: 10,
+
+            alcoholicCocktail: 8,
+            nonAlcoholicCocktail: 2,
+
+            alcoholicCocktails:
+              true,
+
+            nonAlcoholicCocktails:
+              true,
+
+            premiumCocktails:
+              false,
+
+            bottledBeer:
+              false,
+
+            premiumSpirits:
+              false,
+
+            bottledWaterUnlimited:
+              false,
+          });
+
+        expect(
+          result
+            .operationalRuleImpacts
+            .every(
+              (impact) =>
+                impact
+                  .alcoholDailyLimit
+                  .status ===
+                "unknown"
+            )
+        ).toBe(true);
+      }
+    );
+  }
+);
