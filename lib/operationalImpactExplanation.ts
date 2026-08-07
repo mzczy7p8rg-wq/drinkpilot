@@ -17,7 +17,10 @@ export type OperationalImpactExplanation = {
   severity:
     OperationalImpactSeverity;
 
-  message: string;
+  operationalMessage: string;
+
+  economicMessage:
+    string | null;
 };
 
 /*
@@ -32,9 +35,9 @@ export type OperationalImpactExplanation = {
  * - rentabilidad;
  * - recomendación.
  *
- * Solo explica consecuencias que pueden
- * afirmarse a partir de los datos
- * operativos ya resueltos.
+ * La consecuencia operativa y el grado
+ * de conocimiento económico se mantienen
+ * separados explícitamente.
  */
 export function buildOperationalImpactExplanations(
   impacts:
@@ -65,6 +68,17 @@ export function buildOperationalImpactExplanations(
       continue;
     }
 
+    let economicMessage:
+      string | null = null;
+
+    if (
+      impact.economicImpact.status ===
+      "known-unquantified"
+    ) {
+      economicMessage =
+        "Existe un impacto económico potencial asociado a este exceso, pero los datos disponibles no permiten cuantificarlo de forma fiable. DrinkPilot no lo incorpora todavía al cálculo económico.";
+    }
+
     explanations.push({
       id:
         `${impact.packageKey}-alcohol-daily-limit-impact`,
@@ -77,8 +91,10 @@ export function buildOperationalImpactExplanations(
 
       severity: "warning",
 
-      message:
-        `${impact.packageName}: tu consumo conocido es de ${evaluation.alcoholicDrinksPerDay} bebidas alcohólicas al día y supera en ${evaluation.excessDrinksPerDay} el límite operativo conocido de ${evaluation.alcoholicDrinksDailyLimit} al día. DrinkPilot todavía no aplica este exceso al cálculo económico.`,
+      operationalMessage:
+        `${impact.packageName}: tu consumo conocido es de ${evaluation.alcoholicDrinksPerDay} bebidas alcohólicas al día y supera en ${evaluation.excessDrinksPerDay} el límite operativo conocido de ${evaluation.alcoholicDrinksDailyLimit} al día.`,
+
+      economicMessage,
     });
   }
 

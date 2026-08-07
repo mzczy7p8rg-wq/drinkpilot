@@ -34,6 +34,23 @@ function createImpact(
       alcoholicDrinksDailyLimit,
       excessDrinksPerDay,
     },
+
+    economicImpact: {
+      status:
+        status === "over-limit"
+          ? "known-unquantified"
+          : status === "unknown"
+            ? "unknown"
+            : "none",
+
+      excessDrinksPerDay,
+
+      additionalCostPerDay:
+        status === "over-limit" ||
+        status === "unknown"
+          ? null
+          : 0,
+    },
   };
 }
 
@@ -41,7 +58,7 @@ describe(
   "operational impact explanation",
   () => {
     it(
-      "crea advertencia cuando el consumo supera el límite",
+      "separa impacto operativo e incertidumbre económica",
       () => {
         const explanations =
           buildOperationalImpactExplanations([
@@ -64,28 +81,37 @@ describe(
 
         expect(
           explanations[0]
-            .packageKey
-        ).toBe("mscEasy");
-
-        expect(
-          explanations[0]
-            .message
+            .operationalMessage
         ).toContain(
           "supera en 3"
         );
 
         expect(
           explanations[0]
-            .message
+            .operationalMessage
         ).toContain(
           "límite operativo conocido de 15"
         );
 
         expect(
           explanations[0]
-            .message
+            .operationalMessage
+        ).not.toContain(
+          "cálculo económico"
+        );
+
+        expect(
+          explanations[0]
+            .economicMessage
         ).toContain(
-          "todavía no aplica este exceso al cálculo económico"
+          "no permiten cuantificarlo"
+        );
+
+        expect(
+          explanations[0]
+            .economicMessage
+        ).toContain(
+          "no lo incorpora todavía al cálculo económico"
         );
       }
     );
