@@ -86,6 +86,55 @@ function findBestCoveragePackage(
   })[0];
 }
 
+function getUnquantifiedThresholdDrinks(
+  comparison: ComparisonResult,
+  packageKey: string
+) {
+  const thresholdImpact =
+    comparison.thresholdCruiseImpacts.find(
+      (item) =>
+        item.packageKey === packageKey &&
+        item.cruiseImpact.status ===
+          "known-unquantified" &&
+        item.cruiseImpact.drinksAboveThreshold !==
+          null &&
+        item.cruiseImpact.drinksAboveThreshold > 0
+    );
+
+  return (
+    thresholdImpact?.cruiseImpact
+      .drinksAboveThreshold ?? 0
+  );
+}
+
+function buildThresholdUncertaintyExplanation(
+  packageName: string,
+  savings: number,
+  affectedDrinks: number
+): RecommendationExplanation {
+  return {
+    title:
+      `${packageName} es la mejor opción provisional`,
+
+    summary:
+      `Con los costes que DrinkPilot puede cuantificar actualmente, este paquete presenta un ahorro teórico de ${savings.toFixed(
+        2
+      )} € durante el crucero.`,
+
+    reason:
+      `${affectedDrinks} ${
+        affectedDrinks === 1
+          ? "consumición prevista supera"
+          : "consumiciones previstas superan"
+      } el límite de precio conocido del paquete.`,
+
+    secondaryReason:
+      "El coste adicional de esas consumiciones todavía no puede cuantificarse de forma fiable, por lo que el ahorro mostrado no debe interpretarse como definitivo.",
+
+    tone: "warning",
+  };
+}
+
 export function buildRecommendationExplanation(
   comparison: ComparisonResult
 ): RecommendationExplanation {
@@ -102,6 +151,20 @@ export function buildRecommendationExplanation(
    * - genera ahorro positivo
    */
   if (bestPackage) {
+    const affectedThresholdDrinks =
+      getUnquantifiedThresholdDrinks(
+        comparison,
+        bestPackage.packageKey
+      );
+
+    if (affectedThresholdDrinks > 0) {
+      return buildThresholdUncertaintyExplanation(
+        bestPackage.packageName,
+        bestPackage.savings,
+        affectedThresholdDrinks
+      );
+    }
+
     const highestSavingsPackage =
       findHighestSavingsPackage(packages);
 

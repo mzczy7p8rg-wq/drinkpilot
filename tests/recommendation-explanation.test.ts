@@ -223,3 +223,130 @@ describe("DrinkPilot recommendation explanations", () => {
     );
   });
 });
+describe("threshold uncertainty in recommendation explanation", () => {
+  it("keeps a positive recommendation when the best package has no unquantified threshold impact", () => {
+    const comparison = {
+      packages: [
+        {
+          packageKey: "test-package",
+          packageName: "Test Package",
+          packagePricePerDay: 40,
+          packageCost: 280,
+          drinksCost: 350,
+          savings: 70,
+          savingsPercentage: 20,
+          dailyMargin: 10,
+          breakEvenDrinksPerDay: 5,
+          coverageScore: 100,
+          fullyCovered: true,
+          coveredCategories: [],
+          uncoveredCategories: [],
+          priceSource: "reference",
+          referencePricePerDay: 40,
+          economicComparisonStatus: "complete",
+        },
+      ],
+
+      bestPackage: {
+        packageKey: "test-package",
+        packageName: "Test Package",
+        packagePricePerDay: 40,
+        packageCost: 280,
+        drinksCost: 350,
+        savings: 70,
+        savingsPercentage: 20,
+        dailyMargin: 10,
+        breakEvenDrinksPerDay: 5,
+        coverageScore: 100,
+        fullyCovered: true,
+        coveredCategories: [],
+        uncoveredCategories: [],
+        priceSource: "reference",
+        referencePricePerDay: 40,
+        economicComparisonStatus: "complete",
+      },
+
+      thresholdCruiseImpacts: [],
+    } as any;
+
+    const explanation =
+      buildRecommendationExplanation(
+        comparison
+      );
+
+    expect(explanation.tone).toBe(
+      "positive"
+    );
+
+    expect(explanation.title).toContain(
+      "mejor opción"
+    );
+  });
+
+  it("marks the recommendation as provisional when the best package has an unquantified threshold impact", () => {
+    const bestPackage = {
+      packageKey: "test-package",
+      packageName: "Test Package",
+      packagePricePerDay: 40,
+      packageCost: 280,
+      drinksCost: 350,
+      savings: 70,
+      savingsPercentage: 20,
+      dailyMargin: 10,
+      breakEvenDrinksPerDay: 5,
+      coverageScore: 100,
+      fullyCovered: true,
+      coveredCategories: [],
+      uncoveredCategories: [],
+      priceSource: "reference",
+      referencePricePerDay: 40,
+      economicComparisonStatus: "complete",
+    };
+
+    const comparison = {
+      packages: [bestPackage],
+
+      bestPackage,
+
+      thresholdCruiseImpacts: [
+        {
+          packageKey:
+            "test-package",
+
+          packageName:
+            "Test Package",
+
+          cruiseImpact: {
+            status:
+              "known-unquantified",
+
+            drinksAboveThreshold: 8,
+          },
+        },
+      ],
+    } as any;
+
+    const explanation =
+      buildRecommendationExplanation(
+        comparison
+      );
+
+    expect(explanation.tone).toBe(
+      "warning"
+    );
+
+    expect(explanation.title).toContain(
+      "provisional"
+    );
+
+    expect(explanation.reason).toContain(
+      "8 consumiciones"
+    );
+
+    expect(
+      explanation.secondaryReason
+    ).toContain(
+      "no debe interpretarse como definitivo"
+    );
+  });
+});
