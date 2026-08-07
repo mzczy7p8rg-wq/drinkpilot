@@ -2,6 +2,10 @@ import type {
   PackageOperationalRules,
 } from "@/lib/packageRules";
 
+import {
+  filterAdultPackageItems,
+} from "@/lib/adultPackageFilter";
+
 export type OperationalRuleNotice = {
   id: string;
 
@@ -218,23 +222,8 @@ export function filterAdultOperationalRuleNotices(
   notices: OperationalRuleNotice[],
   rules: PackageOperationalRules[]
 ): OperationalRuleNotice[] {
-  const minorsOnlyPackageKeys =
-    new Set(
-      rules
-        .filter(
-          (rule) =>
-            rule.minorsOnly
-        )
-        .map(
-          (rule) =>
-            rule.packageKey
-        )
-    );
-
-  return notices.filter(
-    (notice) =>
-      !minorsOnlyPackageKeys.has(
-        notice.packageKey
-      )
+  return filterAdultPackageItems(
+    notices,
+    rules
   );
 }

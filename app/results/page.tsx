@@ -19,6 +19,10 @@ import {
 } from "@/lib/operationalImpactExplanation";
 
 import {
+  filterAdultPackageItems,
+} from "@/lib/adultPackageFilter";
+
+import {
   hasCompleteOnboardPriceValues,
 } from "@/lib/onboardPriceService";
 
@@ -318,25 +322,10 @@ export default function ResultsPage() {
         comparison.operationalRules
       );
 
-    const minorsOnlyPackageKeys =
-      new Set(
-        comparison.operationalRules
-          .filter(
-            (rule) =>
-              rule.minorsOnly
-          )
-          .map(
-            (rule) =>
-              rule.packageKey
-          )
-      );
-
     const adultOperationalImpactExplanations =
-      allOperationalImpactExplanations.filter(
-        (explanation) =>
-          !minorsOnlyPackageKeys.has(
-            explanation.packageKey
-          )
+      filterAdultPackageItems(
+        allOperationalImpactExplanations,
+        comparison.operationalRules
       );
 
     const missingPriceLabels = {
@@ -663,6 +652,28 @@ export default function ResultsPage() {
 
         return comparedPackageKeys.has(
           notice.packageKey
+        );
+      }
+    );
+
+  const adultOperationalImpactExplanations =
+    filterAdultPackageItems(
+      allOperationalImpactExplanations,
+      comparison.operationalRules
+    );
+
+  const operationalImpactExplanations =
+    adultOperationalImpactExplanations.filter(
+      (impact) => {
+        if (bestPackage) {
+          return (
+            impact.packageKey ===
+            bestPackage.packageKey
+          );
+        }
+
+        return comparedPackageKeys.has(
+          impact.packageKey
         );
       }
     );
