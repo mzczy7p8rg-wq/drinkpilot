@@ -39,6 +39,24 @@ import {
   type PackageOperationalRuleImpact,
 } from "@/lib/operationalRuleImpact";
 
+import {
+  createSelectedDrinkPrice,
+} from "@/lib/selectedDrinkPrice";
+
+import type {
+  SelectedDrinkConsumption,
+} from "@/lib/selectedDrinkConsumption";
+
+import {
+  evaluatePackageThresholdConsumptionImpact,
+  type PackageThresholdConsumptionImpact,
+} from "@/lib/packageThresholdConsumptionImpact";
+
+import {
+  evaluatePackageThresholdCruiseImpact,
+  type PackageThresholdCruiseImpact,
+} from "@/lib/packageThresholdCruiseImpact";
+
 export type PriceSource =
   | "user"
   | "reference";
@@ -128,6 +146,28 @@ export type ComparisonInput = {
     string,
     number | null | undefined
   >;
+
+
+  /*
+   * Precios concretos seleccionados
+   * por categoría.
+   *
+   * Su ausencia significa que todavía
+   * no podemos evaluar económicamente
+   * un threshold de precio.
+   */
+  selectedDrinkPrices?: Partial<
+    Record<
+      OnboardPriceKey,
+      {
+        price:
+          number | null | undefined;
+
+        currency:
+          string | null | undefined;
+      }
+    >
+  >;
 };
 
 export type PackageComparisonResult = {
@@ -193,6 +233,20 @@ export type PackageComparisonResult = {
     CoverageCategory[];
 };
 
+export type PackageThresholdCruiseImpactResult = {
+  packageKey:
+    PackageKey;
+
+  packageName:
+    string;
+
+  dailyImpact:
+    PackageThresholdConsumptionImpact;
+
+  cruiseImpact:
+    PackageThresholdCruiseImpact;
+};
+
 export type ComparisonResult = {
   /*
    * true = existen precios individuales
@@ -228,6 +282,14 @@ export type ComparisonResult = {
    */
   operationalRules:
     PackageOperationalRules[];
+
+  /*
+   * Impacto del threshold durante todo
+   * el crucero, separado del cálculo
+   * económico principal.
+   */
+  thresholdCruiseImpacts:
+    PackageThresholdCruiseImpactResult[];
 
   /*
    * Resolución del consumo alcohólico
@@ -678,6 +740,135 @@ export function compareDrinkPackages(
     );
 
   /*
+   * BEBIDAS CON PRECIO EXPLÍCITO
+   *
+   * No utilizamos los precios medios de
+   * la naviera como sustituto de una bebida
+   * concreta seleccionada por el usuario.
+   */
+  const selectedDrinkConsumptions:
+    SelectedDrinkConsumption[] = (
+      [
+        ["coffee", input.coffee],
+        ["water", input.water],
+        ["soda", input.soda],
+        ["beer", input.beer],
+        ["wine", input.wine],
+        ["cocktail", input.cocktail],
+      ] as const
+    )
+      .map(
+        ([category, quantityPerDay]) => {
+          if (
+            !Number.isFinite(
+              quantityPerDay
+            ) ||
+            quantityPerDay <= 0
+          ) {
+            return null;
+          }
+
+          const selectedPrice =
+            input
+              .selectedDrinkPrices
+              ?.[category];
+
+          const drink =
+            createSelectedDrinkPrice({
+              category,
+
+              price:
+                selectedPrice?.price,
+
+              currency:
+                selectedPrice?.currency,
+            });
+
+          if (!drink) {
+            return null;
+          }
+
+          return {
+            drink,
+            quantityPerDay,
+          };
+        }
+      )
+      .filter(
+        (
+          item
+        ): item is SelectedDrinkConsumption =>
+          item !== null
+      );
+
+  const hasSelectedDrinkPriceInput =
+    input.selectedDrinkPrices !==
+    undefined;
+
+  /*
+   * IMPACTO ECONÓMICO DEL THRESHOLD
+   *
+   * Se mantiene separado de savings,
+   * drinksCost y recommended.
+   */
+  const thresholdCruiseImpacts:
+    PackageThresholdCruiseImpactResult[] =
+      operationalRules.map(
+        (operationalRule) => {
+          const dailyImpact:
+            PackageThresholdConsumptionImpact =
+              hasSelectedDrinkPriceInput
+                ? evaluatePackageThresholdConsumptionImpact(
+                    operationalRule,
+                    selectedDrinkConsumptions
+                  )
+                : {
+                    status:
+                      "unknown",
+
+                    items: [],
+
+                    totalDrinksPerDay:
+                      input.coffee +
+                      input.water +
+                      input.soda +
+                      input.beer +
+                      input.wine +
+                      input.cocktail,
+
+                    drinksAboveThresholdPerDay:
+                      null,
+
+                    additionalCostPerDay:
+                      null,
+                  };
+
+          return {
+            packageKey:
+              operationalRule
+                .packageKey,
+
+            packageName:
+              operationalRule
+                .packageName,
+
+            dailyImpact,
+
+            cruiseImpact:
+              evaluatePackageThresholdCruiseImpact({
+                dailyImpact,
+
+                days:
+                  input.days,
+
+                people:
+                  input.people,
+              }),
+          };
+        }
+      );
+
+  /*
    * PRECIOS INDIVIDUALES
    *
    * Algunas navieras pueden estar
@@ -829,9 +1020,14 @@ export function compareDrinkPackages(
 
       operationalRules,
 
+
+      thresholdCruiseImpacts,
+
       alcoholConsumption,
 
+
       operationalRuleImpacts,
+
 
       packages: [],
 
@@ -1040,11 +1236,16 @@ export function compareDrinkPackages(
 
     operationalRules,
 
-    alcoholConsumption,
 
-    operationalRuleImpacts,
+  thresholdCruiseImpacts,
 
-    packages:
+  alcoholConsumption,
+
+
+  operationalRuleImpacts,
+
+
+  packages:
       results,
 
     bestPackage,
