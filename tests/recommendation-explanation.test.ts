@@ -350,3 +350,136 @@ describe("threshold uncertainty in recommendation explanation", () => {
     );
   });
 });
+
+describe(
+  "effective savings in recommendation explanation",
+  () => {
+    it(
+      "no presenta como definitivo un paquete completamente cubierto con ahorro efectivo desconocido",
+      () => {
+        const comparison = {
+          packages: [
+            {
+              packageKey:
+                "uncertain-package",
+
+              packageName:
+                "Uncertain Package",
+
+              savings:
+                120,
+
+              effectiveSavings:
+                null,
+
+              fullyCovered:
+                true,
+
+              coverageScore:
+                100,
+
+              uncoveredCategories:
+                [],
+            },
+          ],
+
+          bestPackage:
+            null,
+
+          thresholdCruiseImpacts:
+            [],
+        } as any;
+
+        const explanation =
+          buildRecommendationExplanation(
+            comparison
+          );
+
+        expect(
+          explanation.tone
+        ).toBe(
+          "warning"
+        );
+
+        expect(
+          explanation.title
+        ).toContain(
+          "no es definitivo"
+        );
+
+        expect(
+          explanation.reason
+        ).toContain(
+          "120.00 €"
+        );
+
+        expect(
+          explanation.reason
+        ).toContain(
+          "no debe interpretarse como ahorro final"
+        );
+      }
+    );
+
+    it(
+      "calcula el sobrecoste con ahorro efectivo y no con ahorro bruto",
+      () => {
+        const comparison = {
+          packages: [
+            {
+              packageKey:
+                "adjusted-package",
+
+              packageName:
+                "Adjusted Package",
+
+              savings:
+                20,
+
+              effectiveSavings:
+                -15,
+
+              fullyCovered:
+                true,
+
+              coverageScore:
+                100,
+
+              uncoveredCategories:
+                [],
+            },
+          ],
+
+          bestPackage:
+            null,
+
+          thresholdCruiseImpacts:
+            [],
+        } as any;
+
+        const explanation =
+          buildRecommendationExplanation(
+            comparison
+          );
+
+        expect(
+          explanation.tone
+        ).toBe(
+          "warning"
+        );
+
+        expect(
+          explanation.reason
+        ).toContain(
+          "15.00 € más"
+        );
+
+        expect(
+          explanation.reason
+        ).not.toContain(
+          "20.00 € más"
+        );
+      }
+    );
+  }
+);
