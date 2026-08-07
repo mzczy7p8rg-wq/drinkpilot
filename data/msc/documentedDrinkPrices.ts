@@ -69,4 +69,127 @@ export type MscDocumentedDrinkPrice = {
  * con contexto suficiente.
  */
 export const mscDocumentedDrinkPrices:
-  readonly MscDocumentedDrinkPrice[] = [];
+  readonly MscDocumentedDrinkPrice[] = [
+  {
+    id:
+      "msc-world-america-passion-fruit-martini-2025-07",
+
+    category:
+      "cocktail",
+
+    productName:
+      "Passion Fruit Martini",
+
+    format:
+      null,
+
+    price:
+      14,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    notes:
+      "Precio observado en una carta atribuida a MSC World America; no debe generalizarse a toda la flota ni a otros mercados.",
+  },
+
+  {
+    id:
+      "msc-world-america-heineken-draft-14oz-2025-07",
+
+    category:
+      "beer",
+
+    productName:
+      "Heineken Draft",
+
+    format:
+      "14 oz",
+
+    price:
+      9,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    notes:
+      "Precio observado para formato draft de 14 oz; la misma carta documenta un formato de 7 oz con precio diferente.",
+  },
+
+  {
+    id:
+      "msc-world-america-canned-soda-2025-07",
+
+    category:
+      "soda",
+
+    productName:
+      "Canned Soda",
+
+    format:
+      "can",
+
+    price:
+      3.5,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    notes:
+      "Precio observado en carta documentada de MSC World America; no representa un precio medio MSC.",
+  },
+];
