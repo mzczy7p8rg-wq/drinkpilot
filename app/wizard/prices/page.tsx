@@ -434,6 +434,11 @@ export default function PricesPage() {
               return [];
             }
 
+            const existingPrice =
+              data.selectedDrinkPrices[
+                category
+              ];
+
             const selectedPrice =
               createSelectedDrinkPrice({
                 category,
@@ -443,6 +448,10 @@ export default function PricesPage() {
 
                 currency:
                   selectedDrinkCurrency,
+
+                source:
+                  existingPrice?.source ??
+                  "user",
               });
 
             return selectedPrice
