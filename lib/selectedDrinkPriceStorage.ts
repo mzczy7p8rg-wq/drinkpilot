@@ -85,8 +85,9 @@ export function resolveStoredSelectedDrinkPrices(
             : null,
 
         source:
-          candidate.source === "official"
-            ? "official"
+          candidate.source === "official" ||
+          candidate.source === "documented-menu"
+            ? candidate.source
             : "user",
       });
 

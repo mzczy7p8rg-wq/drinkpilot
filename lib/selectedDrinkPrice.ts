@@ -4,7 +4,8 @@ import type {
 
 export type SelectedDrinkPriceSource =
   | "user"
-  | "official";
+  | "official"
+  | "documented-menu";
 
 export type SelectedDrinkPrice = {
   category:

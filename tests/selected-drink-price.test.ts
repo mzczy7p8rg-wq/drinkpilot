@@ -185,6 +185,25 @@ describe(
     );
 
     it(
+      "conserva un origen documented-menu explícito",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category: "coffee",
+            price: 4,
+            currency: "USD",
+            source: "documented-menu",
+          })
+        ).toEqual({
+          category: "coffee",
+          price: 4,
+          currency: "USD",
+          source: "documented-menu",
+        });
+      }
+    );
+
+    it(
       "conserva un origen oficial explícito",
       () => {
         expect(

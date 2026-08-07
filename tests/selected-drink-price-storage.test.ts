@@ -195,6 +195,28 @@ describe(
     );
 
     it(
+      "conserva un origen documented-menu almacenado",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            coffee: {
+              price: 4,
+              currency: "USD",
+              source: "documented-menu",
+            },
+          })
+        ).toEqual({
+          coffee: {
+            category: "coffee",
+            price: 4,
+            currency: "USD",
+            source: "documented-menu",
+          },
+        });
+      }
+    );
+
+    it(
       "mantiene compatibilidad con datos antiguos sin source",
       () => {
         expect(
