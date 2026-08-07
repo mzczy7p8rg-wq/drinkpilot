@@ -11,9 +11,17 @@ import type {
   SelectedDrinkPrice,
 } from "@/lib/selectedDrinkPrice";
 
+export type SelectedDrinkThresholdCoverageStatus =
+  | "unknown"
+  | "covered"
+  | "excluded";
+
 export type SelectedDrinkThresholdEvaluation = {
   drink:
     SelectedDrinkPrice;
+
+  coverageStatus:
+    SelectedDrinkThresholdCoverageStatus;
 
   packageImpact:
     PackageThresholdEconomicImpact;
@@ -25,18 +33,41 @@ export function evaluateSelectedDrinkAgainstPackageThreshold(
   drink:
     SelectedDrinkPrice
 ): SelectedDrinkThresholdEvaluation {
+  const packageImpact =
+    evaluatePackageThresholdEconomicImpact({
+      operationalRule,
+
+      drinkPrice:
+        drink.price,
+
+      drinkCurrency:
+        drink.currency,
+    });
+
+  let coverageStatus:
+    SelectedDrinkThresholdCoverageStatus =
+      "unknown";
+
+  if (
+    packageImpact.impact.exceedsThreshold ===
+    false
+  ) {
+    coverageStatus = "covered";
+  } else if (
+    packageImpact.impact.exceedsThreshold ===
+      true &&
+    operationalRule
+      .drinkPriceThresholdCoveragePolicy ===
+      "excluded-above-threshold"
+  ) {
+    coverageStatus = "excluded";
+  }
+
   return {
     drink,
 
-    packageImpact:
-      evaluatePackageThresholdEconomicImpact({
-        operationalRule,
+    coverageStatus,
 
-        drinkPrice:
-          drink.price,
-
-        drinkCurrency:
-          drink.currency,
-      }),
+    packageImpact,
   };
 }

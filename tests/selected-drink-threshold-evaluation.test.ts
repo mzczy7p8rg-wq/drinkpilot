@@ -309,3 +309,203 @@ describe(
     );
   }
 );
+
+describe(
+  "selected drink threshold coverage",
+  () => {
+    it(
+      "marca como excluida una bebida por encima del threshold cuando la cobertura lo indica",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "EUR",
+
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        const drink =
+          createSelectedDrinkPrice({
+            category:
+              "cocktail",
+
+            price:
+              15,
+
+            currency:
+              "EUR",
+          });
+
+        if (
+          !rule ||
+          !drink
+        ) {
+          throw new Error(
+            "Test setup failed"
+          );
+        }
+
+        const result =
+          evaluateSelectedDrinkAgainstPackageThreshold(
+            rule,
+            drink
+          );
+
+        expect(
+          result.coverageStatus
+        ).toBe("excluded");
+
+        expect(
+          result.packageImpact
+            .impact
+            .exceedsThreshold
+        ).toBe(true);
+
+        expect(
+          result.packageImpact
+            .impact
+            .additionalCostPerDrink
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "marca como cubierta una bebida dentro del threshold",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "EUR",
+
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        const drink =
+          createSelectedDrinkPrice({
+            category:
+              "wine",
+
+            price:
+              12,
+
+            currency:
+              "EUR",
+          });
+
+        if (
+          !rule ||
+          !drink
+        ) {
+          throw new Error(
+            "Test setup failed"
+          );
+        }
+
+        const result =
+          evaluateSelectedDrinkAgainstPackageThreshold(
+            rule,
+            drink
+          );
+
+        expect(
+          result.coverageStatus
+        ).toBe("covered");
+
+        expect(
+          result.packageImpact
+            .impact
+            .exceedsThreshold
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "mantiene cobertura desconocida cuando no puede comparar el threshold",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "EUR",
+
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        const drink =
+          createSelectedDrinkPrice({
+            category:
+              "cocktail",
+
+            price:
+              15,
+
+            currency:
+              "USD",
+          });
+
+        if (
+          !rule ||
+          !drink
+        ) {
+          throw new Error(
+            "Test setup failed"
+          );
+        }
+
+        const result =
+          evaluateSelectedDrinkAgainstPackageThreshold(
+            rule,
+            drink
+          );
+
+        expect(
+          result.coverageStatus
+        ).toBe("unknown");
+
+        expect(
+          result.packageImpact
+            .impact
+            .exceedsThreshold
+        ).toBeNull();
+      }
+    );
+  }
+);
