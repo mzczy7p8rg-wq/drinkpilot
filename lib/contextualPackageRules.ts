@@ -69,6 +69,18 @@ export type ContextualPackageRule = {
     string[];
 
   /*
+   * Monedas operativas a bordo para las
+   * que resulta válida la regla.
+   *
+   * Es independiente del mercado de compra
+   * y de la región de navegación.
+   *
+   * undefined o [] = cualquier moneda.
+   */
+  onboardCurrencies?:
+    string[];
+
+  /*
    * Límites temporales inclusivos.
    *
    * null/undefined = sin límite.
@@ -125,6 +137,31 @@ function matchesSailingRegion(
 
   return rule.sailingRegions.includes(
     context.sailingRegion
+  );
+}
+
+function matchesOnboardCurrency(
+  rule: ContextualPackageRule,
+  context: CruiseContext
+): boolean {
+  if (
+    !rule.onboardCurrencies ||
+    rule.onboardCurrencies.length === 0
+  ) {
+    return true;
+  }
+
+  /*
+   * Una regla monetaria nunca debe
+   * activarse si desconocemos la moneda
+   * operativa real del crucero.
+   */
+  if (!context.onboardCurrency) {
+    return false;
+  }
+
+  return rule.onboardCurrencies.includes(
+    context.onboardCurrency
   );
 }
 
@@ -199,6 +236,15 @@ export function matchesContextualPackageRule(
 
   if (
     !matchesSailingRegion(
+      rule,
+      context
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    !matchesOnboardCurrency(
       rule,
       context
     )

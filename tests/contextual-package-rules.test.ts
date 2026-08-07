@@ -557,3 +557,158 @@ describe(
     );
   }
 );
+
+
+describe(
+  "contextual onboard currency matching",
+  () => {
+    const eurRule:
+      ContextualPackageRule = {
+        id:
+          "test-premium-eur-threshold",
+
+        cruiseLine:
+          "msc",
+
+        packageKey:
+          "mscPremiumExtra",
+
+        onboardCurrencies: [
+          "EUR",
+        ],
+
+        rules: {
+          drinkPriceThreshold:
+            14,
+
+          drinkPriceThresholdCurrency:
+            "EUR",
+        },
+      };
+
+    it(
+      "aplica una regla cuando coincide la moneda operativa",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            eurRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "EUR",
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "no aplica una regla cuando la moneda operativa es distinta",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            eurRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "USD",
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no aplica una regla monetaria cuando la moneda es desconocida",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            eurRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                null,
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "mantiene compatibles las reglas sin restricción monetaria",
+      () => {
+        const unrestrictedRule:
+          ContextualPackageRule = {
+            id:
+              "test-unrestricted-currency",
+
+            cruiseLine:
+              "msc",
+
+            packageKey:
+              "mscEasy",
+
+            rules: {
+              alcoholicDrinksDailyLimit:
+                15,
+            },
+          };
+
+        expect(
+          matchesContextualPackageRule(
+            unrestrictedRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                null,
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(true);
+      }
+    );
+  }
+);
