@@ -26,6 +26,11 @@ import {
   resolveStoredCocktailConsumption,
 } from "@/lib/cocktailConsumptionStorage";
 
+import {
+  resolveStoredSelectedDrinkPrices,
+  type SelectedDrinkPrices,
+} from "@/lib/selectedDrinkPriceStorage";
+
 export type CustomPackagePrices = Record<
   string,
   number | null
@@ -100,6 +105,15 @@ export type WizardData = {
    */
   customPackagePrices:
     CustomPackagePrices;
+
+  /*
+   * Precios concretos de bebidas
+   * introducidos por el usuario.
+   *
+   * category -> SelectedDrinkPrice
+   */
+  selectedDrinkPrices:
+    SelectedDrinkPrices;
 
   people: number;
 };
@@ -241,6 +255,9 @@ function createInitialData(
       createEmptyPackagePrices(
         cruiseLine
       ),
+
+    selectedDrinkPrices:
+      {},
 
     people: 1,
   };
@@ -526,6 +543,11 @@ export function StoreProvider({
               parsedData.sailingDate,
           });
 
+        const storedSelectedDrinkPrices =
+          resolveStoredSelectedDrinkPrices(
+            parsedData.selectedDrinkPrices
+          );
+
         const storedCocktailConsumption =
           resolveStoredCocktailConsumption(
             {
@@ -673,6 +695,9 @@ export function StoreProvider({
                   .bottledWaterUnlimited,
 
           customPackagePrices,
+
+          selectedDrinkPrices:
+            storedSelectedDrinkPrices,
 
           people:
             typeof parsedData.people ===
