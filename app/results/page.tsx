@@ -311,6 +311,27 @@ export default function ResultsPage() {
     );
 
   /*
+   * IMPACTO ECONÓMICO DEL THRESHOLD
+   *
+   * Solo mostramos impactos cuyo efecto
+   * durante el crucero ya conocemos.
+   *
+   * "known-unquantified" significa:
+   * sabemos cuántas consumiciones quedan
+   * por encima del threshold, pero todavía
+   * no inventamos un coste adicional.
+   */
+  const thresholdCruiseImpacts =
+    comparison.thresholdCruiseImpacts.filter(
+      (item) =>
+        item.cruiseImpact.status ===
+          "known-unquantified" &&
+        item.cruiseImpact.drinksAboveThreshold !==
+          null &&
+        item.cruiseImpact.drinksAboveThreshold > 0
+    );
+
+  /*
    * DATOS ECONÓMICOS INCOMPLETOS
    *
    * No fabricamos precios ni ejecutamos
@@ -340,6 +361,12 @@ export default function ResultsPage() {
     const adultCoveragePackages =
       filterAdultPackageItems(
         comparison.coveragePackages,
+        comparison.operationalRules
+      );
+
+    const adultThresholdCruiseImpacts =
+      filterAdultPackageItems(
+        thresholdCruiseImpacts,
         comparison.operationalRules
       );
 
@@ -492,6 +519,119 @@ export default function ResultsPage() {
                 )}
               </div>
             </section>
+
+            {adultThresholdCruiseImpacts.length > 0 && (
+              <section className="mt-8 rounded-2xl border border-violet-200 bg-violet-50 p-5 sm:p-6">
+                <h2 className="text-lg font-bold text-violet-950 sm:text-xl">
+                  💶 Impacto del límite de precio
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-violet-900">
+                  Algunos paquetes incluyen bebidas solo hasta un determinado precio por consumición. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
+                </p>
+
+                <div className="mt-4 grid gap-3">
+                  {adultThresholdCruiseImpacts.map(
+                    (thresholdImpact) => {
+                      const affectedDrinks =
+                        thresholdImpact
+                          .cruiseImpact
+                          .drinksAboveThreshold;
+
+                      const thresholdEconomicImpact =
+                        thresholdImpact
+                          .dailyImpact
+                          .items
+                          .map(
+                            (item) =>
+                              item.evaluation
+                                .packageImpact
+                                .impact
+                          )
+                          .find(
+                            (impact) =>
+                              impact.threshold !==
+                                null &&
+                              impact.thresholdCurrency !==
+                                null
+                          );
+
+                      const threshold =
+                        thresholdEconomicImpact
+                          ?.threshold ?? null;
+
+                      const thresholdCurrency =
+                        thresholdEconomicImpact
+                          ?.thresholdCurrency ?? null;
+
+                      return (
+                        <div
+                          key={
+                            thresholdImpact
+                              .packageKey
+                          }
+                          className="rounded-xl border border-violet-100 bg-white p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-slate-900">
+                                {
+                                  thresholdImpact
+                                    .packageName
+                                }
+                              </p>
+
+                              {threshold !== null &&
+                                thresholdCurrency !==
+                                  null && (
+                                  <div className="mt-2 inline-flex rounded-lg border border-violet-200 bg-violet-50 px-3 py-2">
+                                    <p className="text-sm font-semibold text-violet-900">
+                                      Límite incluido:{" "}
+                                      {threshold}{" "}
+                                      {thresholdCurrency} por bebida
+                                    </p>
+                                  </div>
+                                )}
+
+                              <p className="mt-2 text-sm leading-6 text-slate-700">
+                                Según tu consumo y los precios concretos introducidos,{" "}
+                                <strong>
+                                  {
+                                    affectedDrinks
+                                  }
+                                </strong>{" "}
+                                {affectedDrinks ===
+                                1
+                                  ? "consumición prevista supera"
+                                  : "consumiciones previstas superan"}{" "}
+                                el límite de precio conocido del paquete durante el crucero.
+                              </p>
+                            </div>
+
+                            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">
+                              {
+                                affectedDrinks
+                              }{" "}
+                              afectadas
+                            </span>
+                          </div>
+
+                          <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                              Coste adicional
+                            </p>
+
+                            <p className="mt-1 text-sm leading-6 text-amber-900">
+                              Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </section>
+            )}
 
             {adultOperationalImpactExplanations.length > 0 && (
               <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
@@ -693,6 +833,12 @@ export default function ResultsPage() {
   const adultOperationalImpactExplanations =
     filterAdultPackageItems(
       allOperationalImpactExplanations,
+      comparison.operationalRules
+    );
+
+  const economicThresholdCruiseImpacts =
+    filterAdultPackageItems(
+      thresholdCruiseImpacts,
       comparison.operationalRules
     );
 
@@ -1548,6 +1694,121 @@ export default function ResultsPage() {
                 recomendación.
               </p>
             </div>
+          )}
+
+          {economicThresholdCruiseImpacts.length > 0 && (
+            <section className="mt-8 rounded-2xl border border-violet-200 bg-violet-50 p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-violet-950 sm:text-xl">
+                💶 Impacto del límite de precio
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-violet-900">
+                Algunos paquetes incluyen bebidas solo hasta un determinado precio por consumición. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
+              </p>
+
+              <div className="mt-4 grid gap-3">
+                {economicThresholdCruiseImpacts.map(
+                  (thresholdImpact) => {
+                    const affectedDrinks =
+                      thresholdImpact
+                        .cruiseImpact
+                        .drinksAboveThreshold;
+
+                    const thresholdEconomicImpact =
+                      thresholdImpact
+                        .dailyImpact
+                        .items
+                        .map(
+                          (item) =>
+                            item.evaluation
+                              .packageImpact
+                              .impact
+                        )
+                        .find(
+                          (impact) =>
+                            impact.threshold !==
+                              null &&
+                            impact.thresholdCurrency !==
+                              null
+                        );
+
+                    const threshold =
+                      thresholdEconomicImpact
+                        ?.threshold ?? null;
+
+                    const thresholdCurrency =
+                      thresholdEconomicImpact
+                        ?.thresholdCurrency ?? null;
+
+                    return (
+                      <div
+                        key={
+                          thresholdImpact
+                            .packageKey
+                        }
+                        className="rounded-xl border border-violet-100 bg-white p-4"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {
+                                thresholdImpact
+                                  .packageName
+                              }
+                            </p>
+
+                            {threshold !== null &&
+                              thresholdCurrency !==
+                                null && (
+                                <div className="mt-2 inline-flex rounded-lg border border-violet-200 bg-violet-50 px-3 py-2">
+                                  <p className="text-sm font-semibold text-violet-900">
+                                    Límite incluido:{" "}
+                                    {threshold}{" "}
+                                    {thresholdCurrency} por bebida
+                                  </p>
+                                </div>
+                              )}
+
+                            <p className="mt-2 text-sm leading-6 text-slate-700">
+                              Según tu consumo y los precios concretos introducidos,{" "}
+                              <strong>
+                                {
+                                  affectedDrinks
+                                }
+                              </strong>{" "}
+                              {affectedDrinks ===
+                              1
+                                ? "consumición prevista supera"
+                                : "consumiciones previstas superan"}{" "}
+                              el límite de precio conocido del paquete durante el crucero.
+                            </p>
+                          </div>
+
+                          <div className="shrink-0 rounded-lg bg-violet-100 px-3 py-2 text-center">
+                            <p className="text-lg font-bold text-violet-950">
+                              {
+                                affectedDrinks
+                              }{" "}
+                              afectadas
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                            Coste adicional
+                          </p>
+
+                          <p className="mt-1 text-sm leading-6 text-slate-700">
+                            Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </section>
           )}
 
           {/* IMPACTO OPERATIVO PERSONALIZADO */}
