@@ -151,6 +151,92 @@ export const mscMetadata = {
       "Información contextual que nunca sustituye una fuente oficial.",
   },
 
+  contextualEvidence: [
+    {
+      id:
+        "premium-extra-threshold-eur",
+
+      sourceId:
+        "msc-drinks-packages",
+
+      type:
+        "official",
+
+      packageKey:
+        "mscPremiumExtra",
+
+      onboardCurrency:
+        "EUR",
+
+      value:
+        14,
+
+      valueType:
+        "drink-price-threshold",
+
+      status:
+        "verified",
+
+      verifiedAt:
+        "2026-08-07",
+    },
+
+    {
+      id:
+        "premium-extra-threshold-usd",
+
+      sourceId:
+        "msc-drinks-packages",
+
+      type:
+        "official",
+
+      packageKey:
+        "mscPremiumExtra",
+
+      onboardCurrency:
+        "USD",
+
+      value:
+        16,
+
+      valueType:
+        "drink-price-threshold",
+
+      status:
+        "verified",
+
+      verifiedAt:
+        "2026-08-07",
+    },
+
+    {
+      id:
+        "legacy-package-transition",
+
+      sourceId:
+        "msc-drinks-packages",
+
+      type:
+        "official",
+
+      packageKey:
+        null,
+
+      effectivePurchaseDate:
+        "2025-10-01",
+
+      valueType:
+        "legacy-package-transition",
+
+      status:
+        "verified",
+
+      verifiedAt:
+        "2026-08-07",
+    },
+  ],
+
   notes: [
     "MSC indica que los paquetes se venden por crucero y que el precio se aplica a los días del crucero excepto el día de desembarque.",
 
