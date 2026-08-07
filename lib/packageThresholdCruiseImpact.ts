@@ -5,7 +5,8 @@ import type {
 export type PackageThresholdCruiseImpactStatus =
   | "unknown"
   | "none"
-  | "known-unquantified";
+  | "known-unquantified"
+  | "quantified";
 
 export type PackageThresholdCruiseImpact = {
   status:
@@ -136,9 +137,30 @@ export function evaluatePackageThresholdCruiseImpact(
     };
   }
 
+  if (
+    dailyImpact.status ===
+      "known-unquantified" ||
+    dailyImpact.additionalCostPerDay ===
+      null
+  ) {
+    return {
+      status:
+        "known-unquantified",
+
+      days,
+      people,
+
+      totalDrinks,
+
+      drinksAboveThreshold,
+
+      additionalCostTotal:
+        null,
+    };
+  }
+
   return {
-    status:
-      "known-unquantified",
+    status: "quantified",
 
     days,
     people,
@@ -147,14 +169,9 @@ export function evaluatePackageThresholdCruiseImpact(
 
     drinksAboveThreshold,
 
-    /*
-     * Sabemos cuántas consumiciones
-     * están afectadas, pero todavía
-     * no tenemos una regla económica
-     * suficientemente respaldada para
-     * convertirlas en coste adicional.
-     */
     additionalCostTotal:
-      null,
+      dailyImpact.additionalCostPerDay *
+      days *
+      people,
   };
 }

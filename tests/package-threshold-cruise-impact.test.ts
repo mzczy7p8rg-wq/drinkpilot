@@ -301,3 +301,90 @@ describe(
     );
   }
 );
+
+describe(
+  "quantified package threshold cruise impact",
+  () => {
+    it(
+      "proyecta el coste adicional diario a todo el crucero",
+      () => {
+        const result =
+          evaluatePackageThresholdCruiseImpact({
+            dailyImpact:
+              createDailyImpact({
+                status:
+                  "quantified",
+
+                totalDrinksPerDay:
+                  6,
+
+                drinksAboveThresholdPerDay:
+                  3,
+
+                additionalCostPerDay:
+                  10,
+              }),
+
+            days:
+              7,
+
+            people:
+              2,
+          });
+
+        expect(
+          result.status
+        ).toBe("quantified");
+
+        expect(
+          result.totalDrinks
+        ).toBe(84);
+
+        expect(
+          result.drinksAboveThreshold
+        ).toBe(42);
+
+        expect(
+          result.additionalCostTotal
+        ).toBe(140);
+      }
+    );
+
+    it(
+      "no degrada un impacto quantified con coste cero válido",
+      () => {
+        const result =
+          evaluatePackageThresholdCruiseImpact({
+            dailyImpact:
+              createDailyImpact({
+                status:
+                  "quantified",
+
+                totalDrinksPerDay:
+                  4,
+
+                drinksAboveThresholdPerDay:
+                  1,
+
+                additionalCostPerDay:
+                  0,
+              }),
+
+            days:
+              7,
+
+            people:
+              2,
+          });
+
+        expect(
+          result.status
+        ).toBe("quantified");
+
+        expect(
+          result.additionalCostTotal
+        ).toBe(0);
+      }
+    );
+  }
+);

@@ -14,7 +14,8 @@ import {
 export type PackageThresholdConsumptionImpactStatus =
   | "unknown"
   | "none"
-  | "known-unquantified";
+  | "known-unquantified"
+  | "quantified";
 
 export type PackageThresholdConsumptionItem = {
   consumption:
@@ -139,9 +140,64 @@ export function evaluatePackageThresholdConsumptionImpact(
     };
   }
 
+  const hasUnquantified =
+    items.some(
+      (item) =>
+        item.evaluation
+          .packageImpact
+          .impact
+          .status ===
+        "known-unquantified"
+    );
+
+  if (hasUnquantified) {
+    return {
+      status:
+        "known-unquantified",
+
+      items,
+
+      totalDrinksPerDay,
+
+      drinksAboveThresholdPerDay,
+
+      additionalCostPerDay:
+        null,
+    };
+  }
+
+  const additionalCostPerDay =
+    items.reduce(
+      (
+        total,
+        item
+      ) => {
+        const impact =
+          item.evaluation
+            .packageImpact
+            .impact;
+
+        if (
+          impact.status !==
+            "quantified" ||
+          impact.additionalCostPerDrink ===
+            null
+        ) {
+          return total;
+        }
+
+        return (
+          total +
+          impact.additionalCostPerDrink *
+            item.consumption
+              .quantityPerDay
+        );
+      },
+      0
+    );
+
   return {
-    status:
-      "known-unquantified",
+    status: "quantified",
 
     items,
 
@@ -149,7 +205,6 @@ export function evaluatePackageThresholdConsumptionImpact(
 
     drinksAboveThresholdPerDay,
 
-    additionalCostPerDay:
-      null,
+    additionalCostPerDay,
   };
 }

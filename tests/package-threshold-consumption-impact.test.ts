@@ -305,3 +305,161 @@ describe(
     );
   }
 );
+
+describe(
+  "quantified package threshold consumption impact",
+  () => {
+    it(
+      "suma el coste adicional diario cuando la política es difference",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate: "2026-08-15",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-difference-policy",
+
+                  cruiseLine:
+                    "msc",
+
+                  packageKey:
+                    "mscPremiumExtra",
+
+                  onboardCurrencies: [
+                    "EUR",
+                  ],
+
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+
+                    drinkPriceThresholdCurrency:
+                      "EUR",
+
+                    drinkPriceThresholdChargePolicy:
+                      "difference",
+                  },
+                },
+              ],
+            }
+          );
+
+        if (!rule) {
+          throw new Error(
+            "MSC Premium Extra rule missing"
+          );
+        }
+
+        const result =
+          evaluatePackageThresholdConsumptionImpact(
+            rule,
+            [
+              createConsumption(
+                "cocktail",
+                18,
+                2
+              ),
+
+              createConsumption(
+                "wine",
+                16,
+                1
+              ),
+
+              createConsumption(
+                "beer",
+                8,
+                3
+              ),
+            ]
+          );
+
+        /*
+         * Cocktail:
+         * (18 - 14) * 2 = 8
+         *
+         * Wine:
+         * (16 - 14) * 1 = 2
+         *
+         * Beer:
+         * debajo del threshold = 0
+         *
+         * Total diario = 10
+         */
+        expect(
+          result.status
+        ).toBe("quantified");
+
+        expect(
+          result.totalDrinksPerDay
+        ).toBe(6);
+
+        expect(
+          result.drinksAboveThresholdPerDay
+        ).toBe(3);
+
+        expect(
+          result.additionalCostPerDay
+        ).toBe(10);
+      }
+    );
+
+    it(
+      "mantiene known-unquantified si alguna bebida afectada no puede cuantificarse",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate: "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        if (!rule) {
+          throw new Error(
+            "MSC Premium Extra rule missing"
+          );
+        }
+
+        const result =
+          evaluatePackageThresholdConsumptionImpact(
+            rule,
+            [
+              createConsumption(
+                "cocktail",
+                18,
+                2
+              ),
+            ]
+          );
+
+        expect(
+          result.status
+        ).toBe(
+          "known-unquantified"
+        );
+
+        expect(
+          result.drinksAboveThresholdPerDay
+        ).toBe(2);
+
+        expect(
+          result.additionalCostPerDay
+        ).toBeNull();
+      }
+    );
+  }
+);
