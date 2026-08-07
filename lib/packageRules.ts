@@ -80,6 +80,15 @@ export type PackageOperationalRules = {
   drinkPriceThreshold:
     number | null;
 
+  /*
+   * Moneda del umbral anterior.
+   *
+   * null cuando no existe un umbral
+   * monetario válido.
+   */
+  drinkPriceThresholdCurrency:
+    string | null;
+
   drinkPriceThresholdSource:
     OperationalRuleSource;
 
@@ -254,6 +263,26 @@ function applyContextualRules(
           : result
               .drinkPriceThreshold,
 
+      drinkPriceThresholdCurrency:
+        values
+          .drinkPriceThreshold !==
+        undefined
+          ? (
+              typeof values
+                .drinkPriceThresholdCurrency ===
+                "string" &&
+              values
+                .drinkPriceThresholdCurrency
+                .trim().length > 0
+                ? values
+                    .drinkPriceThresholdCurrency
+                    .trim()
+                    .toUpperCase()
+                : null
+            )
+          : result
+              .drinkPriceThresholdCurrency,
+
       aquaUnlimited:
         values.aquaUnlimited !==
         undefined
@@ -376,6 +405,9 @@ function resolvePackageRules(
        * contextual explícita.
        */
       drinkPriceThreshold:
+        null,
+
+      drinkPriceThresholdCurrency:
         null,
 
       drinkPriceThresholdSource: {

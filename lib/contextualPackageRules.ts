@@ -21,6 +21,17 @@ export type ContextualRuleValues = {
   drinkPriceThreshold?:
     number;
 
+  /*
+   * Moneda en la que está expresado
+   * drinkPriceThreshold.
+   *
+   * Debe viajar junto al umbral para
+   * evitar interpretar el mismo número
+   * como EUR, USD u otra moneda.
+   */
+  drinkPriceThresholdCurrency?:
+    string;
+
   aquaUnlimited?:
     boolean;
 

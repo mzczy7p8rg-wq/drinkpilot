@@ -320,6 +320,9 @@ describe(
                   rules: {
                     drinkPriceThreshold:
                       14,
+
+                    drinkPriceThresholdCurrency:
+                      "EUR",
                   },
                 },
               ],
@@ -330,6 +333,11 @@ describe(
           rule
             ?.drinkPriceThreshold
         ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdCurrency
+        ).toBe("EUR");
 
         expect(
           rule

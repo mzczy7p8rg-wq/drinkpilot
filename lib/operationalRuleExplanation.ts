@@ -121,7 +121,12 @@ export function buildOperationalRuleNotices(
         message:
           `${rule.packageName}: para el contexto indicado se ha resuelto un límite de ${rule.drinkPriceThreshold.toFixed(
             2
-          )} € por bebida.`,
+          )}${
+            rule
+              .drinkPriceThresholdCurrency
+              ? ` ${rule.drinkPriceThresholdCurrency}`
+              : ""
+          } por bebida.`,
 
         source:
           rule
