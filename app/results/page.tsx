@@ -328,6 +328,12 @@ export default function ResultsPage() {
         comparison.operationalRules
       );
 
+    const adultCoveragePackages =
+      filterAdultPackageItems(
+        comparison.coveragePackages,
+        comparison.operationalRules
+      );
+
     const missingPriceLabels = {
       coffee: "café",
       water: "agua",
@@ -402,7 +408,7 @@ export default function ResultsPage() {
               </div>
 
               <div className="mt-5 grid gap-4 md:grid-cols-2">
-                {comparison.coveragePackages.map(
+                {adultCoveragePackages.map(
                   (pkg) => (
                     <div
                       key={
