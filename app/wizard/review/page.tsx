@@ -14,6 +14,14 @@ import {
 } from "@/lib/packageService";
 
 import {
+  getPackageOperationalRules,
+} from "@/lib/packageRules";
+
+import {
+  filterAdultCatalogPackages,
+} from "@/lib/adultPackageFilter";
+
+import {
   useStore,
 } from "@/lib/store";
 
@@ -68,6 +76,31 @@ export default function ReviewPage() {
   const packages =
     getAllPackages(
       data.cruiseLine
+    );
+
+  const operationalRules =
+    getPackageOperationalRules({
+      cruiseLine:
+        data.cruiseLine,
+
+      market:
+        data.market ?? null,
+
+      sailingDate:
+        data.sailingDate ?? null,
+    });
+
+  /*
+   * Review resume únicamente los paquetes
+   * que participan en el flujo adulto.
+   *
+   * El catálogo completo sigue disponible
+   * en Prices y en las capas de evidencia.
+   */
+  const adultPackages =
+    filterAdultCatalogPackages(
+      packages,
+      operationalRules
     );
 
   const drinks = [
@@ -377,7 +410,7 @@ export default function ReviewPage() {
           </div>
 
           <div className="mt-4 space-y-4">
-            {packages.map(
+            {adultPackages.map(
               (pkg) => {
                 const customPrice =
                   data

@@ -10,20 +10,35 @@ export type PackageKeyedItem = {
   packageKey: PackageKey;
 };
 
+export type PackageCatalogItem = {
+  key: PackageKey;
+};
+
+function getMinorsOnlyPackageKeys(
+  rules: PackageOperationalRules[]
+): Set<PackageKey> {
+  return new Set(
+    rules
+      .filter(
+        (rule) =>
+          rule.minorsOnly
+      )
+      .map(
+        (rule) =>
+          rule.packageKey
+      )
+  );
+}
+
 /*
- * El flujo actual de DrinkPilot analiza
- * paquetes adultos.
+ * Filtra estructuras de análisis que
+ * utilizan packageKey.
  *
- * Este helper centraliza la exclusión de
- * cualquier elemento asociado a paquetes
- * marcados como minorsOnly.
- *
- * Puede utilizarse con:
+ * Ejemplos:
  *
  * - avisos operativos;
  * - impactos personalizados;
- * - futuras explicaciones;
- * - cualquier estructura con packageKey.
+ * - resultados de cobertura.
  */
 export function filterAdultPackageItems<
   T extends PackageKeyedItem,
@@ -32,22 +47,42 @@ export function filterAdultPackageItems<
   rules: PackageOperationalRules[]
 ): T[] {
   const minorsOnlyPackageKeys =
-    new Set(
+    getMinorsOnlyPackageKeys(
       rules
-        .filter(
-          (rule) =>
-            rule.minorsOnly
-        )
-        .map(
-          (rule) =>
-            rule.packageKey
-        )
     );
 
   return items.filter(
     (item) =>
       !minorsOnlyPackageKeys.has(
         item.packageKey
+      )
+  );
+}
+
+/*
+ * Filtra objetos procedentes del catálogo
+ * de paquetes, donde el identificador se
+ * expone como key.
+ *
+ * Se utiliza en vistas adultas como Review,
+ * sin eliminar el paquete del catálogo ni
+ * de las capas de evidencia.
+ */
+export function filterAdultCatalogPackages<
+  T extends PackageCatalogItem,
+>(
+  packages: T[],
+  rules: PackageOperationalRules[]
+): T[] {
+  const minorsOnlyPackageKeys =
+    getMinorsOnlyPackageKeys(
+      rules
+    );
+
+  return packages.filter(
+    (pkg) =>
+      !minorsOnlyPackageKeys.has(
+        pkg.key
       )
   );
 }

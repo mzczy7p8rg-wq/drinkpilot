@@ -5,6 +5,7 @@ import {
 } from "vitest";
 
 import {
+  filterAdultCatalogPackages,
   filterAdultPackageItems,
 } from "@/lib/adultPackageFilter";
 
@@ -84,6 +85,54 @@ describe(
             rules
           )
         ).toEqual(items);
+      }
+    );
+  }
+);
+
+describe(
+  "adult catalog package filter",
+  () => {
+    it(
+      "elimina paquetes minorsOnly del catálogo visible adulto",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            "msc"
+          );
+
+        const packages = [
+          {
+            key:
+              "mscEasy" as const,
+
+            name:
+              "Easy Package",
+          },
+
+          {
+            key:
+              "mscMinors" as const,
+
+            name:
+              "Minors Package",
+          },
+        ];
+
+        expect(
+          filterAdultCatalogPackages(
+            packages,
+            rules
+          )
+        ).toEqual([
+          {
+            key:
+              "mscEasy",
+
+            name:
+              "Easy Package",
+          },
+        ]);
       }
     );
   }
