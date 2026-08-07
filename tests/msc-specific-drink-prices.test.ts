@@ -51,6 +51,9 @@ describe(
           source:
             "official",
 
+      evidence:
+        "official",
+
           sourceUrl:
             "https://example.com",
 
@@ -114,3 +117,36 @@ describe("MSC AQUA official prices", () => {
     ).toBe(true);
   });
 });
+
+describe(
+  "MSC specific drink price evidence",
+  () => {
+    it(
+      "marca AQUA como evidencia oficial",
+      () => {
+        expect(
+          mscSpecificDrinkPrices.every(
+            (item) =>
+              item.evidence === "official"
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "mantiene sourceUrl como URL limpia",
+      () => {
+        expect(
+          mscSpecificDrinkPrices.every(
+            (item) =>
+              item.sourceUrl.startsWith(
+                "https://"
+              ) &&
+              !item.sourceUrl.includes("[") &&
+              !item.sourceUrl.includes("]")
+          )
+        ).toBe(true);
+      }
+    );
+  }
+);

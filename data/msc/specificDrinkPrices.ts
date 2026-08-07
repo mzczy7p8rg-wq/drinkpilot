@@ -2,6 +2,10 @@ import type {
   OnboardPriceKey,
 } from "@/lib/onboardPriceService";
 
+import type {
+  DrinkPriceEvidence,
+} from "@/lib/drinkPriceEvidence";
+
 /*
  * PRECIOS CONCRETOS DE BEBIDAS MSC
  *
@@ -38,6 +42,9 @@ export type MscSpecificDrinkPrice = {
   source:
     MscSpecificDrinkPriceSource;
 
+  evidence:
+    DrinkPriceEvidence;
+
   sourceUrl:
     string;
 
@@ -71,6 +78,7 @@ export const mscSpecificDrinkPrices:
     price: 2,
     currency: "EUR",
     source: "official",
+    evidence: "official",
     sourceUrl:
       "https://www.msccruises.com/int/on-board/dining-and-drinks/aqua-by-msc",
     verifiedAt: "2026-08-07",
@@ -85,6 +93,7 @@ export const mscSpecificDrinkPrices:
     price: 1,
     currency: "EUR",
     source: "official",
+    evidence: "official",
     sourceUrl:
       "https://www.msccruises.com/int/on-board/dining-and-drinks/aqua-by-msc",
     verifiedAt: "2026-08-07",
@@ -99,6 +108,7 @@ export const mscSpecificDrinkPrices:
     price: 0.5,
     currency: "EUR",
     source: "official",
+    evidence: "official",
     sourceUrl:
       "https://www.msccruises.com/int/on-board/dining-and-drinks/aqua-by-msc",
     verifiedAt: "2026-08-07",
