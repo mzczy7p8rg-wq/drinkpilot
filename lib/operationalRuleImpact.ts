@@ -7,6 +7,11 @@ import {
   type AlcoholDailyLimitEvaluation,
 } from "@/lib/alcoholDailyLimit";
 
+import {
+  evaluateOperationalEconomicImpact,
+  type OperationalEconomicImpact,
+} from "@/lib/operationalEconomicImpact";
+
 import type {
   PackageOperationalRules,
 } from "@/lib/packageRules";
@@ -19,6 +24,9 @@ export type PackageOperationalRuleImpact = {
 
   alcoholDailyLimit:
     AlcoholDailyLimitEvaluation;
+
+  economicImpact:
+    OperationalEconomicImpact;
 };
 
 /*
@@ -42,21 +50,30 @@ export function evaluateOperationalRuleImpacts(
     PackageOperationalRules[]
 ): PackageOperationalRuleImpact[] {
   return operationalRules.map(
-    (rule) => ({
-      packageKey:
-        rule.packageKey,
-
-      packageName:
-        rule.packageName,
-
-      alcoholDailyLimit:
+    (rule) => {
+      const alcoholDailyLimit =
         evaluateAlcoholDailyLimit(
           alcoholConsumption
             .alcoholicDrinksPerDay,
 
           rule
             .alcoholicDrinksDailyLimit
-        ),
-    })
+        );
+
+      return {
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        alcoholDailyLimit,
+
+        economicImpact:
+          evaluateOperationalEconomicImpact(
+            alcoholDailyLimit
+          ),
+      };
+    }
   );
 }

@@ -138,3 +138,81 @@ describe(
     );
   }
 );
+
+describe(
+  "operational economic impact integration",
+  () => {
+    it(
+      "marca como known-unquantified un exceso MSC",
+      () => {
+        const consumption =
+          resolveAlcoholConsumption({
+            beer: 6,
+            wine: 4,
+            cocktail: 8,
+
+            alcoholicCocktail: 8,
+            nonAlcoholicCocktail: 0,
+          });
+
+        const impacts =
+          evaluateOperationalRuleImpacts(
+            consumption,
+            getPackageOperationalRules(
+              "msc"
+            )
+          );
+
+        const easy =
+          impacts.find(
+            (impact) =>
+              impact.packageKey ===
+              "mscEasy"
+          );
+
+        expect(
+          easy?.economicImpact.status
+        ).toBe(
+          "known-unquantified"
+        );
+
+        expect(
+          easy
+            ?.economicImpact
+            .additionalCostPerDay
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "mantiene unknown cuando no puede evaluar el límite",
+      () => {
+        const consumption =
+          resolveAlcoholConsumption({
+            beer: 2,
+            wine: 1,
+            cocktail: 4,
+          });
+
+        const impacts =
+          evaluateOperationalRuleImpacts(
+            consumption,
+            getPackageOperationalRules(
+              "msc"
+            )
+          );
+
+        const easy =
+          impacts.find(
+            (impact) =>
+              impact.packageKey ===
+              "mscEasy"
+          );
+
+        expect(
+          easy?.economicImpact.status
+        ).toBe("unknown");
+      }
+    );
+  }
+);
