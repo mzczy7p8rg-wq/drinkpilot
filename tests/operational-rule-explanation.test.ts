@@ -548,3 +548,147 @@ describe(
     );
   }
 );
+
+describe(
+  "MSC Premium Extra contextual threshold end to end",
+  () => {
+    it(
+      "explica el umbral EUR real como regla contextual informativa",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingRegion: null,
+            onboardCurrency: "EUR",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "14.00 EUR"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("contextual");
+
+        expect(
+          notice?.appliedContextualRuleIds
+        ).toContain(
+          "msc-premium-extra-threshold-eur"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe("informational");
+      }
+    );
+
+    it(
+      "explica el umbral USD real sin confundir su moneda",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "US",
+            sailingRegion: null,
+            onboardCurrency: "USD",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "16.00 USD"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("contextual");
+
+        expect(
+          notice?.appliedContextualRuleIds
+        ).toContain(
+          "msc-premium-extra-threshold-usd"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe("informational");
+      }
+    );
+
+    it(
+      "no genera un aviso de umbral cuando se desconoce la moneda a bordo",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingRegion: null,
+            onboardCurrency: null,
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          notice
+        ).toBeUndefined();
+      }
+    );
+  }
+);
