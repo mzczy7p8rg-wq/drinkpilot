@@ -529,3 +529,122 @@ describe(
     );
   }
 );
+
+describe(
+  "drink price threshold charge policy",
+  () => {
+    it(
+      "mantiene la política desconocida cuando solo conocemos el threshold",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: null,
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate: null,
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicy
+        ).toBe("unknown");
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicySource
+        ).toEqual({
+          source: "none",
+          contextualRuleIds: [],
+        });
+      }
+    );
+
+    it(
+      "resuelve una política de cobro contextual con procedencia independiente",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-threshold-charge-policy",
+
+                  cruiseLine:
+                    "msc",
+
+                  packageKey:
+                    "mscPremiumExtra",
+
+                  markets: [
+                    "ES",
+                  ],
+
+                  onboardCurrencies: [
+                    "EUR",
+                  ],
+
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+
+                    drinkPriceThresholdCurrency:
+                      "EUR",
+
+                    drinkPriceThresholdChargePolicy:
+                      "difference",
+                  },
+                },
+              ],
+            }
+          );
+
+        expect(
+          rule?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicy
+        ).toBe("difference");
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicySource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "test-threshold-charge-policy",
+          ],
+        });
+
+        expect(
+          rule
+            ?.drinkPriceThresholdSource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "test-threshold-charge-policy",
+          ],
+        });
+      }
+    );
+  }
+);

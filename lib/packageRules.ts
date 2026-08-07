@@ -19,6 +19,7 @@ import {
 import {
   getContextualPackageRulesForPackage,
   type ContextualPackageRule,
+  type DrinkPriceThresholdChargePolicy,
 } from "@/lib/contextualPackageRules";
 
 export type PackageRulesContext =
@@ -90,6 +91,20 @@ export type PackageOperationalRules = {
     string | null;
 
   drinkPriceThresholdSource:
+    OperationalRuleSource;
+
+  /*
+   * Política económica conocida para
+   * bebidas que superan el threshold.
+   *
+   * Por defecto permanece en "unknown"
+   * hasta que una regla contextual
+   * explícita aporte evidencia.
+   */
+  drinkPriceThresholdChargePolicy:
+    DrinkPriceThresholdChargePolicy;
+
+  drinkPriceThresholdChargePolicySource:
     OperationalRuleSource;
 
   /*
@@ -206,6 +221,23 @@ function applyContextualRules(
         : result
             .drinkPriceThresholdSource;
 
+    const drinkPriceThresholdChargePolicySource =
+      values
+        .drinkPriceThresholdChargePolicy !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .drinkPriceThresholdChargePolicySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .drinkPriceThresholdChargePolicySource;
+
     const aquaUnlimitedSource =
       values.aquaUnlimited !==
       undefined
@@ -283,6 +315,15 @@ function applyContextualRules(
           : result
               .drinkPriceThresholdCurrency,
 
+      drinkPriceThresholdChargePolicy:
+        values
+          .drinkPriceThresholdChargePolicy !==
+        undefined
+          ? values
+              .drinkPriceThresholdChargePolicy
+          : result
+              .drinkPriceThresholdChargePolicy,
+
       aquaUnlimited:
         values.aquaUnlimited !==
         undefined
@@ -298,6 +339,8 @@ function applyContextualRules(
       alcoholicDrinksDailyLimitSource,
 
       drinkPriceThresholdSource,
+
+      drinkPriceThresholdChargePolicySource,
 
       aquaUnlimitedSource,
 
@@ -411,6 +454,14 @@ function resolvePackageRules(
         null,
 
       drinkPriceThresholdSource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
+
+      drinkPriceThresholdChargePolicy:
+        "unknown",
+
+      drinkPriceThresholdChargePolicySource: {
         source: "none",
         contextualRuleIds: [],
       },

@@ -38,6 +38,10 @@ export type PackageThresholdEconomicImpact = {
  *
  * No conoce MSC, Costa ni ningún packageKey
  * concreto.
+ *
+ * Tanto el threshold como la política
+ * económica llegan ya resueltos desde
+ * PackageOperationalRules.
  */
 export function evaluatePackageThresholdEconomicImpact(
   input:
@@ -74,6 +78,10 @@ export function evaluatePackageThresholdEconomicImpact(
         thresholdCurrency:
           operationalRule
             .drinkPriceThresholdCurrency,
+
+        chargePolicy:
+          operationalRule
+            .drinkPriceThresholdChargePolicy,
       }),
   };
 }

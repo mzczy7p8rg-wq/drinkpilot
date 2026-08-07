@@ -1,7 +1,13 @@
 export type DrinkPriceThresholdEconomicImpactStatus =
   | "unknown"
   | "none"
-  | "known-unquantified";
+  | "known-unquantified"
+  | "quantified";
+
+export type DrinkPriceThresholdChargePolicy =
+  | "unknown"
+  | "difference"
+  | "full-price";
 
 export type DrinkPriceThresholdEconomicImpactInput = {
   drinkPrice:
@@ -15,6 +21,16 @@ export type DrinkPriceThresholdEconomicImpactInput = {
 
   thresholdCurrency:
     string | null | undefined;
+
+  /*
+   * Opcional por compatibilidad.
+   *
+   * Si una capa anterior todavía no
+   * proporciona una política explícita,
+   * nunca cuantificamos el exceso.
+   */
+  chargePolicy?:
+    DrinkPriceThresholdChargePolicy;
 };
 
 export type DrinkPriceThresholdEconomicImpact = {
@@ -37,15 +53,11 @@ export type DrinkPriceThresholdEconomicImpact = {
     boolean | null;
 
   /*
-   * Sabemos si la bebida supera el threshold,
-   * pero todavía NO sabemos cuánto debe pagar
-   * realmente el huésped.
+   * Coste que realmente debe añadirse
+   * por cada bebida afectada.
    *
-   * No asumimos que MSC cobre:
-   *
-   * - la diferencia;
-   * - el precio completo;
-   * - ningún otro importe.
+   * null = sabemos que existe impacto,
+   * pero todavía no podemos cuantificarlo.
    */
   additionalCostPerDrink:
     number | null;
@@ -85,15 +97,21 @@ function normalizePositivePrice(
 }
 
 /*
- * Evalúa exclusivamente si un precio
- * individual conocido supera un threshold
- * conocido expresado en la misma moneda.
+ * Evalúa el impacto económico de un
+ * precio individual frente al threshold.
  *
- * IMPORTANTE:
+ * La política de cobro es independiente
+ * del threshold:
  *
- * Esta función NO calcula todavía el coste
- * adicional real de una bebida que excede
- * el threshold.
+ * unknown:
+ *   sabemos que supera el límite,
+ *   pero no cuánto debe pagarse.
+ *
+ * difference:
+ *   se paga solo drinkPrice - threshold.
+ *
+ * full-price:
+ *   se paga el precio completo.
  */
 export function evaluateDrinkPriceThresholdEconomicImpact(
   input:
@@ -118,6 +136,10 @@ export function evaluateDrinkPriceThresholdEconomicImpact(
     normalizeCurrency(
       input.thresholdCurrency
     );
+
+  const chargePolicy =
+    input.chargePolicy ??
+    "unknown";
 
   if (
     drinkPrice === null ||
@@ -161,10 +183,59 @@ export function evaluateDrinkPriceThresholdEconomicImpact(
 
       exceedsThreshold: false,
 
-      additionalCostPerDrink: 0,
+      additionalCostPerDrink:
+        0,
     };
   }
 
+  if (
+    chargePolicy ===
+    "difference"
+  ) {
+    return {
+      status: "quantified",
+
+      drinkPrice,
+
+      drinkCurrency,
+
+      threshold,
+
+      thresholdCurrency,
+
+      exceedsThreshold: true,
+
+      additionalCostPerDrink:
+        drinkPrice - threshold,
+    };
+  }
+
+  if (
+    chargePolicy ===
+    "full-price"
+  ) {
+    return {
+      status: "quantified",
+
+      drinkPrice,
+
+      drinkCurrency,
+
+      threshold,
+
+      thresholdCurrency,
+
+      exceedsThreshold: true,
+
+      additionalCostPerDrink:
+        drinkPrice,
+    };
+  }
+
+  /*
+   * Threshold conocido pero política
+   * económica todavía desconocida.
+   */
   return {
     status:
       "known-unquantified",
@@ -179,13 +250,7 @@ export function evaluateDrinkPriceThresholdEconomicImpact(
 
     exceedsThreshold: true,
 
-    /*
-     * Deliberadamente null.
-     *
-     * drinkPrice - threshold NO equivale
-     * automáticamente al importe que debe
-     * pagar el huésped.
-     */
-    additionalCostPerDrink: null,
+    additionalCostPerDrink:
+      null,
   };
 }

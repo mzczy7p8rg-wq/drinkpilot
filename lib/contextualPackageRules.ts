@@ -14,6 +14,11 @@ import type {
   PackageKey,
 } from "@/lib/packageService";
 
+export type DrinkPriceThresholdChargePolicy =
+  | "unknown"
+  | "difference"
+  | "full-price";
+
 export type ContextualRuleValues = {
   alcoholicDrinksDailyLimit?:
     number;
@@ -31,6 +36,25 @@ export type ContextualRuleValues = {
    */
   drinkPriceThresholdCurrency?:
     string;
+
+  /*
+   * Política económica aplicable cuando
+   * una bebida supera el threshold.
+   *
+   * unknown:
+   * conocemos el límite, pero no existe
+   * evidencia suficiente para cuantificar
+   * qué debe pagar el huésped.
+   *
+   * difference:
+   * paga únicamente la diferencia sobre
+   * el threshold.
+   *
+   * full-price:
+   * paga el precio completo de la bebida.
+   */
+  drinkPriceThresholdChargePolicy?:
+    DrinkPriceThresholdChargePolicy;
 
   aquaUnlimited?:
     boolean;

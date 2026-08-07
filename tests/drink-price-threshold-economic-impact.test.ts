@@ -237,3 +237,92 @@ describe(
     );
   }
 );
+
+describe(
+  "threshold charge policy quantification",
+  () => {
+    it(
+      "mantiene el impacto sin cuantificar cuando la política es unknown",
+      () => {
+        const result =
+          evaluateDrinkPriceThresholdEconomicImpact(
+            {
+              drinkPrice: 18,
+              drinkCurrency: "EUR",
+              threshold: 14,
+              thresholdCurrency: "EUR",
+              chargePolicy: "unknown",
+            }
+          );
+
+        expect(result.status).toBe(
+          "known-unquantified"
+        );
+
+        expect(
+          result.exceedsThreshold
+        ).toBe(true);
+
+        expect(
+          result.additionalCostPerDrink
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "cuantifica únicamente la diferencia cuando la política es difference",
+      () => {
+        const result =
+          evaluateDrinkPriceThresholdEconomicImpact(
+            {
+              drinkPrice: 18,
+              drinkCurrency: "EUR",
+              threshold: 14,
+              thresholdCurrency: "EUR",
+              chargePolicy: "difference",
+            }
+          );
+
+        expect(result.status).toBe(
+          "quantified"
+        );
+
+        expect(
+          result.exceedsThreshold
+        ).toBe(true);
+
+        expect(
+          result.additionalCostPerDrink
+        ).toBe(4);
+      }
+    );
+
+    it(
+      "cuantifica el precio completo cuando la política es full-price",
+      () => {
+        const result =
+          evaluateDrinkPriceThresholdEconomicImpact(
+            {
+              drinkPrice: 18,
+              drinkCurrency: "EUR",
+              threshold: 14,
+              thresholdCurrency: "EUR",
+              chargePolicy: "full-price",
+            }
+          );
+
+        expect(result.status).toBe(
+          "quantified"
+        );
+
+        expect(
+          result.exceedsThreshold
+        ).toBe(true);
+
+        expect(
+          result.additionalCostPerDrink
+        ).toBe(18);
+      }
+    );
+  }
+);
