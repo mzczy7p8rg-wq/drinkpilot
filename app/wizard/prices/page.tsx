@@ -37,6 +37,10 @@ import {
   getMscSpecificDrinkPrices,
 } from "@/lib/mscSpecificDrinkPriceService";
 
+import {
+  getMscDocumentedDrinkPrices,
+} from "@/lib/mscDocumentedDrinkPriceService";
+
 const drinkCategoryLabels:
   Record<OnboardPriceKey, string> = {
     coffee: "Café",
@@ -482,6 +486,96 @@ export default function PricesPage() {
     );
   }
 
+  function selectDocumentedDrinkReference(
+    category: OnboardPriceKey,
+    referenceId: string,
+    price: number
+  ) {
+    setDrinkPriceInputs(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          String(price),
+      })
+    );
+
+    setSelectedDrinkReferenceIds(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          referenceId,
+      })
+    );
+
+    setSelectedDrinkReferenceSources(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          "documented-menu",
+      })
+    );
+  }
+
+  function updateOnboardCurrency(
+    currency:
+      "" | "EUR" | "USD"
+  ) {
+    const nextCurrency =
+      currency === ""
+        ? null
+        : currency;
+
+    if (
+      nextCurrency ===
+      data.onboardCurrency
+    ) {
+      return;
+    }
+
+    setData(
+      (previous) => ({
+        ...previous,
+
+        onboardCurrency:
+          nextCurrency,
+
+        /*
+         * Un precio concreto depende de su
+         * moneda. Si cambia la moneda,
+         * descartamos selecciones anteriores
+         * para no reinterpretar importes.
+         */
+        selectedDrinkPrices:
+          {},
+      })
+    );
+
+    setDrinkPriceInputs(
+      Object.fromEntries(
+        onboardPriceKeys.map(
+          (category) => [
+            category,
+            "",
+          ]
+        )
+      ) as Record<
+        OnboardPriceKey,
+        string
+      >
+    );
+
+    setSelectedDrinkReferenceIds(
+      {}
+    );
+
+    setSelectedDrinkReferenceSources(
+      {}
+    );
+  }
+
   function savePrices() {
     if (!canContinue) {
       return;
@@ -905,6 +999,71 @@ export default function PricesPage() {
             </p>
           </div>
 
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-900">
+              Moneda utilizada a bordo
+            </p>
+
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Selecciona la moneda real que utiliza tu crucero.
+              No la deducimos automáticamente del mercado o de
+              la naviera.
+            </p>
+
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  updateOnboardCurrency(
+                    "EUR"
+                  )
+                }
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  selectedDrinkCurrency ===
+                  "EUR"
+                    ? "border-sky-500 bg-sky-600 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
+                }`}
+              >
+                EUR (€)
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateOnboardCurrency(
+                    "USD"
+                  )
+                }
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  selectedDrinkCurrency ===
+                  "USD"
+                    ? "border-sky-500 bg-sky-600 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
+                }`}
+              >
+                USD ($)
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateOnboardCurrency(
+                    ""
+                  )
+                }
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  selectedDrinkCurrency ===
+                  null
+                    ? "border-slate-500 bg-slate-700 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
+                }`}
+              >
+                No lo sé
+              </button>
+            </div>
+          </div>
+
           {selectedDrinkCurrency === null ? (
             <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
               Para utilizar precios concretos
@@ -954,6 +1113,22 @@ export default function PricesPage() {
                           )
                         : [];
 
+                    const documentedCurrency =
+                      selectedDrinkCurrency === "EUR" ||
+                      selectedDrinkCurrency === "USD"
+                        ? selectedDrinkCurrency
+                        : undefined;
+
+                    const documentedReferences =
+                      data.cruiseLine === "msc" &&
+                      documentedCurrency
+                        ? getMscDocumentedDrinkPrices({
+                            category,
+                            currency:
+                              documentedCurrency,
+                          })
+                        : [];
+
                     const selectedReferenceId =
                       selectedDrinkReferenceIds[
                         category
@@ -964,6 +1139,7 @@ export default function PricesPage() {
                         key={category}
                         className="rounded-2xl border border-slate-200 p-4"
                       >
+
                         <label
                           htmlFor={inputId}
                           className="block text-sm font-semibold text-slate-900"
@@ -1030,6 +1206,81 @@ export default function PricesPage() {
 
                             <p className="mt-2 text-xs leading-5 text-sky-800">
                               Puedes usar una referencia oficial o escribir tu precio real manualmente.
+                            </p>
+                          </div>
+                        ) : null}
+
+                        {documentedReferences.length > 0 ? (
+                          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                              Precios documentados en menús MSC
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {documentedReferences.map(
+                                (reference) => {
+                                  const isSelected =
+                                    selectedReferenceId ===
+                                    reference.id;
+
+                                  return (
+                                    <button
+                                      key={reference.id}
+                                      type="button"
+                                      onClick={() =>
+                                        selectDocumentedDrinkReference(
+                                          category,
+                                          reference.id,
+                                          reference.price
+                                        )
+                                      }
+                                      className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
+                                        isSelected
+                                          ? "border-slate-700 bg-slate-800 text-white"
+                                          : "border-slate-300 bg-white text-slate-900 hover:border-slate-500"
+                                      }`}
+                                    >
+                                      <span className="block font-semibold">
+                                        {reference.productName}
+                                      </span>
+
+                                      <span
+                                        className={`mt-1 block ${
+                                          isSelected
+                                            ? "text-slate-200"
+                                            : "text-slate-500"
+                                        }`}
+                                      >
+                                        {reference.format
+                                          ? `${reference.format} · `
+                                          : ""}
+                                        {formatCurrency(
+                                          reference.price,
+                                          reference.currency
+                                        )}
+                                      </span>
+
+                                      <span
+                                        className={`mt-1 block ${
+                                          isSelected
+                                            ? "text-slate-300"
+                                            : "text-slate-500"
+                                        }`}
+                                      >
+                                        {reference.menuName ??
+                                          "Menú documentado"}
+                                        {reference.ship
+                                          ? ` · ${reference.ship}`
+                                          : ""}
+                                      </span>
+                                    </button>
+                                  );
+                                }
+                              )}
+                            </div>
+
+                            <p className="mt-2 text-xs leading-5 text-slate-600">
+                              Precios observados en menús documentados. No se presentan como precios oficiales vigentes para toda la flota.
                             </p>
                           </div>
                         ) : null}
