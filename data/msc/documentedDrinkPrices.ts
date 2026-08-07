@@ -384,4 +384,49 @@ export const mscDocumentedDrinkPrices:
       "Segundo formato documentado de Heineken draft; el formato de 14 oz tiene un precio diferente.",
   },
 
+
+  {
+    id:
+      "msc-world-america-espresso-coffee-emporium-2025-07",
+
+    category:
+      "coffee",
+
+    productName:
+      "Espresso",
+
+    format:
+      null,
+
+    price:
+      4,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    menuName:
+      "Coffee Emporium",
+
+    notes:
+      "Precio documentado en Coffee Emporium; se mantiene separado del Espresso de 2.50 USD del Fleetwide menu.",
+  },
+
 ];

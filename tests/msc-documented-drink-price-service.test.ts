@@ -17,7 +17,7 @@ describe(
       () => {
         expect(
           getMscDocumentedDrinkPrices()
-        ).toHaveLength(7);
+        ).toHaveLength(8);
       }
     );
 
@@ -64,15 +64,59 @@ describe(
     );
 
     it(
-      "no mezcla un menú diferente",
+      "separa Coffee Emporium del Fleetwide menu",
       () => {
-        expect(
+        const coffeeEmporium =
           getMscDocumentedDrinkPrices({
             category: "coffee",
             ship: "MSC World America",
             menuName: "Coffee Emporium",
-          })
-        ).toEqual([]);
+          });
+
+        expect(
+          coffeeEmporium
+        ).toHaveLength(1);
+
+        expect(
+          coffeeEmporium[0]
+        ).toMatchObject({
+          productName: "Espresso",
+          price: 4,
+          menuName: "Coffee Emporium",
+        });
+      }
+    );
+
+    it(
+      "conserva ambos Espresso sin filtro de menú",
+      () => {
+        const espresso =
+          getMscDocumentedDrinkPrices({
+            category: "coffee",
+            ship: "MSC World America",
+          }).filter(
+            (item) =>
+              item.productName ===
+              "Espresso"
+          );
+
+        expect(
+          espresso.map(
+            ({ menuName, price }) => ({
+              menuName,
+              price,
+            })
+          )
+        ).toEqual([
+          {
+            menuName: "Fleetwide menu",
+            price: 2.5,
+          },
+          {
+            menuName: "Coffee Emporium",
+            price: 4,
+          },
+        ]);
       }
     );
 

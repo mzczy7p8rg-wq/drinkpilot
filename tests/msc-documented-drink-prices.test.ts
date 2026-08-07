@@ -17,7 +17,7 @@ describe(
       () => {
         expect(
           mscDocumentedDrinkPrices
-        ).toHaveLength(7);
+        ).toHaveLength(8);
 
         expect(
           mscDocumentedDrinkPrices.every(
@@ -296,7 +296,7 @@ describe(
       "conserva exactamente los cuatro nuevos precios documentados",
       () => {
         const additions =
-          mscDocumentedDrinkPrices.slice(3);
+          mscDocumentedDrinkPrices.slice(3, 7);
 
         expect(
           additions.map(
@@ -348,7 +348,9 @@ describe(
           mscDocumentedDrinkPrices.every(
             (item) =>
               item.menuName ===
-              "Fleetwide menu"
+                "Fleetwide menu" ||
+              item.menuName ===
+                "Coffee Emporium"
           )
         ).toBe(true);
       }
