@@ -29,6 +29,10 @@ import {
   createSelectedDrinkPrice,
 } from "@/lib/selectedDrinkPrice";
 
+import {
+  getMscSpecificDrinkPrices,
+} from "@/lib/mscSpecificDrinkPriceService";
+
 const drinkCategoryLabels:
   Record<OnboardPriceKey, string> = {
     coffee: "Café",
@@ -307,6 +311,13 @@ export default function PricesPage() {
     >;
   });
 
+  const [
+    selectedDrinkReferenceIds,
+    setSelectedDrinkReferenceIds,
+  ] = useState<
+    Partial<Record<OnboardPriceKey, string>>
+  >({});
+
   const drinkPriceValidations =
     Object.fromEntries(
       onboardPriceKeys.map(
@@ -396,6 +407,42 @@ export default function PricesPage() {
           value,
       })
     );
+
+    setSelectedDrinkReferenceIds(
+      (previous) => {
+        const next = {
+          ...previous,
+        };
+
+        delete next[category];
+
+        return next;
+      }
+    );
+  }
+
+  function selectOfficialDrinkReference(
+    category: OnboardPriceKey,
+    referenceId: string,
+    price: number
+  ) {
+    setDrinkPriceInputs(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          String(price),
+      })
+    );
+
+    setSelectedDrinkReferenceIds(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          referenceId,
+      })
+    );
   }
 
   function savePrices() {
@@ -450,8 +497,11 @@ export default function PricesPage() {
                   selectedDrinkCurrency,
 
                 source:
-                  existingPrice?.source ??
-                  "user",
+                  selectedDrinkReferenceIds[
+                    category
+                  ]
+                    ? "official"
+                    : "user",
               });
 
             return selectedPrice
@@ -851,6 +901,24 @@ export default function PricesPage() {
                     const inputId =
                       `drink-price-${category}`;
 
+                    const officialReferences =
+                      data.cruiseLine === "msc" &&
+                      category === "water" &&
+                      selectedDrinkCurrency === "EUR"
+                        ? getMscSpecificDrinkPrices(
+                            category
+                          ).filter(
+                            (reference) =>
+                              reference.currency ===
+                              selectedDrinkCurrency
+                          )
+                        : [];
+
+                    const selectedReferenceId =
+                      selectedDrinkReferenceIds[
+                        category
+                      ];
+
                     return (
                       <div
                         key={category}
@@ -866,6 +934,65 @@ export default function PricesPage() {
                             ]
                           }
                         </label>
+
+                        {officialReferences.length > 0 ? (
+                          <div className="mt-3 rounded-xl border border-sky-100 bg-sky-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-sky-800">
+                              Referencias oficiales MSC
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {officialReferences.map(
+                                (reference) => {
+                                  const isSelected =
+                                    selectedReferenceId ===
+                                    reference.id;
+
+                                  return (
+                                    <button
+                                      key={reference.id}
+                                      type="button"
+                                      onClick={() =>
+                                        selectOfficialDrinkReference(
+                                          category,
+                                          reference.id,
+                                          reference.price
+                                        )
+                                      }
+                                      className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
+                                        isSelected
+                                          ? "border-sky-500 bg-sky-600 text-white"
+                                          : "border-sky-200 bg-white text-sky-900 hover:border-sky-400"
+                                      }`}
+                                    >
+                                      <span className="block font-semibold">
+                                        {reference.productName}
+                                      </span>
+
+                                      <span
+                                        className={`mt-1 block ${
+                                          isSelected
+                                            ? "text-sky-100"
+                                            : "text-slate-500"
+                                        }`}
+                                      >
+                                        {reference.format} ·{" "}
+                                        {formatCurrency(
+                                          reference.price,
+                                          reference.currency
+                                        )}
+                                      </span>
+                                    </button>
+                                  );
+                                }
+                              )}
+                            </div>
+
+                            <p className="mt-2 text-xs leading-5 text-sky-800">
+                              Puedes usar una referencia oficial o escribir tu precio real manualmente.
+                            </p>
+                          </div>
+                        ) : null}
 
                         <div className="relative mt-3">
                           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-medium text-slate-500">
