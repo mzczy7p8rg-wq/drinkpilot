@@ -197,6 +197,7 @@ describe(
         ).toEqual({
           cruiseLine: "msc",
           market: "ES",
+          sailingRegion: null,
           sailingDate:
             "2026-08-15",
         });
@@ -243,6 +244,7 @@ describe(
         ).toEqual({
           cruiseLine: "msc",
           market: null,
+          sailingRegion: null,
           sailingDate: null,
         });
       }

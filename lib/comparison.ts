@@ -69,6 +69,8 @@ export type ComparisonInput = {
    */
   market?: string | null;
 
+  sailingRegion?: string | null;
+
   sailingDate?: string | null;
 
   days: number;
@@ -616,6 +618,9 @@ export function compareDrinkPackages(
 
       market:
         input.market ?? null,
+
+      sailingRegion:
+        input.sailingRegion ?? null,
 
       sailingDate:
         input.sailingDate ?? null,

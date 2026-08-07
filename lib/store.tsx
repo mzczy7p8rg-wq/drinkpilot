@@ -48,6 +48,8 @@ export type WizardData = {
    */
   market: string | null;
 
+  sailingRegion: string | null;
+
   sailingDate: string | null;
 
   days: number;
@@ -188,6 +190,8 @@ function createInitialData(
     cruiseLine,
 
     market: null,
+
+    sailingRegion: null,
 
     sailingDate: null,
 
@@ -508,6 +512,9 @@ export function StoreProvider({
             market:
               parsedData.market,
 
+            sailingRegion:
+              parsedData.sailingRegion,
+
             sailingDate:
               parsedData.sailingDate,
           });
@@ -535,6 +542,10 @@ export function StoreProvider({
           market:
             storedCruiseContext
               .market,
+
+          sailingRegion:
+            storedCruiseContext
+              .sailingRegion,
 
           sailingDate:
             storedCruiseContext

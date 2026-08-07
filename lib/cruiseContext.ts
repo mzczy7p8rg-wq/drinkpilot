@@ -33,6 +33,22 @@ export type CruiseContext = {
   market: string | null;
 
   /*
+   * Región operativa de la navegación.
+   *
+   * Es deliberadamente distinta del
+   * mercado de compra o reserva.
+   *
+   * Ejemplos futuros para MSC:
+   *
+   * "MED"
+   * "NOR"
+   * "WEE"
+   *
+   * null = desconocida.
+   */
+  sailingRegion: string | null;
+
+  /*
    * Fecha de salida ISO:
    *
    * YYYY-MM-DD
@@ -54,6 +70,7 @@ export function createCruiseContext(
   return {
     cruiseLine,
     market: null,
+    sailingRegion: null,
     sailingDate: null,
   };
 }

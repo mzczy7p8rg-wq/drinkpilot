@@ -225,6 +225,9 @@ export default function ResultsPage() {
       market:
         data.market,
 
+      sailingRegion:
+        data.sailingRegion,
+
       sailingDate:
         data.sailingDate,
 

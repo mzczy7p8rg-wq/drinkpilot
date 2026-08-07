@@ -22,6 +22,7 @@ describe(
         ).toEqual({
           cruiseLine: "msc",
           market: null,
+          sailingRegion: null,
           sailingDate: null,
         });
       }

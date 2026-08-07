@@ -86,6 +86,9 @@ export default function ReviewPage() {
       market:
         data.market ?? null,
 
+      sailingRegion:
+        data.sailingRegion ?? null,
+
       sailingDate:
         data.sailingDate ?? null,
     });

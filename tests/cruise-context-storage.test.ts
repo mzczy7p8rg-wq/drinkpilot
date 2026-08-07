@@ -20,6 +20,7 @@ describe(
           )
         ).toEqual({
           market: null,
+          sailingRegion: null,
           sailingDate: null,
         });
       }
@@ -31,11 +32,13 @@ describe(
         expect(
           resolveStoredCruiseContext({
             market: "ES",
+            sailingRegion: "MED",
             sailingDate:
               "2026-08-15",
           })
         ).toEqual({
           market: "ES",
+          sailingRegion: "MED",
           sailingDate:
             "2026-08-15",
         });
@@ -49,11 +52,14 @@ describe(
           resolveStoredCruiseContext({
             market:
               "  ES  ",
+            sailingRegion:
+              "  MED  ",
             sailingDate:
               "  2026-08-15  ",
           })
         ).toEqual({
           market: "ES",
+          sailingRegion: "MED",
           sailingDate:
             "2026-08-15",
         });
@@ -66,11 +72,13 @@ describe(
         expect(
           resolveStoredCruiseContext({
             market: "   ",
+            sailingRegion: [],
             sailingDate:
               12345,
           })
         ).toEqual({
           market: null,
+          sailingRegion: null,
           sailingDate: null,
         });
       }

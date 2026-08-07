@@ -1,10 +1,12 @@
 export type StoredCruiseContextInput = {
   market?: unknown;
+  sailingRegion?: unknown;
   sailingDate?: unknown;
 };
 
 export type StoredCruiseContext = {
   market: string | null;
+  sailingRegion: string | null;
   sailingDate: string | null;
 };
 
@@ -52,6 +54,11 @@ export function resolveStoredCruiseContext(
     market:
       sanitizeOptionalString(
         input.market
+      ),
+
+    sailingRegion:
+      sanitizeOptionalString(
+        input.sailingRegion
       ),
 
     sailingDate:
