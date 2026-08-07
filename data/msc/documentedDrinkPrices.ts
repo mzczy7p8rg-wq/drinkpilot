@@ -59,6 +59,9 @@ export type MscDocumentedDrinkPrice = {
   itinerary?:
     string | null;
 
+  menuName?:
+    string | null;
+
   notes?:
     string;
 };
@@ -107,6 +110,10 @@ export const mscDocumentedDrinkPrices:
     itinerary:
       null,
 
+
+  menuName:
+    "Fleetwide menu",
+
     notes:
       "Precio observado en una carta atribuida a MSC World America; no debe generalizarse a toda la flota ni a otros mercados.",
   },
@@ -147,6 +154,10 @@ export const mscDocumentedDrinkPrices:
 
     itinerary:
       null,
+
+
+  menuName:
+    "Fleetwide menu",
 
     notes:
       "Precio observado para formato draft de 14 oz; la misma carta documenta un formato de 7 oz con precio diferente.",
@@ -189,7 +200,188 @@ export const mscDocumentedDrinkPrices:
     itinerary:
       null,
 
+
+  menuName:
+    "Fleetwide menu",
+
     notes:
       "Precio observado en carta documentada de MSC World America; no representa un precio medio MSC.",
   },
+
+  {
+    id:
+      "msc-world-america-espresso-fleetwide-2025-07",
+
+    category:
+      "coffee",
+
+    productName:
+      "Espresso",
+
+    format:
+      null,
+
+    price:
+      2.5,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    menuName:
+      "Fleetwide menu",
+
+    notes:
+      "Espresso del menú general documentado. No debe confundirse con el Espresso de Coffee Emporium, que tiene un precio distinto.",
+  },
+
+  {
+    id:
+      "msc-world-america-water-16oz-fleetwide-2025-07",
+
+    category:
+      "water",
+
+    productName:
+      "Still/Sparkling Water",
+
+    format:
+      "16 oz",
+
+    price:
+      3.25,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    menuName:
+      "Fleetwide menu",
+
+    notes:
+      "Precio documentado para formato de 16 oz; la carta también muestra un formato de 32 oz con precio diferente.",
+  },
+
+  {
+    id:
+      "msc-world-america-valdo-prosecco-glass-2025-07",
+
+    category:
+      "wine",
+
+    productName:
+      "Valdo, Prosecco",
+
+    format:
+      "glass",
+
+    price:
+      14,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    menuName:
+      "Fleetwide menu",
+
+    notes:
+      "Precio por copa documentado; la misma carta muestra también precio por botella.",
+  },
+
+  {
+    id:
+      "msc-world-america-heineken-draft-7oz-2025-07",
+
+    category:
+      "beer",
+
+    productName:
+      "Heineken Draft",
+
+    format:
+      "7 oz",
+
+    price:
+      6,
+
+    currency:
+      "USD",
+
+    evidence:
+      "documented-menu",
+
+    sourceUrl:
+      "https://cruise.blog/2025/msc-cruises-drink-menu-and-prices",
+
+    observedAt:
+      "2025-07",
+
+    ship:
+      "MSC World America",
+
+    market:
+      "North America",
+
+    itinerary:
+      null,
+
+    menuName:
+      "Fleetwide menu",
+
+    notes:
+      "Segundo formato documentado de Heineken draft; el formato de 14 oz tiene un precio diferente.",
+  },
+
 ];

@@ -17,7 +17,7 @@ describe(
       () => {
         expect(
           mscDocumentedDrinkPrices
-        ).toHaveLength(3);
+        ).toHaveLength(7);
 
         expect(
           mscDocumentedDrinkPrices.every(
@@ -136,7 +136,9 @@ describe(
       "registra tres categorías sin fabricar una media",
       () => {
         expect(
-          mscDocumentedDrinkPrices.map(
+          mscDocumentedDrinkPrices
+          .slice(0, 3)
+          .map(
             ({
               category,
               productName,
@@ -254,6 +256,112 @@ describe(
               ) &&
               !item.sourceUrl.includes("[") &&
               !item.sourceUrl.includes("]")
+          )
+        ).toBe(true);
+      }
+    );
+  }
+);
+
+describe(
+  "MSC World America documented menu expansion",
+  () => {
+    it(
+      "añade coffee water wine y un segundo formato de beer",
+      () => {
+        const ids =
+          mscDocumentedDrinkPrices.map(
+            (item) => item.id
+          );
+
+        expect(ids).toContain(
+          "msc-world-america-espresso-fleetwide-2025-07"
+        );
+
+        expect(ids).toContain(
+          "msc-world-america-water-16oz-fleetwide-2025-07"
+        );
+
+        expect(ids).toContain(
+          "msc-world-america-valdo-prosecco-glass-2025-07"
+        );
+
+        expect(ids).toContain(
+          "msc-world-america-heineken-draft-7oz-2025-07"
+        );
+      }
+    );
+
+    it(
+      "conserva exactamente los cuatro nuevos precios documentados",
+      () => {
+        const additions =
+          mscDocumentedDrinkPrices.slice(3);
+
+        expect(
+          additions.map(
+            ({
+              category,
+              productName,
+              format,
+              price,
+            }) => ({
+              category,
+              productName,
+              format,
+              price,
+            })
+          )
+        ).toEqual([
+          {
+            category: "coffee",
+            productName: "Espresso",
+            format: null,
+            price: 2.5,
+          },
+          {
+            category: "water",
+            productName: "Still/Sparkling Water",
+            format: "16 oz",
+            price: 3.25,
+          },
+          {
+            category: "wine",
+            productName: "Valdo, Prosecco",
+            format: "glass",
+            price: 14,
+          },
+          {
+            category: "beer",
+            productName: "Heineken Draft",
+            format: "7 oz",
+            price: 6,
+          },
+        ]);
+      }
+    );
+
+    it(
+      "conserva el menú como parte del contexto documental",
+      () => {
+        expect(
+          mscDocumentedDrinkPrices.every(
+            (item) =>
+              item.menuName ===
+              "Fleetwide menu"
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "mantiene todas las referencias como documented-menu",
+      () => {
+        expect(
+          mscDocumentedDrinkPrices.every(
+            (item) =>
+              item.evidence ===
+              "documented-menu"
           )
         ).toBe(true);
       }
