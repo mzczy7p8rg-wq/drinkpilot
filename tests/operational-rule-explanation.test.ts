@@ -500,3 +500,51 @@ describe(
     );
   }
 );
+
+describe(
+  "AQUA semantic distinction",
+  () => {
+    it(
+      "distingue AQUA by MSC ilimitada del agua mineral embotellada tradicional ilimitada",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const easyAquaNotice =
+          notices.find(
+            (notice) =>
+              notice.type ===
+                "aqua-unlimited" &&
+              notice.packageKey ===
+                "mscEasy"
+          );
+
+        expect(
+          easyAquaNotice
+        ).toBeDefined();
+
+        expect(
+          easyAquaNotice?.message
+        ).toContain(
+          "AQUA by MSC ilimitada"
+        );
+
+        expect(
+          easyAquaNotice?.message
+        ).toContain(
+          "no equivale a agua mineral embotellada tradicional ilimitada"
+        );
+      }
+    );
+  }
+);

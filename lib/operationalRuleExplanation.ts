@@ -155,7 +155,7 @@ export function buildOperationalRuleNotices(
           "informational",
 
         message:
-          `${rule.packageName}: incluye cobertura AQUA según los datos operativos disponibles.`,
+          `${rule.packageName}: incluye AQUA by MSC ilimitada según los datos operativos disponibles. Esta cobertura no equivale a agua mineral embotellada tradicional ilimitada.`,
 
         source:
           rule
