@@ -463,3 +463,129 @@ describe(
     );
   }
 );
+
+describe(
+  "package threshold consumption coverage",
+  () => {
+    it(
+      "cuenta por separado las bebidas excluidas de cobertura",
+      () => {
+        const result =
+          evaluatePackageThresholdConsumptionImpact(
+            getPremiumExtraEurRule(),
+            [
+              createConsumption(
+                "cocktail",
+                15,
+                2
+              ),
+
+              createConsumption(
+                "wine",
+                12,
+                3
+              ),
+
+              createConsumption(
+                "beer",
+                18,
+                1
+              ),
+            ]
+          );
+
+        expect(
+          result.drinksAboveThresholdPerDay
+        ).toBe(3);
+
+        expect(
+          result.drinksExcludedFromCoveragePerDay
+        ).toBe(3);
+
+        expect(
+          result.additionalCostPerDay
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "devuelve cero exclusiones cuando todas las bebidas están cubiertas",
+      () => {
+        const result =
+          evaluatePackageThresholdConsumptionImpact(
+            getPremiumExtraEurRule(),
+            [
+              createConsumption(
+                "cocktail",
+                14,
+                2
+              ),
+
+              createConsumption(
+                "wine",
+                12,
+                3
+              ),
+            ]
+          );
+
+        expect(
+          result.drinksExcludedFromCoveragePerDay
+        ).toBe(0);
+      }
+    );
+
+    it(
+      "mantiene exclusiones desconocidas cuando no puede evaluar el threshold",
+      () => {
+        const rule =
+          getPremiumExtraEurRule();
+
+        const usdDrink =
+          createSelectedDrinkPrice({
+            category:
+              "cocktail",
+
+            price:
+              15,
+
+            currency:
+              "USD",
+          });
+
+        if (!usdDrink) {
+          throw new Error(
+            "Selected drink setup failed"
+          );
+        }
+
+        const consumption =
+          createSelectedDrinkConsumption({
+            drink:
+              usdDrink,
+
+            quantityPerDay:
+              2,
+          });
+
+        if (!consumption) {
+          throw new Error(
+            "Consumption setup failed"
+          );
+        }
+
+        const result =
+          evaluatePackageThresholdConsumptionImpact(
+            rule,
+            [
+              consumption,
+            ]
+          );
+
+        expect(
+          result.drinksExcludedFromCoveragePerDay
+        ).toBeNull();
+      }
+    );
+  }
+);

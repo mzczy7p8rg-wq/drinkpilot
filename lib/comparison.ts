@@ -901,6 +901,9 @@ export function compareDrinkPackages(
                     drinksAboveThresholdPerDay:
                       null,
 
+                      drinksExcludedFromCoveragePerDay:
+                        null,
+
                     additionalCostPerDay:
                       null,
                   };

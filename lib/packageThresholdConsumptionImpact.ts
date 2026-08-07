@@ -38,6 +38,9 @@ export type PackageThresholdConsumptionImpact = {
   drinksAboveThresholdPerDay:
     number | null;
 
+  drinksExcludedFromCoveragePerDay:
+    number | null;
+
   additionalCostPerDay:
     number | null;
 };
@@ -92,6 +95,9 @@ export function evaluatePackageThresholdConsumptionImpact(
       drinksAboveThresholdPerDay:
         null,
 
+      drinksExcludedFromCoveragePerDay:
+        null,
+
       additionalCostPerDay:
         null,
     };
@@ -122,6 +128,29 @@ export function evaluatePackageThresholdConsumptionImpact(
       0
     );
 
+  const drinksExcludedFromCoveragePerDay =
+    items.reduce(
+      (
+        total,
+        item
+      ) => {
+        if (
+          item.evaluation
+            .coverageStatus !==
+          "excluded"
+        ) {
+          return total;
+        }
+
+        return (
+          total +
+          item.consumption
+            .quantityPerDay
+        );
+      },
+      0
+    );
+
   if (
     drinksAboveThresholdPerDay === 0
   ) {
@@ -133,6 +162,9 @@ export function evaluatePackageThresholdConsumptionImpact(
       totalDrinksPerDay,
 
       drinksAboveThresholdPerDay:
+        0,
+
+      drinksExcludedFromCoveragePerDay:
         0,
 
       additionalCostPerDay:
@@ -160,6 +192,8 @@ export function evaluatePackageThresholdConsumptionImpact(
       totalDrinksPerDay,
 
       drinksAboveThresholdPerDay,
+
+      drinksExcludedFromCoveragePerDay,
 
       additionalCostPerDay:
         null,
@@ -204,6 +238,8 @@ export function evaluatePackageThresholdConsumptionImpact(
     totalDrinksPerDay,
 
     drinksAboveThresholdPerDay,
+
+    drinksExcludedFromCoveragePerDay,
 
     additionalCostPerDay,
   };
