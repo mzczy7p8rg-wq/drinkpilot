@@ -2272,3 +2272,58 @@ describe(
     );
   }
 );
+
+describe(
+  "effective savings recommendation safety",
+  () => {
+    it(
+      "mantiene el ahorro efectivo igual al bruto cuando no existe impacto de threshold",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine:
+              "costa",
+
+            days:
+              7,
+
+            people:
+              1,
+
+            coffee:
+              2,
+
+            water:
+              2,
+
+            soda:
+              2,
+
+            beer:
+              1,
+
+            wine:
+              1,
+
+            cocktail:
+              1,
+          });
+
+        const bestPackage =
+          result.bestPackage;
+
+        expect(
+          bestPackage
+        ).not.toBeNull();
+
+        expect(
+          bestPackage
+            ?.effectiveSavings
+        ).toBe(
+          bestPackage
+            ?.savings
+        );
+      }
+    );
+  }
+);

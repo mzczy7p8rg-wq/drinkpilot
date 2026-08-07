@@ -559,7 +559,7 @@ const nonQuantifiedCategories:
  * Determina la calidad real
  * de la comparación económica.
  */
-function resolveEconomicComparison(
+export function resolveEconomicComparison(
   coverage:
     | {
         fullyCovered: boolean;
@@ -569,7 +569,10 @@ function resolveEconomicComparison(
       }
     | undefined,
 
-  savings: number
+  savings: number,
+
+  thresholdImpact?:
+    PackageThresholdCruiseImpact
 ): {
   status:
     EconomicComparisonStatus;
@@ -588,8 +591,54 @@ function resolveEconomicComparison(
   }
 
   /*
+   * THRESHOLD ECONÓMICO
+   *
+   * known-unquantified:
+   * sabemos que existen consumiciones
+   * afectadas, pero todavía no podemos
+   * conocer su coste adicional real.
+   *
+   * Por tanto, tampoco podemos afirmar
+   * un ahorro efectivo definitivo.
+   */
+  if (
+    thresholdImpact?.status ===
+      "known-unquantified"
+  ) {
+    return {
+      status:
+        "partial-unknown",
+
+      effectiveSavings:
+        null,
+    };
+  }
+
+  /*
+   * Si el impacto está cuantificado,
+   * descontamos únicamente el coste
+   * adicional demostrado.
+   *
+   * savings permanece intacto como
+   * ahorro económico base.
+   */
+  const thresholdAdditionalCost =
+    thresholdImpact?.status ===
+      "quantified" &&
+    thresholdImpact
+      .additionalCostTotal !== null
+      ? thresholdImpact
+          .additionalCostTotal
+      : 0;
+
+  const thresholdAdjustedSavings =
+    savings -
+    thresholdAdditionalCost;
+
+  /*
    * Cobertura completa:
-   * ahorro bruto = ahorro efectivo.
+   * el ahorro efectivo incorpora cualquier
+   * coste de threshold ya cuantificado.
    */
   if (
     coverage.fullyCovered
@@ -599,7 +648,7 @@ function resolveEconomicComparison(
         "complete",
 
       effectiveSavings:
-        savings,
+        thresholdAdjustedSavings,
     };
   }
 
@@ -640,6 +689,19 @@ function resolveEconomicComparison(
     effectiveSavings:
       null,
   };
+}
+
+export function findBestPackageByEffectiveSavings(
+  packages: PackageComparisonResult[]
+): PackageComparisonResult | null {
+  return (
+    packages.find(
+      (pkg) =>
+        pkg.fullyCovered &&
+        pkg.effectiveSavings !== null &&
+        pkg.effectiveSavings > 0
+    ) ?? null
+  );
 }
 
 export function compareDrinkPackages(
@@ -1121,10 +1183,18 @@ export function compareDrinkPackages(
                 packageKey
             );
 
+          const thresholdImpact =
+            thresholdCruiseImpacts.find(
+              (impact) =>
+                impact.packageKey ===
+                packageKey
+            )?.cruiseImpact;
+
           const economicComparison =
             resolveEconomicComparison(
               coverage,
-              calculation.savings
+              calculation.savings,
+              thresholdImpact
             );
 
           return {
@@ -1202,12 +1272,52 @@ export function compareDrinkPackages(
       );
 
   /*
-   * Mayor ahorro primero.
+   * ORDEN ECONÓMICO
+   *
+   * Priorizamos comparaciones cuyo ahorro
+   * efectivo puede calcularse.
+   *
+   * effectiveSavings === null significa
+   * que existe incertidumbre económica y
+   * no debe ganar frente a una alternativa
+   * cuantificada.
    */
   results.sort(
-    (a, b) =>
-      b.savings -
-      a.savings
+    (a, b) => {
+      const aEffective =
+        a.effectiveSavings;
+
+      const bEffective =
+        b.effectiveSavings;
+
+      if (
+        aEffective !== null &&
+        bEffective !== null
+      ) {
+        return (
+          bEffective -
+          aEffective
+        );
+      }
+
+      if (aEffective !== null) {
+        return -1;
+      }
+
+      if (bEffective !== null) {
+        return 1;
+      }
+
+      /*
+       * Si ambos son inciertos,
+       * savings continúa siendo útil
+       * como criterio secundario.
+       */
+      return (
+        b.savings -
+        a.savings
+      );
+    }
   );
 
   /*
@@ -1215,15 +1325,14 @@ export function compareDrinkPackages(
    *
    * Para ser recomendado:
    *
-   * 1. ahorro positivo;
-   * 2. cobertura completa.
+   * 1. cobertura completa;
+   * 2. ahorro efectivo conocido;
+   * 3. ahorro efectivo positivo.
    */
   const bestPackage =
-    results.find(
-      (pkg) =>
-        pkg.savings > 0 &&
-        pkg.fullyCovered
-    ) ?? null;
+    findBestPackageByEffectiveSavings(
+      results
+    );
 
   return {
     economicDataAvailable:
