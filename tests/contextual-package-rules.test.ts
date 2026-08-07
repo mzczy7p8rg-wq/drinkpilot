@@ -315,3 +315,245 @@ describe(
     );
   }
 );
+
+describe(
+  "contextual sailing region matching",
+  () => {
+    const regionalRule = {
+      id:
+        "test-msc-premium-med",
+
+      cruiseLine:
+        "msc" as const,
+
+      packageKey:
+        "mscPremiumExtra" as const,
+
+      sailingRegions: [
+        "MED",
+      ],
+
+      rules: {
+        drinkPriceThreshold:
+          14,
+      },
+    };
+
+    it(
+      "aplica una regla cuando coincide la región de navegación",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                "MED",
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "no aplica una regla regional cuando la región es desconocida",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                null,
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no aplica una regla cuando la navegación pertenece a otra región",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                "CAR",
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no confunde mercado de compra con región de navegación",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "MED",
+
+              sailingRegion:
+                null,
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+  }
+);
+
+describe(
+  "contextual sailing region matching",
+  () => {
+    const regionalRule = {
+      id:
+        "test-msc-premium-med",
+
+      cruiseLine:
+        "msc" as const,
+
+      packageKey:
+        "mscPremiumExtra" as const,
+
+      sailingRegions: [
+        "MED",
+      ],
+
+      rules: {
+        drinkPriceThreshold:
+          14,
+      },
+    };
+
+    it(
+      "aplica una regla cuando coincide la región de navegación",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                "MED",
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "no aplica una regla regional cuando la región es desconocida",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                null,
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no aplica una regla cuando la navegación pertenece a otra región",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                "CAR",
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no confunde mercado de compra con región de navegación",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "MED",
+
+              sailingRegion:
+                null,
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+  }
+);

@@ -46,6 +46,18 @@ export type ContextualPackageRule = {
     string[];
 
   /*
+   * Regiones operativas de navegación
+   * donde aplica la regla.
+   *
+   * Es deliberadamente independiente
+   * del mercado de compra o reserva.
+   *
+   * undefined o [] = cualquier región.
+   */
+  sailingRegions?:
+    string[];
+
+  /*
    * Límites temporales inclusivos.
    *
    * null/undefined = sin límite.
@@ -77,6 +89,31 @@ function matchesMarket(
 
   return rule.markets.includes(
     context.market
+  );
+}
+
+function matchesSailingRegion(
+  rule: ContextualPackageRule,
+  context: CruiseContext
+): boolean {
+  if (
+    !rule.sailingRegions ||
+    rule.sailingRegions.length === 0
+  ) {
+    return true;
+  }
+
+  /*
+   * Una regla regional nunca debe
+   * activarse si desconocemos la
+   * región real de navegación.
+   */
+  if (!context.sailingRegion) {
+    return false;
+  }
+
+  return rule.sailingRegions.includes(
+    context.sailingRegion
   );
 }
 
@@ -142,6 +179,15 @@ export function matchesContextualPackageRule(
 
   if (
     !matchesMarket(
+      rule,
+      context
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    !matchesSailingRegion(
       rule,
       context
     )
