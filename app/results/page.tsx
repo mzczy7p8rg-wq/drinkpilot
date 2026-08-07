@@ -15,6 +15,10 @@ import {
 } from "@/lib/operationalRuleExplanation";
 
 import {
+  buildOperationalImpactExplanations,
+} from "@/lib/operationalImpactExplanation";
+
+import {
   hasCompleteOnboardPriceValues,
 } from "@/lib/onboardPriceService";
 
@@ -244,6 +248,12 @@ export default function ResultsPage() {
       cocktail:
         data.cocktail,
 
+      alcoholicCocktail:
+        data.alcoholicCocktail,
+
+      nonAlcoholicCocktail:
+        data.nonAlcoholicCocktail,
+
       alcoholicCocktails:
         data.alcoholicCocktails,
 
@@ -282,6 +292,11 @@ export default function ResultsPage() {
       comparison.operationalRules
     );
 
+  const allOperationalImpactExplanations =
+    buildOperationalImpactExplanations(
+      comparison.operationalRuleImpacts
+    );
+
   /*
    * DATOS ECONÓMICOS INCOMPLETOS
    *
@@ -301,6 +316,27 @@ export default function ResultsPage() {
       filterAdultOperationalRuleNotices(
         allOperationalNotices,
         comparison.operationalRules
+      );
+
+    const minorsOnlyPackageKeys =
+      new Set(
+        comparison.operationalRules
+          .filter(
+            (rule) =>
+              rule.minorsOnly
+          )
+          .map(
+            (rule) =>
+              rule.packageKey
+          )
+      );
+
+    const adultOperationalImpactExplanations =
+      allOperationalImpactExplanations.filter(
+        (explanation) =>
+          !minorsOnlyPackageKeys.has(
+            explanation.packageKey
+          )
       );
 
     const missingPriceLabels = {
@@ -452,6 +488,33 @@ export default function ResultsPage() {
                 )}
               </div>
             </section>
+
+            {adultOperationalImpactExplanations.length > 0 && (
+              <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+                <h2 className="text-lg font-bold text-amber-950 sm:text-xl">
+                  ⚠️ Impacto en tu patrón de consumo
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-amber-900">
+                  Estas condiciones afectan a tu consumo declarado, pero DrinkPilot todavía no utiliza ese exceso para modificar el cálculo económico.
+                </p>
+
+                <div className="mt-4 grid gap-3">
+                  {adultOperationalImpactExplanations.map(
+                    (explanation) => (
+                      <div
+                        key={explanation.id}
+                        className="rounded-xl border border-amber-100 bg-white p-4"
+                      >
+                        <p className="text-sm leading-6 text-slate-700">
+                          {explanation.message}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </section>
+            )}
 
             {adultOperationalNotices.length > 0 && (
               <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
@@ -1440,6 +1503,35 @@ export default function ResultsPage() {
                 recomendación.
               </p>
             </div>
+          )}
+
+          {/* IMPACTO OPERATIVO PERSONALIZADO */}
+
+          {operationalImpactExplanations.length > 0 && (
+            <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-amber-950 sm:text-xl">
+                ⚠️ Impacto en tu patrón de consumo
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-amber-900">
+                Estas condiciones afectan a tu consumo declarado, pero DrinkPilot todavía no utiliza ese exceso para modificar el cálculo económico.
+              </p>
+
+              <div className="mt-4 grid gap-3">
+                {operationalImpactExplanations.map(
+                  (explanation) => (
+                    <div
+                      key={explanation.id}
+                      className="rounded-xl border border-amber-100 bg-white p-4"
+                    >
+                      <p className="text-sm leading-6 text-slate-700">
+                        {explanation.message}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
+            </section>
           )}
 
           {/* CONDICIONES OPERATIVAS */}
