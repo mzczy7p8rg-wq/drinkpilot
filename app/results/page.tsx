@@ -324,8 +324,10 @@ export default function ResultsPage() {
   const thresholdCruiseImpacts =
     comparison.thresholdCruiseImpacts.filter(
       (item) =>
-        item.cruiseImpact.status ===
-          "known-unquantified" &&
+        (item.cruiseImpact.status ===
+          "known-unquantified" ||
+          item.cruiseImpact.status ===
+            "quantified") &&
         item.cruiseImpact.drinksAboveThreshold !==
           null &&
         item.cruiseImpact.drinksAboveThreshold > 0
@@ -621,9 +623,31 @@ export default function ResultsPage() {
                               Coste adicional
                             </p>
 
-                            <p className="mt-1 text-sm leading-6 text-amber-900">
-                              Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
-                            </p>
+                            {thresholdImpact
+                              .cruiseImpact
+                              .status ===
+                              "quantified" &&
+                            thresholdImpact
+                              .cruiseImpact
+                              .additionalCostTotal !==
+                              null ? (
+                              <>
+                                <p className="mt-1 text-lg font-bold text-violet-950">
+                                  {thresholdImpact.cruiseImpact.additionalCostTotal.toFixed(
+                                    2
+                                  )}{" "}
+                                  €
+                                </p>
+
+                                <p className="mt-1 text-sm leading-6 text-amber-900">
+                                  Este coste adicional ya está incorporado en el ahorro efectivo utilizado por DrinkPilot para comparar este paquete.
+                                </p>
+                              </>
+                            ) : (
+                              <p className="mt-1 text-sm leading-6 text-amber-900">
+                                Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                              </p>
+                            )}
                           </div>
                         </div>
                       );
@@ -1073,15 +1097,20 @@ export default function ResultsPage() {
             {bestPackage ? (
               <>
                 <p className="mt-6 text-4xl font-bold text-sky-600 sm:mt-7 sm:text-5xl">
-                  {bestPackage.savings.toFixed(
-                    2
-                  )}{" "}
+                  {bestPackage.effectiveSavings !== null
+                    ? bestPackage.effectiveSavings.toFixed(
+                        2
+                      )
+                    : bestPackage.savings.toFixed(
+                        2
+                      )}{" "}
                   €
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
-                  de ahorro estimado
-                  durante el crucero
+                  {bestPackage.effectiveSavings !== null
+                    ? "de ahorro efectivo estimado durante el crucero"
+                    : "de ahorro teórico durante el crucero"}
                 </p>
 
                 <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
@@ -1271,6 +1300,25 @@ export default function ResultsPage() {
                     pkg.priceSource ===
                     "user";
 
+                  const thresholdImpact =
+                    comparison.thresholdCruiseImpacts.find(
+                      (item) =>
+                        item.packageKey ===
+                        pkg.packageKey
+                    )?.cruiseImpact;
+
+                  const thresholdAdditionalCost =
+                    thresholdImpact?.status ===
+                      "quantified" &&
+                    thresholdImpact.additionalCostTotal !==
+                      null
+                      ? thresholdImpact.additionalCostTotal
+                      : null;
+
+                  const displayedSavings =
+                    pkg.effectiveSavings ??
+                    pkg.savings;
+
                   return (
                     <div
                       key={
@@ -1450,10 +1498,7 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            {pkg.economicComparisonStatus ===
-                            "complete"
-                              ? "Diferencia"
-                              : "Diferencia teórica"}
+                            Ahorro bruto
                           </p>
 
                           <p
@@ -1480,22 +1525,60 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            {pkg.economicComparisonStatus ===
-                            "complete"
-                              ? "Ahorro estimado"
-                              : "Ahorro teórico"}
+                            Ahorro efectivo
                           </p>
 
-                          <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                            {pkg.savingsPercentage >
-                            0
-                              ? `${pkg.savingsPercentage.toFixed(
-                                  1
-                                )} %`
-                              : "0 %"}
-                          </p>
+                          {pkg.effectiveSavings !==
+                          null ? (
+                            <p
+                              className={`mt-1 text-lg font-bold sm:text-xl ${
+                                displayedSavings >
+                                0
+                                  ? "text-green-700"
+                                  : displayedSavings <
+                                    0
+                                  ? "text-red-700"
+                                  : "text-slate-700"
+                              }`}
+                            >
+                              {displayedSavings >
+                              0
+                                ? "+"
+                                : ""}
+                              {displayedSavings.toFixed(
+                                2
+                              )}{" "}
+                              €
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-lg font-bold text-amber-700 sm:text-xl">
+                              Pendiente
+                            </p>
+                          )}
                         </div>
                       </div>
+
+                      {thresholdAdditionalCost !==
+                        null &&
+                        thresholdAdditionalCost >
+                          0 && (
+                          <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
+                              Coste adicional por límite
+                            </p>
+
+                            <p className="mt-1 text-lg font-bold text-violet-950">
+                              {thresholdAdditionalCost.toFixed(
+                                2
+                              )}{" "}
+                              €
+                            </p>
+
+                            <p className="mt-1 text-xs leading-5 text-violet-800">
+                              Este importe ya está descontado del ahorro efectivo mostrado.
+                            </p>
+                          </div>
+                        )}
 
                       {/* CALIDAD ECONÓMICA */}
 
@@ -1799,9 +1882,31 @@ export default function ResultsPage() {
                             Coste adicional
                           </p>
 
-                          <p className="mt-1 text-sm leading-6 text-slate-700">
-                            Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
-                          </p>
+                          {thresholdImpact
+                            .cruiseImpact
+                            .status ===
+                            "quantified" &&
+                          thresholdImpact
+                            .cruiseImpact
+                            .additionalCostTotal !==
+                            null ? (
+                            <>
+                              <p className="mt-1 text-lg font-bold text-violet-950">
+                                {thresholdImpact.cruiseImpact.additionalCostTotal.toFixed(
+                                  2
+                                )}{" "}
+                                €
+                              </p>
+
+                              <p className="mt-1 text-sm leading-6 text-slate-700">
+                                Este coste adicional ya está incorporado en el ahorro efectivo utilizado por DrinkPilot para comparar este paquete.
+                              </p>
+                            </>
+                          ) : (
+                            <p className="mt-1 text-sm leading-6 text-slate-700">
+                              Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
