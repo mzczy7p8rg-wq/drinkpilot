@@ -80,3 +80,70 @@ describe(
     );
   }
 );
+
+describe(
+  "MSC specific drink price evidence resolution",
+  () => {
+    it(
+      "resuelve conjuntamente precio, referencia y evidencia",
+      async () => {
+        const {
+          resolveMscSpecificDrinkPriceSelection,
+        } = await import(
+          "@/lib/mscSpecificDrinkPriceService"
+        );
+
+        const result =
+          resolveMscSpecificDrinkPriceSelection(
+            "msc-aqua-1l-main-restaurant"
+          );
+
+        expect(
+          result?.selectedDrinkPrice
+        ).toEqual({
+          category: "water",
+          price: 2,
+          currency: "EUR",
+          source: "official",
+        });
+
+        expect(
+          result?.reference.id
+        ).toBe(
+          "msc-aqua-1l-main-restaurant"
+        );
+
+        expect(
+          result?.evidence.evidence
+        ).toBe("official");
+
+        expect(
+          result?.evidence.context
+            .currency
+        ).toBe("EUR");
+
+        expect(
+          result?.evidence.context
+            .verifiedAt
+        ).toBe("2026-08-07");
+      }
+    );
+
+    it(
+      "no fabrica evidencia para una referencia inexistente",
+      async () => {
+        const {
+          resolveMscSpecificDrinkPriceSelection,
+        } = await import(
+          "@/lib/mscSpecificDrinkPriceService"
+        );
+
+        expect(
+          resolveMscSpecificDrinkPriceSelection(
+            "missing-reference"
+          )
+        ).toBeNull();
+      }
+    );
+  }
+);
