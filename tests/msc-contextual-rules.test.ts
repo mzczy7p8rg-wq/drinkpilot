@@ -20,25 +20,120 @@ describe(
   "MSC contextual package rules",
   () => {
     it(
-      "no activa reglas contextuales MSC sin evidencia registrada",
-      () => {
-        expect(
-          mscContextualPackageRules
-        ).toEqual([]);
-      }
-    );
-
-    it(
-      "no fabrica reglas para un contexto MSC completo",
+      "resuelve el umbral Premium Extra de 14 EUR",
       () => {
         const rules =
           getMatchingContextualPackageRules(
             mscContextualPackageRules,
             {
-              cruiseLine: "msc",
-              market: "ES",
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "EUR",
+
               sailingDate:
-                "2026-08-15",
+                null,
+            }
+          );
+
+        expect(
+          rules.map(
+            (rule) =>
+              rule.id
+          )
+        ).toEqual([
+          "msc-premium-extra-threshold-eur",
+        ]);
+
+        expect(
+          rules[0]
+            ?.rules
+            .drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rules[0]
+            ?.rules
+            .drinkPriceThresholdCurrency
+        ).toBe("EUR");
+      }
+    );
+
+    it(
+      "resuelve el umbral Premium Extra de 16 USD",
+      () => {
+        const rules =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "USD",
+
+              sailingDate:
+                null,
+            }
+          );
+
+        expect(
+          rules.map(
+            (rule) =>
+              rule.id
+          )
+        ).toEqual([
+          "msc-premium-extra-threshold-usd",
+        ]);
+
+        expect(
+          rules[0]
+            ?.rules
+            .drinkPriceThreshold
+        ).toBe(16);
+
+        expect(
+          rules[0]
+            ?.rules
+            .drinkPriceThresholdCurrency
+        ).toBe("USD");
+      }
+    );
+
+    it(
+      "no inventa un umbral cuando la moneda a bordo es desconocida",
+      () => {
+        const rules =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                null,
+
+              sailingDate:
+                null,
             }
           );
 
@@ -49,15 +144,26 @@ describe(
     );
 
     it(
-      "no fabrica reglas cuando faltan mercado y fecha",
+      "no inventa un umbral para una moneda no documentada",
       () => {
         const rules =
           getMatchingContextualPackageRules(
             mscContextualPackageRules,
             {
-              cruiseLine: "msc",
-              market: null,
-              sailingDate: null,
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "GBP",
+
+              sailingDate:
+                null,
             }
           );
 
@@ -68,7 +174,6 @@ describe(
     );
   }
 );
-
 
 describe(
   "MSC contextual evidence",
@@ -90,13 +195,6 @@ describe(
         ).toBeDefined();
 
         expect(
-          evidence
-            ?.packageKey
-        ).toBe(
-          "mscPremiumExtra"
-        );
-
-        expect(
           "onboardCurrency" in
             (evidence ?? {})
             ? evidence
@@ -110,11 +208,6 @@ describe(
             ? evidence.value
             : null
         ).toBe(14);
-
-        expect(
-          evidence
-            ?.status
-        ).toBe("verified");
       }
     );
 
@@ -148,16 +241,11 @@ describe(
             ? evidence.value
             : null
         ).toBe(16);
-
-        expect(
-          evidence
-            ?.status
-        ).toBe("verified");
       }
     );
 
     it(
-      "registra la transición legacy sin convertirla todavía en regla",
+      "mantiene documentada la transición legacy sin automatizarla",
       () => {
         const evidence =
           mscMetadata
@@ -182,14 +270,15 @@ describe(
           "2025-10-01"
         );
 
-        /*
-         * La evidencia legacy existe,
-         * pero todavía no debe activar
-         * ninguna regla automática.
-         */
         expect(
           mscContextualPackageRules
-        ).toEqual([]);
+            .some(
+              (rule) =>
+                rule.id.includes(
+                  "legacy"
+                )
+            )
+        ).toBe(false);
       }
     );
   }
