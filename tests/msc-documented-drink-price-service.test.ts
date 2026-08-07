@@ -182,3 +182,129 @@ describe(
     );
   }
 );
+
+describe(
+  "MSC documented drink price selection",
+  () => {
+    it(
+      "convierte una referencia documentada en SelectedDrinkPrice sin elevarla a official",
+      async () => {
+        const {
+          createSelectedDrinkPriceFromMscDocumentedReference,
+        } = await import(
+          "@/lib/mscDocumentedDrinkPriceService"
+        );
+
+        expect(
+          createSelectedDrinkPriceFromMscDocumentedReference(
+            "msc-world-america-espresso-coffee-emporium-2025-07"
+          )
+        ).toEqual({
+          category:
+            "coffee",
+
+          price:
+            4,
+
+          currency:
+            "USD",
+
+          source:
+            "documented-menu",
+        });
+      }
+    );
+
+    it(
+      "resuelve precio referencia y evidencia conjuntamente",
+      async () => {
+        const {
+          resolveMscDocumentedDrinkPriceSelection,
+        } = await import(
+          "@/lib/mscDocumentedDrinkPriceService"
+        );
+
+        const result =
+          resolveMscDocumentedDrinkPriceSelection(
+            "msc-world-america-espresso-coffee-emporium-2025-07"
+          );
+
+        expect(
+          result?.selectedDrinkPrice
+        ).toEqual({
+          category:
+            "coffee",
+
+          price:
+            4,
+
+          currency:
+            "USD",
+
+          source:
+            "documented-menu",
+        });
+
+        expect(
+          result?.reference.menuName
+        ).toBe(
+          "Coffee Emporium"
+        );
+
+        expect(
+          result?.evidence.evidence
+        ).toBe(
+          "documented-menu"
+        );
+
+        expect(
+          result?.evidence.context.ship
+        ).toBe(
+          "MSC World America"
+        );
+
+        expect(
+          result?.evidence.context.market
+        ).toBe(
+          "North America"
+        );
+
+        expect(
+          result?.evidence.context.currency
+        ).toBe(
+          "USD"
+        );
+
+        expect(
+          result?.evidence.context.verifiedAt
+        ).toBe(
+          "2025-07"
+        );
+      }
+    );
+
+    it(
+      "no fabrica selección documentada para una referencia inexistente",
+      async () => {
+        const {
+          createSelectedDrinkPriceFromMscDocumentedReference,
+          resolveMscDocumentedDrinkPriceSelection,
+        } = await import(
+          "@/lib/mscDocumentedDrinkPriceService"
+        );
+
+        expect(
+          createSelectedDrinkPriceFromMscDocumentedReference(
+            "missing-reference"
+          )
+        ).toBeNull();
+
+        expect(
+          resolveMscDocumentedDrinkPriceSelection(
+            "missing-reference"
+          )
+        ).toBeNull();
+      }
+    );
+  }
+);

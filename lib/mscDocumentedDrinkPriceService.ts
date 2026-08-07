@@ -7,6 +7,15 @@ import type {
   OnboardPriceKey,
 } from "@/lib/onboardPriceService";
 
+import {
+  createSelectedDrinkPrice,
+  type SelectedDrinkPrice,
+} from "@/lib/selectedDrinkPrice";
+
+import type {
+  DrinkPriceEvidenceRecord,
+} from "@/lib/drinkPriceEvidence";
+
 export type MscDocumentedDrinkPriceQuery = {
   category?: OnboardPriceKey;
   ship?: string;
@@ -66,4 +75,91 @@ export function getMscDocumentedDrinkPriceById(
       (item) => item.id === id
     ) ?? null
   );
+}
+
+export function createSelectedDrinkPriceFromMscDocumentedReference(
+  id: string
+): SelectedDrinkPrice | null {
+  const reference =
+    getMscDocumentedDrinkPriceById(id);
+
+  if (!reference) {
+    return null;
+  }
+
+  return createSelectedDrinkPrice({
+    category:
+      reference.category,
+
+    price:
+      reference.price,
+
+    currency:
+      reference.currency,
+
+    source:
+      "documented-menu",
+  });
+}
+
+export type MscDocumentedDrinkPriceSelection = {
+  reference:
+    MscDocumentedDrinkPrice;
+
+  selectedDrinkPrice:
+    SelectedDrinkPrice;
+
+  evidence:
+    DrinkPriceEvidenceRecord;
+};
+
+export function resolveMscDocumentedDrinkPriceSelection(
+  id: string
+): MscDocumentedDrinkPriceSelection | null {
+  const reference =
+    getMscDocumentedDrinkPriceById(id);
+
+  if (!reference) {
+    return null;
+  }
+
+  const selectedDrinkPrice =
+    createSelectedDrinkPriceFromMscDocumentedReference(
+      id
+    );
+
+  if (!selectedDrinkPrice) {
+    return null;
+  }
+
+  return {
+    reference,
+
+    selectedDrinkPrice,
+
+    evidence: {
+      evidence:
+        reference.evidence,
+
+      context: {
+        ship:
+          reference.ship,
+
+        market:
+          reference.market,
+
+        itinerary:
+          reference.itinerary,
+
+        currency:
+          reference.currency,
+
+        sourceUrl:
+          reference.sourceUrl,
+
+        verifiedAt:
+          reference.observedAt,
+      },
+    },
+  };
 }
