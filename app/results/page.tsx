@@ -496,8 +496,27 @@ export default function ResultsPage() {
                         className="rounded-xl border border-amber-100 bg-white p-4"
                       >
                         <p className="text-sm leading-6 text-slate-700">
-                          {explanation.message}
+                      {
+                        explanation
+                          .operationalMessage
+                      }
+                    </p>
+
+                    {explanation
+                      .economicMessage && (
+                      <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                          💶 Impacto económico
                         </p>
+
+                        <p className="mt-1 text-sm leading-6 text-amber-900">
+                          {
+                            explanation
+                              .economicMessage
+                          }
+                        </p>
+                      </div>
+                    )}
                       </div>
                     )
                   )}
@@ -1536,8 +1555,27 @@ export default function ResultsPage() {
                       className="rounded-xl border border-amber-100 bg-white p-4"
                     >
                       <p className="text-sm leading-6 text-slate-700">
-                        {explanation.message}
-                      </p>
+                      {
+                        explanation
+                          .operationalMessage
+                      }
+                    </p>
+
+                    {explanation
+                      .economicMessage && (
+                      <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                          💶 Impacto económico
+                        </p>
+
+                        <p className="mt-1 text-sm leading-6 text-amber-900">
+                          {
+                            explanation
+                              .economicMessage
+                          }
+                        </p>
+                      </div>
+                    )}
                     </div>
                   )
                 )}
