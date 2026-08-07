@@ -483,3 +483,242 @@ describe(
     );
   }
 );
+
+describe(
+  "threshold coverage in recommendation explanation",
+  () => {
+    it(
+      "explica explícitamente cuando las bebidas afectadas quedan fuera de cobertura",
+      () => {
+        const bestPackage = {
+          packageKey:
+            "test-package",
+
+          packageName:
+            "Test Package",
+
+          packagePricePerDay:
+            40,
+
+          packageCost:
+            280,
+
+          drinksCost:
+            350,
+
+          savings:
+            70,
+
+          effectiveSavings:
+            null,
+
+          savingsPercentage:
+            20,
+
+          dailyMargin:
+            10,
+
+          breakEvenDrinksPerDay:
+            5,
+
+          coverageScore:
+            100,
+
+          fullyCovered:
+            true,
+
+          coveredCategories:
+            [],
+
+          uncoveredCategories:
+            [],
+
+          priceSource:
+            "reference",
+
+          referencePricePerDay:
+            40,
+
+          economicComparisonStatus:
+            "complete",
+        };
+
+        const comparison = {
+          packages: [
+            bestPackage,
+          ],
+
+          bestPackage,
+
+          thresholdCruiseImpacts: [
+            {
+              packageKey:
+                "test-package",
+
+              packageName:
+                "Test Package",
+
+              cruiseImpact: {
+                status:
+                  "known-unquantified",
+
+                drinksAboveThreshold:
+                  8,
+
+                drinksExcludedFromCoverage:
+                  8,
+
+                additionalCostTotal:
+                  null,
+              },
+            },
+          ],
+        } as any;
+
+        const explanation =
+          buildRecommendationExplanation(
+            comparison
+          );
+
+        expect(
+          explanation.tone
+        ).toBe(
+          "warning"
+        );
+
+        expect(
+          explanation.reason
+        ).toContain(
+          "8 consumiciones"
+        );
+
+        expect(
+          explanation.reason
+            .toLowerCase()
+        ).toContain(
+          "fuera de cobertura"
+        );
+
+        expect(
+          explanation.secondaryReason
+        ).toContain(
+          "no puede cuantificarse"
+        );
+      }
+    );
+
+    it(
+      "no afirma que estén fuera de cobertura si esa cobertura es desconocida",
+      () => {
+        const bestPackage = {
+          packageKey:
+            "test-package",
+
+          packageName:
+            "Test Package",
+
+          packagePricePerDay:
+            40,
+
+          packageCost:
+            280,
+
+          drinksCost:
+            350,
+
+          savings:
+            70,
+
+          effectiveSavings:
+            null,
+
+          savingsPercentage:
+            20,
+
+          dailyMargin:
+            10,
+
+          breakEvenDrinksPerDay:
+            5,
+
+          coverageScore:
+            100,
+
+          fullyCovered:
+            true,
+
+          coveredCategories:
+            [],
+
+          uncoveredCategories:
+            [],
+
+          priceSource:
+            "reference",
+
+          referencePricePerDay:
+            40,
+
+          economicComparisonStatus:
+            "complete",
+        };
+
+        const comparison = {
+          packages: [
+            bestPackage,
+          ],
+
+          bestPackage,
+
+          thresholdCruiseImpacts: [
+            {
+              packageKey:
+                "test-package",
+
+              packageName:
+                "Test Package",
+
+              cruiseImpact: {
+                status:
+                  "known-unquantified",
+
+                drinksAboveThreshold:
+                  8,
+
+                drinksExcludedFromCoverage:
+                  null,
+
+                additionalCostTotal:
+                  null,
+              },
+            },
+          ],
+        } as any;
+
+        const explanation =
+          buildRecommendationExplanation(
+            comparison
+          );
+
+        expect(
+          explanation.reason
+        ).toContain(
+          "8 consumiciones"
+        );
+
+        expect(
+          explanation.reason
+            .toLowerCase()
+        ).not.toContain(
+          "fuera de cobertura"
+        );
+
+        expect(
+          explanation.reason
+        ).toContain(
+          "superan"
+        );
+      }
+    );
+  }
+);

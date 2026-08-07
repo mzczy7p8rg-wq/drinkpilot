@@ -117,7 +117,7 @@ function findBestCoveragePackage(
   })[0];
 }
 
-function getUnquantifiedThresholdDrinks(
+function getUnquantifiedThresholdImpact(
   comparison: ComparisonResult,
   packageKey: string
 ) {
@@ -132,16 +132,14 @@ function getUnquantifiedThresholdDrinks(
         item.cruiseImpact.drinksAboveThreshold > 0
     );
 
-  return (
-    thresholdImpact?.cruiseImpact
-      .drinksAboveThreshold ?? 0
-  );
+  return thresholdImpact?.cruiseImpact ?? null;
 }
 
 function buildThresholdUncertaintyExplanation(
   packageName: string,
   savings: number,
-  affectedDrinks: number
+  affectedDrinks: number,
+  excludedDrinks: number | null
 ): RecommendationExplanation {
   return {
     title:
@@ -153,11 +151,18 @@ function buildThresholdUncertaintyExplanation(
       )} € durante el crucero.`,
 
     reason:
-      `${affectedDrinks} ${
-        affectedDrinks === 1
-          ? "consumición prevista supera"
-          : "consumiciones previstas superan"
-      } el límite de precio conocido del paquete.`,
+      excludedDrinks !== null &&
+      excludedDrinks > 0
+        ? `${excludedDrinks} ${
+            excludedDrinks === 1
+              ? "consumición prevista queda"
+              : "consumiciones previstas quedan"
+          } fuera de cobertura por superar el límite de precio conocido del paquete.`
+        : `${affectedDrinks} ${
+            affectedDrinks === 1
+              ? "consumición prevista supera"
+              : "consumiciones previstas superan"
+          } el límite de precio conocido del paquete.`,
 
     secondaryReason:
       "El coste adicional de esas consumiciones todavía no puede cuantificarse de forma fiable, por lo que el ahorro mostrado no debe interpretarse como definitivo.",
@@ -182,17 +187,25 @@ export function buildRecommendationExplanation(
    * - genera ahorro positivo
    */
   if (bestPackage) {
-    const affectedThresholdDrinks =
-      getUnquantifiedThresholdDrinks(
+    const thresholdImpact =
+      getUnquantifiedThresholdImpact(
         comparison,
         bestPackage.packageKey
       );
+
+    const affectedThresholdDrinks =
+      thresholdImpact?.drinksAboveThreshold ?? 0;
+
+    const excludedThresholdDrinks =
+      thresholdImpact?.drinksExcludedFromCoverage ??
+      null;
 
     if (affectedThresholdDrinks > 0) {
       return buildThresholdUncertaintyExplanation(
         bestPackage.packageName,
         bestPackage.savings,
-        affectedThresholdDrinks
+        affectedThresholdDrinks,
+        excludedThresholdDrinks
       );
     }
 
