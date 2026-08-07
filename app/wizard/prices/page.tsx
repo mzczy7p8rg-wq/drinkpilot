@@ -30,6 +30,10 @@ import {
 } from "@/lib/selectedDrinkPrice";
 
 import {
+  resolveDrinkPriceSelectionSource,
+} from "@/lib/drinkPriceSelectionSource";
+
+import {
   getMscSpecificDrinkPrices,
 } from "@/lib/mscSpecificDrinkPriceService";
 
@@ -497,11 +501,11 @@ export default function PricesPage() {
                   selectedDrinkCurrency,
 
                 source:
-                  selectedDrinkReferenceIds[
-                    category
-                  ]
-                    ? "official"
-                    : "user",
+                  resolveDrinkPriceSelectionSource(
+                    selectedDrinkReferenceIds[
+                      category
+                    ]
+                  ),
               });
 
             return selectedPrice
