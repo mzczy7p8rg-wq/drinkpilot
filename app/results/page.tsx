@@ -287,6 +287,9 @@ export default function ResultsPage() {
 
       customPackagePrices:
         data.customPackagePrices,
+
+      selectedDrinkPrices:
+        data.selectedDrinkPrices,
     });
 
   /*

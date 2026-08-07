@@ -20,6 +20,25 @@ import {
   useStore,
 } from "@/lib/store";
 
+import {
+  onboardPriceKeys,
+  type OnboardPriceKey,
+} from "@/lib/onboardPriceService";
+
+import {
+  createSelectedDrinkPrice,
+} from "@/lib/selectedDrinkPrice";
+
+const drinkCategoryLabels:
+  Record<OnboardPriceKey, string> = {
+    coffee: "Café",
+    water: "Agua",
+    soda: "Refresco",
+    beer: "Cerveza",
+    wine: "Vino",
+    cocktail: "Cóctel",
+  };
+
 type PriceValidation = {
   valid: boolean;
   value: number | null;
@@ -199,6 +218,24 @@ export default function PricesPage() {
     );
 
   /*
+   * Los precios concretos de bebidas
+   * deben expresarse en la moneda real
+   * utilizada a bordo.
+   *
+   * Si todavía no la conocemos, no
+   * inventamos una a partir del mercado.
+   */
+  const selectedDrinkCurrency =
+    data.onboardCurrency ?? null;
+
+  const selectedDrinkCurrencySymbol =
+    selectedDrinkCurrency
+      ? getCurrencySymbol(
+          selectedDrinkCurrency
+        )
+      : null;
+
+  /*
    * Estado visual de inputs.
    *
    * packageKey -> texto introducido
@@ -237,6 +274,58 @@ export default function PricesPage() {
   });
 
   /*
+   * Estado visual de precios concretos
+   * de bebidas.
+   */
+  const [
+    drinkPriceInputs,
+    setDrinkPriceInputs,
+  ] = useState<
+    Record<OnboardPriceKey, string>
+  >(() => {
+    return Object.fromEntries(
+      onboardPriceKeys.map(
+        (category) => {
+          const storedPrice =
+            data.selectedDrinkPrices[
+              category
+            ];
+
+          return [
+            category,
+            storedPrice
+              ? String(
+                  storedPrice.price
+                )
+              : "",
+          ];
+        }
+      )
+    ) as Record<
+      OnboardPriceKey,
+      string
+    >;
+  });
+
+  const drinkPriceValidations =
+    Object.fromEntries(
+      onboardPriceKeys.map(
+        (category) => [
+          category,
+          validateOptionalPrice(
+            drinkPriceInputs[
+              category
+            ] ?? "",
+            100
+          ),
+        ]
+      )
+    ) as Record<
+      OnboardPriceKey,
+      PriceValidation
+    >;
+
+  /*
    * Validación dinámica por paquete.
    */
   const validations =
@@ -261,13 +350,25 @@ export default function PricesPage() {
       PriceValidation
     >;
 
-  const canContinue =
+  const packagePricesValid =
     Object.values(
       validations
     ).every(
       (validation) =>
         validation.valid
     );
+
+  const drinkPricesValid =
+    Object.values(
+      drinkPriceValidations
+    ).every(
+      (validation) =>
+        validation.valid
+    );
+
+  const canContinue =
+    packagePricesValid &&
+    drinkPricesValid;
 
   function updatePriceInput(
     packageKey: string,
@@ -278,6 +379,20 @@ export default function PricesPage() {
         ...previous,
 
         [packageKey]:
+          value,
+      })
+    );
+  }
+
+  function updateDrinkPriceInput(
+    category: OnboardPriceKey,
+    value: string
+  ) {
+    setDrinkPriceInputs(
+      (previous) => ({
+        ...previous,
+
+        [category]:
           value,
       })
     );
@@ -302,6 +417,46 @@ export default function PricesPage() {
         )
       );
 
+    const nextSelectedDrinkPrices =
+      Object.fromEntries(
+        onboardPriceKeys.flatMap(
+          (category) => {
+            const validation =
+              drinkPriceValidations[
+                category
+              ];
+
+            if (
+              validation.value === null ||
+              selectedDrinkCurrency ===
+                null
+            ) {
+              return [];
+            }
+
+            const selectedPrice =
+              createSelectedDrinkPrice({
+                category,
+
+                price:
+                  validation.value,
+
+                currency:
+                  selectedDrinkCurrency,
+              });
+
+            return selectedPrice
+              ? [
+                  [
+                    category,
+                    selectedPrice,
+                  ],
+                ]
+              : [];
+          }
+        )
+      );
+
     setData(
       (previous) => ({
         ...previous,
@@ -312,6 +467,9 @@ export default function PricesPage() {
 
           ...nextPrices,
         },
+
+        selectedDrinkPrices:
+          nextSelectedDrinkPrices,
       })
     );
   }
@@ -624,6 +782,139 @@ export default function PricesPage() {
           valores de referencia
           disponibles.
         </div>
+
+
+        {/* PRECIOS DE BEBIDAS SELECCIONADAS */}
+
+        <section className="mt-8 border-t border-slate-200 pt-8">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+              Precisión adicional
+            </p>
+
+            <h2 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">
+              ¿Conoces el precio de alguna bebida a bordo?
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+              Es opcional. Si introduces el
+              precio real de una bebida,
+              DrinkPilot podrá comprobar si
+              supera el límite de precio
+              incluido por determinados
+              paquetes.
+            </p>
+          </div>
+
+          {selectedDrinkCurrency === null ? (
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              Para utilizar precios concretos
+              de bebidas necesitamos conocer
+              primero la moneda utilizada a
+              bordo. No asumiremos una moneda
+              automáticamente.
+            </div>
+          ) : (
+            <>
+              <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+                Introduce los precios en{" "}
+                <strong>
+                  {selectedDrinkCurrency}
+                </strong>
+                . Solo necesitamos las
+                categorías que realmente
+                conozcas.
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                {onboardPriceKeys.map(
+                  (category) => {
+                    const validation =
+                      drinkPriceValidations[
+                        category
+                      ];
+
+                    const inputValue =
+                      drinkPriceInputs[
+                        category
+                      ] ?? "";
+
+                    const inputId =
+                      `drink-price-${category}`;
+
+                    return (
+                      <div
+                        key={category}
+                        className="rounded-2xl border border-slate-200 p-4"
+                      >
+                        <label
+                          htmlFor={inputId}
+                          className="block text-sm font-semibold text-slate-900"
+                        >
+                          {
+                            drinkCategoryLabels[
+                              category
+                            ]
+                          }
+                        </label>
+
+                        <div className="relative mt-3">
+                          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-medium text-slate-500">
+                            {
+                              selectedDrinkCurrencySymbol
+                            }
+                          </span>
+
+                          <input
+                            id={inputId}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            inputMode="decimal"
+                            value={inputValue}
+                            onChange={(event) =>
+                              updateDrinkPriceInput(
+                                category,
+                                event.target.value
+                              )
+                            }
+                            placeholder="Opcional"
+                            className={`w-full rounded-xl border bg-white py-3 pl-10 pr-3 text-slate-900 outline-none transition ${
+                              validation.valid
+                                ? "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                : "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                            }`}
+                          />
+                        </div>
+
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          Precio de una
+                          consumición individual.
+                        </p>
+
+                        {validation.error ? (
+                          <p className="mt-2 text-sm font-medium text-red-600">
+                            {
+                              validation.error
+                            }
+                          </p>
+                        ) : null}
+
+                        {validation.warning ? (
+                          <p className="mt-2 text-sm leading-5 text-amber-700">
+                            {
+                              validation.warning
+                            }
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </>
+          )}
+        </section>
 
         {/* NAVEGACIÓN */}
 
