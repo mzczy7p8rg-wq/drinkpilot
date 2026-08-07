@@ -16,6 +16,15 @@ import type {
   DrinkPriceEvidenceRecord,
 } from "@/lib/drinkPriceEvidence";
 
+import type {
+  CruiseContext,
+} from "@/lib/cruiseContext";
+
+import {
+  evaluateDrinkPriceContextRelevance,
+  type DrinkPriceContextRelevanceResult,
+} from "@/lib/drinkPriceContextRelevance";
+
 export type MscDocumentedDrinkPriceQuery = {
   category?: OnboardPriceKey;
   ship?: string;
@@ -161,5 +170,35 @@ export function resolveMscDocumentedDrinkPriceSelection(
           reference.observedAt,
       },
     },
+  };
+}
+
+export type MscContextualDocumentedDrinkPriceSelection =
+  MscDocumentedDrinkPriceSelection & {
+    contextRelevance:
+      DrinkPriceContextRelevanceResult;
+  };
+
+export function resolveMscDocumentedDrinkPriceSelectionForContext(
+  id: string,
+  cruiseContext: CruiseContext
+): MscContextualDocumentedDrinkPriceSelection | null {
+  const selection =
+    resolveMscDocumentedDrinkPriceSelection(
+      id
+    );
+
+  if (!selection) {
+    return null;
+  }
+
+  return {
+    ...selection,
+
+    contextRelevance:
+      evaluateDrinkPriceContextRelevance(
+        cruiseContext,
+        selection.evidence.context
+      ),
   };
 }

@@ -308,3 +308,116 @@ describe(
     );
   }
 );
+
+describe(
+  "MSC documented drink price contextual selection",
+  () => {
+    it(
+      "marca como compatible una referencia cuando el contexto conocido no contradice la evidencia",
+      async () => {
+        const {
+          resolveMscDocumentedDrinkPriceSelectionForContext,
+        } = await import(
+          "@/lib/mscDocumentedDrinkPriceService"
+        );
+
+        const result =
+          resolveMscDocumentedDrinkPriceSelectionForContext(
+            "msc-world-america-espresso-coffee-emporium-2025-07",
+            {
+              cruiseLine: "msc",
+              market: null,
+              sailingRegion: null,
+              onboardCurrency:
+                "USD",
+              sailingDate: null,
+            }
+          );
+
+        expect(
+          result?.contextRelevance.relevance
+        ).toBe(
+          "compatible"
+        );
+
+        expect(
+          result?.contextRelevance.mismatches
+        ).toEqual([]);
+
+        expect(
+          result?.contextRelevance.unknowns
+        ).toEqual([
+          "market",
+          "ship",
+        ]);
+      }
+    );
+
+    it(
+      "detecta una contradicción contextual conocida",
+      async () => {
+        const {
+          resolveMscDocumentedDrinkPriceSelectionForContext,
+        } = await import(
+          "@/lib/mscDocumentedDrinkPriceService"
+        );
+
+        const result =
+          resolveMscDocumentedDrinkPriceSelectionForContext(
+            "msc-world-america-espresso-coffee-emporium-2025-07",
+            {
+              cruiseLine: "msc",
+              market: "Europe",
+              sailingRegion: null,
+              onboardCurrency:
+                "USD",
+              sailingDate: null,
+            }
+          );
+
+        expect(
+          result?.contextRelevance.relevance
+        ).toBe(
+          "mismatch"
+        );
+
+        expect(
+          result?.contextRelevance.mismatches
+        ).toContain(
+          "market"
+        );
+
+        expect(
+          result?.contextRelevance.unknowns
+        ).toContain(
+          "ship"
+        );
+      }
+    );
+
+    it(
+      "no fabrica una selección contextual para un id inexistente",
+      async () => {
+        const {
+          resolveMscDocumentedDrinkPriceSelectionForContext,
+        } = await import(
+          "@/lib/mscDocumentedDrinkPriceService"
+        );
+
+        expect(
+          resolveMscDocumentedDrinkPriceSelectionForContext(
+            "missing-reference",
+            {
+              cruiseLine: "msc",
+              market: null,
+              sailingRegion: null,
+              onboardCurrency:
+                "USD",
+              sailingDate: null,
+            }
+          )
+        ).toBeNull();
+      }
+    );
+  }
+);
