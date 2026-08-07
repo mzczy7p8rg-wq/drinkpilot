@@ -81,6 +81,9 @@ describe(
 
           currency:
             "EUR",
+
+          source:
+            "user",
         });
 
         expect(

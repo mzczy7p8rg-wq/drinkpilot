@@ -14,6 +14,7 @@ export type StoredSelectedDrinkPrices =
       {
         price?: unknown;
         currency?: unknown;
+        source?: unknown;
       }
     >
   >;
@@ -82,6 +83,11 @@ export function resolveStoredSelectedDrinkPrices(
           "string"
             ? candidate.currency
             : null,
+
+        source:
+          candidate.source === "official"
+            ? "official"
+            : "user",
       });
 
     if (price !== null) {

@@ -34,6 +34,9 @@ describe(
 
           currency:
             "EUR",
+
+          source:
+            "user",
         });
       }
     );
@@ -61,6 +64,9 @@ describe(
 
           currency:
             "USD",
+
+          source:
+            "user",
         });
       }
     );
@@ -152,6 +158,48 @@ describe(
               null,
           })
         ).toBeNull();
+      }
+    );
+  }
+);
+
+describe(
+  "selected drink price source",
+  () => {
+    it(
+      "marca como user un precio sin origen explícito",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category: "cocktail",
+            price: 15,
+            currency: "EUR",
+          })
+        ).toEqual({
+          category: "cocktail",
+          price: 15,
+          currency: "EUR",
+          source: "user",
+        });
+      }
+    );
+
+    it(
+      "conserva un origen oficial explícito",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category: "water",
+            price: 3,
+            currency: "EUR",
+            source: "official",
+          })
+        ).toEqual({
+          category: "water",
+          price: 3,
+          currency: "EUR",
+          source: "official",
+        });
       }
     );
   }

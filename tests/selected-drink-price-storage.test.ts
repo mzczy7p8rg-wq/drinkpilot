@@ -44,6 +44,7 @@ describe(
               "cocktail",
             price: 18,
             currency: "EUR",
+            source: "user",
           },
         });
       }
@@ -65,6 +66,7 @@ describe(
             category: "wine",
             price: 16,
             currency: "USD",
+            source: "user",
           },
         });
       }
@@ -135,6 +137,7 @@ describe(
               "cocktail",
             price: 18,
             currency: "EUR",
+            source: "user",
           },
         });
       }
@@ -161,6 +164,54 @@ describe(
               "not-an-object",
           })
         ).toEqual({});
+      }
+    );
+  }
+);
+
+describe(
+  "selected drink price source storage",
+  () => {
+    it(
+      "conserva un origen oficial almacenado",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            water: {
+              price: 3,
+              currency: "EUR",
+              source: "official",
+            },
+          })
+        ).toEqual({
+          water: {
+            category: "water",
+            price: 3,
+            currency: "EUR",
+            source: "official",
+          },
+        });
+      }
+    );
+
+    it(
+      "mantiene compatibilidad con datos antiguos sin source",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            beer: {
+              price: 8,
+              currency: "EUR",
+            },
+          })
+        ).toEqual({
+          beer: {
+            category: "beer",
+            price: 8,
+            currency: "EUR",
+            source: "user",
+          },
+        });
       }
     );
   }

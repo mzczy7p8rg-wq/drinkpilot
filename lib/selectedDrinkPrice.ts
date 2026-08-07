@@ -2,6 +2,10 @@ import type {
   OnboardPriceKey,
 } from "@/lib/onboardPriceService";
 
+export type SelectedDrinkPriceSource =
+  | "user"
+  | "official";
+
 export type SelectedDrinkPrice = {
   category:
     OnboardPriceKey;
@@ -11,6 +15,9 @@ export type SelectedDrinkPrice = {
 
   currency:
     string;
+
+  source:
+    SelectedDrinkPriceSource;
 };
 
 export type SelectedDrinkPriceInput = {
@@ -22,6 +29,9 @@ export type SelectedDrinkPriceInput = {
 
   currency:
     string | null | undefined;
+
+  source?:
+    SelectedDrinkPriceSource;
 };
 
 function normalizeCurrency(
@@ -85,5 +95,8 @@ export function createSelectedDrinkPrice(
     price,
 
     currency,
+
+    source:
+      input.source ?? "user",
   };
 }
