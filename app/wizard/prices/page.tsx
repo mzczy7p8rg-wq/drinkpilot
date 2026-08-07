@@ -322,6 +322,18 @@ export default function PricesPage() {
     Partial<Record<OnboardPriceKey, string>>
   >({});
 
+  const [
+    selectedDrinkReferenceSources,
+    setSelectedDrinkReferenceSources,
+  ] = useState<
+    Partial<
+      Record<
+        OnboardPriceKey,
+        "official" | "documented-menu"
+      >
+    >
+  >({});
+
   const drinkPriceValidations =
     Object.fromEntries(
       onboardPriceKeys.map(
@@ -423,6 +435,18 @@ export default function PricesPage() {
         return next;
       }
     );
+
+    setSelectedDrinkReferenceSources(
+      (previous) => {
+        const next = {
+          ...previous,
+        };
+
+        delete next[category];
+
+        return next;
+      }
+    );
   }
 
   function selectOfficialDrinkReference(
@@ -445,6 +469,15 @@ export default function PricesPage() {
 
         [category]:
           referenceId,
+      })
+    );
+
+    setSelectedDrinkReferenceSources(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          "official",
       })
     );
   }
@@ -504,7 +537,10 @@ export default function PricesPage() {
                   resolveDrinkPriceSelectionSource(
                     selectedDrinkReferenceIds[
                       category
-                    ]
+                    ],
+                    selectedDrinkReferenceSources[
+                      category
+                    ] ?? "official"
                   ),
               });
 
