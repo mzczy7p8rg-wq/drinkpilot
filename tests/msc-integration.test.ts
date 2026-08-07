@@ -216,6 +216,170 @@ describe(
     );
 
     it(
+      "aplica el umbral real de Premium Extra para moneda EUR",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "msc",
+
+            market: "ES",
+
+            onboardCurrency: "EUR",
+
+            sailingDate:
+              "2026-08-15",
+
+            days: 7,
+            people: 1,
+
+            coffee: 2,
+            water: 2,
+            soda: 2,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+          });
+
+        const premiumRule =
+          result.operationalRules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        expect(
+          premiumRule
+            ?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          premiumRule
+            ?.drinkPriceThresholdCurrency
+        ).toBe("EUR");
+
+        expect(
+          premiumRule
+            ?.drinkPriceThresholdSource
+            .source
+        ).toBe("contextual");
+
+        expect(
+          premiumRule
+            ?.appliedContextualRuleIds
+        ).toContain(
+          "msc-premium-extra-threshold-eur"
+        );
+      }
+    );
+
+    it(
+      "aplica el umbral real de Premium Extra para moneda USD",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "msc",
+
+            market: "US",
+
+            onboardCurrency: "USD",
+
+            sailingDate:
+              "2026-08-15",
+
+            days: 7,
+            people: 1,
+
+            coffee: 2,
+            water: 2,
+            soda: 2,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+          });
+
+        const premiumRule =
+          result.operationalRules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        expect(
+          premiumRule
+            ?.drinkPriceThreshold
+        ).toBe(16);
+
+        expect(
+          premiumRule
+            ?.drinkPriceThresholdCurrency
+        ).toBe("USD");
+
+        expect(
+          premiumRule
+            ?.drinkPriceThresholdSource
+            .source
+        ).toBe("contextual");
+
+        expect(
+          premiumRule
+            ?.appliedContextualRuleIds
+        ).toContain(
+          "msc-premium-extra-threshold-usd"
+        );
+      }
+    );
+
+    it(
+      "no aplica un umbral de Premium Extra cuando la moneda a bordo es desconocida",
+      () => {
+        const result =
+          compareDrinkPackages({
+            cruiseLine: "msc",
+
+            market: "ES",
+
+            onboardCurrency: null,
+
+            sailingDate:
+              "2026-08-15",
+
+            days: 7,
+            people: 1,
+
+            coffee: 2,
+            water: 2,
+            soda: 2,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+          });
+
+        const premiumRule =
+          result.operationalRules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        expect(
+          premiumRule
+            ?.drinkPriceThreshold
+        ).toBeNull();
+
+        expect(
+          premiumRule
+            ?.drinkPriceThresholdCurrency
+        ).toBeNull();
+
+        expect(
+          premiumRule
+            ?.drinkPriceThresholdSource
+            .source
+        ).toBe("none");
+      }
+    );
+
+    it(
       "no inventa contexto cuando market y sailingDate son desconocidos",
       () => {
         const result =
