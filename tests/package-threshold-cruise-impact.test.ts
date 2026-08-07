@@ -28,6 +28,9 @@ function createDailyImpact(
     drinksAboveThresholdPerDay:
       2,
 
+    drinksExcludedFromCoveragePerDay:
+      1,
+
     additionalCostPerDay:
       null,
 
@@ -301,6 +304,93 @@ describe(
     );
   }
 );
+
+describe(
+  "package threshold cruise coverage",
+  () => {
+    it(
+      "proyecta las bebidas excluidas a todo el crucero",
+      () => {
+        const result =
+          evaluatePackageThresholdCruiseImpact({
+            dailyImpact:
+              createDailyImpact({
+                drinksExcludedFromCoveragePerDay:
+                  2,
+              }),
+
+            days:
+              7,
+
+            people:
+              2,
+          });
+
+        expect(
+          result.drinksExcludedFromCoverage
+        ).toBe(28);
+      }
+    );
+
+    it(
+      "mantiene desconocidas las exclusiones si el dato diario es desconocido",
+      () => {
+        const result =
+          evaluatePackageThresholdCruiseImpact({
+            dailyImpact:
+              createDailyImpact({
+                drinksExcludedFromCoveragePerDay:
+                  null,
+              }),
+
+            days:
+              7,
+
+            people:
+              2,
+          });
+
+        expect(
+          result.drinksExcludedFromCoverage
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "mantiene cero exclusiones cuando ninguna bebida supera el threshold",
+      () => {
+        const result =
+          evaluatePackageThresholdCruiseImpact({
+            dailyImpact:
+              createDailyImpact({
+                status:
+                  "none",
+
+                drinksAboveThresholdPerDay:
+                  0,
+
+                drinksExcludedFromCoveragePerDay:
+                  0,
+
+                additionalCostPerDay:
+                  0,
+              }),
+
+            days:
+              7,
+
+            people:
+              2,
+          });
+
+        expect(
+          result.drinksExcludedFromCoverage
+        ).toBe(0);
+      }
+    );
+  }
+);
+
 
 describe(
   "quantified package threshold cruise impact",

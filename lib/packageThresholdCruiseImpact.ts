@@ -24,6 +24,9 @@ export type PackageThresholdCruiseImpact = {
   drinksAboveThreshold:
     number | null;
 
+  drinksExcludedFromCoverage:
+    number | null;
+
   additionalCostTotal:
     number | null;
 };
@@ -75,6 +78,9 @@ export function evaluatePackageThresholdCruiseImpact(
       drinksAboveThreshold:
         null,
 
+      drinksExcludedFromCoverage:
+        null,
+
       additionalCostTotal:
         null,
     };
@@ -101,6 +107,9 @@ export function evaluatePackageThresholdCruiseImpact(
       drinksAboveThreshold:
         null,
 
+      drinksExcludedFromCoverage:
+        null,
+
       additionalCostTotal:
         null,
     };
@@ -117,6 +126,16 @@ export function evaluatePackageThresholdCruiseImpact(
     days *
     people;
 
+  const drinksExcludedFromCoverage =
+    dailyImpact
+      .drinksExcludedFromCoveragePerDay ===
+    null
+      ? null
+      : dailyImpact
+          .drinksExcludedFromCoveragePerDay *
+        days *
+        people;
+
   if (
     dailyImpact.status === "none" ||
     drinksAboveThreshold === 0
@@ -130,6 +149,9 @@ export function evaluatePackageThresholdCruiseImpact(
       totalDrinks,
 
       drinksAboveThreshold:
+        0,
+
+      drinksExcludedFromCoverage:
         0,
 
       additionalCostTotal:
@@ -154,6 +176,8 @@ export function evaluatePackageThresholdCruiseImpact(
 
       drinksAboveThreshold,
 
+      drinksExcludedFromCoverage,
+
       additionalCostTotal:
         null,
     };
@@ -168,6 +192,8 @@ export function evaluatePackageThresholdCruiseImpact(
     totalDrinks,
 
     drinksAboveThreshold,
+
+    drinksExcludedFromCoverage,
 
     additionalCostTotal:
       dailyImpact.additionalCostPerDay *
