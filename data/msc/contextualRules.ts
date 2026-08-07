@@ -47,6 +47,9 @@ export const mscContextualPackageRules:
 
         drinkPriceThresholdCurrency:
           "EUR",
+
+        drinkPriceThresholdCoveragePolicy:
+          "excluded-above-threshold",
       },
     },
 
@@ -70,6 +73,9 @@ export const mscContextualPackageRules:
 
         drinkPriceThresholdCurrency:
           "USD",
+
+        drinkPriceThresholdCoveragePolicy:
+          "excluded-above-threshold",
       },
     },
   ];

@@ -20,6 +20,7 @@ import {
   getContextualPackageRulesForPackage,
   type ContextualPackageRule,
   type DrinkPriceThresholdChargePolicy,
+  type DrinkPriceThresholdCoveragePolicy,
 } from "@/lib/contextualPackageRules";
 
 export type PackageRulesContext =
@@ -105,6 +106,21 @@ export type PackageOperationalRules = {
     DrinkPriceThresholdChargePolicy;
 
   drinkPriceThresholdChargePolicySource:
+    OperationalRuleSource;
+
+  /*
+   * Política de cobertura asociada al
+   * threshold.
+   *
+   * Se mantiene separada de la política
+   * económica: conocer que una bebida
+   * queda fuera de cobertura no implica
+   * conocer cuánto se cobra por ella.
+   */
+  drinkPriceThresholdCoveragePolicy:
+    DrinkPriceThresholdCoveragePolicy;
+
+  drinkPriceThresholdCoveragePolicySource:
     OperationalRuleSource;
 
   /*
@@ -238,6 +254,23 @@ function applyContextualRules(
         : result
             .drinkPriceThresholdChargePolicySource;
 
+    const drinkPriceThresholdCoveragePolicySource =
+      values
+        .drinkPriceThresholdCoveragePolicy !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .drinkPriceThresholdCoveragePolicySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .drinkPriceThresholdCoveragePolicySource;
+
     const aquaUnlimitedSource =
       values.aquaUnlimited !==
       undefined
@@ -324,6 +357,15 @@ function applyContextualRules(
           : result
               .drinkPriceThresholdChargePolicy,
 
+      drinkPriceThresholdCoveragePolicy:
+        values
+          .drinkPriceThresholdCoveragePolicy !==
+        undefined
+          ? values
+              .drinkPriceThresholdCoveragePolicy
+          : result
+              .drinkPriceThresholdCoveragePolicy,
+
       aquaUnlimited:
         values.aquaUnlimited !==
         undefined
@@ -341,6 +383,8 @@ function applyContextualRules(
       drinkPriceThresholdSource,
 
       drinkPriceThresholdChargePolicySource,
+
+      drinkPriceThresholdCoveragePolicySource,
 
       aquaUnlimitedSource,
 
@@ -462,6 +506,14 @@ function resolvePackageRules(
         "unknown",
 
       drinkPriceThresholdChargePolicySource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
+
+      drinkPriceThresholdCoveragePolicy:
+        "unknown",
+
+      drinkPriceThresholdCoveragePolicySource: {
         source: "none",
         contextualRuleIds: [],
       },

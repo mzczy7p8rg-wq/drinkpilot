@@ -14,6 +14,11 @@ import type {
   PackageKey,
 } from "@/lib/packageService";
 
+export type DrinkPriceThresholdCoveragePolicy =
+  | "unknown"
+  | "included-through-threshold"
+  | "excluded-above-threshold";
+
 export type DrinkPriceThresholdChargePolicy =
   | "unknown"
   | "difference"
@@ -55,6 +60,29 @@ export type ContextualRuleValues = {
    */
   drinkPriceThresholdChargePolicy?:
     DrinkPriceThresholdChargePolicy;
+
+  /*
+   * Política de cobertura cuando una bebida
+   * supera el threshold.
+   *
+   * unknown:
+   * no existe evidencia suficiente para
+   * determinar cómo afecta el threshold
+   * a la cobertura.
+   *
+   * included-through-threshold:
+   * la bebida permanece cubierta hasta
+   * el valor del threshold.
+   *
+   * excluded-above-threshold:
+   * una bebida cuyo precio supera el
+   * threshold queda fuera de cobertura.
+   *
+   * Esta propiedad describe cobertura,
+   * no cuánto debe pagar el huésped.
+   */
+  drinkPriceThresholdCoveragePolicy?:
+    DrinkPriceThresholdCoveragePolicy;
 
   aquaUnlimited?:
     boolean;

@@ -283,3 +283,90 @@ describe(
     );
   }
 );
+
+describe(
+  "MSC threshold coverage policy",
+  () => {
+    it(
+      "marca Premium Extra EUR como excluido por encima del threshold sin inventar política de cobro",
+      () => {
+        const rules =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "EUR",
+
+              sailingDate:
+                null,
+            }
+          );
+
+        const rule =
+          rules[0];
+
+        expect(
+          rule?.rules
+            .drinkPriceThresholdCoveragePolicy
+        ).toBe(
+          "excluded-above-threshold"
+        );
+
+        expect(
+          rule?.rules
+            .drinkPriceThresholdChargePolicy
+        ).toBeUndefined();
+      }
+    );
+
+    it(
+      "marca Premium Extra USD como excluido por encima del threshold sin inventar política de cobro",
+      () => {
+        const rules =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                "USD",
+
+              sailingDate:
+                null,
+            }
+          );
+
+        const rule =
+          rules[0];
+
+        expect(
+          rule?.rules
+            .drinkPriceThresholdCoveragePolicy
+        ).toBe(
+          "excluded-above-threshold"
+        );
+
+        expect(
+          rule?.rules
+            .drinkPriceThresholdChargePolicy
+        ).toBeUndefined();
+      }
+    );
+  }
+);
