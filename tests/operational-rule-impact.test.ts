@@ -216,3 +216,117 @@ describe(
     );
   }
 );
+
+describe(
+  "operational rule source traceability",
+  () => {
+    it(
+      "conserva la procedencia base del límite MSC",
+      () => {
+        const consumption =
+          resolveAlcoholConsumption({
+            beer: 6,
+            wine: 4,
+            cocktail: 8,
+
+            alcoholicCocktail: 8,
+            nonAlcoholicCocktail: 0,
+          });
+
+        const impacts =
+          evaluateOperationalRuleImpacts(
+            consumption,
+            getPackageOperationalRules(
+              "msc"
+            )
+          );
+
+        const easy =
+          impacts.find(
+            (impact) =>
+              impact.packageKey ===
+              "mscEasy"
+          );
+
+        expect(
+          easy?.alcoholDailyLimitSource
+        ).toEqual({
+          source: "base",
+          contextualRuleIds: [],
+        });
+      }
+    );
+
+    it(
+      "conserva los IDs de una procedencia contextual",
+      () => {
+        const consumption =
+          resolveAlcoholConsumption({
+            beer: 6,
+            wine: 4,
+            cocktail: 8,
+
+            alcoholicCocktail: 8,
+            nonAlcoholicCocktail: 0,
+          });
+
+        const rules =
+          getPackageOperationalRules(
+            "msc"
+          );
+
+        const easyRule =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        if (!easyRule) {
+          throw new Error(
+            "MSC Easy rule not found"
+          );
+        }
+
+        const impacts =
+          evaluateOperationalRuleImpacts(
+            consumption,
+            [
+              {
+                ...easyRule,
+
+                alcoholicDrinksDailyLimit:
+                  12,
+
+                alcoholicDrinksDailyLimitSource: {
+                  source:
+                    "contextual",
+
+                  contextualRuleIds: [
+                    "test-contextual-alcohol-limit",
+                  ],
+                },
+              },
+            ]
+          );
+
+        expect(
+          impacts[0]
+            .alcoholDailyLimitSource
+        ).toEqual({
+          source: "contextual",
+
+          contextualRuleIds: [
+            "test-contextual-alcohol-limit",
+          ],
+        });
+
+        expect(
+          impacts[0]
+            .alcoholDailyLimit
+            .alcoholicDrinksDailyLimit
+        ).toBe(12);
+      }
+    );
+  }
+);

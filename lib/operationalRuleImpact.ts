@@ -25,6 +25,19 @@ export type PackageOperationalRuleImpact = {
   alcoholDailyLimit:
     AlcoholDailyLimitEvaluation;
 
+  /*
+   * Conserva la procedencia exacta de la
+   * regla utilizada para evaluar el límite.
+   *
+   * Esto permite auditar posteriormente si
+   * el valor procede del catálogo base o de
+   * una regla contextual concreta.
+   */
+  alcoholDailyLimitSource:
+    PackageOperationalRules[
+      "alcoholicDrinksDailyLimitSource"
+    ];
+
   economicImpact:
     OperationalEconomicImpact;
 };
@@ -68,6 +81,10 @@ export function evaluateOperationalRuleImpacts(
           rule.packageName,
 
         alcoholDailyLimit,
+
+        alcoholDailyLimitSource:
+          rule
+            .alcoholicDrinksDailyLimitSource,
 
         economicImpact:
           evaluateOperationalEconomicImpact(
