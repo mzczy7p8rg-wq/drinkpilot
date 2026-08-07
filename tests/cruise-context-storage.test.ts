@@ -21,6 +21,7 @@ describe(
         ).toEqual({
           market: null,
           sailingRegion: null,
+          onboardCurrency: null,
           sailingDate: null,
         });
       }
@@ -33,12 +34,14 @@ describe(
           resolveStoredCruiseContext({
             market: "ES",
             sailingRegion: "MED",
+            onboardCurrency: "EUR",
             sailingDate:
               "2026-08-15",
           })
         ).toEqual({
           market: "ES",
           sailingRegion: "MED",
+          onboardCurrency: "EUR",
           sailingDate:
             "2026-08-15",
         });
@@ -54,12 +57,15 @@ describe(
               "  ES  ",
             sailingRegion:
               "  MED  ",
+            onboardCurrency:
+              "  EUR  ",
             sailingDate:
               "  2026-08-15  ",
           })
         ).toEqual({
           market: "ES",
           sailingRegion: "MED",
+          onboardCurrency: "EUR",
           sailingDate:
             "2026-08-15",
         });
@@ -73,12 +79,14 @@ describe(
           resolveStoredCruiseContext({
             market: "   ",
             sailingRegion: [],
+            onboardCurrency: {},
             sailingDate:
               12345,
           })
         ).toEqual({
           market: null,
           sailingRegion: null,
+          onboardCurrency: null,
           sailingDate: null,
         });
       }

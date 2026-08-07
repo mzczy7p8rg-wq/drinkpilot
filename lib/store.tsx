@@ -50,6 +50,8 @@ export type WizardData = {
 
   sailingRegion: string | null;
 
+  onboardCurrency: string | null;
+
   sailingDate: string | null;
 
   days: number;
@@ -192,6 +194,8 @@ function createInitialData(
     market: null,
 
     sailingRegion: null,
+
+    onboardCurrency: null,
 
     sailingDate: null,
 
@@ -515,6 +519,9 @@ export function StoreProvider({
             sailingRegion:
               parsedData.sailingRegion,
 
+            onboardCurrency:
+              parsedData.onboardCurrency,
+
             sailingDate:
               parsedData.sailingDate,
           });
@@ -546,6 +553,10 @@ export function StoreProvider({
           sailingRegion:
             storedCruiseContext
               .sailingRegion,
+
+          onboardCurrency:
+            storedCruiseContext
+              .onboardCurrency,
 
           sailingDate:
             storedCruiseContext

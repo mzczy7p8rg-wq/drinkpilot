@@ -198,6 +198,7 @@ describe(
           cruiseLine: "msc",
           market: "ES",
           sailingRegion: null,
+          onboardCurrency: null,
           sailingDate:
             "2026-08-15",
         });
@@ -245,6 +246,7 @@ describe(
           cruiseLine: "msc",
           market: null,
           sailingRegion: null,
+          onboardCurrency: null,
           sailingDate: null,
         });
       }

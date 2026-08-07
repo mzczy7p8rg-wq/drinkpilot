@@ -89,6 +89,9 @@ export default function ReviewPage() {
       sailingRegion:
         data.sailingRegion ?? null,
 
+      onboardCurrency:
+        data.onboardCurrency ?? null,
+
       sailingDate:
         data.sailingDate ?? null,
     });

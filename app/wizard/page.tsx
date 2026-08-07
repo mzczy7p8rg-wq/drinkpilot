@@ -139,6 +139,11 @@ export default function WizardPage() {
               ? null
               : previous.sailingRegion,
 
+          onboardCurrency:
+            cruiseLineChanged
+              ? null
+              : previous.onboardCurrency,
+
           sailingDate:
             sailingDate === ""
               ? null

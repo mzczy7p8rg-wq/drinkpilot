@@ -71,6 +71,8 @@ export type ComparisonInput = {
 
   sailingRegion?: string | null;
 
+  onboardCurrency?: string | null;
+
   sailingDate?: string | null;
 
   days: number;
@@ -621,6 +623,9 @@ export function compareDrinkPackages(
 
       sailingRegion:
         input.sailingRegion ?? null,
+
+      onboardCurrency:
+        input.onboardCurrency ?? null,
 
       sailingDate:
         input.sailingDate ?? null,

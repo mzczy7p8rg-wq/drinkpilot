@@ -228,6 +228,9 @@ export default function ResultsPage() {
       sailingRegion:
         data.sailingRegion,
 
+      onboardCurrency:
+        data.onboardCurrency,
+
       sailingDate:
         data.sailingDate,
 

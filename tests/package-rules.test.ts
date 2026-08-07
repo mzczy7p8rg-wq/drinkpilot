@@ -139,6 +139,7 @@ describe(
           cruiseLine: "msc",
           market: null,
           sailingRegion: null,
+          onboardCurrency: null,
           sailingDate: null,
         });
       }
