@@ -367,9 +367,20 @@ describe(
           notices.length
         ).toBeGreaterThan(0);
 
+        const informationalNotices =
+          notices.filter(
+            (notice) =>
+              notice.type !==
+              "package-pricing-day-policy"
+          );
+
+        expect(
+          informationalNotices.length
+        ).toBeGreaterThan(0);
+
         for (
           const notice of
-          notices
+          informationalNotices
         ) {
           expect(
             notice.calculationImpact
@@ -461,9 +472,20 @@ describe(
           notices.length
         ).toBeGreaterThan(0);
 
+        const informationalNotices =
+          notices.filter(
+            (notice) =>
+              notice.type !==
+              "package-pricing-day-policy"
+          );
+
+        expect(
+          informationalNotices.length
+        ).toBeGreaterThan(0);
+
         for (
           const notice of
-          notices
+          informationalNotices
         ) {
           expect(
             notice.calculationImpact
@@ -1023,6 +1045,83 @@ describe(
             (notice) =>
               notice.type ===
               "package-purchase-group-requirement"
+          )
+        ).toBe(false);
+      }
+    );
+  }
+);
+
+describe(
+  "package pricing day policy notices",
+  () => {
+    it(
+      "explica que MSC no factura el día de desembarque y marca impacto económico",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const notice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (item) =>
+              item.packageKey ===
+                "mscEasy" &&
+              item.type ===
+                "package-pricing-day-policy"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "día de desembarque"
+        );
+
+        expect(
+          notice?.message
+        ).toContain(
+          "no se factura"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "economic"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("base");
+
+        expect(
+          notice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "no genera aviso cuando la política de días facturables es desconocida",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+          });
+
+        expect(
+          buildOperationalRuleNotices(
+            rules
+          ).some(
+            (notice) =>
+              notice.type ===
+              "package-pricing-day-policy"
           )
         ).toBe(false);
       }

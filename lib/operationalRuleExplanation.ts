@@ -24,7 +24,8 @@ export type OperationalRuleNotice = {
     | "aqua-unlimited"
     | "minors-only"
     | "venue-coverage"
-    | "package-purchase-group-requirement";
+    | "package-purchase-group-requirement"
+    | "package-pricing-day-policy";
 
   message: string;
 
@@ -59,6 +60,22 @@ export type OperationalRuleNotice = {
   appliedContextualRuleIds:
     string[];
 };
+
+function buildPackagePricingDayPolicyMessage(
+  rule: PackageOperationalRules
+): string | null {
+  if (
+    rule.packagePricingDayPolicy ===
+    "exclude-disembarkation-day"
+  ) {
+    return (
+      `${rule.packageName}: el día de desembarque ` +
+      `no se factura dentro del precio del paquete.`
+    );
+  }
+
+  return null;
+}
 
 function buildPackagePurchaseGroupRequirementMessage(
   rule: PackageOperationalRules
@@ -367,6 +384,47 @@ export function buildOperationalRuleNotices(
         appliedContextualRuleIds:
           rule
             .packagePurchaseGroupRequirementSource
+            .contextualRuleIds,
+      });
+    }
+
+    const packagePricingDayPolicyMessage =
+      buildPackagePricingDayPolicyMessage(
+        rule
+      );
+
+    if (
+      packagePricingDayPolicyMessage
+    ) {
+      notices.push({
+        id:
+          `${rule.packageKey}-package-pricing-day-policy`,
+
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        type:
+          "package-pricing-day-policy",
+
+        calculationImpact:
+          "economic",
+
+        message:
+          packagePricingDayPolicyMessage,
+
+        source:
+          rule
+            .packagePricingDayPolicySource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
+        appliedContextualRuleIds:
+          rule
+            .packagePricingDayPolicySource
             .contextualRuleIds,
       });
     }
