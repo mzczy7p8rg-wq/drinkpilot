@@ -38,6 +38,10 @@ import {
 } from "@/lib/currencyFormatting";
 
 import {
+  resolveEconomicDrinkPriceForCurrency,
+} from "@/lib/economicDrinkPriceResolution";
+
+import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
@@ -2027,12 +2031,12 @@ export default function ResultsPage() {
           {Object.keys(data.selectedDrinkPrices).length > 0 && (
             <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
               <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
-                🥤 Precios de bebidas utilizados
+                🥤 Precios de bebidas seleccionados
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Estas son las referencias individuales utilizadas por DrinkPilot
-                para realizar la comparación económica.
+                DrinkPilot distingue qué referencias pueden participar en el
+                cálculo económico y cuáles se conservan solo como información.
               </p>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -2063,6 +2067,12 @@ export default function ResultsPage() {
                           "official"
                         ? "Información oficial"
                         : "Precio introducido por ti";
+
+                  const isEconomicallyUsable =
+                    resolveEconomicDrinkPriceForCurrency(
+                      selectedPrice,
+                      economicCurrency
+                    ) !== null;
 
                   return (
                     <div
@@ -2096,6 +2106,18 @@ export default function ResultsPage() {
                                   : "Compatible · faltan datos"}
                               </p>
                             )}
+
+                          <p
+                            className={`mt-1 text-xs font-semibold ${
+                              isEconomicallyUsable
+                                ? "text-emerald-700"
+                                : "text-amber-700"
+                            }`}
+                          >
+                            {isEconomicallyUsable
+                              ? "Apto para el cálculo económico"
+                              : "Solo informativo · no participa todavía en el cálculo económico"}
+                          </p>
                         </div>
 
                         <p className="shrink-0 font-bold text-slate-900">

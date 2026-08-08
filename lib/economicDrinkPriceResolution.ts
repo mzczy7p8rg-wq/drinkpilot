@@ -90,6 +90,59 @@ export function resolveEconomicDrinkPrice(
 }
 
 /*
+ * Aplica también el contrato monetario de la
+ * comparación.
+ *
+ * Esta función es la fuente común para decidir
+ * si una selección concreta participa realmente
+ * en el cálculo económico y para explicarlo en la
+ * interfaz sin prometer un uso que el motor rechaza.
+ */
+export function resolveEconomicDrinkPriceForCurrency(
+  selectedPrice:
+    EconomicDrinkPriceInput,
+  expectedCurrency?:
+    string | null
+): number | null {
+  const economicPrice =
+    resolveEconomicDrinkPrice(
+      selectedPrice
+    );
+
+  if (economicPrice === null) {
+    return null;
+  }
+
+  const normalizedExpectedCurrency =
+    expectedCurrency
+      ?.trim()
+      .toUpperCase() ?? null;
+
+  if (
+    normalizedExpectedCurrency ===
+    null
+  ) {
+    return economicPrice;
+  }
+
+  const selectedCurrency =
+    selectedPrice &&
+    "currency" in
+      selectedPrice &&
+    typeof selectedPrice.currency ===
+      "string"
+      ? selectedPrice.currency
+          .trim()
+          .toUpperCase()
+      : null;
+
+  return selectedCurrency ===
+    normalizedExpectedCurrency
+    ? economicPrice
+    : null;
+}
+
+/*
  * Convierte las selecciones individuales
  * en la cesta estricta number | null que
  * entiende onboardPriceService.
@@ -132,37 +185,17 @@ export function resolveEffectiveDrinkPrices(
   expectedCurrency?:
     string | null
 ): PartialOnboardPriceValues {
-  const normalizedExpectedCurrency =
-    expectedCurrency
-      ?.trim()
-      .toUpperCase() ?? null;
-
   return Object.fromEntries(
     onboardPriceKeys.map(
       (category) => {
         const selectedPrice =
           selections[category];
 
-        const selectedCurrency =
-          selectedPrice &&
-          "currency" in
-            selectedPrice &&
-          typeof selectedPrice.currency ===
-            "string"
-            ? selectedPrice.currency
-                .trim()
-                .toUpperCase()
-            : null;
-
         const selectedEconomicPrice =
-          normalizedExpectedCurrency ===
-            null ||
-          selectedCurrency ===
-            normalizedExpectedCurrency
-            ? resolveEconomicDrinkPrice(
-                selectedPrice
-              )
-            : null;
+          resolveEconomicDrinkPriceForCurrency(
+            selectedPrice,
+            expectedCurrency
+          );
 
         return [
           category,
