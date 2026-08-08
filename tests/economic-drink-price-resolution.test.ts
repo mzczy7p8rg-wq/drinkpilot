@@ -132,4 +132,29 @@ describe("economic drink price resolution", () => {
       cocktail: 12,
     });
   });
+
+  it("no mezcla una selección expresada en otra moneda", () => {
+    const result =
+      resolveEffectiveDrinkPrices(
+        {
+          coffee: 3,
+          water: 2,
+          soda: 4,
+          beer: 8,
+          wine: 10,
+          cocktail: 12,
+        },
+        {
+          coffee: {
+            category: "coffee",
+            price: 7,
+            currency: "USD",
+            source: "user",
+          },
+        },
+        "EUR"
+      );
+
+    expect(result.coffee).toBe(3);
+  });
 });

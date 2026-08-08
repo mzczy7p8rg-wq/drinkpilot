@@ -33,6 +33,11 @@ import {
 
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 
+import {
+  formatCurrency,
+  formatSignedCurrency,
+} from "@/lib/currencyFormatting";
+
 const coverageLabels: Record<
   CoverageCategory,
   string
@@ -293,6 +298,9 @@ export default function ResultsPage() {
   const economicDrinkPrices =
     comparison.economicDrinkPrices;
 
+  const economicCurrency =
+    comparison.economicCurrency;
+
   /*
    * AVISOS OPERATIVOS
    *
@@ -431,7 +439,7 @@ export default function ResultsPage() {
               </div>
 
               <p className="mt-4 text-xs leading-5 text-amber-800">
-                No utilizamos 0 € ni precios inventados para completar estos datos.
+                No utilizamos precios cero ni importes inventados para completar estos datos.
               </p>
             </div>
 
@@ -659,10 +667,11 @@ export default function ResultsPage() {
                               null ? (
                               <>
                                 <p className="mt-1 text-lg font-bold text-violet-950">
-                                  {thresholdImpact.cruiseImpact.additionalCostTotal.toFixed(
-                                    2
-                                  )}{" "}
-                                  €
+                                  {formatCurrency(
+                                    thresholdImpact.cruiseImpact.additionalCostTotal,
+                                    thresholdImpact.currency ??
+                                      economicCurrency
+                                  )}
                                 </p>
 
                                 <p className="mt-1 text-sm leading-6 text-amber-900">
@@ -1133,14 +1142,12 @@ export default function ResultsPage() {
             {bestPackage ? (
               <>
                 <p className="mt-6 text-4xl font-bold text-sky-600 sm:mt-7 sm:text-5xl">
-                  {bestPackage.effectiveSavings !== null
-                    ? bestPackage.effectiveSavings.toFixed(
-                        2
-                      )
-                    : bestPackage.savings.toFixed(
-                        2
-                      )}{" "}
-                  €
+                  {formatCurrency(
+                    bestPackage.effectiveSavings !== null
+                      ? bestPackage.effectiveSavings
+                      : bestPackage.savings,
+                    bestPackage.currency
+                  )}
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
@@ -1175,10 +1182,10 @@ export default function ResultsPage() {
             ) : (
               <>
                 <p className="mt-6 text-4xl font-bold text-sky-600 sm:mt-7 sm:text-5xl">
-                  {baseline.drinksCost.toFixed(
-                    2
-                  )}{" "}
-                  €
+                  {formatCurrency(
+                    baseline.drinksCost,
+                    economicCurrency
+                  )}
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
@@ -1279,10 +1286,10 @@ export default function ResultsPage() {
             </p>
 
             <p className="mt-2 text-3xl font-bold sm:text-4xl">
-              {baseline.drinksCost.toFixed(
-                2
-              )}{" "}
-              €
+              {formatCurrency(
+                baseline.drinksCost,
+                economicCurrency
+              )}
             </p>
 
             <p className="mt-2 text-sm text-slate-300">
@@ -1377,11 +1384,11 @@ export default function ResultsPage() {
                           </p>
 
                           <p className="mt-1 font-bold text-slate-900 sm:text-lg">
-                            {pkg.packagePricePerDay.toFixed(
-                              2
+                            {formatCurrency(
+                              pkg.packagePricePerDay,
+                              pkg.currency
                             )}{" "}
-                            € por persona
-                            / día
+                            por persona / día
                           </p>
 
                           {usesUserPrice ? (
@@ -1398,10 +1405,11 @@ export default function ResultsPage() {
                                   <p className="mt-2 text-xs text-slate-500">
                                     Referencia
                                     DrinkPilot:{" "}
-                                    {pkg.referencePricePerDay.toFixed(
-                                      2
+                                    {formatCurrency(
+                                      pkg.referencePricePerDay,
+                                      pkg.currency
                                     )}{" "}
-                                    € / día
+                                    / día
                                   </p>
                                 )}
                             </div>
@@ -1512,10 +1520,10 @@ export default function ResultsPage() {
                           </p>
 
                           <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                            {pkg.packageCost.toFixed(
-                              2
-                            )}{" "}
-                            €
+                            {formatCurrency(
+                              pkg.packageCost,
+                              pkg.currency
+                            )}
                           </p>
                         </div>
 
@@ -1525,10 +1533,10 @@ export default function ResultsPage() {
                           </p>
 
                           <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                            {pkg.drinksCost.toFixed(
-                              2
-                            )}{" "}
-                            €
+                            {formatCurrency(
+                              pkg.drinksCost,
+                              pkg.currency
+                            )}
                           </p>
                         </div>
 
@@ -1548,14 +1556,10 @@ export default function ResultsPage() {
                                 : "text-slate-700"
                             }`}
                           >
-                            {pkg.savings >
-                            0
-                              ? "+"
-                              : ""}
-                            {pkg.savings.toFixed(
-                              2
-                            )}{" "}
-                            €
+                            {formatSignedCurrency(
+                              pkg.savings,
+                              pkg.currency
+                            )}
                           </p>
                         </div>
 
@@ -1577,14 +1581,10 @@ export default function ResultsPage() {
                                   : "text-slate-700"
                               }`}
                             >
-                              {displayedSavings >
-                              0
-                                ? "+"
-                                : ""}
-                              {displayedSavings.toFixed(
-                                2
-                              )}{" "}
-                              €
+                              {formatSignedCurrency(
+                                displayedSavings,
+                                pkg.currency
+                              )}
                             </p>
                           ) : (
                             <p className="mt-1 text-lg font-bold text-amber-700 sm:text-xl">
@@ -1604,10 +1604,10 @@ export default function ResultsPage() {
                             </p>
 
                             <p className="mt-1 text-lg font-bold text-violet-950">
-                              {thresholdAdditionalCost.toFixed(
-                                2
-                              )}{" "}
-                              €
+                              {formatCurrency(
+                                thresholdAdditionalCost,
+                                pkg.currency
+                              )}
                             </p>
 
                             <p className="mt-1 text-xs leading-5 text-violet-800">
@@ -1724,14 +1724,10 @@ export default function ResultsPage() {
                                 : "text-red-700"
                             }
                           >
-                            {pkg.dailyMargin >
-                            0
-                              ? "+"
-                              : ""}
-                            {pkg.dailyMargin.toFixed(
-                              2
-                            )}{" "}
-                            €
+                            {formatSignedCurrency(
+                              pkg.dailyMargin,
+                              pkg.currency
+                            )}
                           </strong>{" "}
                           por persona
                         </p>
@@ -1953,10 +1949,11 @@ export default function ResultsPage() {
                             null ? (
                             <>
                               <p className="mt-1 text-lg font-bold text-violet-950">
-                                {thresholdImpact.cruiseImpact.additionalCostTotal.toFixed(
-                                  2
-                                )}{" "}
-                                €
+                                {formatCurrency(
+                                  thresholdImpact.cruiseImpact.additionalCostTotal,
+                                  thresholdImpact.currency ??
+                                    economicCurrency
+                                )}
                               </p>
 
                               <p className="mt-1 text-sm leading-6 text-slate-700">
@@ -2141,10 +2138,10 @@ export default function ResultsPage() {
                         </div>
 
                         <p className="shrink-0 font-bold text-slate-900">
-                          {selectedPrice.price.toFixed(
-                            2
-                          )}{" "}
-                          {selectedPrice.currency}
+                          {formatCurrency(
+                            selectedPrice.price,
+                            selectedPrice.currency
+                          )}
                         </p>
                       </div>
                     </div>
@@ -2204,10 +2201,10 @@ export default function ResultsPage() {
                         </p>
 
                         <p className="mt-1 text-base font-bold text-slate-900">
-                          {row.price.toFixed(
-                            2
-                          )}{" "}
-                          €
+                          {formatCurrency(
+                            row.price,
+                            economicCurrency
+                          )}
                         </p>
 
                         <div className="mt-3 border-t border-slate-200 pt-3">
@@ -2217,10 +2214,10 @@ export default function ResultsPage() {
                           </p>
 
                           <p className="mt-1 text-lg font-bold text-slate-900">
-                            {row.total.toFixed(
-                              2
-                            )}{" "}
-                            €
+                            {formatCurrency(
+                              row.total,
+                              economicCurrency
+                            )}
                           </p>
                         </div>
                       </div>
@@ -2276,17 +2273,17 @@ export default function ResultsPage() {
                         </td>
 
                         <td className="p-3 text-center">
-                          {row.price.toFixed(
-                            2
-                          )}{" "}
-                          €
+                          {formatCurrency(
+                            row.price,
+                            economicCurrency
+                          )}
                         </td>
 
                         <td className="p-3 text-right font-semibold">
-                          {row.total.toFixed(
-                            2
-                          )}{" "}
-                          €
+                          {formatCurrency(
+                            row.total,
+                            economicCurrency
+                          )}
                         </td>
                       </tr>
                     )
