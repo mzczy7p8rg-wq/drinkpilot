@@ -2043,6 +2043,96 @@ export default function ResultsPage() {
             </section>
           )}
 
+          {/* PROCEDENCIA DE LOS PRECIOS DE BEBIDAS */}
+
+          {Object.keys(data.selectedDrinkPrices).length > 0 && (
+            <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                🥤 Precios de bebidas utilizados
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Estas son las referencias individuales utilizadas por DrinkPilot
+                para realizar la comparación económica.
+              </p>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {(
+                  [
+                    ["coffee", "☕ Café"],
+                    ["water", "💧 Agua"],
+                    ["soda", "🥤 Refresco"],
+                    ["beer", "🍺 Cerveza"],
+                    ["wine", "🍷 Vino"],
+                    ["cocktail", "🍸 Cóctel"],
+                  ] as const
+                ).map(([category, label]) => {
+                  const selectedPrice =
+                    data.selectedDrinkPrices[
+                      category
+                    ];
+
+                  if (!selectedPrice) {
+                    return null;
+                  }
+
+                  const sourceLabel =
+                    selectedPrice.source ===
+                    "documented-menu"
+                      ? "Información documentada"
+                      : selectedPrice.source ===
+                          "official"
+                        ? "Información oficial"
+                        : "Precio introducido por ti";
+
+                  return (
+                    <div
+                      key={category}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {label}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            {sourceLabel}
+                          </p>
+
+                          {selectedPrice.source ===
+                            "documented-menu" &&
+                            selectedPrice.contextRelevance && (
+                              <p
+                                className={`mt-1 text-xs font-semibold ${
+                                  selectedPrice.contextRelevance ===
+                                  "exact"
+                                    ? "text-emerald-700"
+                                    : "text-amber-700"
+                                }`}
+                              >
+                                {selectedPrice.contextRelevance ===
+                                "exact"
+                                  ? "Contexto coincidente"
+                                  : "Compatible · faltan datos"}
+                              </p>
+                            )}
+                        </div>
+
+                        <p className="shrink-0 font-bold text-slate-900">
+                          {selectedPrice.price.toFixed(
+                            2
+                          )}{" "}
+                          {selectedPrice.currency}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {/* CALIDAD DE DATOS */}
 
           <div className="mt-8">
