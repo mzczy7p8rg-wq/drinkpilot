@@ -29,6 +29,29 @@ export const mscContextualPackageRules:
   ContextualPackageRule[] = [
     {
       id:
+        "msc-premium-extra-alcohol-limit-full-price-us",
+
+      cruiseLine:
+        "msc",
+
+      packageKey:
+        "mscPremiumExtra",
+
+      markets: [
+        "US",
+      ],
+
+      validFrom:
+        "2025-04-01",
+
+      rules: {
+        alcoholicDrinksDailyLimitChargePolicy:
+          "full-price-plus-gratuities",
+      },
+    },
+
+    {
+      id:
         "msc-premium-extra-threshold-eur",
 
       cruiseLine:

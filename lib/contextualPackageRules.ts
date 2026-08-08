@@ -25,9 +25,25 @@ export type DrinkPriceThresholdChargePolicy =
   | "difference"
   | "full-price";
 
+export type AlcoholicDrinksDailyLimitChargePolicy =
+  | "unknown"
+  | "full-price-plus-gratuities";
+
 export type ContextualRuleValues = {
   alcoholicDrinksDailyLimit?:
     number;
+
+  /*
+   * Política económica aplicable a las
+   * bebidas alcohólicas que exceden el
+   * límite diario.
+   *
+   * Se mantiene separada del propio límite
+   * porque su alcance puede depender del
+   * mercado y de la fecha de navegación.
+   */
+  alcoholicDrinksDailyLimitChargePolicy?:
+    AlcoholicDrinksDailyLimitChargePolicy;
 
   drinkPriceThreshold?:
     number;

@@ -435,3 +435,107 @@ describe(
     );
   }
 );
+
+describe(
+  "MSC Premium Extra alcohol daily limit charge policy",
+  () => {
+    it(
+      "aplica precio completo más propinas al exceso documentado para US",
+      () => {
+        const policyRule =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-04-01",
+            }
+          ).find(
+            (rule) =>
+              rule.id ===
+              "msc-premium-extra-alcohol-limit-full-price-us"
+          );
+
+        expect(
+          policyRule?.rules
+            .alcoholicDrinksDailyLimitChargePolicy
+        ).toBe(
+          "full-price-plus-gratuities"
+        );
+      }
+    );
+
+    it(
+      "no aplica la política US antes de la primera navegación documentada",
+      () => {
+        expect(
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-03-31",
+            }
+          ).some(
+            (rule) =>
+              rule.id ===
+              "msc-premium-extra-alcohol-limit-full-price-us"
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "no extiende la política localizada de US al mercado ES",
+      () => {
+        expect(
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate:
+                "2026-08-15",
+            }
+          ).some(
+            (rule) =>
+              rule.id ===
+              "msc-premium-extra-alcohol-limit-full-price-us"
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "registra la procedencia oficial de la política US",
+      () => {
+        const evidence =
+          mscMetadata
+            .contextualEvidence
+            .find(
+              (item) =>
+                item.id ===
+                "premium-extra-alcohol-limit-full-price-us"
+            );
+
+        expect(
+          evidence
+        ).toBeDefined();
+
+        expect(
+          evidence?.sourceId
+        ).toBe(
+          "msc-us-drinks-packages"
+        );
+      }
+    );
+  }
+);

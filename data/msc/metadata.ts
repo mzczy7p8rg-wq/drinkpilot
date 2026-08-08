@@ -16,6 +16,9 @@ export const mscMetadata = {
     officialDrinksPage:
       "https://www.msccruises.com/int/on-board/dining-and-drinks/drinks-packages",
 
+    officialUsDrinksPage:
+      "https://www.msccruisesusa.com/on-board/dining-drinks/drinks-packages",
+
     officialTerms:
       "https://www.msccruises.com/int/terms-conditions",
 
@@ -57,6 +60,30 @@ export const mscMetadata = {
 
         verifiedAt:
           "2026-08-04",
+      },
+
+      {
+        id: "msc-us-drinks-packages",
+
+        name:
+          "MSC Cruises USA — Drinks Packages",
+
+        type: "official",
+
+        url:
+          "https://www.msccruisesusa.com/on-board/dining-drinks/drinks-packages",
+
+        market: "US",
+
+        supports: [
+          "premium-extra-15-alcoholic-drinks-daily-limit",
+          "full-menu-price-after-alcohol-daily-limit",
+          "gratuities-after-alcohol-daily-limit",
+          "alcohol-daily-limit-effective-sailing-date",
+        ],
+
+        verifiedAt:
+          "2026-08-08",
       },
 
       {
@@ -152,6 +179,38 @@ export const mscMetadata = {
   },
 
   contextualEvidence: [
+    {
+      id:
+        "premium-extra-alcohol-limit-full-price-us",
+
+      sourceId:
+        "msc-us-drinks-packages",
+
+      type:
+        "official",
+
+      packageKey:
+        "mscPremiumExtra",
+
+      market:
+        "US",
+
+      effectiveSailingDate:
+        "2025-04-01",
+
+      value:
+        "full-price-plus-gratuities",
+
+      valueType:
+        "alcoholic-drinks-daily-limit-charge-policy",
+
+      status:
+        "verified",
+
+      verifiedAt:
+        "2026-08-08",
+    },
+
     {
       id:
         "premium-extra-threshold-eur",
