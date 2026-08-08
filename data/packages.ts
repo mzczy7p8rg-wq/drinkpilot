@@ -108,6 +108,9 @@ export const costaPackages = {
           "Casanova",
         ],
       },
+
+      packagePurchaseGroupRequirement:
+        "same-booking-or-cabin",
     },
 
     restrictions:
@@ -207,6 +210,9 @@ export const costaPackages = {
           "Casanova",
         ],
       },
+
+      packagePurchaseGroupRequirement:
+        "same-booking-or-cabin",
     },
 
     restrictions:
@@ -299,6 +305,9 @@ export const costaPackages = {
           "Casanova",
         ],
       },
+
+      packagePurchaseGroupRequirement:
+        "same-booking-or-cabin",
     },
 
     restrictions:

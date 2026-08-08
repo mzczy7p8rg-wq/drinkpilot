@@ -779,3 +779,59 @@ it(
     });
   }
 );
+
+it(
+  "expone el alcance de contratación conjunta sin inferir cumplimiento",
+  () => {
+    const mscEasy =
+      getPackageOperationalRule(
+        "msc",
+        "mscEasy"
+      );
+
+    const mscPremiumExtra =
+      getPackageOperationalRule(
+        "msc",
+        "mscPremiumExtra"
+      );
+
+    const costaMyDrinks =
+      getPackageOperationalRule(
+        "costa",
+        "myDrinks"
+      );
+
+    expect(
+      mscEasy
+        ?.packagePurchaseGroupRequirement
+    ).toBe("same-cabin");
+
+    expect(
+      mscEasy
+        ?.packagePurchaseGroupRequirementSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+
+    expect(
+      mscPremiumExtra
+        ?.packagePurchaseGroupRequirement
+    ).toBe("same-cabin");
+
+    expect(
+      costaMyDrinks
+        ?.packagePurchaseGroupRequirement
+    ).toBe(
+      "same-booking-or-cabin"
+    );
+
+    expect(
+      costaMyDrinks
+        ?.packagePurchaseGroupRequirementSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+  }
+);

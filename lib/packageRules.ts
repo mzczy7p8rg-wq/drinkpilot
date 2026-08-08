@@ -73,6 +73,11 @@ export type PackageVenueCoverage = {
     string[];
 };
 
+export type PackagePurchaseGroupRequirement =
+  | "unknown"
+  | "same-cabin"
+  | "same-booking-or-cabin";
+
 
 export type PackageOperationalRules = {
   packageKey: PackageKey;
@@ -183,6 +188,20 @@ export type PackageOperationalRules = {
     OperationalRuleSource;
 
   /*
+   * Alcance conocido de contratación
+   * conjunta del paquete.
+   *
+   * No implica que DrinkPilot conozca
+   * todavía la composición real del
+   * camarote o de la reserva.
+   */
+  packagePurchaseGroupRequirement:
+    PackagePurchaseGroupRequirement;
+
+  packagePurchaseGroupRequirementSource:
+    OperationalRuleSource;
+
+  /*
    * IDs de reglas contextuales que
    * realmente participaron en la
    * resolución.
@@ -233,6 +252,19 @@ function readVenueCoverageStatus(
     value === "limited" ||
     value === "conditional" ||
     value === "excluded"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function readPackagePurchaseGroupRequirement(
+  value: unknown
+): PackagePurchaseGroupRequirement {
+  if (
+    value === "same-cabin" ||
+    value === "same-booking-or-cabin"
   ) {
     return value;
   }
@@ -562,6 +594,10 @@ function resolvePackageRules(
       excludedVenues: [],
     };
 
+  let packagePurchaseGroupRequirement:
+    PackagePurchaseGroupRequirement =
+      "unknown";
+
   /*
    * REGLAS BASE
    *
@@ -609,6 +645,17 @@ function resolvePackageRules(
       venueCoverage =
         readVenueCoverage(
           observed.venueCoverage
+        );
+    }
+
+    if (
+      "packagePurchaseGroupRequirement" in
+        observed
+    ) {
+      packagePurchaseGroupRequirement =
+        readPackagePurchaseGroupRequirement(
+          observed
+            .packagePurchaseGroupRequirement
         );
     }
   }
@@ -701,6 +748,20 @@ function resolvePackageRules(
       venueCoverageSource:
         observed &&
         "venueCoverage" in observed
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
+      packagePurchaseGroupRequirement,
+
+      packagePurchaseGroupRequirementSource:
+        packagePurchaseGroupRequirement !==
+        "unknown"
           ? {
               source: "base",
               contextualRuleIds: [],

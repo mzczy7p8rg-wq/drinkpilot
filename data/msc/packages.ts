@@ -106,6 +106,9 @@ export const mscPackages = {
 
         excludedVenues: [],
       },
+
+      packagePurchaseGroupRequirement:
+        "same-cabin",
     },
 
     restrictions:
@@ -205,6 +208,9 @@ export const mscPackages = {
 
         excludedVenues: [],
       },
+
+      packagePurchaseGroupRequirement:
+        "same-cabin",
     },
 
     restrictions:
@@ -308,6 +314,9 @@ export const mscPackages = {
 
         excludedVenues: [],
       },
+
+      packagePurchaseGroupRequirement:
+        "same-cabin",
     },
 
     restrictions:
@@ -399,6 +408,9 @@ export const mscPackages = {
 
       minorsOnly:
         true,
+
+      packagePurchaseGroupRequirement:
+        "same-cabin",
     },
 
     restrictions:
