@@ -14,6 +14,7 @@ import type {
 export type SelectedDrinkThresholdCoverageStatus =
   | "unknown"
   | "covered"
+  | "credited"
   | "excluded";
 
 export type SelectedDrinkThresholdEvaluation = {
@@ -53,6 +54,14 @@ export function evaluateSelectedDrinkAgainstPackageThreshold(
     false
   ) {
     coverageStatus = "covered";
+  } else if (
+    packageImpact.impact.exceedsThreshold ===
+      true &&
+    operationalRule
+      .drinkPriceThresholdCoveragePolicy ===
+      "credited-through-threshold"
+  ) {
+    coverageStatus = "credited";
   } else if (
     packageImpact.impact.exceedsThreshold ===
       true &&

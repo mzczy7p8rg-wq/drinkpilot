@@ -52,7 +52,7 @@ export const mscContextualPackageRules:
         "difference",
 
         drinkPriceThresholdCoveragePolicy:
-          "excluded-above-threshold",
+          "credited-through-threshold",
       },
     },
 
@@ -81,7 +81,7 @@ export const mscContextualPackageRules:
         "difference",
 
         drinkPriceThresholdCoveragePolicy:
-          "excluded-above-threshold",
+          "credited-through-threshold",
       },
     },
   ];

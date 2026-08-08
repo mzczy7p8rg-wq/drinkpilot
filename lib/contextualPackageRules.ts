@@ -17,6 +17,7 @@ import type {
 export type DrinkPriceThresholdCoveragePolicy =
   | "unknown"
   | "included-through-threshold"
+  | "credited-through-threshold"
   | "excluded-above-threshold";
 
 export type DrinkPriceThresholdChargePolicy =
@@ -73,6 +74,11 @@ export type ContextualRuleValues = {
    * included-through-threshold:
    * la bebida permanece cubierta hasta
    * el valor del threshold.
+   *
+   * credited-through-threshold:
+   * una bebida cuyo precio supera el
+   * threshold conserva un crédito del
+   * paquete equivalente al threshold.
    *
    * excluded-above-threshold:
    * una bebida cuyo precio supera el

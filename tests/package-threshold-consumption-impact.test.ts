@@ -468,7 +468,7 @@ describe(
   "package threshold consumption coverage",
   () => {
     it(
-      "cuenta por separado las bebidas excluidas de cobertura",
+      "cuenta bebidas sobre el threshold sin marcarlas como excluidas cuando conservan crédito",
       () => {
         const result =
           evaluatePackageThresholdConsumptionImpact(
@@ -500,7 +500,7 @@ describe(
 
         expect(
           result.drinksExcludedFromCoveragePerDay
-        ).toBe(3);
+        ).toBe(0);
 
         expect(
           result.additionalCostPerDay

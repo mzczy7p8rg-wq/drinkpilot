@@ -606,7 +606,7 @@ describe(
   "MSC threshold coverage integration",
   () => {
     it(
-      "propaga cobertura excluida y política de copago contextual",
+      "propaga crédito hasta el threshold y política de copago contextual",
       () => {
         const result =
           compareDrinkPackages({
@@ -658,7 +658,7 @@ describe(
           premiumRule
             ?.drinkPriceThresholdCoveragePolicy
         ).toBe(
-          "excluded-above-threshold"
+          "credited-through-threshold"
         );
 
         expect(
@@ -813,6 +813,80 @@ it(
         ?.dailyImpact
         .drinksAboveThresholdPerDay
     ).toBe(2);
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .additionalCostPerDay
+    ).toBe(2);
+
+    expect(
+      premiumImpact
+        ?.cruiseImpact
+        .additionalCostTotal
+    ).toBe(14);
+  }
+);
+
+it(
+  "cuantifica el crédito Premium Extra sin contar la bebida como excluida",
+  () => {
+    const result =
+      compareDrinkPackages({
+        cruiseLine: "msc",
+
+        market: "ES",
+        sailingRegion: null,
+        onboardCurrency: "EUR",
+        sailingDate: "2026-08-15",
+
+        days: 7,
+        people: 1,
+
+        coffee: 0,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 2,
+
+        selectedDrinkPrices: {
+          cocktail: {
+            category: "cocktail",
+            price: 15,
+            currency: "EUR",
+            source: "documented-menu",
+            contextRelevance: "exact",
+          },
+        },
+      });
+
+    const premiumImpact =
+      result
+        .thresholdCruiseImpacts
+        .find(
+          (impact) =>
+            impact.packageKey ===
+            "mscPremiumExtra"
+        );
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .status
+    ).toBe("quantified");
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .drinksAboveThresholdPerDay
+    ).toBe(2);
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .drinksExcludedFromCoveragePerDay
+    ).toBe(0);
 
     expect(
       premiumImpact

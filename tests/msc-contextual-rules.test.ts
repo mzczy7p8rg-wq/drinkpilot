@@ -288,7 +288,7 @@ describe(
   "MSC threshold coverage policy",
   () => {
     it(
-      "marca Premium Extra EUR como excluido por encima del threshold con copago por diferencia",
+      "marca Premium Extra EUR con crédito hasta el threshold y copago por diferencia",
       () => {
         const rules =
           getMatchingContextualPackageRules(
@@ -318,7 +318,7 @@ describe(
           rule?.rules
             .drinkPriceThresholdCoveragePolicy
         ).toBe(
-          "excluded-above-threshold"
+          "credited-through-threshold"
         );
 
         expect(
@@ -329,7 +329,7 @@ describe(
     );
 
     it(
-      "marca Premium Extra USD como excluido por encima del threshold con copago por diferencia",
+      "marca Premium Extra USD con crédito hasta el threshold y copago por diferencia",
       () => {
         const rules =
           getMatchingContextualPackageRules(
@@ -359,7 +359,7 @@ describe(
           rule?.rules
             .drinkPriceThresholdCoveragePolicy
         ).toBe(
-          "excluded-above-threshold"
+          "credited-through-threshold"
         );
 
         expect(

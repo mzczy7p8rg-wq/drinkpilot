@@ -317,7 +317,7 @@ describe(
   "selected drink threshold coverage",
   () => {
     it(
-      "marca como excluida una bebida por encima del threshold cuando la cobertura lo indica",
+      "marca como credited una bebida por encima del threshold cuando el paquete mantiene crédito",
       () => {
         const rule =
           getPackageOperationalRule(
@@ -369,7 +369,7 @@ describe(
 
         expect(
           result.coverageStatus
-        ).toBe("excluded");
+        ).toBe("credited");
 
         expect(
           result.packageImpact
@@ -510,5 +510,98 @@ describe(
         ).toBeNull();
       }
     );
+  }
+);
+
+it(
+  "marca como credited una bebida que supera un threshold con crédito parcial",
+  () => {
+    const result =
+      evaluateSelectedDrinkAgainstPackageThreshold(
+        {
+          packageKey:
+            "mscPremiumExtra",
+
+          packageName:
+            "Premium Extra",
+
+          alcoholicDrinksDailyLimit:
+            null,
+
+          aquaUnlimited:
+            false,
+
+          minorsOnly:
+            false,
+
+          drinkPriceThreshold:
+            14,
+
+          drinkPriceThresholdCurrency:
+            "EUR",
+
+          drinkPriceThresholdSource: {
+            source:
+              "contextual",
+
+            contextualRuleIds: [
+              "msc-premium-extra-threshold-eur",
+            ],
+          },
+
+          drinkPriceThresholdChargePolicy:
+            "difference",
+
+          drinkPriceThresholdChargePolicySource: {
+            source:
+              "contextual",
+
+            contextualRuleIds: [
+              "msc-premium-extra-threshold-eur",
+            ],
+          },
+
+          drinkPriceThresholdCoveragePolicy:
+            "credited-through-threshold",
+
+          drinkPriceThresholdCoveragePolicySource: {
+            source:
+              "contextual",
+
+            contextualRuleIds: [
+              "msc-premium-extra-threshold-eur",
+            ],
+          },
+        },
+        {
+          category:
+            "cocktail",
+
+          price:
+            15,
+
+          currency:
+            "EUR",
+
+          source:
+            "official",
+        }
+      );
+
+    expect(
+      result.packageImpact
+        .impact
+        .exceedsThreshold
+    ).toBe(true);
+
+    expect(
+      result.packageImpact
+        .impact
+        .additionalCostPerDrink
+    ).toBe(1);
+
+    expect(
+      result.coverageStatus
+    ).toBe("credited");
   }
 );
