@@ -691,3 +691,139 @@ describe(
     );
   }
 );
+
+it(
+  "no eleva una referencia documented-menu compatible a precio económico",
+  () => {
+    const result =
+      compareDrinkPackages({
+        cruiseLine: "msc",
+
+        market: "ES",
+        sailingRegion: null,
+        onboardCurrency: "EUR",
+        sailingDate: "2026-08-15",
+
+        days: 7,
+        people: 1,
+
+        coffee: 0,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 2,
+
+        selectedDrinkPrices: {
+          cocktail: {
+            category: "cocktail",
+            price: 15,
+            currency: "EUR",
+            source: "documented-menu",
+            contextRelevance: "compatible",
+          },
+        },
+      });
+
+    const premiumImpact =
+      result
+        .thresholdCruiseImpacts
+        .find(
+          (impact) =>
+            impact.packageKey ===
+            "mscPremiumExtra"
+        );
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .status
+    ).toBe("unknown");
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .drinksAboveThresholdPerDay
+    ).toBeNull();
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .additionalCostPerDay
+    ).toBeNull();
+
+    expect(
+      premiumImpact
+        ?.cruiseImpact
+        .additionalCostTotal
+    ).toBeNull();
+  }
+);
+
+it(
+  "acepta una referencia documented-menu exact como precio económico",
+  () => {
+    const result =
+      compareDrinkPackages({
+        cruiseLine: "msc",
+
+        market: "ES",
+        sailingRegion: null,
+        onboardCurrency: "EUR",
+        sailingDate: "2026-08-15",
+
+        days: 7,
+        people: 1,
+
+        coffee: 0,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 2,
+
+        selectedDrinkPrices: {
+          cocktail: {
+            category: "cocktail",
+            price: 15,
+            currency: "EUR",
+            source: "documented-menu",
+            contextRelevance: "exact",
+          },
+        },
+      });
+
+    const premiumImpact =
+      result
+        .thresholdCruiseImpacts
+        .find(
+          (impact) =>
+            impact.packageKey ===
+            "mscPremiumExtra"
+        );
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .status
+    ).toBe("quantified");
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .drinksAboveThresholdPerDay
+    ).toBe(2);
+
+    expect(
+      premiumImpact
+        ?.dailyImpact
+        .additionalCostPerDay
+    ).toBe(2);
+
+    expect(
+      premiumImpact
+        ?.cruiseImpact
+        .additionalCostTotal
+    ).toBe(14);
+  }
+);

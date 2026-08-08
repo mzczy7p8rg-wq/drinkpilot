@@ -41,7 +41,13 @@ import {
 
 import {
   createSelectedDrinkPrice,
+  type SelectedDrinkPriceSource,
+  type SelectedDrinkPriceContextRelevance,
 } from "@/lib/selectedDrinkPrice";
+
+import {
+  resolveEconomicDrinkPrice,
+} from "@/lib/economicDrinkPriceResolution";
 
 import type {
   SelectedDrinkConsumption,
@@ -160,11 +166,20 @@ export type ComparisonInput = {
     Record<
       OnboardPriceKey,
       {
+        category?:
+          OnboardPriceKey;
+
         price:
           number | null | undefined;
 
         currency:
           string | null | undefined;
+
+        source?:
+          SelectedDrinkPriceSource;
+
+        contextRelevance?:
+          SelectedDrinkPriceContextRelevance;
       }
     >
   >;
@@ -844,14 +859,52 @@ export function compareDrinkPackages(
 
               currency:
                 selectedPrice?.currency,
+
+              source:
+                selectedPrice?.source,
+
+              contextRelevance:
+                selectedPrice?.contextRelevance,
             });
 
           if (!drink) {
             return null;
           }
 
+          const economicPrice =
+            resolveEconomicDrinkPrice(
+              drink
+            );
+
+          if (economicPrice === null) {
+            return null;
+          }
+
+          const economicDrink =
+            createSelectedDrinkPrice({
+              category,
+
+              price:
+                economicPrice,
+
+              currency:
+                drink.currency,
+
+              source:
+                drink.source,
+
+              contextRelevance:
+                drink.contextRelevance,
+            });
+
+          if (!economicDrink) {
+            return null;
+          }
+
           return {
-            drink,
+            drink:
+              economicDrink,
+
             quantityPerDay,
           };
         }
@@ -867,6 +920,38 @@ export function compareDrinkPackages(
     input.selectedDrinkPrices !==
     undefined;
 
+  const totalDrinksPerDay =
+    input.coffee +
+    input.water +
+    input.soda +
+    input.beer +
+    input.wine +
+    input.cocktail;
+
+  const economicallyResolvedDrinksPerDay =
+    selectedDrinkConsumptions.reduce(
+      (
+        total,
+        consumption
+      ) =>
+        total +
+        consumption.quantityPerDay,
+      0
+    );
+
+  /*
+   * Puede existir consumo real aunque una
+   * referencia seleccionada no sea admisible
+   * como evidencia económica.
+   *
+   * En ese caso no concluimos "none":
+   * el impacto económico sigue siendo unknown.
+   */
+  const hasUnresolvedEconomicDrinkConsumption =
+    hasSelectedDrinkPriceInput &&
+    economicallyResolvedDrinksPerDay <
+      totalDrinksPerDay;
+
   /*
    * IMPACTO ECONÓMICO DEL THRESHOLD
    *
@@ -879,7 +964,8 @@ export function compareDrinkPackages(
         (operationalRule) => {
           const dailyImpact:
             PackageThresholdConsumptionImpact =
-              hasSelectedDrinkPriceInput
+              hasSelectedDrinkPriceInput &&
+              !hasUnresolvedEconomicDrinkConsumption
                 ? evaluatePackageThresholdConsumptionImpact(
                     operationalRule,
                     selectedDrinkConsumptions
@@ -890,13 +976,7 @@ export function compareDrinkPackages(
 
                     items: [],
 
-                    totalDrinksPerDay:
-                      input.coffee +
-                      input.water +
-                      input.soda +
-                      input.beer +
-                      input.wine +
-                      input.cocktail,
+                    totalDrinksPerDay,
 
                     drinksAboveThresholdPerDay:
                       null,
