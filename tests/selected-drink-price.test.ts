@@ -223,3 +223,79 @@ describe(
     );
   }
 );
+
+describe(
+  "selected drink price reference identity",
+  () => {
+    it(
+      "conserva la referencia oficial seleccionada",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category: "water",
+            price: 3,
+            currency: "EUR",
+            source: "official",
+            referenceId:
+              " msc-aqua-1l-main-restaurant ",
+          })
+        ).toEqual({
+          category: "water",
+          price: 3,
+          currency: "EUR",
+          source: "official",
+          referenceId:
+            "msc-aqua-1l-main-restaurant",
+        });
+      }
+    );
+
+    it(
+      "conserva la referencia de menú documentado seleccionada",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category: "coffee",
+            price: 2.5,
+            currency: "USD",
+            source: "documented-menu",
+            referenceId:
+              "msc-world-america-espresso-fleetwide-2025-07",
+            contextRelevance:
+              "compatible",
+          })
+        ).toEqual({
+          category: "coffee",
+          price: 2.5,
+          currency: "USD",
+          source: "documented-menu",
+          referenceId:
+            "msc-world-america-espresso-fleetwide-2025-07",
+          contextRelevance:
+            "compatible",
+        });
+      }
+    );
+
+    it(
+      "no conserva una referencia en precios manuales",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category: "beer",
+            price: 8,
+            currency: "EUR",
+            source: "user",
+            referenceId:
+              "stale-reference",
+          })
+        ).toEqual({
+          category: "beer",
+          price: 8,
+          currency: "EUR",
+          source: "user",
+        });
+      }
+    );
+  }
+);

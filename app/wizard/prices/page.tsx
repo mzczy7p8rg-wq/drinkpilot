@@ -30,6 +30,7 @@ import {
 } from "@/lib/selectedDrinkPrice";
 
 import {
+  resolveDrinkPriceReferenceSelection,
   resolveDrinkPriceSelectionSource,
 } from "@/lib/drinkPriceSelectionSource";
 
@@ -325,7 +326,11 @@ export default function PricesPage() {
     setSelectedDrinkReferenceIds,
   ] = useState<
     Partial<Record<OnboardPriceKey, string>>
-  >({});
+  >(() =>
+    resolveDrinkPriceReferenceSelection(
+      data.selectedDrinkPrices
+    ).referenceIds
+  );
 
   const [
     selectedDrinkReferenceSources,
@@ -337,7 +342,11 @@ export default function PricesPage() {
         "official" | "documented-menu"
       >
     >
-  >({});
+  >(() =>
+    resolveDrinkPriceReferenceSelection(
+      data.selectedDrinkPrices
+    ).referenceSources
+  );
 
   const drinkPriceValidations =
     Object.fromEntries(
@@ -675,6 +684,8 @@ export default function PricesPage() {
                   selectedDrinkCurrency,
 
                 source,
+
+                referenceId,
 
                 contextRelevance,
               });

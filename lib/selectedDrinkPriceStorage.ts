@@ -15,6 +15,7 @@ export type StoredSelectedDrinkPrices =
         price?: unknown;
         currency?: unknown;
         source?: unknown;
+        referenceId?: unknown;
         contextRelevance?: unknown;
       }
     >
@@ -90,6 +91,12 @@ export function resolveStoredSelectedDrinkPrices(
           candidate.source === "documented-menu"
             ? candidate.source
             : "user",
+
+        referenceId:
+          typeof candidate.referenceId ===
+          "string"
+            ? candidate.referenceId
+            : null,
 
         contextRelevance:
           candidate.contextRelevance === "exact" ||

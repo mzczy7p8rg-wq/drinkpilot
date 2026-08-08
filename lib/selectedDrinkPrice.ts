@@ -24,6 +24,9 @@ export type SelectedDrinkPrice = {
   source:
     SelectedDrinkPriceSource;
 
+  referenceId?:
+    string;
+
   contextRelevance?:
     SelectedDrinkPriceContextRelevance;
 };
@@ -40,6 +43,9 @@ export type SelectedDrinkPriceInput = {
 
   source?:
     SelectedDrinkPriceSource;
+
+  referenceId?:
+    string | null;
 
   contextRelevance?:
     SelectedDrinkPriceContextRelevance;
@@ -78,6 +84,24 @@ function normalizePrice(
   return value;
 }
 
+function normalizeReferenceId(
+  value:
+    string | null | undefined
+): string | null {
+  if (
+    typeof value !== "string"
+  ) {
+    return null;
+  }
+
+  const normalized =
+    value.trim();
+
+  return normalized.length > 0
+    ? normalized
+    : null;
+}
+
 export function createSelectedDrinkPrice(
   input:
     SelectedDrinkPriceInput
@@ -91,6 +115,16 @@ export function createSelectedDrinkPrice(
     normalizeCurrency(
       input.currency
     );
+
+  const source =
+    input.source ?? "user";
+
+  const referenceId =
+    source === "user"
+      ? null
+      : normalizeReferenceId(
+          input.referenceId
+        );
 
   if (
     price === null ||
@@ -108,9 +142,15 @@ export function createSelectedDrinkPrice(
     currency,
 
     source:
-      input.source ?? "user",
+      source,
 
-    ...(input.source === "documented-menu" &&
+    ...(referenceId
+      ? {
+          referenceId,
+        }
+      : {}),
+
+    ...(source === "documented-menu" &&
     (input.contextRelevance === "exact" ||
       input.contextRelevance === "compatible")
       ? {

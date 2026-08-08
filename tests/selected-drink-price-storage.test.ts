@@ -337,3 +337,62 @@ describe(
     );
   }
 );
+
+describe(
+  "selected drink price reference identity storage",
+  () => {
+    it(
+      "rehidrata la identidad de una referencia documentada",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            coffee: {
+              price: 2.5,
+              currency: "USD",
+              source: "documented-menu",
+              referenceId:
+                "msc-world-america-espresso-fleetwide-2025-07",
+              contextRelevance:
+                "compatible",
+            },
+          })
+        ).toEqual({
+          coffee: {
+            category: "coffee",
+            price: 2.5,
+            currency: "USD",
+            source: "documented-menu",
+            referenceId:
+              "msc-world-america-espresso-fleetwide-2025-07",
+            contextRelevance:
+              "compatible",
+          },
+        });
+      }
+    );
+
+    it(
+      "descarta una referencia asociada a un precio manual",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            beer: {
+              price: 8,
+              currency: "EUR",
+              source: "user",
+              referenceId:
+                "stale-reference",
+            },
+          })
+        ).toEqual({
+          beer: {
+            category: "beer",
+            price: 8,
+            currency: "EUR",
+            source: "user",
+          },
+        });
+      }
+    );
+  }
+);
