@@ -17,6 +17,10 @@ import {
 } from "@/lib/cruiseContext";
 
 import {
+  resolveSelectedDrinkPricesAfterCruiseLineChange,
+} from "@/lib/selectedDrinkPriceContext";
+
+import {
   useStore,
 } from "@/lib/store";
 
@@ -157,6 +161,18 @@ export default function WizardPage() {
               ? {}
               : previous
                   .customPackagePrices,
+
+          selectedDrinkPrices:
+            resolveSelectedDrinkPricesAfterCruiseLineChange({
+              previousCruiseLine:
+                previous.cruiseLine,
+
+              nextCruiseLine:
+                selectedCruiseLine,
+
+              selectedDrinkPrices:
+                previous.selectedDrinkPrices,
+            }),
         };
       }
     );
