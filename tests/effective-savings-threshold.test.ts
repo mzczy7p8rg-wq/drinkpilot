@@ -38,6 +38,9 @@ describe(
               drinksAboveThreshold:
                 14,
 
+              drinksExcludedFromCoverage:
+                null,
+
               additionalCostTotal:
                 null,
             }
@@ -81,6 +84,9 @@ describe(
               drinksAboveThreshold:
                 14,
 
+              drinksExcludedFromCoverage:
+                null,
+
               additionalCostTotal:
                 40,
             }
@@ -116,7 +122,7 @@ describe(
             fullyCovered:
               true,
           },
-        ] as any;
+        ];
 
         const result =
           findBestPackageByEffectiveSavings(
@@ -164,7 +170,7 @@ describe(
             fullyCovered:
               true,
           },
-        ] as any;
+        ];
 
         const result =
           findBestPackageByEffectiveSavings(

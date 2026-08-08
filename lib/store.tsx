@@ -565,6 +565,12 @@ export function StoreProvider({
             baseData.cocktail
           );
 
+        /*
+         * La hidratación posmontaje desde
+         * localStorage evita divergencias
+         * entre servidor y cliente.
+         */
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setData({
           cruiseLine,
 

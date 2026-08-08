@@ -1,6 +1,6 @@
 import {
-  ComparisonResult,
-  PackageComparisonResult,
+  type PackageComparisonResult,
+  type PackageThresholdCruiseImpactResult,
 } from "@/lib/comparison";
 
 import { CoverageCategory } from "@/lib/coverage";
@@ -18,6 +18,62 @@ export type RecommendationExplanation = {
     | "positive"
     | "neutral"
     | "warning";
+};
+
+type RecommendationPackage =
+  Omit<
+    Partial<PackageComparisonResult>,
+    | "packageKey"
+    | "effectiveSavings"
+  > & {
+    packageKey: string;
+
+    packageName: string;
+
+    savings: number;
+
+    effectiveSavings:
+      number | null;
+
+    coverageScore: number;
+
+    fullyCovered: boolean;
+
+    uncoveredCategories:
+      CoverageCategory[];
+  };
+
+type RecommendationThresholdImpact =
+  Omit<
+    Partial<PackageThresholdCruiseImpactResult>,
+    "packageKey" | "cruiseImpact"
+  > & {
+    packageKey: string;
+
+    cruiseImpact:
+      Partial<
+        PackageThresholdCruiseImpactResult[
+          "cruiseImpact"
+        ]
+      > &
+        Pick<
+          PackageThresholdCruiseImpactResult[
+            "cruiseImpact"
+          ],
+          | "status"
+          | "drinksAboveThreshold"
+        >;
+  };
+
+export type RecommendationComparison = {
+  packages:
+    RecommendationPackage[];
+
+  bestPackage:
+    RecommendationPackage | null;
+
+  thresholdCruiseImpacts:
+    RecommendationThresholdImpact[];
 };
 
 const coverageLabels: Record<CoverageCategory, string> = {
@@ -59,13 +115,13 @@ function formatCategories(
 }
 
 function getEffectiveSavings(
-  pkg: PackageComparisonResult
+  pkg: RecommendationPackage
 ): number | null {
   return pkg.effectiveSavings;
 }
 
 function findHighestSavingsPackage(
-  packages: PackageComparisonResult[]
+  packages: RecommendationPackage[]
 ) {
   const comparablePackages =
     packages.filter(
@@ -85,7 +141,7 @@ function findHighestSavingsPackage(
 }
 
 function findHighestGrossSavingsPackage(
-  packages: PackageComparisonResult[]
+  packages: RecommendationPackage[]
 ) {
   if (packages.length === 0) {
     return null;
@@ -99,7 +155,7 @@ function findHighestGrossSavingsPackage(
 }
 
 function findBestCoveragePackage(
-  packages: PackageComparisonResult[]
+  packages: RecommendationPackage[]
 ) {
   if (packages.length === 0) {
     return null;
@@ -118,7 +174,7 @@ function findBestCoveragePackage(
 }
 
 function getUnquantifiedThresholdImpact(
-  comparison: ComparisonResult,
+  comparison: RecommendationComparison,
   packageKey: string
 ) {
   const thresholdImpact =
@@ -172,7 +228,7 @@ function buildThresholdUncertaintyExplanation(
 }
 
 export function buildRecommendationExplanation(
-  comparison: ComparisonResult
+  comparison: RecommendationComparison
 ): RecommendationExplanation {
   const {
     packages,
