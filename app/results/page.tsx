@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { useStore } from "@/lib/store";
@@ -37,6 +36,14 @@ import {
   formatCurrency,
   formatSignedCurrency,
 } from "@/lib/currencyFormatting";
+
+import {
+  useWizardRouteGuard,
+} from "@/lib/useWizardRouteGuard";
+
+import {
+  getTotalDrinksPerDay,
+} from "@/lib/wizardProgress";
 
 const coverageLabels: Record<
   CoverageCategory,
@@ -76,9 +83,15 @@ export default function ResultsPage() {
 
   const {
     data,
-    hydrated,
     resetData,
   } = useStore();
+
+  const {
+    hydrated,
+    ready,
+  } = useWizardRouteGuard(
+    "people"
+  );
 
   /*
    * NAVIERA ACTIVA
@@ -92,12 +105,9 @@ export default function ResultsPage() {
     );
 
   const totalDrinksPerDay =
-    data.coffee +
-    data.water +
-    data.soda +
-    data.beer +
-    data.wine +
-    data.cocktail;
+    getTotalDrinksPerDay(
+      data
+    );
 
   const selectedPremiumPreferences = [
     data.alcoholicCocktails,
@@ -131,55 +141,6 @@ export default function ResultsPage() {
         price > 0
     ).length;
 
-  const hasValidDays =
-    Number.isInteger(data.days) &&
-    data.days > 0;
-
-  const hasValidConsumption =
-    totalDrinksPerDay > 0;
-
-  const hasValidPeople =
-    Number.isInteger(data.people) &&
-    data.people > 0;
-
-  const isComplete =
-    hasValidDays &&
-    hasValidConsumption &&
-    hasValidPeople;
-
-  /*
-   * PROTECCIÓN DE RUTAS
-   */
-  useEffect(() => {
-    if (!hydrated) {
-      return;
-    }
-
-    if (!hasValidDays) {
-      router.replace("/wizard");
-      return;
-    }
-
-    if (!hasValidConsumption) {
-      router.replace(
-        "/wizard/consumption"
-      );
-      return;
-    }
-
-    if (!hasValidPeople) {
-      router.replace(
-        "/wizard/people"
-      );
-    }
-  }, [
-    hydrated,
-    hasValidDays,
-    hasValidConsumption,
-    hasValidPeople,
-    router,
-  ]);
-
   if (!hydrated) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-6">
@@ -196,7 +157,7 @@ export default function ResultsPage() {
     );
   }
 
-  if (!isComplete) {
+  if (!ready) {
     return (
       <main className="min-h-screen bg-slate-100 flex items-center justify-center px-6">
         <div className="text-center">

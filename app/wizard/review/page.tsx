@@ -25,6 +25,14 @@ import {
   useStore,
 } from "@/lib/store";
 
+import {
+  useWizardRouteGuard,
+} from "@/lib/useWizardRouteGuard";
+
+import {
+  getTotalDrinksPerDay,
+} from "@/lib/wizardProgress";
+
 function formatCurrency(
   amount: number,
   currency: string
@@ -52,8 +60,14 @@ export default function ReviewPage() {
 
   const {
     data,
-    hydrated,
   } = useStore();
+
+  const {
+    hydrated,
+    ready,
+  } = useWizardRouteGuard(
+    "people"
+  );
 
   /*
    * NAVIERA ACTIVA
@@ -149,14 +163,8 @@ export default function ReviewPage() {
     );
 
   const totalDrinksPerDay =
-    activeDrinks.reduce(
-      (
-        total,
-        drink
-      ) =>
-        total +
-        drink.value,
-      0
+    getTotalDrinksPerDay(
+      data
     );
 
   const preferences = [
@@ -188,6 +196,16 @@ export default function ReviewPage() {
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <p className="font-medium text-slate-600">
           Recuperando tu análisis...
+        </p>
+      </main>
+    );
+  }
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <p className="font-medium text-slate-600">
+          Comprobando los datos de tu análisis...
         </p>
       </main>
     );

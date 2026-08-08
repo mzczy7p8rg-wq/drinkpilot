@@ -80,8 +80,6 @@ export type WizardData = {
   nonAlcoholicCocktail:
     number | null;
 
-  drinksPerDay: number;
-
   /*
    * Preferencias de cobertura.
    */
@@ -227,8 +225,6 @@ function createInitialData(
 
     nonAlcoholicCocktail:
       null,
-
-    drinksPerDay: 0,
 
     alcoholicCocktails:
       false,
@@ -637,12 +633,6 @@ export function StoreProvider({
           nonAlcoholicCocktail:
             storedCocktailConsumption
               .nonAlcoholicCocktail,
-
-          drinksPerDay:
-            typeof parsedData.drinksPerDay ===
-            "number"
-              ? parsedData.drinksPerDay
-              : baseData.drinksPerDay,
 
           alcoholicCocktails:
             typeof parsedData.alcoholicCocktails ===
