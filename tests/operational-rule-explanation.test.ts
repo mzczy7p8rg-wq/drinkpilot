@@ -90,7 +90,7 @@ describe(
     );
 
     it(
-      "no inventa avisos operativos para Costa",
+      "expone únicamente avisos operativos respaldados para Costa",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -106,8 +106,20 @@ describe(
           );
 
         expect(
-          notices
-        ).toEqual([]);
+          notices.length
+        ).toBe(3);
+
+        expect(
+          notices.every(
+            (notice) =>
+              notice.type ===
+                "venue-coverage" &&
+              notice.source ===
+                "base" &&
+              notice.calculationImpact ===
+                "informational"
+          )
+        ).toBe(true);
       }
     );
   }
@@ -688,6 +700,165 @@ describe(
         expect(
           notice
         ).toBeUndefined();
+      }
+    );
+  }
+);
+
+describe(
+  "venue coverage operational notices",
+  () => {
+    it(
+      "expone las limitaciones de venues de Costa como información estructurada",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "myDrinks" &&
+              item.type ===
+                "venue-coverage"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("base");
+
+        expect(
+          notice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+
+        expect(
+          notice?.message
+        ).toContain(
+          "Archipelago"
+        );
+
+        expect(
+          notice?.message
+        ).toContain(
+          "Casanova"
+        );
+      }
+    );
+
+    it(
+      "expone la cobertura condicional de Premium Extra sin llamarla exclusión",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            onboardCurrency: "EUR",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "venue-coverage"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "cobertura condicional"
+        );
+
+        expect(
+          notice?.message
+        ).not.toContain(
+          "excluidos"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+      }
+    );
+
+    it(
+      "no crea aviso cuando toda la cobertura de venues es desconocida",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const unknownRule =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        if (!unknownRule) {
+          throw new Error(
+            "MSC Premium Extra rule missing"
+          );
+        }
+
+        const notices =
+          buildOperationalRuleNotices([
+            {
+              ...unknownRule,
+
+              venueCoverage: {
+                specialityRestaurants:
+                  "unknown",
+
+                privateIslands:
+                  "unknown",
+
+                themedVenues:
+                  "unknown",
+              },
+            },
+          ]);
+
+        expect(
+          notices.some(
+            (notice) =>
+              notice.type ===
+              "venue-coverage"
+          )
+        ).toBe(false);
       }
     );
   }

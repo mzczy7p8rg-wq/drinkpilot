@@ -6,6 +6,10 @@ import {
   filterAdultPackageItems,
 } from "@/lib/adultPackageFilter";
 
+import {
+  explainVenueCoverage,
+} from "@/lib/venueCoverageExplanation";
+
 export type OperationalRuleNotice = {
   id: string;
 
@@ -18,7 +22,8 @@ export type OperationalRuleNotice = {
     | "alcohol-daily-limit"
     | "drink-price-threshold"
     | "aqua-unlimited"
-    | "minors-only";
+    | "minors-only"
+    | "venue-coverage";
 
   message: string;
 
@@ -53,6 +58,89 @@ export type OperationalRuleNotice = {
   appliedContextualRuleIds:
     string[];
 };
+
+function buildVenueCoverageMessage(
+  rule: PackageOperationalRules
+): string | null {
+  const explanation =
+    explainVenueCoverage(
+      rule.venueCoverage
+    );
+
+  if (
+    !explanation
+      .hasKnownLimitations
+  ) {
+    return null;
+  }
+
+  const parts:
+    string[] = [];
+
+  const appendStatus = (
+    label: string,
+    status:
+      typeof explanation
+        .specialityRestaurants
+        .status
+  ) => {
+    if (status === "limited") {
+      parts.push(
+        `${label}: cobertura limitada`
+      );
+    } else if (
+      status === "conditional"
+    ) {
+      parts.push(
+        `${label}: cobertura condicional`
+      );
+    } else if (
+      status === "excluded"
+    ) {
+      parts.push(
+        `${label}: excluidos`
+      );
+    }
+  };
+
+  appendStatus(
+    "Restaurantes de especialidad",
+    explanation
+      .specialityRestaurants
+      .status
+  );
+
+  appendStatus(
+    "Islas privadas",
+    explanation
+      .privateIslands
+      .status
+  );
+
+  appendStatus(
+    "Venues temáticos",
+    explanation
+      .themedVenues
+      .status
+  );
+
+  if (
+    explanation
+      .excludedVenues
+      .length > 0
+  ) {
+    parts.push(
+      `Venues excluidos: ${explanation.excludedVenues.join(
+        ", "
+      )}`
+    );
+  }
+
+  return (
+    `${rule.packageName}: ` +
+    `${parts.join("; ")}.`
+  );
+}
 
 export function buildOperationalRuleNotices(
   rules: PackageOperationalRules[]
@@ -172,6 +260,45 @@ export function buildOperationalRuleNotices(
         appliedContextualRuleIds:
           rule
             .aquaUnlimitedSource
+            .contextualRuleIds,
+      });
+    }
+
+    const venueMessage =
+      buildVenueCoverageMessage(
+        rule
+      );
+
+    if (venueMessage) {
+      notices.push({
+        id:
+          `${rule.packageKey}-venue-coverage`,
+
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        type:
+          "venue-coverage",
+
+        calculationImpact:
+          "informational",
+
+        message:
+          venueMessage,
+
+        source:
+          rule
+            .venueCoverageSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
+        appliedContextualRuleIds:
+          rule
+            .venueCoverageSource
             .contextualRuleIds,
       });
     }
