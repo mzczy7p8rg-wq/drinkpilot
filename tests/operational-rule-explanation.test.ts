@@ -6,6 +6,7 @@ import {
 
 import {
   buildOperationalRuleNotices,
+  getOperationalRuleNoticeImpactLabel,
 } from "@/lib/operationalRuleExplanation";
 
 import {
@@ -90,7 +91,7 @@ describe(
     );
 
     it(
-      "no inventa avisos operativos para Costa",
+      "expone únicamente avisos operativos respaldados para Costa",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -106,8 +107,46 @@ describe(
           );
 
         expect(
-          notices
-        ).toEqual([]);
+          notices.length
+        ).toBe(6);
+
+        expect(
+          notices.every(
+            (notice) =>
+              notice.source ===
+                "base" &&
+              notice.calculationImpact ===
+                "informational"
+          )
+        ).toBe(true);
+
+        for (
+          const packageKey of [
+            "myDrinksSoft",
+            "myDrinks",
+            "myDrinksPlus",
+          ] as const
+        ) {
+          expect(
+            notices.some(
+              (notice) =>
+                notice.packageKey ===
+                  packageKey &&
+                notice.type ===
+                  "venue-coverage"
+            )
+          ).toBe(true);
+
+          expect(
+            notices.some(
+              (notice) =>
+                notice.packageKey ===
+                  packageKey &&
+                notice.type ===
+                  "package-purchase-group-requirement"
+            )
+          ).toBe(true);
+        }
       }
     );
   }
@@ -310,7 +349,7 @@ describe(
   "operational notice calculation impact",
   () => {
     it(
-      "marca las reglas operativas actuales como informativas",
+      "mantiene informativas las reglas que no participan en el cálculo",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -329,103 +368,22 @@ describe(
           notices.length
         ).toBeGreaterThan(0);
 
-        for (
-          const notice of
-          notices
-        ) {
-          expect(
-            notice.calculationImpact
-          ).toBe(
-            "informational"
-          );
-        }
-      }
-    );
-
-    it(
-      "no convierte un umbral contextual ficticio en impacto económico antes de que el motor lo utilice",
-      () => {
-        const rules =
-          getPackageOperationalRules(
-            {
-              cruiseLine: "msc",
-              market: "ES",
-              sailingDate:
-                "2026-08-15",
-            },
-            {
-              contextualRules: [
-                {
-                  id:
-                    "test-threshold-impact",
-                  cruiseLine:
-                    "msc",
-                  packageKey:
-                    "mscPremiumExtra",
-                  markets: ["ES"],
-                  rules: {
-                    drinkPriceThreshold:
-                      14,
-                  },
-                },
-              ],
-            }
-          );
-
-        const thresholdNotice =
-          buildOperationalRuleNotices(
-            rules
-          ).find(
+        const informationalNotices =
+          notices.filter(
             (notice) =>
-              notice.type ===
-                "drink-price-threshold" &&
-              notice.packageKey ===
-                "mscPremiumExtra"
+              notice.type !==
+                "package-pricing-day-policy" &&
+              notice.type !==
+                "drink-price-threshold"
           );
 
         expect(
-          thresholdNotice
-            ?.calculationImpact
-        ).toBe(
-          "informational"
-        );
-
-        expect(
-          thresholdNotice?.source
-        ).toBe(
-          "contextual"
-        );
-      }
-    );
-  }
-);
-
-describe(
-  "operational notice calculation impact",
-  () => {
-    it(
-      "marca las reglas operativas actuales como informativas",
-      () => {
-        const rules =
-          getPackageOperationalRules({
-            cruiseLine: "msc",
-            market: "ES",
-            sailingDate:
-              "2026-08-15",
-          });
-
-        const notices =
-          buildOperationalRuleNotices(
-            rules
-          );
-
-        expect(
-          notices.length
+          informationalNotices.length
         ).toBeGreaterThan(0);
 
         for (
           const notice of
-          notices
+          informationalNotices
         ) {
           expect(
             notice.calculationImpact
@@ -437,7 +395,7 @@ describe(
     );
 
     it(
-      "mantiene informativo un umbral contextual mientras el motor no lo utilice",
+      "marca económico un umbral contextual que el motor ya utiliza",
       () => {
         const rules =
           getPackageOperationalRules(
@@ -481,7 +439,7 @@ describe(
           thresholdNotice
             ?.calculationImpact
         ).toBe(
-          "informational"
+          "economic"
         );
 
         expect(
@@ -544,6 +502,545 @@ describe(
         ).toContain(
           "no equivale a agua mineral embotellada tradicional ilimitada"
         );
+      }
+    );
+  }
+);
+
+describe(
+  "MSC Premium Extra contextual threshold end to end",
+  () => {
+    it(
+      "explica el umbral EUR real como regla contextual económica",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingRegion: null,
+            onboardCurrency: "EUR",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "14.00 EUR"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("contextual");
+
+        expect(
+          notice?.appliedContextualRuleIds
+        ).toContain(
+          "msc-premium-extra-threshold-eur"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe("economic");
+      }
+    );
+
+    it(
+      "explica el umbral USD real como regla económica sin confundir su moneda",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "US",
+            sailingRegion: null,
+            onboardCurrency: "USD",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "16.00 USD"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("contextual");
+
+        expect(
+          notice?.appliedContextualRuleIds
+        ).toContain(
+          "msc-premium-extra-threshold-usd"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe("economic");
+      }
+    );
+
+    it(
+      "no genera un aviso de umbral cuando se desconoce la moneda a bordo",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            sailingRegion: null,
+            onboardCurrency: null,
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "drink-price-threshold"
+          );
+
+        expect(
+          notice
+        ).toBeUndefined();
+      }
+    );
+  }
+);
+
+describe(
+  "venue coverage operational notices",
+  () => {
+    it(
+      "expone las limitaciones de venues de Costa como información estructurada",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "myDrinks" &&
+              item.type ===
+                "venue-coverage"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("base");
+
+        expect(
+          notice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+
+        expect(
+          notice?.message
+        ).toContain(
+          "Archipelago"
+        );
+
+        expect(
+          notice?.message
+        ).toContain(
+          "Casanova"
+        );
+      }
+    );
+
+    it(
+      "expone la cobertura condicional de Premium Extra sin llamarla exclusión",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+            market: "ES",
+            onboardCurrency: "EUR",
+            sailingDate:
+              "2026-08-15",
+          });
+
+        const notices =
+          buildOperationalRuleNotices(
+            rules
+          );
+
+        const notice =
+          notices.find(
+            (item) =>
+              item.packageKey ===
+                "mscPremiumExtra" &&
+              item.type ===
+                "venue-coverage"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "cobertura condicional"
+        );
+
+        expect(
+          notice?.message
+        ).not.toContain(
+          "excluidos"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+      }
+    );
+
+    it(
+      "no crea aviso cuando toda la cobertura de venues es desconocida",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const unknownRule =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        if (!unknownRule) {
+          throw new Error(
+            "MSC Premium Extra rule missing"
+          );
+        }
+
+        const notices =
+          buildOperationalRuleNotices([
+            {
+              ...unknownRule,
+
+              venueCoverage: {
+                specialityRestaurants:
+                  "unknown",
+
+                privateIslands:
+                  "unknown",
+
+                themedVenues:
+                  "unknown",
+              },
+            },
+          ]);
+
+        expect(
+          notices.some(
+            (notice) =>
+              notice.type ===
+              "venue-coverage"
+          )
+        ).toBe(false);
+      }
+    );
+  }
+);
+
+describe(
+  "package purchase group requirement notices",
+  () => {
+    it(
+      "explica el requisito de mismo camarote de MSC sin inferir cumplimiento",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const notice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (item) =>
+              item.packageKey ===
+                "mscEasy" &&
+              item.type ===
+                "package-purchase-group-requirement"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "mismo camarote"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("base");
+
+        expect(
+          notice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "distingue la regla de misma reserva o camarote de Costa",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+          });
+
+        const notice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (item) =>
+              item.packageKey ===
+                "myDrinks" &&
+              item.type ===
+                "package-purchase-group-requirement"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "misma reserva o camarote"
+        );
+
+        expect(
+          notice?.message
+        ).not.toContain(
+          "solo el mismo camarote"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+      }
+    );
+
+    it(
+      "no genera aviso cuando el alcance de contratación es desconocido",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const easy =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        if (!easy) {
+          throw new Error(
+            "MSC Easy rule missing"
+          );
+        }
+
+        const notices =
+          buildOperationalRuleNotices([
+            {
+              ...easy,
+
+              packagePurchaseGroupRequirement:
+                "unknown",
+
+              packagePurchaseGroupRequirementSource: {
+                source: "none",
+                contextualRuleIds: [],
+              },
+            },
+          ]);
+
+        expect(
+          notices.some(
+            (notice) =>
+              notice.type ===
+              "package-purchase-group-requirement"
+          )
+        ).toBe(false);
+      }
+    );
+  }
+);
+
+describe(
+  "package pricing day policy notices",
+  () => {
+    it(
+      "proporciona una etiqueta económica reutilizable por results",
+      () => {
+        expect(
+          getOperationalRuleNoticeImpactLabel(
+            "economic"
+          )
+        ).toBe(
+          "Aplicado al cálculo económico"
+        );
+
+        expect(
+          getOperationalRuleNoticeImpactLabel(
+            "informational"
+          )
+        ).toBeNull();
+      }
+    );
+
+    it(
+      "explica que MSC no factura el día de desembarque y marca impacto económico",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const notice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (item) =>
+              item.packageKey ===
+                "mscEasy" &&
+              item.type ===
+                "package-pricing-day-policy"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "día de desembarque"
+        );
+
+        expect(
+          notice?.message
+        ).toContain(
+          "no se factura"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "economic"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("base");
+
+        expect(
+          notice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "no genera aviso cuando la política de días facturables es desconocida",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+          });
+
+        expect(
+          buildOperationalRuleNotices(
+            rules
+          ).some(
+            (notice) =>
+              notice.type ===
+              "package-pricing-day-policy"
+          )
+        ).toBe(false);
       }
     );
   }

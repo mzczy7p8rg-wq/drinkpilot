@@ -2,6 +2,10 @@ import type {
   AlcoholDailyLimitEvaluation,
 } from "@/lib/alcoholDailyLimit";
 
+import type {
+  AlcoholicDrinksDailyLimitChargePolicy,
+} from "@/lib/contextualPackageRules";
+
 export type OperationalEconomicImpactStatus =
   | "unknown"
   | "none"
@@ -13,6 +17,9 @@ export type OperationalEconomicImpact = {
 
   excessDrinksPerDay:
     number | null;
+
+  chargePolicy:
+    AlcoholicDrinksDailyLimitChargePolicy;
 
   /*
    * null significa que sabemos que existe
@@ -36,7 +43,10 @@ export type OperationalEconomicImpact = {
  */
 export function evaluateOperationalEconomicImpact(
   evaluation:
-    AlcoholDailyLimitEvaluation
+    AlcoholDailyLimitEvaluation,
+  chargePolicy:
+    AlcoholicDrinksDailyLimitChargePolicy =
+      "unknown"
 ): OperationalEconomicImpact {
   if (
     evaluation.status === "unknown"
@@ -44,6 +54,7 @@ export function evaluateOperationalEconomicImpact(
     return {
       status: "unknown",
       excessDrinksPerDay: null,
+      chargePolicy,
       additionalCostPerDay: null,
     };
   }
@@ -58,6 +69,8 @@ export function evaluateOperationalEconomicImpact(
       excessDrinksPerDay:
         evaluation.excessDrinksPerDay,
 
+      chargePolicy,
+
       additionalCostPerDay: null,
     };
   }
@@ -67,6 +80,8 @@ export function evaluateOperationalEconomicImpact(
 
     excessDrinksPerDay:
       evaluation.excessDrinksPerDay,
+
+    chargePolicy,
 
     additionalCostPerDay: 0,
   };

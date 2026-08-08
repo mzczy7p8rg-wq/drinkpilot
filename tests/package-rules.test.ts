@@ -138,6 +138,8 @@ describe(
         ).toEqual({
           cruiseLine: "msc",
           market: null,
+          sailingRegion: null,
+          onboardCurrency: null,
           sailingDate: null,
         });
       }
@@ -151,6 +153,7 @@ describe(
             {
               cruiseLine: "msc",
               market: "ES",
+              sailingRegion: null,
               sailingDate:
                 "2026-08-15",
             },
@@ -162,6 +165,7 @@ describe(
         ).toEqual({
           cruiseLine: "msc",
           market: "ES",
+          sailingRegion: null,
           sailingDate:
             "2026-08-15",
         });
@@ -316,6 +320,9 @@ describe(
                   rules: {
                     drinkPriceThreshold:
                       14,
+
+                    drinkPriceThresholdCurrency:
+                      "EUR",
                   },
                 },
               ],
@@ -326,6 +333,11 @@ describe(
           rule
             ?.drinkPriceThreshold
         ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdCurrency
+        ).toBe("EUR");
 
         expect(
           rule
@@ -513,6 +525,487 @@ describe(
         ).toEqual([
           "test-threshold-only",
         ]);
+      }
+    );
+  }
+);
+
+describe(
+  "drink price threshold charge policy",
+  () => {
+    it(
+      "resuelve la política difference cuando el threshold MSC la documenta",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: null,
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate: null,
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicy
+        ).toBe("difference");
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicySource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "msc-premium-extra-threshold-eur",
+          ],
+        });
+      }
+    );
+
+    it(
+      "resuelve una política de cobro contextual con procedencia independiente",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra",
+            {
+              contextualRules: [
+                {
+                  id:
+                    "test-threshold-charge-policy",
+
+                  cruiseLine:
+                    "msc",
+
+                  packageKey:
+                    "mscPremiumExtra",
+
+                  markets: [
+                    "ES",
+                  ],
+
+                  onboardCurrencies: [
+                    "EUR",
+                  ],
+
+                  rules: {
+                    drinkPriceThreshold:
+                      14,
+
+                    drinkPriceThresholdCurrency:
+                      "EUR",
+
+                    drinkPriceThresholdChargePolicy:
+                      "difference",
+                  },
+                },
+              ],
+            }
+          );
+
+        expect(
+          rule?.drinkPriceThreshold
+        ).toBe(14);
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicy
+        ).toBe("difference");
+
+        expect(
+          rule
+            ?.drinkPriceThresholdChargePolicySource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "test-threshold-charge-policy",
+          ],
+        });
+
+        expect(
+          rule
+            ?.drinkPriceThresholdSource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "test-threshold-charge-policy",
+          ],
+        });
+      }
+    );
+  }
+);
+
+it(
+  "expone cobertura operativa de venues sin inferirla desde restrictions",
+  () => {
+    const costaRules =
+      getPackageOperationalRules({
+        cruiseLine: "costa",
+      });
+
+    const mscRules =
+      getPackageOperationalRules({
+        cruiseLine: "msc",
+      });
+
+    const costaMyDrinks =
+      costaRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "myDrinks"
+      );
+
+    const costaMyDrinksPlus =
+      costaRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "myDrinksPlus"
+      );
+
+    const mscEasy =
+      mscRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "mscEasy"
+      );
+
+    const mscPremiumExtra =
+      mscRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "mscPremiumExtra"
+      );
+
+    expect(
+      costaMyDrinks?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "unknown",
+      privateIslands:
+        "unknown",
+      themedVenues:
+        "limited",
+      excludedVenues: [
+        "Archipelago",
+        "Casanova",
+      ],
+    });
+
+    expect(
+      costaMyDrinksPlus?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "unknown",
+      privateIslands:
+        "unknown",
+      themedVenues:
+        "limited",
+      excludedVenues: [
+        "Archipelago",
+        "Casanova",
+      ],
+    });
+
+    expect(
+      mscEasy?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "limited",
+      privateIslands:
+        "limited",
+      themedVenues:
+        "limited",
+      excludedVenues: [],
+    });
+
+    expect(
+      mscPremiumExtra?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "conditional",
+      privateIslands:
+        "conditional",
+      themedVenues:
+        "unknown",
+      excludedVenues: [],
+    });
+  }
+);
+
+
+it(
+  "mantiene procedencia base para venueCoverage cuando procede de observedCoverage",
+  () => {
+    const mscEasy =
+      getPackageOperationalRule(
+        "msc",
+        "mscEasy"
+      );
+
+    const costaMyDrinks =
+      getPackageOperationalRule(
+        "costa",
+        "myDrinks"
+      );
+
+    expect(
+      mscEasy?.venueCoverageSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+
+    expect(
+      costaMyDrinks?.venueCoverageSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+  }
+);
+
+it(
+  "expone el alcance de contratación conjunta sin inferir cumplimiento",
+  () => {
+    const mscEasy =
+      getPackageOperationalRule(
+        "msc",
+        "mscEasy"
+      );
+
+    const mscPremiumExtra =
+      getPackageOperationalRule(
+        "msc",
+        "mscPremiumExtra"
+      );
+
+    const costaMyDrinks =
+      getPackageOperationalRule(
+        "costa",
+        "myDrinks"
+      );
+
+    expect(
+      mscEasy
+        ?.packagePurchaseGroupRequirement
+    ).toBe("same-cabin");
+
+    expect(
+      mscEasy
+        ?.packagePurchaseGroupRequirementSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+
+    expect(
+      mscPremiumExtra
+        ?.packagePurchaseGroupRequirement
+    ).toBe("same-cabin");
+
+    expect(
+      costaMyDrinks
+        ?.packagePurchaseGroupRequirement
+    ).toBe(
+      "same-booking-or-cabin"
+    );
+
+    expect(
+      costaMyDrinks
+        ?.packagePurchaseGroupRequirementSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+  }
+);
+describe(
+  "package pricing day policy",
+  () => {
+    it(
+      "expone que MSC excluye el día de desembarque del precio del paquete",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            "msc"
+          );
+
+        const mscEasy =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        const mscPremiumExtra =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        const mscAlcoholFree =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscAlcoholFree"
+          );
+
+        expect(
+          mscEasy
+            ?.packagePricingDayPolicy
+        ).toBe(
+          "exclude-disembarkation-day"
+        );
+
+        expect(
+          mscPremiumExtra
+            ?.packagePricingDayPolicy
+        ).toBe(
+          "exclude-disembarkation-day"
+        );
+
+        expect(
+          mscAlcoholFree
+            ?.packagePricingDayPolicy
+        ).toBe(
+          "exclude-disembarkation-day"
+        );
+
+        expect(
+          mscEasy
+            ?.packagePricingDayPolicySource
+            .source
+        ).toBe("base");
+      }
+    );
+
+    it(
+      "no inventa una política de días facturables para Costa",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            "costa"
+          );
+
+        expect(
+          rules.every(
+            (rule) =>
+              rule
+                .packagePricingDayPolicy ===
+              "unknown"
+          )
+        ).toBe(true);
+      }
+    );
+  }
+);
+
+describe(
+  "alcohol daily limit charge policy resolution",
+  () => {
+    it(
+      "resuelve precio completo más propinas para Premium Extra US",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-04-01",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicy
+        ).toBe(
+          "full-price-plus-gratuities"
+        );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicySource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "msc-premium-extra-alcohol-limit-full-price-us",
+          ],
+        });
+      }
+    );
+
+    it(
+      "mantiene desconocida la política localizada fuera de US",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicy
+        ).toBe("unknown");
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicySource
+        ).toEqual({
+          source: "none",
+          contextualRuleIds: [],
+        });
+      }
+    );
+
+    it(
+      "mantiene desconocida la política antes de la fecha documentada",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-03-31",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicy
+        ).toBe("unknown");
       }
     );
   }

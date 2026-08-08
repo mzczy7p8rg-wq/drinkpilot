@@ -30,6 +30,11 @@ import {
 } from "@/lib/packageRules";
 
 import {
+  resolvePackageChargeDays,
+} from "@/lib/packageChargeDays";
+
+
+import {
   resolveAlcoholConsumption,
   type AlcoholConsumptionResolution,
 } from "@/lib/alcoholConsumption";
@@ -38,6 +43,30 @@ import {
   evaluateOperationalRuleImpacts,
   type PackageOperationalRuleImpact,
 } from "@/lib/operationalRuleImpact";
+
+import {
+  createSelectedDrinkPrice,
+  type SelectedDrinkPriceSource,
+  type SelectedDrinkPriceContextRelevance,
+} from "@/lib/selectedDrinkPrice";
+
+import {
+  resolveEconomicDrinkPrice,
+} from "@/lib/economicDrinkPriceResolution";
+
+import type {
+  SelectedDrinkConsumption,
+} from "@/lib/selectedDrinkConsumption";
+
+import {
+  evaluatePackageThresholdConsumptionImpact,
+  type PackageThresholdConsumptionImpact,
+} from "@/lib/packageThresholdConsumptionImpact";
+
+import {
+  evaluatePackageThresholdCruiseImpact,
+  type PackageThresholdCruiseImpact,
+} from "@/lib/packageThresholdCruiseImpact";
 
 export type PriceSource =
   | "user"
@@ -53,9 +82,9 @@ export type ComparisonInput = {
    * Naviera que debe utilizar
    * el motor.
    *
-   * Mientras el wizard todavía no
-   * permita seleccionarla, Costa
-   * continúa siendo el valor por defecto.
+   * Se mantiene opcional por compatibilidad;
+   * Costa continúa siendo el valor por
+   * defecto cuando no se proporciona.
    */
   cruiseLine?: CruiseLineKey;
 
@@ -68,6 +97,10 @@ export type ComparisonInput = {
    * cálculo económico.
    */
   market?: string | null;
+
+  sailingRegion?: string | null;
+
+  onboardCurrency?: string | null;
 
   sailingDate?: string | null;
 
@@ -123,6 +156,37 @@ export type ComparisonInput = {
   customPackagePrices?: Record<
     string,
     number | null | undefined
+  >;
+
+
+  /*
+   * Precios concretos seleccionados
+   * por categoría.
+   *
+   * Su ausencia significa que todavía
+   * no podemos evaluar económicamente
+   * un threshold de precio.
+   */
+  selectedDrinkPrices?: Partial<
+    Record<
+      OnboardPriceKey,
+      {
+        category?:
+          OnboardPriceKey;
+
+        price:
+          number | null | undefined;
+
+        currency:
+          string | null | undefined;
+
+        source?:
+          SelectedDrinkPriceSource;
+
+        contextRelevance?:
+          SelectedDrinkPriceContextRelevance;
+      }
+    >
   >;
 };
 
@@ -189,6 +253,20 @@ export type PackageComparisonResult = {
     CoverageCategory[];
 };
 
+export type PackageThresholdCruiseImpactResult = {
+  packageKey:
+    PackageKey;
+
+  packageName:
+    string;
+
+  dailyImpact:
+    PackageThresholdConsumptionImpact;
+
+  cruiseImpact:
+    PackageThresholdCruiseImpact;
+};
+
 export type ComparisonResult = {
   /*
    * true = existen precios individuales
@@ -226,22 +304,30 @@ export type ComparisonResult = {
     PackageOperationalRules[];
 
   /*
+   * Impacto del threshold durante todo
+   * el crucero. Puede ajustar o volver
+   * desconocido el ahorro efectivo.
+   */
+  thresholdCruiseImpacts:
+    PackageThresholdCruiseImpactResult[];
+
+  /*
    * Resolución del consumo alcohólico
    * diario conocido.
    *
-   * Por ahora es únicamente informativa:
-   * no modifica cálculo, cobertura ni
-   * recomendación.
+   * No modifica por sí sola el cálculo:
+   * alimenta la evaluación posterior de
+   * las reglas operativas.
    */
   alcoholConsumption:
     AlcoholConsumptionResolution;
 
   /*
-   * Impacto descriptivo de las reglas
+   * Impacto estructurado de las reglas
    * operativas sobre el consumo conocido.
-   *
-   * No modifica todavía cobertura,
-   * economía ni recomendación.
+   * La comparación puede utilizar una
+   * incertidumbre económica demostrada
+   * para calificar el ahorro efectivo.
    */
   operationalRuleImpacts:
     PackageOperationalRuleImpact[];
@@ -493,7 +579,7 @@ const nonQuantifiedCategories:
  * Determina la calidad real
  * de la comparación económica.
  */
-function resolveEconomicComparison(
+export function resolveEconomicComparison(
   coverage:
     | {
         fullyCovered: boolean;
@@ -503,7 +589,15 @@ function resolveEconomicComparison(
       }
     | undefined,
 
-  savings: number
+  savings: number,
+
+  thresholdImpact?:
+    PackageThresholdCruiseImpact,
+
+  operationalEconomicImpact?:
+    PackageOperationalRuleImpact[
+      "economicImpact"
+    ]
 ): {
   status:
     EconomicComparisonStatus;
@@ -522,8 +616,83 @@ function resolveEconomicComparison(
   }
 
   /*
+   * THRESHOLD ECONÓMICO
+   *
+   * known-unquantified:
+   * sabemos que existen consumiciones
+   * afectadas, pero todavía no podemos
+   * conocer su coste adicional real.
+   *
+   * Por tanto, tampoco podemos afirmar
+   * un ahorro efectivo definitivo.
+   */
+  if (
+    thresholdImpact?.status ===
+      "known-unquantified"
+  ) {
+    return {
+      status:
+        "partial-unknown",
+
+      effectiveSavings:
+        null,
+    };
+  }
+
+  /*
+   * LÍMITE DIARIO DE ALCOHOL
+   *
+   * Solo cerramos el ahorro efectivo
+   * cuando conocemos tanto el exceso como
+   * la política económica aplicable.
+   *
+   * El coste permanece sin cuantificar:
+   * no sabemos qué bebidas concretas se
+   * consumen después de alcanzar el límite
+   * ni el importe exacto de las propinas.
+   */
+  if (
+    operationalEconomicImpact
+      ?.status ===
+      "known-unquantified" &&
+    operationalEconomicImpact
+      .chargePolicy !==
+      "unknown"
+  ) {
+    return {
+      status:
+        "partial-unknown",
+
+      effectiveSavings:
+        null,
+    };
+  }
+
+  /*
+   * Si el impacto está cuantificado,
+   * descontamos únicamente el coste
+   * adicional demostrado.
+   *
+   * savings permanece intacto como
+   * ahorro económico base.
+   */
+  const thresholdAdditionalCost =
+    thresholdImpact?.status ===
+      "quantified" &&
+    thresholdImpact
+      .additionalCostTotal !== null
+      ? thresholdImpact
+          .additionalCostTotal
+      : 0;
+
+  const thresholdAdjustedSavings =
+    savings -
+    thresholdAdditionalCost;
+
+  /*
    * Cobertura completa:
-   * ahorro bruto = ahorro efectivo.
+   * el ahorro efectivo incorpora cualquier
+   * coste de threshold ya cuantificado.
    */
   if (
     coverage.fullyCovered
@@ -533,7 +702,7 @@ function resolveEconomicComparison(
         "complete",
 
       effectiveSavings:
-        savings,
+        thresholdAdjustedSavings,
     };
   }
 
@@ -576,6 +745,19 @@ function resolveEconomicComparison(
   };
 }
 
+export function findBestPackageByEffectiveSavings(
+  packages: PackageComparisonResult[]
+): PackageComparisonResult | null {
+  return (
+    packages.find(
+      (pkg) =>
+        pkg.fullyCovered &&
+        pkg.effectiveSavings !== null &&
+        pkg.effectiveSavings > 0
+    ) ?? null
+  );
+}
+
 export function compareDrinkPackages(
   input: ComparisonInput
 ): ComparisonResult {
@@ -605,9 +787,13 @@ export function compareDrinkPackages(
    * Construimos el contexto real recibido
    * desde el wizard.
    *
-   * Todavía no utilizamos estas reglas
-   * para alterar cálculo, cobertura ni
-   * recomendación.
+   * La mayoría de reglas continúan siendo
+   * descriptivas.
+   *
+   * Algunas reglas explícitamente modeladas
+   * pueden participar en el cálculo económico,
+   * como la política de días facturables
+   * del paquete.
    */
   const operationalRules =
     getPackageOperationalRules({
@@ -616,6 +802,12 @@ export function compareDrinkPackages(
 
       market:
         input.market ?? null,
+
+      sailingRegion:
+        input.sailingRegion ?? null,
+
+      onboardCurrency:
+        input.onboardCurrency ?? null,
 
       sailingDate:
         input.sailingDate ?? null,
@@ -631,8 +823,8 @@ export function compareDrinkPackages(
    * está completa, alcoholicDrinksPerDay
    * permanecerá en null.
    *
-   * Todavía no aplicamos límites
-   * operativos sobre este valor.
+   * Este valor alimenta la evaluación
+   * posterior de límites operativos.
    */
   const alcoholConsumption =
     resolveAlcoholConsumption({
@@ -658,14 +850,212 @@ export function compareDrinkPackages(
    * Cruzamos las reglas de cada paquete
    * con el consumo alcohólico conocido.
    *
-   * El resultado sigue siendo únicamente
-   * descriptivo.
+   * El resultado conserva el detalle
+   * descriptivo; la comparación económica
+   * decide después si debe utilizarlo.
    */
   const operationalRuleImpacts =
     evaluateOperationalRuleImpacts(
       alcoholConsumption,
       operationalRules
     );
+
+  /*
+   * BEBIDAS CON PRECIO EXPLÍCITO
+   *
+   * No utilizamos los precios medios de
+   * la naviera como sustituto de una bebida
+   * concreta seleccionada por el usuario.
+   */
+  const selectedDrinkConsumptions:
+    SelectedDrinkConsumption[] = (
+      [
+        ["coffee", input.coffee],
+        ["water", input.water],
+        ["soda", input.soda],
+        ["beer", input.beer],
+        ["wine", input.wine],
+        ["cocktail", input.cocktail],
+      ] as const
+    )
+      .map(
+        ([category, quantityPerDay]) => {
+          if (
+            !Number.isFinite(
+              quantityPerDay
+            ) ||
+            quantityPerDay <= 0
+          ) {
+            return null;
+          }
+
+          const selectedPrice =
+            input
+              .selectedDrinkPrices
+              ?.[category];
+
+          const drink =
+            createSelectedDrinkPrice({
+              category,
+
+              price:
+                selectedPrice?.price,
+
+              currency:
+                selectedPrice?.currency,
+
+              source:
+                selectedPrice?.source,
+
+              contextRelevance:
+                selectedPrice?.contextRelevance,
+            });
+
+          if (!drink) {
+            return null;
+          }
+
+          const economicPrice =
+            resolveEconomicDrinkPrice(
+              drink
+            );
+
+          if (economicPrice === null) {
+            return null;
+          }
+
+          const economicDrink =
+            createSelectedDrinkPrice({
+              category,
+
+              price:
+                economicPrice,
+
+              currency:
+                drink.currency,
+
+              source:
+                drink.source,
+
+              contextRelevance:
+                drink.contextRelevance,
+            });
+
+          if (!economicDrink) {
+            return null;
+          }
+
+          return {
+            drink:
+              economicDrink,
+
+            quantityPerDay,
+          };
+        }
+      )
+      .filter(
+        (
+          item
+        ): item is SelectedDrinkConsumption =>
+          item !== null
+      );
+
+  const hasSelectedDrinkPriceInput =
+    input.selectedDrinkPrices !==
+    undefined;
+
+  const totalDrinksPerDay =
+    input.coffee +
+    input.water +
+    input.soda +
+    input.beer +
+    input.wine +
+    input.cocktail;
+
+  const economicallyResolvedDrinksPerDay =
+    selectedDrinkConsumptions.reduce(
+      (
+        total,
+        consumption
+      ) =>
+        total +
+        consumption.quantityPerDay,
+      0
+    );
+
+  /*
+   * Puede existir consumo real aunque una
+   * referencia seleccionada no sea admisible
+   * como evidencia económica.
+   *
+   * En ese caso no concluimos "none":
+   * el impacto económico sigue siendo unknown.
+   */
+  const hasUnresolvedEconomicDrinkConsumption =
+    hasSelectedDrinkPriceInput &&
+    economicallyResolvedDrinksPerDay <
+      totalDrinksPerDay;
+
+  /*
+   * IMPACTO ECONÓMICO DEL THRESHOLD
+   *
+   * Se mantiene separado de savings,
+   * drinksCost y recommended.
+   */
+  const thresholdCruiseImpacts:
+    PackageThresholdCruiseImpactResult[] =
+      operationalRules.map(
+        (operationalRule) => {
+          const dailyImpact:
+            PackageThresholdConsumptionImpact =
+              hasSelectedDrinkPriceInput &&
+              !hasUnresolvedEconomicDrinkConsumption
+                ? evaluatePackageThresholdConsumptionImpact(
+                    operationalRule,
+                    selectedDrinkConsumptions
+                  )
+                : {
+                    status:
+                      "unknown",
+
+                    items: [],
+
+                    totalDrinksPerDay,
+
+                    drinksAboveThresholdPerDay:
+                      null,
+
+                      drinksExcludedFromCoveragePerDay:
+                        null,
+
+                    additionalCostPerDay:
+                      null,
+                  };
+
+          return {
+            packageKey:
+              operationalRule
+                .packageKey,
+
+            packageName:
+              operationalRule
+                .packageName,
+
+            dailyImpact,
+
+            cruiseImpact:
+              evaluatePackageThresholdCruiseImpact({
+                dailyImpact,
+
+                days:
+                  input.days,
+
+                people:
+                  input.people,
+              }),
+          };
+        }
+      );
 
   /*
    * PRECIOS INDIVIDUALES
@@ -819,9 +1209,14 @@ export function compareDrinkPackages(
 
       operationalRules,
 
+
+      thresholdCruiseImpacts,
+
       alcoholConsumption,
 
+
       operationalRuleImpacts,
+
 
       packages: [],
 
@@ -850,10 +1245,32 @@ export function compareDrinkPackages(
           referencePrice,
           resolvedPrice,
         }) => {
+          const operationalRule =
+            operationalRules.find(
+              (rule) =>
+                rule.packageKey ===
+                packageKey
+            );
+
+          const packageChargeDays =
+            resolvePackageChargeDays({
+              cruiseDays:
+                input.days,
+
+              packagePricingDayPolicy:
+                operationalRule
+                  ?.packagePricingDayPolicy ??
+                "unknown",
+            });
+
           const calculation =
             calculateRecommendation({
               days:
                 input.days,
+
+              packageChargeDays:
+                packageChargeDays
+                  .chargeDays,
 
               people:
                 input.people,
@@ -915,10 +1332,26 @@ export function compareDrinkPackages(
                 packageKey
             );
 
+          const thresholdImpact =
+            thresholdCruiseImpacts.find(
+              (impact) =>
+                impact.packageKey ===
+                packageKey
+            )?.cruiseImpact;
+
+          const operationalEconomicImpact =
+            operationalRuleImpacts.find(
+              (impact) =>
+                impact.packageKey ===
+                packageKey
+            )?.economicImpact;
+
           const economicComparison =
             resolveEconomicComparison(
               coverage,
-              calculation.savings
+              calculation.savings,
+              thresholdImpact,
+              operationalEconomicImpact
             );
 
           return {
@@ -996,12 +1429,52 @@ export function compareDrinkPackages(
       );
 
   /*
-   * Mayor ahorro primero.
+   * ORDEN ECONÓMICO
+   *
+   * Priorizamos comparaciones cuyo ahorro
+   * efectivo puede calcularse.
+   *
+   * effectiveSavings === null significa
+   * que existe incertidumbre económica y
+   * no debe ganar frente a una alternativa
+   * cuantificada.
    */
   results.sort(
-    (a, b) =>
-      b.savings -
-      a.savings
+    (a, b) => {
+      const aEffective =
+        a.effectiveSavings;
+
+      const bEffective =
+        b.effectiveSavings;
+
+      if (
+        aEffective !== null &&
+        bEffective !== null
+      ) {
+        return (
+          bEffective -
+          aEffective
+        );
+      }
+
+      if (aEffective !== null) {
+        return -1;
+      }
+
+      if (bEffective !== null) {
+        return 1;
+      }
+
+      /*
+       * Si ambos son inciertos,
+       * savings continúa siendo útil
+       * como criterio secundario.
+       */
+      return (
+        b.savings -
+        a.savings
+      );
+    }
   );
 
   /*
@@ -1009,15 +1482,14 @@ export function compareDrinkPackages(
    *
    * Para ser recomendado:
    *
-   * 1. ahorro positivo;
-   * 2. cobertura completa.
+   * 1. cobertura completa;
+   * 2. ahorro efectivo conocido;
+   * 3. ahorro efectivo positivo.
    */
   const bestPackage =
-    results.find(
-      (pkg) =>
-        pkg.savings > 0 &&
-        pkg.fullyCovered
-    ) ?? null;
+    findBestPackageByEffectiveSavings(
+      results
+    );
 
   return {
     economicDataAvailable:
@@ -1030,11 +1502,16 @@ export function compareDrinkPackages(
 
     operationalRules,
 
-    alcoholConsumption,
 
-    operationalRuleImpacts,
+  thresholdCruiseImpacts,
 
-    packages:
+  alcoholConsumption,
+
+
+  operationalRuleImpacts,
+
+
+  packages:
       results,
 
     bestPackage,

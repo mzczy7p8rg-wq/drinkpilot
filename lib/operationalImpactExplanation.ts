@@ -76,7 +76,11 @@ export function buildOperationalImpactExplanations(
       "known-unquantified"
     ) {
       economicMessage =
-        "Existe un impacto económico potencial asociado a este exceso, pero los datos disponibles no permiten cuantificarlo de forma fiable. DrinkPilot no lo incorpora todavía al cálculo económico.";
+        impact.economicImpact
+          .chargePolicy ===
+        "full-price-plus-gratuities"
+          ? "Las bebidas alcohólicas que superan el límite se cobran a precio completo más propinas. DrinkPilot todavía no puede cuantificar este impacto porque el consumo diario no identifica qué bebidas concretas se producen después de alcanzar el límite ni el importe exacto de las propinas. Por eso no añade un importe y mantiene el ahorro efectivo como desconocido."
+          : "Existe un impacto económico potencial asociado a este exceso, pero los datos disponibles no permiten cuantificarlo de forma fiable. DrinkPilot no lo incorpora todavía al cálculo económico.";
     }
 
     explanations.push({

@@ -33,6 +33,39 @@ export type CruiseContext = {
   market: string | null;
 
   /*
+   * Región operativa de la navegación.
+   *
+   * Es deliberadamente distinta del
+   * mercado de compra o reserva.
+   *
+   * Ejemplos futuros para MSC:
+   *
+   * "MED"
+   * "NOR"
+   * "WEE"
+   *
+   * null = desconocida.
+   */
+  sailingRegion: string | null;
+
+  /*
+   * Moneda operativa utilizada a bordo.
+   *
+   * Es independiente del mercado de compra
+   * y de la moneda en la que el usuario haya
+   * pagado su reserva.
+   *
+   * Ejemplos:
+   *
+   * "EUR"
+   * "USD"
+   * "GBP"
+   *
+   * null = desconocida.
+   */
+  onboardCurrency: string | null;
+
+  /*
    * Fecha de salida ISO:
    *
    * YYYY-MM-DD
@@ -54,6 +87,8 @@ export function createCruiseContext(
   return {
     cruiseLine,
     market: null,
+    sailingRegion: null,
+    onboardCurrency: null,
     sailingDate: null,
   };
 }

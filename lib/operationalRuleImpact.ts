@@ -38,6 +38,11 @@ export type PackageOperationalRuleImpact = {
       "alcoholicDrinksDailyLimitSource"
     ];
 
+  alcoholDailyLimitChargePolicySource:
+    PackageOperationalRules[
+      "alcoholicDrinksDailyLimitChargePolicySource"
+    ];
+
   economicImpact:
     OperationalEconomicImpact;
 };
@@ -86,9 +91,15 @@ export function evaluateOperationalRuleImpacts(
           rule
             .alcoholicDrinksDailyLimitSource,
 
+        alcoholDailyLimitChargePolicySource:
+          rule
+            .alcoholicDrinksDailyLimitChargePolicySource,
+
         economicImpact:
           evaluateOperationalEconomicImpact(
-            alcoholDailyLimit
+            alcoholDailyLimit,
+            rule
+              .alcoholicDrinksDailyLimitChargePolicy
           ),
       };
     }

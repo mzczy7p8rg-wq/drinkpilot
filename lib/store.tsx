@@ -26,6 +26,11 @@ import {
   resolveStoredCocktailConsumption,
 } from "@/lib/cocktailConsumptionStorage";
 
+import {
+  resolveStoredSelectedDrinkPrices,
+  type SelectedDrinkPrices,
+} from "@/lib/selectedDrinkPriceStorage";
+
 export type CustomPackagePrices = Record<
   string,
   number | null
@@ -47,6 +52,10 @@ export type WizardData = {
    * y fecha sin inventar contexto.
    */
   market: string | null;
+
+  sailingRegion: string | null;
+
+  onboardCurrency: string | null;
 
   sailingDate: string | null;
 
@@ -96,6 +105,15 @@ export type WizardData = {
    */
   customPackagePrices:
     CustomPackagePrices;
+
+  /*
+   * Precios concretos de bebidas
+   * introducidos por el usuario.
+   *
+   * category -> SelectedDrinkPrice
+   */
+  selectedDrinkPrices:
+    SelectedDrinkPrices;
 
   people: number;
 };
@@ -189,6 +207,10 @@ function createInitialData(
 
     market: null,
 
+    sailingRegion: null,
+
+    onboardCurrency: null,
+
     sailingDate: null,
 
     days: 0,
@@ -233,6 +255,9 @@ function createInitialData(
       createEmptyPackagePrices(
         cruiseLine
       ),
+
+    selectedDrinkPrices:
+      {},
 
     people: 1,
   };
@@ -508,9 +533,20 @@ export function StoreProvider({
             market:
               parsedData.market,
 
+            sailingRegion:
+              parsedData.sailingRegion,
+
+            onboardCurrency:
+              parsedData.onboardCurrency,
+
             sailingDate:
               parsedData.sailingDate,
           });
+
+        const storedSelectedDrinkPrices =
+          resolveStoredSelectedDrinkPrices(
+            parsedData.selectedDrinkPrices
+          );
 
         const storedCocktailConsumption =
           resolveStoredCocktailConsumption(
@@ -535,6 +571,14 @@ export function StoreProvider({
           market:
             storedCruiseContext
               .market,
+
+          sailingRegion:
+            storedCruiseContext
+              .sailingRegion,
+
+          onboardCurrency:
+            storedCruiseContext
+              .onboardCurrency,
 
           sailingDate:
             storedCruiseContext
@@ -651,6 +695,9 @@ export function StoreProvider({
                   .bottledWaterUnlimited,
 
           customPackagePrices,
+
+          selectedDrinkPrices:
+            storedSelectedDrinkPrices,
 
           people:
             typeof parsedData.people ===

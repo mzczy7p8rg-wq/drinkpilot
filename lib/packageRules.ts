@@ -18,7 +18,10 @@ import {
 
 import {
   getContextualPackageRulesForPackage,
+  type AlcoholicDrinksDailyLimitChargePolicy,
   type ContextualPackageRule,
+  type DrinkPriceThresholdChargePolicy,
+  type DrinkPriceThresholdCoveragePolicy,
 } from "@/lib/contextualPackageRules";
 
 export type PackageRulesContext =
@@ -50,6 +53,37 @@ export type OperationalRuleSource = {
     string[];
 };
 
+export type PackageVenueCoverageStatus =
+  | "unknown"
+  | "included"
+  | "limited"
+  | "conditional"
+  | "excluded";
+
+export type PackageVenueCoverage = {
+  specialityRestaurants:
+    PackageVenueCoverageStatus;
+
+  privateIslands:
+    PackageVenueCoverageStatus;
+
+  themedVenues:
+    PackageVenueCoverageStatus;
+
+  excludedVenues:
+    string[];
+};
+
+export type PackagePurchaseGroupRequirement =
+  | "unknown"
+  | "same-cabin"
+  | "same-booking-or-cabin";
+
+export type PackagePricingDayPolicy =
+  | "unknown"
+  | "exclude-disembarkation-day";
+
+
 export type PackageOperationalRules = {
   packageKey: PackageKey;
 
@@ -72,6 +106,17 @@ export type PackageOperationalRules = {
     OperationalRuleSource;
 
   /*
+   * Política económica conocida para las
+   * bebidas alcohólicas que exceden el
+   * límite diario.
+   */
+  alcoholicDrinksDailyLimitChargePolicy:
+    AlcoholicDrinksDailyLimitChargePolicy;
+
+  alcoholicDrinksDailyLimitChargePolicySource:
+    OperationalRuleSource;
+
+  /*
    * Umbral máximo por bebida.
    *
    * null = ninguna regla válida
@@ -80,7 +125,45 @@ export type PackageOperationalRules = {
   drinkPriceThreshold:
     number | null;
 
+  /*
+   * Moneda del umbral anterior.
+   *
+   * null cuando no existe un umbral
+   * monetario válido.
+   */
+  drinkPriceThresholdCurrency:
+    string | null;
+
   drinkPriceThresholdSource:
+    OperationalRuleSource;
+
+  /*
+   * Política económica conocida para
+   * bebidas que superan el threshold.
+   *
+   * Por defecto permanece en "unknown"
+   * hasta que una regla contextual
+   * explícita aporte evidencia.
+   */
+  drinkPriceThresholdChargePolicy:
+    DrinkPriceThresholdChargePolicy;
+
+  drinkPriceThresholdChargePolicySource:
+    OperationalRuleSource;
+
+  /*
+   * Política de cobertura asociada al
+   * threshold.
+   *
+   * Se mantiene separada de la política
+   * económica: conocer que una bebida
+   * queda fuera de cobertura no implica
+   * conocer cuánto se cobra por ella.
+   */
+  drinkPriceThresholdCoveragePolicy:
+    DrinkPriceThresholdCoveragePolicy;
+
+  drinkPriceThresholdCoveragePolicySource:
     OperationalRuleSource;
 
   /*
@@ -98,6 +181,54 @@ export type PackageOperationalRules = {
   minorsOnly: boolean;
 
   minorsOnlySource:
+    OperationalRuleSource;
+
+  /*
+   * Cobertura operativa conocida según
+   * el tipo de venue.
+   *
+   * No se infiere desde restrictions:
+   * procede únicamente de datos
+   * estructurados.
+   */
+  venueCoverage:
+    PackageVenueCoverage;
+
+  /*
+   * Procedencia de la cobertura de venues.
+   *
+   * La cobertura base procede únicamente
+   * de observedCoverage estructurado.
+   */
+  venueCoverageSource:
+    OperationalRuleSource;
+
+  /*
+   * Alcance conocido de contratación
+   * conjunta del paquete.
+   *
+   * No implica que DrinkPilot conozca
+   * todavía la composición real del
+   * camarote o de la reserva.
+   */
+  packagePurchaseGroupRequirement:
+    PackagePurchaseGroupRequirement;
+
+  packagePurchaseGroupRequirementSource:
+    OperationalRuleSource;
+
+  /*
+   * Política conocida sobre qué días
+   * del crucero son facturables para
+   * el paquete.
+   *
+   * Cuando se conoce, participa en el
+   * coste económico del paquete.
+   */
+  packagePricingDayPolicy:
+    PackagePricingDayPolicy;
+
+  packagePricingDayPolicySource:
     OperationalRuleSource;
 
   /*
@@ -143,6 +274,118 @@ function readPositiveNumber(
     : null;
 }
 
+function readVenueCoverageStatus(
+  value: unknown
+): PackageVenueCoverageStatus {
+  if (
+    value === "included" ||
+    value === "limited" ||
+    value === "conditional" ||
+    value === "excluded"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function readPackagePricingDayPolicy(
+  value: unknown
+): PackagePricingDayPolicy {
+  if (
+    value ===
+    "exclude-disembarkation-day"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function readPackagePurchaseGroupRequirement(
+  value: unknown
+): PackagePurchaseGroupRequirement {
+  if (
+    value === "same-cabin" ||
+    value === "same-booking-or-cabin"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function readVenueCoverage(
+  value: unknown
+): PackageVenueCoverage {
+  const fallback:
+    PackageVenueCoverage = {
+      specialityRestaurants:
+        "unknown",
+
+      privateIslands:
+        "unknown",
+
+      themedVenues:
+        "unknown",
+
+      excludedVenues: [],
+    };
+
+  if (
+    !value ||
+    typeof value !== "object"
+  ) {
+    return fallback;
+  }
+
+  const record =
+    value as Record<
+      string,
+      unknown
+    >;
+
+  const excludedVenues =
+    Array.isArray(
+      record.excludedVenues
+    )
+      ? record.excludedVenues
+          .filter(
+            (
+              venue
+            ): venue is string =>
+              typeof venue ===
+                "string" &&
+              venue.trim().length >
+                0
+          )
+          .map(
+            (venue) =>
+              venue.trim()
+          )
+      : [];
+
+  return {
+    specialityRestaurants:
+      readVenueCoverageStatus(
+        record
+          .specialityRestaurants
+      ),
+
+    privateIslands:
+      readVenueCoverageStatus(
+        record.privateIslands
+      ),
+
+    themedVenues:
+      readVenueCoverageStatus(
+        record.themedVenues
+      ),
+
+    excludedVenues,
+  };
+}
+
 /*
  * Aplica reglas contextuales sobre
  * las reglas base.
@@ -181,6 +424,23 @@ function applyContextualRules(
         : result
             .alcoholicDrinksDailyLimitSource;
 
+    const alcoholicDrinksDailyLimitChargePolicySource =
+      values
+        .alcoholicDrinksDailyLimitChargePolicy !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .alcoholicDrinksDailyLimitChargePolicySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .alcoholicDrinksDailyLimitChargePolicySource;
+
     const drinkPriceThresholdSource =
       values.drinkPriceThreshold !==
       undefined
@@ -196,6 +456,40 @@ function applyContextualRules(
           }
         : result
             .drinkPriceThresholdSource;
+
+    const drinkPriceThresholdChargePolicySource =
+      values
+        .drinkPriceThresholdChargePolicy !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .drinkPriceThresholdChargePolicySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .drinkPriceThresholdChargePolicySource;
+
+    const drinkPriceThresholdCoveragePolicySource =
+      values
+        .drinkPriceThresholdCoveragePolicy !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .drinkPriceThresholdCoveragePolicySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .drinkPriceThresholdCoveragePolicySource;
 
     const aquaUnlimitedSource =
       values.aquaUnlimited !==
@@ -243,6 +537,15 @@ function applyContextualRules(
           : result
               .alcoholicDrinksDailyLimit,
 
+      alcoholicDrinksDailyLimitChargePolicy:
+        values
+          .alcoholicDrinksDailyLimitChargePolicy !==
+        undefined
+          ? values
+              .alcoholicDrinksDailyLimitChargePolicy
+          : result
+              .alcoholicDrinksDailyLimitChargePolicy,
+
       drinkPriceThreshold:
         values
           .drinkPriceThreshold !==
@@ -253,6 +556,44 @@ function applyContextualRules(
             )
           : result
               .drinkPriceThreshold,
+
+      drinkPriceThresholdCurrency:
+        values
+          .drinkPriceThreshold !==
+        undefined
+          ? (
+              typeof values
+                .drinkPriceThresholdCurrency ===
+                "string" &&
+              values
+                .drinkPriceThresholdCurrency
+                .trim().length > 0
+                ? values
+                    .drinkPriceThresholdCurrency
+                    .trim()
+                    .toUpperCase()
+                : null
+            )
+          : result
+              .drinkPriceThresholdCurrency,
+
+      drinkPriceThresholdChargePolicy:
+        values
+          .drinkPriceThresholdChargePolicy !==
+        undefined
+          ? values
+              .drinkPriceThresholdChargePolicy
+          : result
+              .drinkPriceThresholdChargePolicy,
+
+      drinkPriceThresholdCoveragePolicy:
+        values
+          .drinkPriceThresholdCoveragePolicy !==
+        undefined
+          ? values
+              .drinkPriceThresholdCoveragePolicy
+          : result
+              .drinkPriceThresholdCoveragePolicy,
 
       aquaUnlimited:
         values.aquaUnlimited !==
@@ -268,7 +609,13 @@ function applyContextualRules(
 
       alcoholicDrinksDailyLimitSource,
 
+      alcoholicDrinksDailyLimitChargePolicySource,
+
       drinkPriceThresholdSource,
+
+      drinkPriceThresholdChargePolicySource,
+
+      drinkPriceThresholdCoveragePolicySource,
 
       aquaUnlimitedSource,
 
@@ -303,6 +650,28 @@ function resolvePackageRules(
 
   let minorsOnly =
     false;
+
+  let venueCoverage:
+    PackageVenueCoverage = {
+      specialityRestaurants:
+        "unknown",
+
+      privateIslands:
+        "unknown",
+
+      themedVenues:
+        "unknown",
+
+      excludedVenues: [],
+    };
+
+  let packagePurchaseGroupRequirement:
+    PackagePurchaseGroupRequirement =
+      "unknown";
+
+  let packagePricingDayPolicy:
+    PackagePricingDayPolicy =
+      "unknown";
 
   /*
    * REGLAS BASE
@@ -343,6 +712,38 @@ function resolvePackageRules(
       minorsOnly =
         true;
     }
+
+    if (
+      "venueCoverage" in
+        observed
+    ) {
+      venueCoverage =
+        readVenueCoverage(
+          observed.venueCoverage
+        );
+    }
+
+    if (
+      "packagePurchaseGroupRequirement" in
+        observed
+    ) {
+      packagePurchaseGroupRequirement =
+        readPackagePurchaseGroupRequirement(
+          observed
+            .packagePurchaseGroupRequirement
+        );
+    }
+
+    if (
+      "packagePricingDayPolicy" in
+        observed
+    ) {
+      packagePricingDayPolicy =
+        readPackagePricingDayPolicy(
+          observed
+            .packagePricingDayPolicy
+        );
+    }
   }
 
   const baseRules:
@@ -368,6 +769,14 @@ function resolvePackageRules(
               contextualRuleIds: [],
             },
 
+      alcoholicDrinksDailyLimitChargePolicy:
+        "unknown",
+
+      alcoholicDrinksDailyLimitChargePolicySource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
+
       /*
        * Los umbrales no se consideran
        * universales.
@@ -378,7 +787,26 @@ function resolvePackageRules(
       drinkPriceThreshold:
         null,
 
+      drinkPriceThresholdCurrency:
+        null,
+
       drinkPriceThresholdSource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
+
+      drinkPriceThresholdChargePolicy:
+        "unknown",
+
+      drinkPriceThresholdChargePolicySource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
+
+      drinkPriceThresholdCoveragePolicy:
+        "unknown",
+
+      drinkPriceThresholdCoveragePolicySource: {
         source: "none",
         contextualRuleIds: [],
       },
@@ -400,6 +828,48 @@ function resolvePackageRules(
 
       minorsOnlySource:
         minorsOnly
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
+      venueCoverage,
+
+      venueCoverageSource:
+        observed &&
+        "venueCoverage" in observed
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
+      packagePurchaseGroupRequirement,
+
+      packagePurchaseGroupRequirementSource:
+        packagePurchaseGroupRequirement !==
+        "unknown"
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
+      packagePricingDayPolicy,
+
+      packagePricingDayPolicySource:
+        packagePricingDayPolicy !==
+        "unknown"
           ? {
               source: "base",
               contextualRuleIds: [],

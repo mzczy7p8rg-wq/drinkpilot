@@ -20,6 +20,38 @@ import {
   useStore,
 } from "@/lib/store";
 
+import {
+  onboardPriceKeys,
+  type OnboardPriceKey,
+} from "@/lib/onboardPriceService";
+
+import {
+  createSelectedDrinkPrice,
+} from "@/lib/selectedDrinkPrice";
+
+import {
+  resolveDrinkPriceSelectionSource,
+} from "@/lib/drinkPriceSelectionSource";
+
+import {
+  getMscSpecificDrinkPrices,
+} from "@/lib/mscSpecificDrinkPriceService";
+
+import {
+  getMscDocumentedDrinkPrices,
+  resolveMscDocumentedDrinkPriceSelectionForContext,
+} from "@/lib/mscDocumentedDrinkPriceService";
+
+const drinkCategoryLabels:
+  Record<OnboardPriceKey, string> = {
+    coffee: "Café",
+    water: "Agua",
+    soda: "Refresco",
+    beer: "Cerveza",
+    wine: "Vino",
+    cocktail: "Cóctel",
+  };
+
 type PriceValidation = {
   valid: boolean;
   value: number | null;
@@ -199,6 +231,24 @@ export default function PricesPage() {
     );
 
   /*
+   * Los precios concretos de bebidas
+   * deben expresarse en la moneda real
+   * utilizada a bordo.
+   *
+   * Si todavía no la conocemos, no
+   * inventamos una a partir del mercado.
+   */
+  const selectedDrinkCurrency =
+    data.onboardCurrency ?? null;
+
+  const selectedDrinkCurrencySymbol =
+    selectedDrinkCurrency
+      ? getCurrencySymbol(
+          selectedDrinkCurrency
+        )
+      : null;
+
+  /*
    * Estado visual de inputs.
    *
    * packageKey -> texto introducido
@@ -237,6 +287,77 @@ export default function PricesPage() {
   });
 
   /*
+   * Estado visual de precios concretos
+   * de bebidas.
+   */
+  const [
+    drinkPriceInputs,
+    setDrinkPriceInputs,
+  ] = useState<
+    Record<OnboardPriceKey, string>
+  >(() => {
+    return Object.fromEntries(
+      onboardPriceKeys.map(
+        (category) => {
+          const storedPrice =
+            data.selectedDrinkPrices[
+              category
+            ];
+
+          return [
+            category,
+            storedPrice
+              ? String(
+                  storedPrice.price
+                )
+              : "",
+          ];
+        }
+      )
+    ) as Record<
+      OnboardPriceKey,
+      string
+    >;
+  });
+
+  const [
+    selectedDrinkReferenceIds,
+    setSelectedDrinkReferenceIds,
+  ] = useState<
+    Partial<Record<OnboardPriceKey, string>>
+  >({});
+
+  const [
+    selectedDrinkReferenceSources,
+    setSelectedDrinkReferenceSources,
+  ] = useState<
+    Partial<
+      Record<
+        OnboardPriceKey,
+        "official" | "documented-menu"
+      >
+    >
+  >({});
+
+  const drinkPriceValidations =
+    Object.fromEntries(
+      onboardPriceKeys.map(
+        (category) => [
+          category,
+          validateOptionalPrice(
+            drinkPriceInputs[
+              category
+            ] ?? "",
+            100
+          ),
+        ]
+      )
+    ) as Record<
+      OnboardPriceKey,
+      PriceValidation
+    >;
+
+  /*
    * Validación dinámica por paquete.
    */
   const validations =
@@ -261,13 +382,25 @@ export default function PricesPage() {
       PriceValidation
     >;
 
-  const canContinue =
+  const packagePricesValid =
     Object.values(
       validations
     ).every(
       (validation) =>
         validation.valid
     );
+
+  const drinkPricesValid =
+    Object.values(
+      drinkPriceValidations
+    ).every(
+      (validation) =>
+        validation.valid
+    );
+
+  const canContinue =
+    packagePricesValid &&
+    drinkPricesValid;
 
   function updatePriceInput(
     packageKey: string,
@@ -280,6 +413,167 @@ export default function PricesPage() {
         [packageKey]:
           value,
       })
+    );
+  }
+
+  function updateDrinkPriceInput(
+    category: OnboardPriceKey,
+    value: string
+  ) {
+    setDrinkPriceInputs(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          value,
+      })
+    );
+
+    setSelectedDrinkReferenceIds(
+      (previous) => {
+        const next = {
+          ...previous,
+        };
+
+        delete next[category];
+
+        return next;
+      }
+    );
+
+    setSelectedDrinkReferenceSources(
+      (previous) => {
+        const next = {
+          ...previous,
+        };
+
+        delete next[category];
+
+        return next;
+      }
+    );
+  }
+
+  function selectOfficialDrinkReference(
+    category: OnboardPriceKey,
+    referenceId: string,
+    price: number
+  ) {
+    setDrinkPriceInputs(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          String(price),
+      })
+    );
+
+    setSelectedDrinkReferenceIds(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          referenceId,
+      })
+    );
+
+    setSelectedDrinkReferenceSources(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          "official",
+      })
+    );
+  }
+
+  function selectDocumentedDrinkReference(
+    category: OnboardPriceKey,
+    referenceId: string,
+    price: number
+  ) {
+    setDrinkPriceInputs(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          String(price),
+      })
+    );
+
+    setSelectedDrinkReferenceIds(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          referenceId,
+      })
+    );
+
+    setSelectedDrinkReferenceSources(
+      (previous) => ({
+        ...previous,
+
+        [category]:
+          "documented-menu",
+      })
+    );
+  }
+
+  function updateOnboardCurrency(
+    currency:
+      "" | "EUR" | "USD"
+  ) {
+    const nextCurrency =
+      currency === ""
+        ? null
+        : currency;
+
+    if (
+      nextCurrency ===
+      data.onboardCurrency
+    ) {
+      return;
+    }
+
+    setData(
+      (previous) => ({
+        ...previous,
+
+        onboardCurrency:
+          nextCurrency,
+
+        /*
+         * Un precio concreto depende de su
+         * moneda. Si cambia la moneda,
+         * descartamos selecciones anteriores
+         * para no reinterpretar importes.
+         */
+        selectedDrinkPrices:
+          {},
+      })
+    );
+
+    setDrinkPriceInputs(
+      Object.fromEntries(
+        onboardPriceKeys.map(
+          (category) => [
+            category,
+            "",
+          ]
+        )
+      ) as Record<
+        OnboardPriceKey,
+        string
+      >
+    );
+
+    setSelectedDrinkReferenceIds(
+      {}
+    );
+
+    setSelectedDrinkReferenceSources(
+      {}
     );
   }
 
@@ -302,6 +596,101 @@ export default function PricesPage() {
         )
       );
 
+    const cruiseContext = {
+      cruiseLine:
+        data.cruiseLine,
+
+      market:
+        data.market,
+
+      sailingRegion:
+        data.sailingRegion,
+
+      onboardCurrency:
+        data.onboardCurrency,
+
+      sailingDate:
+        data.sailingDate,
+    };
+
+    const nextSelectedDrinkPrices =
+      Object.fromEntries(
+        onboardPriceKeys.flatMap(
+          (category) => {
+            const validation =
+              drinkPriceValidations[
+                category
+              ];
+
+            if (
+              validation.value === null ||
+              selectedDrinkCurrency ===
+                null
+            ) {
+              return [];
+            }
+
+            const referenceId =
+              selectedDrinkReferenceIds[
+                category
+              ];
+
+            const source =
+              resolveDrinkPriceSelectionSource(
+                referenceId,
+                selectedDrinkReferenceSources[
+                  category
+                ] ?? "official"
+              );
+
+            const contextualSelection =
+              source === "documented-menu" &&
+              referenceId
+                ? resolveMscDocumentedDrinkPriceSelectionForContext(
+                    referenceId,
+                    cruiseContext
+                  )
+                : null;
+
+            const resolvedRelevance =
+              contextualSelection
+                ?.contextRelevance
+                .relevance;
+
+            const contextRelevance =
+              resolvedRelevance === "exact" ||
+              resolvedRelevance ===
+                "compatible"
+                ? resolvedRelevance
+                : undefined;
+
+            const selectedPrice =
+              createSelectedDrinkPrice({
+                category,
+
+                price:
+                  validation.value,
+
+                currency:
+                  selectedDrinkCurrency,
+
+                source,
+
+                contextRelevance,
+              });
+
+            return selectedPrice
+              ? [
+                  [
+                    category,
+                    selectedPrice,
+                  ],
+                ]
+              : [];
+          }
+        )
+      );
+
     setData(
       (previous) => ({
         ...previous,
@@ -312,6 +701,9 @@ export default function PricesPage() {
 
           ...nextPrices,
         },
+
+        selectedDrinkPrices:
+          nextSelectedDrinkPrices,
       })
     );
   }
@@ -624,6 +1016,461 @@ export default function PricesPage() {
           valores de referencia
           disponibles.
         </div>
+
+
+        {/* PRECIOS DE BEBIDAS SELECCIONADAS */}
+
+        <section className="mt-8 border-t border-slate-200 pt-8">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+              Precisión adicional
+            </p>
+
+            <h2 className="mt-2 text-xl font-bold text-slate-900 sm:text-2xl">
+              ¿Conoces el precio de alguna bebida a bordo?
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
+              Es opcional. Si introduces el
+              precio real de una bebida,
+              DrinkPilot podrá comprobar si
+              supera el límite de precio
+              incluido por determinados
+              paquetes.
+            </p>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-900">
+              Moneda utilizada a bordo
+            </p>
+
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Selecciona la moneda real que utiliza tu crucero.
+              No la deducimos automáticamente del mercado o de
+              la naviera.
+            </p>
+
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  updateOnboardCurrency(
+                    "EUR"
+                  )
+                }
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  selectedDrinkCurrency ===
+                  "EUR"
+                    ? "border-sky-500 bg-sky-600 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
+                }`}
+              >
+                EUR (€)
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateOnboardCurrency(
+                    "USD"
+                  )
+                }
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  selectedDrinkCurrency ===
+                  "USD"
+                    ? "border-sky-500 bg-sky-600 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
+                }`}
+              >
+                USD ($)
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  updateOnboardCurrency(
+                    ""
+                  )
+                }
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  selectedDrinkCurrency ===
+                  null
+                    ? "border-slate-500 bg-slate-700 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-400"
+                }`}
+              >
+                No lo sé
+              </button>
+            </div>
+          </div>
+
+          {selectedDrinkCurrency === null ? (
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              Para utilizar precios concretos
+              de bebidas necesitamos conocer
+              primero la moneda utilizada a
+              bordo. No asumiremos una moneda
+              automáticamente.
+            </div>
+          ) : (
+            <>
+              <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+                Introduce los precios en{" "}
+                <strong>
+                  {selectedDrinkCurrency}
+                </strong>
+                . Solo necesitamos las
+                categorías que realmente
+                conozcas.
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                {onboardPriceKeys.map(
+                  (category) => {
+                    const validation =
+                      drinkPriceValidations[
+                        category
+                      ];
+
+                    const inputValue =
+                      drinkPriceInputs[
+                        category
+                      ] ?? "";
+
+                    const inputId =
+                      `drink-price-${category}`;
+
+                    const officialReferences =
+                      data.cruiseLine === "msc" &&
+                      category === "water" &&
+                      selectedDrinkCurrency === "EUR"
+                        ? getMscSpecificDrinkPrices(
+                            category
+                          ).filter(
+                            (reference) =>
+                              reference.currency ===
+                              selectedDrinkCurrency
+                          )
+                        : [];
+
+                    const documentedCurrency =
+                      selectedDrinkCurrency === "EUR" ||
+                      selectedDrinkCurrency === "USD"
+                        ? selectedDrinkCurrency
+                        : undefined;
+
+                    const documentedReferences =
+                      data.cruiseLine === "msc" &&
+                      documentedCurrency
+                        ? getMscDocumentedDrinkPrices({
+                            category,
+                            currency:
+                              documentedCurrency,
+                          })
+                        : [];
+
+                    const cruiseContext = {
+                      cruiseLine:
+                        data.cruiseLine,
+
+                      market:
+                        data.market,
+
+                      sailingRegion:
+                        data.sailingRegion,
+
+                      onboardCurrency:
+                        data.onboardCurrency,
+
+                      sailingDate:
+                        data.sailingDate,
+                    };
+
+                    const contextualDocumentedReferences =
+                      documentedReferences
+                        .map((reference) => {
+                          const selection =
+                            resolveMscDocumentedDrinkPriceSelectionForContext(
+                              reference.id,
+                              cruiseContext
+                            );
+
+                          return selection
+                            ? {
+                                reference,
+                                contextRelevance:
+                                  selection.contextRelevance,
+                              }
+                            : null;
+                        })
+                        .filter(
+                          (
+                            item
+                          ): item is NonNullable<
+                            typeof item
+                          > => item !== null
+                        )
+                        .sort((left, right) => {
+                          const relevanceOrder = {
+                            exact: 0,
+                            compatible: 1,
+                            mismatch: 2,
+                          } as const;
+
+                          return (
+                            relevanceOrder[
+                              left.contextRelevance
+                                .relevance
+                            ] -
+                            relevanceOrder[
+                              right.contextRelevance
+                                .relevance
+                            ]
+                          );
+                        });
+
+                    const selectedReferenceId =
+                      selectedDrinkReferenceIds[
+                        category
+                      ];
+
+                    return (
+                      <div
+                        key={category}
+                        className="rounded-2xl border border-slate-200 p-4"
+                      >
+
+                        <label
+                          htmlFor={inputId}
+                          className="block text-sm font-semibold text-slate-900"
+                        >
+                          {
+                            drinkCategoryLabels[
+                              category
+                            ]
+                          }
+                        </label>
+
+                        {officialReferences.length > 0 ? (
+                          <div className="mt-3 rounded-xl border border-sky-100 bg-sky-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-sky-800">
+                              Referencias oficiales MSC
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {officialReferences.map(
+                                (reference) => {
+                                  const isSelected =
+                                    selectedReferenceId ===
+                                    reference.id;
+
+                                  return (
+                                    <button
+                                      key={reference.id}
+                                      type="button"
+                                      onClick={() =>
+                                        selectOfficialDrinkReference(
+                                          category,
+                                          reference.id,
+                                          reference.price
+                                        )
+                                      }
+                                      className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
+                                        isSelected
+                                          ? "border-sky-500 bg-sky-600 text-white"
+                                          : "border-sky-200 bg-white text-sky-900 hover:border-sky-400"
+                                      }`}
+                                    >
+                                      <span className="block font-semibold">
+                                        {reference.productName}
+                                      </span>
+
+                                      <span
+                                        className={`mt-1 block ${
+                                          isSelected
+                                            ? "text-sky-100"
+                                            : "text-slate-500"
+                                        }`}
+                                      >
+                                        {reference.format} ·{" "}
+                                        {formatCurrency(
+                                          reference.price,
+                                          reference.currency
+                                        )}
+                                      </span>
+                                    </button>
+                                  );
+                                }
+                              )}
+                            </div>
+
+                            <p className="mt-2 text-xs leading-5 text-sky-800">
+                              Puedes usar una referencia oficial o escribir tu precio real manualmente.
+                            </p>
+                          </div>
+                        ) : null}
+
+                        {contextualDocumentedReferences.some(
+                          (item) =>
+                            item.contextRelevance.relevance !==
+                            "mismatch"
+                        ) ? (
+                          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
+                              Precios documentados en menús MSC
+                            </p>
+
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {contextualDocumentedReferences
+                                .filter(
+                                  (item) =>
+                                    item.contextRelevance
+                                      .relevance !==
+                                    "mismatch"
+                                )
+                                .map(
+                                  ({
+                                    reference,
+                                    contextRelevance,
+                                  }) => {
+                                    const isSelected =
+                                      selectedReferenceId ===
+                                      reference.id;
+
+                                    return (
+                                      <button
+                                        key={reference.id}
+                                        type="button"
+                                        onClick={() =>
+                                          selectDocumentedDrinkReference(
+                                            category,
+                                            reference.id,
+                                            reference.price
+                                          )
+                                        }
+                                        className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
+                                          isSelected
+                                            ? "border-slate-700 bg-slate-800 text-white"
+                                            : "border-slate-300 bg-white text-slate-900 hover:border-slate-500"
+                                        }`}
+                                      >
+                                        <span className="block font-semibold">
+                                          {reference.productName}
+                                        </span>
+
+                                        <span
+                                          className={`mt-1 block ${
+                                            isSelected
+                                              ? "text-slate-200"
+                                              : "text-slate-500"
+                                          }`}
+                                        >
+                                          {reference.format
+                                            ? `${reference.format} · `
+                                            : ""}
+                                          {formatCurrency(
+                                            reference.price,
+                                            reference.currency
+                                          )}
+                                        </span>
+
+                                        <span
+                                          className={`mt-1 block ${
+                                            isSelected
+                                              ? "text-slate-300"
+                                              : "text-slate-500"
+                                          }`}
+                                        >
+                                          {reference.menuName
+                                            ? `${reference.menuName} · menú documentado`
+                                            : "Menú MSC documentado"}
+                                        </span>
+
+                                        <span
+                                          className={`mt-1 block font-medium ${
+                                            isSelected
+                                              ? "text-slate-200"
+                                              : contextRelevance.relevance ===
+                                                "exact"
+                                                ? "text-emerald-700"
+                                                : "text-amber-700"
+                                          }`}
+                                        >
+                                          {contextRelevance.relevance ===
+                                          "exact"
+                                            ? "Contexto coincidente"
+                                            : "Compatible · faltan datos"}
+                                        </span>
+                                      </button>
+                                    );
+                                  }
+                                )}
+                            </div>
+
+                            <p className="mt-2 text-xs leading-5 text-slate-600">
+                              Precios observados en menús documentados. Solo mostramos referencias sin contradicciones conocidas con el contexto de tu crucero.
+                            </p>
+                          </div>
+                        ) : null}
+
+                        <div className="relative mt-3">
+                          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-medium text-slate-500">
+                            {
+                              selectedDrinkCurrencySymbol
+                            }
+                          </span>
+
+                          <input
+                            id={inputId}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            inputMode="decimal"
+                            value={inputValue}
+                            onChange={(event) =>
+                              updateDrinkPriceInput(
+                                category,
+                                event.target.value
+                              )
+                            }
+                            placeholder="Opcional"
+                            className={`w-full rounded-xl border bg-white py-3 pl-10 pr-3 text-slate-900 outline-none transition ${
+                              validation.valid
+                                ? "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+                                : "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                            }`}
+                          />
+                        </div>
+
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          Precio de una
+                          consumición individual.
+                        </p>
+
+                        {validation.error ? (
+                          <p className="mt-2 text-sm font-medium text-red-600">
+                            {
+                              validation.error
+                            }
+                          </p>
+                        ) : null}
+
+                        {validation.warning ? (
+                          <p className="mt-2 text-sm leading-5 text-amber-700">
+                            {
+                              validation.warning
+                            }
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </>
+          )}
+        </section>
 
         {/* NAVEGACIÓN */}
 

@@ -12,6 +12,7 @@ import { buildRecommendationExplanation } from "@/lib/recommendationExplanation"
 import {
   buildOperationalRuleNotices,
   filterAdultOperationalRuleNotices,
+  getOperationalRuleNoticeImpactLabel,
 } from "@/lib/operationalRuleExplanation";
 
 import {
@@ -225,6 +226,12 @@ export default function ResultsPage() {
       market:
         data.market,
 
+      sailingRegion:
+        data.sailingRegion,
+
+      onboardCurrency:
+        data.onboardCurrency,
+
       sailingDate:
         data.sailingDate,
 
@@ -281,6 +288,9 @@ export default function ResultsPage() {
 
       customPackagePrices:
         data.customPackagePrices,
+
+      selectedDrinkPrices:
+        data.selectedDrinkPrices,
     });
 
   /*
@@ -299,6 +309,29 @@ export default function ResultsPage() {
   const allOperationalImpactExplanations =
     buildOperationalImpactExplanations(
       comparison.operationalRuleImpacts
+    );
+
+  /*
+   * IMPACTO ECONÓMICO DEL THRESHOLD
+   *
+   * Solo mostramos impactos cuyo efecto
+   * durante el crucero ya conocemos.
+   *
+   * "known-unquantified" significa:
+   * sabemos cuántas consumiciones quedan
+   * por encima del threshold, pero todavía
+   * no inventamos un coste adicional.
+   */
+  const thresholdCruiseImpacts =
+    comparison.thresholdCruiseImpacts.filter(
+      (item) =>
+        (item.cruiseImpact.status ===
+          "known-unquantified" ||
+          item.cruiseImpact.status ===
+            "quantified") &&
+        item.cruiseImpact.drinksAboveThreshold !==
+          null &&
+        item.cruiseImpact.drinksAboveThreshold > 0
     );
 
   /*
@@ -331,6 +364,12 @@ export default function ResultsPage() {
     const adultCoveragePackages =
       filterAdultPackageItems(
         comparison.coveragePackages,
+        comparison.operationalRules
+      );
+
+    const adultThresholdCruiseImpacts =
+      filterAdultPackageItems(
+        thresholdCruiseImpacts,
         comparison.operationalRules
       );
 
@@ -484,6 +523,166 @@ export default function ResultsPage() {
               </div>
             </section>
 
+            {adultThresholdCruiseImpacts.length > 0 && (
+              <section className="mt-8 rounded-2xl border border-violet-200 bg-violet-50 p-5 sm:p-6">
+                <h2 className="text-lg font-bold text-violet-950 sm:text-xl">
+                  💶 Impacto del límite de precio
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-violet-900">
+                  Algunos paquetes incluyen bebidas solo hasta un determinado precio por consumición. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
+                </p>
+
+                <div className="mt-4 grid gap-3">
+                  {adultThresholdCruiseImpacts.map(
+                    (thresholdImpact) => {
+                      const affectedDrinks =
+                        thresholdImpact
+                          .cruiseImpact
+                          .drinksAboveThreshold;
+
+
+                      const excludedDrinks =
+
+                        thresholdImpact
+
+                          .cruiseImpact
+
+                          .drinksExcludedFromCoverage;
+
+                      const thresholdEconomicImpact =
+                        thresholdImpact
+                          .dailyImpact
+                          .items
+                          .map(
+                            (item) =>
+                              item.evaluation
+                                .packageImpact
+                                .impact
+                          )
+                          .find(
+                            (impact) =>
+                              impact.threshold !==
+                                null &&
+                              impact.thresholdCurrency !==
+                                null
+                          );
+
+                      const threshold =
+                        thresholdEconomicImpact
+                          ?.threshold ?? null;
+
+                      const thresholdCurrency =
+                        thresholdEconomicImpact
+                          ?.thresholdCurrency ?? null;
+
+                      return (
+                        <div
+                          key={
+                            thresholdImpact
+                              .packageKey
+                          }
+                          className="rounded-xl border border-violet-100 bg-white p-4"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="font-semibold text-slate-900">
+                                {
+                                  thresholdImpact
+                                    .packageName
+                                }
+                              </p>
+
+                              {threshold !== null &&
+                                thresholdCurrency !==
+                                  null && (
+                                  <div className="mt-2 inline-flex rounded-lg border border-violet-200 bg-violet-50 px-3 py-2">
+                                    <p className="text-sm font-semibold text-violet-900">
+                                      Límite incluido:{" "}
+                                      {threshold}{" "}
+                                      {thresholdCurrency} por bebida
+                                    </p>
+                                  </div>
+                                )}
+
+                              <p className="mt-2 text-sm leading-6 text-slate-700">
+                                Según tu consumo y los precios concretos introducidos,{" "}
+                                <strong>
+                                  {
+                                    affectedDrinks
+                                  }
+                                </strong>{" "}
+                                {affectedDrinks ===
+                                1
+                                  ? "consumición prevista supera"
+                                  : "consumiciones previstas superan"}{" "}
+                                el límite de precio conocido del paquete durante el crucero.
+                              </p>
+
+                              {excludedDrinks !== null && excludedDrinks > 0 && (
+                                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                                  <p className="text-sm font-semibold text-amber-950">
+                                    ⚠️ Fuera de cobertura:{" "}
+                                    {excludedDrinks}{" "}
+                                    {excludedDrinks === 1
+                                      ? "consumición"
+                                      : "consumiciones"}
+                                  </p>
+
+                                  <p className="mt-1 text-xs leading-5 text-amber-900">
+                                    Estas consumiciones quedarían fuera de cobertura por superar el límite de precio conocido del paquete.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800">
+                              {
+                                affectedDrinks
+                              }{" "}
+                              afectadas
+                            </span>
+                          </div>
+
+                          <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
+                              Coste adicional
+                            </p>
+
+                            {thresholdImpact
+                              .cruiseImpact
+                              .status ===
+                              "quantified" &&
+                            thresholdImpact
+                              .cruiseImpact
+                              .additionalCostTotal !==
+                              null ? (
+                              <>
+                                <p className="mt-1 text-lg font-bold text-violet-950">
+                                  {thresholdImpact.cruiseImpact.additionalCostTotal.toFixed(
+                                    2
+                                  )}{" "}
+                                  €
+                                </p>
+
+                                <p className="mt-1 text-sm leading-6 text-amber-900">
+                                  Este coste adicional ya está incorporado en el ahorro efectivo utilizado por DrinkPilot para comparar este paquete.
+                                </p>
+                              </>
+                            ) : (
+                              <p className="mt-1 text-sm leading-6 text-amber-900">
+                                Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+              </section>
+            )}
+
             {adultOperationalImpactExplanations.length > 0 && (
               <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
                 <h2 className="text-lg font-bold text-amber-950 sm:text-xl">
@@ -491,7 +690,7 @@ export default function ResultsPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-amber-900">
-                  Estas condiciones afectan a tu consumo declarado, pero DrinkPilot todavía no utiliza ese exceso para modificar el cálculo económico.
+                  Estas condiciones afectan a tu consumo declarado. Cuando existe una política económica conocida, DrinkPilot refleja la incertidumbre en el ahorro efectivo sin inventar un coste.
                 </p>
 
                 <div className="mt-4 grid gap-3">
@@ -537,7 +736,7 @@ export default function ResultsPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-sky-900">
-                  Estas condiciones forman parte de las reglas operativas conocidas y no modifican todavía el cálculo económico de DrinkPilot.
+                  Estas condiciones forman parte de las reglas operativas conocidas. Cuando una de ellas ya modifica la comparación económica, lo indicamos expresamente.
                 </p>
 
                 <div className="mt-4 grid gap-3">
@@ -550,6 +749,16 @@ export default function ResultsPage() {
                         <p className="text-sm leading-6 text-slate-700">
                           {notice.message}
                         </p>
+
+                        {getOperationalRuleNoticeImpactLabel(
+                          notice.calculationImpact
+                        ) && (
+                          <p className="mt-2 text-xs font-semibold text-emerald-700">
+                            ✓ {getOperationalRuleNoticeImpactLabel(
+                              notice.calculationImpact
+                            )}
+                          </p>
+                        )}
                       </div>
                     )
                   )}
@@ -684,6 +893,12 @@ export default function ResultsPage() {
   const adultOperationalImpactExplanations =
     filterAdultPackageItems(
       allOperationalImpactExplanations,
+      comparison.operationalRules
+    );
+
+  const economicThresholdCruiseImpacts =
+    filterAdultPackageItems(
+      thresholdCruiseImpacts,
       comparison.operationalRules
     );
 
@@ -918,15 +1133,20 @@ export default function ResultsPage() {
             {bestPackage ? (
               <>
                 <p className="mt-6 text-4xl font-bold text-sky-600 sm:mt-7 sm:text-5xl">
-                  {bestPackage.savings.toFixed(
-                    2
-                  )}{" "}
+                  {bestPackage.effectiveSavings !== null
+                    ? bestPackage.effectiveSavings.toFixed(
+                        2
+                      )
+                    : bestPackage.savings.toFixed(
+                        2
+                      )}{" "}
                   €
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
-                  de ahorro estimado
-                  durante el crucero
+                  {bestPackage.effectiveSavings !== null
+                    ? "de ahorro efectivo estimado durante el crucero"
+                    : "de ahorro teórico durante el crucero"}
                 </p>
 
                 <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
@@ -1116,6 +1336,25 @@ export default function ResultsPage() {
                     pkg.priceSource ===
                     "user";
 
+                  const thresholdImpact =
+                    comparison.thresholdCruiseImpacts.find(
+                      (item) =>
+                        item.packageKey ===
+                        pkg.packageKey
+                    )?.cruiseImpact;
+
+                  const thresholdAdditionalCost =
+                    thresholdImpact?.status ===
+                      "quantified" &&
+                    thresholdImpact.additionalCostTotal !==
+                      null
+                      ? thresholdImpact.additionalCostTotal
+                      : null;
+
+                  const displayedSavings =
+                    pkg.effectiveSavings ??
+                    pkg.savings;
+
                   return (
                     <div
                       key={
@@ -1295,10 +1534,7 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            {pkg.economicComparisonStatus ===
-                            "complete"
-                              ? "Diferencia"
-                              : "Diferencia teórica"}
+                            Ahorro bruto
                           </p>
 
                           <p
@@ -1325,22 +1561,60 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            {pkg.economicComparisonStatus ===
-                            "complete"
-                              ? "Ahorro estimado"
-                              : "Ahorro teórico"}
+                            Ahorro efectivo
                           </p>
 
-                          <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                            {pkg.savingsPercentage >
-                            0
-                              ? `${pkg.savingsPercentage.toFixed(
-                                  1
-                                )} %`
-                              : "0 %"}
-                          </p>
+                          {pkg.effectiveSavings !==
+                          null ? (
+                            <p
+                              className={`mt-1 text-lg font-bold sm:text-xl ${
+                                displayedSavings >
+                                0
+                                  ? "text-green-700"
+                                  : displayedSavings <
+                                    0
+                                  ? "text-red-700"
+                                  : "text-slate-700"
+                              }`}
+                            >
+                              {displayedSavings >
+                              0
+                                ? "+"
+                                : ""}
+                              {displayedSavings.toFixed(
+                                2
+                              )}{" "}
+                              €
+                            </p>
+                          ) : (
+                            <p className="mt-1 text-lg font-bold text-amber-700 sm:text-xl">
+                              Pendiente
+                            </p>
+                          )}
                         </div>
                       </div>
+
+                      {thresholdAdditionalCost !==
+                        null &&
+                        thresholdAdditionalCost >
+                          0 && (
+                          <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50 p-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">
+                              Coste adicional por límite
+                            </p>
+
+                            <p className="mt-1 text-lg font-bold text-violet-950">
+                              {thresholdAdditionalCost.toFixed(
+                                2
+                              )}{" "}
+                              €
+                            </p>
+
+                            <p className="mt-1 text-xs leading-5 text-violet-800">
+                              Este importe ya está descontado del ahorro efectivo mostrado.
+                            </p>
+                          </div>
+                        )}
 
                       {/* CALIDAD ECONÓMICA */}
 
@@ -1541,6 +1815,168 @@ export default function ResultsPage() {
             </div>
           )}
 
+          {economicThresholdCruiseImpacts.length > 0 && (
+            <section className="mt-8 rounded-2xl border border-violet-200 bg-violet-50 p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-violet-950 sm:text-xl">
+                💶 Impacto del límite de precio
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-violet-900">
+                Algunos paquetes incluyen bebidas solo hasta un determinado precio por consumición. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
+              </p>
+
+              <div className="mt-4 grid gap-3">
+                {economicThresholdCruiseImpacts.map(
+                  (thresholdImpact) => {
+                    const affectedDrinks =
+                      thresholdImpact
+                        .cruiseImpact
+                        .drinksAboveThreshold;
+
+
+                    const excludedDrinks =
+
+                      thresholdImpact
+
+                        .cruiseImpact
+
+                        .drinksExcludedFromCoverage;
+
+                    const thresholdEconomicImpact =
+                      thresholdImpact
+                        .dailyImpact
+                        .items
+                        .map(
+                          (item) =>
+                            item.evaluation
+                              .packageImpact
+                              .impact
+                        )
+                        .find(
+                          (impact) =>
+                            impact.threshold !==
+                              null &&
+                            impact.thresholdCurrency !==
+                              null
+                        );
+
+                    const threshold =
+                      thresholdEconomicImpact
+                        ?.threshold ?? null;
+
+                    const thresholdCurrency =
+                      thresholdEconomicImpact
+                        ?.thresholdCurrency ?? null;
+
+                    return (
+                      <div
+                        key={
+                          thresholdImpact
+                            .packageKey
+                        }
+                        className="rounded-xl border border-violet-100 bg-white p-4"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {
+                                thresholdImpact
+                                  .packageName
+                              }
+                            </p>
+
+                            {threshold !== null &&
+                              thresholdCurrency !==
+                                null && (
+                                <div className="mt-2 inline-flex rounded-lg border border-violet-200 bg-violet-50 px-3 py-2">
+                                  <p className="text-sm font-semibold text-violet-900">
+                                    Límite incluido:{" "}
+                                    {threshold}{" "}
+                                    {thresholdCurrency} por bebida
+                                  </p>
+                                </div>
+                              )}
+
+                            <p className="mt-2 text-sm leading-6 text-slate-700">
+                              Según tu consumo y los precios concretos introducidos,{" "}
+                              <strong>
+                                {
+                                  affectedDrinks
+                                }
+                              </strong>{" "}
+                              {affectedDrinks ===
+                              1
+                                ? "consumición prevista supera"
+                                : "consumiciones previstas superan"}{" "}
+                              el límite de precio conocido del paquete durante el crucero.
+                            </p>
+
+                            {excludedDrinks !== null && excludedDrinks > 0 && (
+                              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                                <p className="text-sm font-semibold text-amber-950">
+                                  ⚠️ Fuera de cobertura:{" "}
+                                  {excludedDrinks}{" "}
+                                  {excludedDrinks === 1
+                                    ? "consumición"
+                                    : "consumiciones"}
+                                </p>
+
+                                <p className="mt-1 text-xs leading-5 text-amber-900">
+                                  Estas consumiciones quedarían fuera de cobertura por superar el límite de precio conocido del paquete.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="shrink-0 rounded-lg bg-violet-100 px-3 py-2 text-center">
+                            <p className="text-lg font-bold text-violet-950">
+                              {
+                                affectedDrinks
+                              }{" "}
+                              afectadas
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                            Coste adicional
+                          </p>
+
+                          {thresholdImpact
+                            .cruiseImpact
+                            .status ===
+                            "quantified" &&
+                          thresholdImpact
+                            .cruiseImpact
+                            .additionalCostTotal !==
+                            null ? (
+                            <>
+                              <p className="mt-1 text-lg font-bold text-violet-950">
+                                {thresholdImpact.cruiseImpact.additionalCostTotal.toFixed(
+                                  2
+                                )}{" "}
+                                €
+                              </p>
+
+                              <p className="mt-1 text-sm leading-6 text-slate-700">
+                                Este coste adicional ya está incorporado en el ahorro efectivo utilizado por DrinkPilot para comparar este paquete.
+                              </p>
+                            </>
+                          ) : (
+                            <p className="mt-1 text-sm leading-6 text-slate-700">
+                              Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </section>
+          )}
+
           {/* IMPACTO OPERATIVO PERSONALIZADO */}
 
           {operationalImpactExplanations.length > 0 && (
@@ -1550,7 +1986,7 @@ export default function ResultsPage() {
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Estas condiciones afectan a tu consumo declarado, pero DrinkPilot todavía no utiliza ese exceso para modificar el cálculo económico.
+                Estas condiciones afectan a tu consumo declarado. Cuando existe una política económica conocida, DrinkPilot refleja la incertidumbre en el ahorro efectivo sin inventar un coste.
               </p>
 
               <div className="mt-4 grid gap-3">
@@ -1611,9 +2047,109 @@ export default function ResultsPage() {
                       <p className="text-sm leading-6 text-slate-700">
                         {notice.message}
                       </p>
+
+                      {getOperationalRuleNoticeImpactLabel(
+                        notice.calculationImpact
+                      ) && (
+                        <p className="mt-2 text-xs font-semibold text-emerald-700">
+                          ✓ {getOperationalRuleNoticeImpactLabel(
+                            notice.calculationImpact
+                          )}
+                        </p>
+                      )}
                     </div>
                   )
                 )}
+              </div>
+            </section>
+          )}
+
+          {/* PROCEDENCIA DE LOS PRECIOS DE BEBIDAS */}
+
+          {Object.keys(data.selectedDrinkPrices).length > 0 && (
+            <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                🥤 Precios de bebidas utilizados
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Estas son las referencias individuales utilizadas por DrinkPilot
+                para realizar la comparación económica.
+              </p>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {(
+                  [
+                    ["coffee", "☕ Café"],
+                    ["water", "💧 Agua"],
+                    ["soda", "🥤 Refresco"],
+                    ["beer", "🍺 Cerveza"],
+                    ["wine", "🍷 Vino"],
+                    ["cocktail", "🍸 Cóctel"],
+                  ] as const
+                ).map(([category, label]) => {
+                  const selectedPrice =
+                    data.selectedDrinkPrices[
+                      category
+                    ];
+
+                  if (!selectedPrice) {
+                    return null;
+                  }
+
+                  const sourceLabel =
+                    selectedPrice.source ===
+                    "documented-menu"
+                      ? "Información documentada"
+                      : selectedPrice.source ===
+                          "official"
+                        ? "Información oficial"
+                        : "Precio introducido por ti";
+
+                  return (
+                    <div
+                      key={category}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {label}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-500">
+                            {sourceLabel}
+                          </p>
+
+                          {selectedPrice.source ===
+                            "documented-menu" &&
+                            selectedPrice.contextRelevance && (
+                              <p
+                                className={`mt-1 text-xs font-semibold ${
+                                  selectedPrice.contextRelevance ===
+                                  "exact"
+                                    ? "text-emerald-700"
+                                    : "text-amber-700"
+                                }`}
+                              >
+                                {selectedPrice.contextRelevance ===
+                                "exact"
+                                  ? "Contexto coincidente"
+                                  : "Compatible · faltan datos"}
+                              </p>
+                            )}
+                        </div>
+
+                        <p className="shrink-0 font-bold text-slate-900">
+                          {selectedPrice.price.toFixed(
+                            2
+                          )}{" "}
+                          {selectedPrice.currency}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}

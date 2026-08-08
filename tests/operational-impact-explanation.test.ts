@@ -22,7 +22,11 @@ function createImpact(
   alcoholicDrinksDailyLimit:
     number | null,
   excessDrinksPerDay:
-    number | null
+    number | null,
+  chargePolicy:
+    PackageOperationalRuleImpact[
+      "economicImpact"
+    ]["chargePolicy"] = "unknown"
 ): PackageOperationalRuleImpact {
   return {
     packageKey: "mscEasy",
@@ -35,6 +39,24 @@ function createImpact(
       excessDrinksPerDay,
     },
 
+    alcoholDailyLimitSource: {
+      source: "base",
+      contextualRuleIds: [],
+    },
+
+    alcoholDailyLimitChargePolicySource: {
+      source:
+        chargePolicy === "unknown"
+          ? "none"
+          : "contextual",
+      contextualRuleIds:
+        chargePolicy === "unknown"
+          ? []
+          : [
+              "test-alcohol-limit-charge-policy",
+            ],
+    },
+
     economicImpact: {
       status:
         status === "over-limit"
@@ -44,6 +66,8 @@ function createImpact(
             : "none",
 
       excessDrinksPerDay,
+
+      chargePolicy,
 
       additionalCostPerDay:
         status === "over-limit" ||
@@ -112,6 +136,50 @@ describe(
             .economicMessage
         ).toContain(
           "no lo incorpora todavía al cálculo económico"
+        );
+      }
+    );
+
+    it(
+      "explica precio completo más propinas sin fingir un coste exacto",
+      () => {
+        const explanation =
+          buildOperationalImpactExplanations([
+            createImpact(
+              "over-limit",
+              18,
+              15,
+              3,
+              "full-price-plus-gratuities"
+            ),
+          ])[0];
+
+        expect(
+          explanation
+            .economicMessage
+        ).toContain(
+          "precio completo más propinas"
+        );
+
+        expect(
+          explanation
+            .economicMessage
+        ).toContain(
+          "no puede cuantificar"
+        );
+
+        expect(
+          explanation
+            .economicMessage
+        ).toContain(
+          "mantiene el ahorro efectivo como desconocido"
+        );
+
+        expect(
+          explanation
+            .economicMessage
+        ).not.toContain(
+          "no lo incorpora todavía"
         );
       }
     );

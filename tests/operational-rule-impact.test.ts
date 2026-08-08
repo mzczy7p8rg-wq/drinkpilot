@@ -214,6 +214,54 @@ describe(
         ).toBe("unknown");
       }
     );
+
+    it(
+      "transporta la política económica contextual de Premium Extra US",
+      () => {
+        const consumption =
+          resolveAlcoholConsumption({
+            beer: 6,
+            wine: 4,
+            cocktail: 8,
+            alcoholicCocktail: 8,
+            nonAlcoholicCocktail: 0,
+          });
+
+        const impact =
+          evaluateOperationalRuleImpacts(
+            consumption,
+            getPackageOperationalRules({
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-04-01",
+            })
+          ).find(
+            (item) =>
+              item.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        expect(
+          impact?.economicImpact
+            .chargePolicy
+        ).toBe(
+          "full-price-plus-gratuities"
+        );
+
+        expect(
+          impact
+            ?.alcoholDailyLimitChargePolicySource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "msc-premium-extra-alcohol-limit-full-price-us",
+          ],
+        });
+      }
+    );
   }
 );
 

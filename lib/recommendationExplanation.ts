@@ -58,7 +58,33 @@ function formatCategories(
     .join(", ");
 }
 
+function getEffectiveSavings(
+  pkg: PackageComparisonResult
+): number | null {
+  return pkg.effectiveSavings;
+}
+
 function findHighestSavingsPackage(
+  packages: PackageComparisonResult[]
+) {
+  const comparablePackages =
+    packages.filter(
+      (pkg) =>
+        getEffectiveSavings(pkg) !== null
+    );
+
+  if (comparablePackages.length === 0) {
+    return null;
+  }
+
+  return [...comparablePackages].sort(
+    (a, b) =>
+      (getEffectiveSavings(b) ?? -Infinity) -
+      (getEffectiveSavings(a) ?? -Infinity)
+  )[0];
+}
+
+function findHighestGrossSavingsPackage(
   packages: PackageComparisonResult[]
 ) {
   if (packages.length === 0) {
@@ -66,7 +92,9 @@ function findHighestSavingsPackage(
   }
 
   return [...packages].sort(
-    (a, b) => b.savings - a.savings
+    (a, b) =>
+      b.savings -
+      a.savings
   )[0];
 }
 
@@ -82,8 +110,65 @@ function findBestCoveragePackage(
       return b.coverageScore - a.coverageScore;
     }
 
-    return b.savings - a.savings;
+    return (
+      (getEffectiveSavings(b) ?? -Infinity) -
+      (getEffectiveSavings(a) ?? -Infinity)
+    );
   })[0];
+}
+
+function getUnquantifiedThresholdImpact(
+  comparison: ComparisonResult,
+  packageKey: string
+) {
+  const thresholdImpact =
+    comparison.thresholdCruiseImpacts.find(
+      (item) =>
+        item.packageKey === packageKey &&
+        item.cruiseImpact.status ===
+          "known-unquantified" &&
+        item.cruiseImpact.drinksAboveThreshold !==
+          null &&
+        item.cruiseImpact.drinksAboveThreshold > 0
+    );
+
+  return thresholdImpact?.cruiseImpact ?? null;
+}
+
+function buildThresholdUncertaintyExplanation(
+  packageName: string,
+  savings: number,
+  affectedDrinks: number,
+  excludedDrinks: number | null
+): RecommendationExplanation {
+  return {
+    title:
+      `${packageName} es la mejor opción provisional`,
+
+    summary:
+      `Con los costes que DrinkPilot puede cuantificar actualmente, este paquete presenta un ahorro teórico de ${savings.toFixed(
+        2
+      )} € durante el crucero.`,
+
+    reason:
+      excludedDrinks !== null &&
+      excludedDrinks > 0
+        ? `${excludedDrinks} ${
+            excludedDrinks === 1
+              ? "consumición prevista queda"
+              : "consumiciones previstas quedan"
+          } fuera de cobertura por superar el límite de precio conocido del paquete.`
+        : `${affectedDrinks} ${
+            affectedDrinks === 1
+              ? "consumición prevista supera"
+              : "consumiciones previstas superan"
+          } el límite de precio conocido del paquete.`,
+
+    secondaryReason:
+      "El coste adicional de esas consumiciones todavía no puede cuantificarse de forma fiable, por lo que el ahorro mostrado no debe interpretarse como definitivo.",
+
+    tone: "warning",
+  };
 }
 
 export function buildRecommendationExplanation(
@@ -102,8 +187,42 @@ export function buildRecommendationExplanation(
    * - genera ahorro positivo
    */
   if (bestPackage) {
+    const thresholdImpact =
+      getUnquantifiedThresholdImpact(
+        comparison,
+        bestPackage.packageKey
+      );
+
+    const affectedThresholdDrinks =
+      thresholdImpact?.drinksAboveThreshold ?? 0;
+
+    const excludedThresholdDrinks =
+      thresholdImpact?.drinksExcludedFromCoverage ??
+      null;
+
+    if (affectedThresholdDrinks > 0) {
+      return buildThresholdUncertaintyExplanation(
+        bestPackage.packageName,
+        bestPackage.savings,
+        affectedThresholdDrinks,
+        excludedThresholdDrinks
+      );
+    }
+
     const highestSavingsPackage =
       findHighestSavingsPackage(packages);
+
+    /*
+     * Se usa únicamente para explicar
+     * alternativas con mayor ahorro bruto
+     * pero cobertura incompleta.
+     *
+     * NO gobierna la recomendación final.
+     */
+    const highestGrossSavingsPackage =
+      findHighestGrossSavingsPackage(
+        packages
+      );
 
     /*
      * El mejor paquete también es
@@ -112,14 +231,21 @@ export function buildRecommendationExplanation(
     if (
       highestSavingsPackage &&
       highestSavingsPackage.packageKey ===
-        bestPackage.packageKey
+        bestPackage.packageKey &&
+      !(
+        highestGrossSavingsPackage &&
+        highestGrossSavingsPackage.savings >
+          bestPackage.savings &&
+        !highestGrossSavingsPackage
+          .fullyCovered
+      )
     ) {
       return {
         title:
           `${bestPackage.packageName} es la mejor opción para tu perfil`,
 
         summary:
-          `Cubre todo lo que has indicado y podría ahorrarte aproximadamente ${bestPackage.savings.toFixed(
+          `Cubre todo lo que has indicado y podría ahorrarte aproximadamente ${(bestPackage.effectiveSavings ?? bestPackage.savings).toFixed(
             2
           )} € durante el crucero.`,
 
@@ -138,14 +264,15 @@ export function buildRecommendationExplanation(
      * lo solicitado.
      */
     if (
-      highestSavingsPackage &&
-      highestSavingsPackage.savings >
+      highestGrossSavingsPackage &&
+      highestGrossSavingsPackage.savings >
         bestPackage.savings &&
-      !highestSavingsPackage.fullyCovered
+      !highestGrossSavingsPackage.fullyCovered
     ) {
       const missing =
         formatCategories(
-          highestSavingsPackage.uncoveredCategories
+          highestGrossSavingsPackage
+            .uncoveredCategories
         );
 
       return {
@@ -153,15 +280,15 @@ export function buildRecommendationExplanation(
           `${bestPackage.packageName} encaja mejor con lo que buscas`,
 
         summary:
-          `Aunque ${highestSavingsPackage.packageName} tendría un ahorro económico mayor, no cubre completamente tus preferencias.`,
+          `Aunque ${highestGrossSavingsPackage.packageName} tendría un ahorro bruto mayor, no cubre completamente tus preferencias.`,
 
         reason:
-          `${bestPackage.packageName} cubre el 100 % de lo solicitado y mantiene un ahorro estimado de ${bestPackage.savings.toFixed(
+          `${bestPackage.packageName} cubre el 100 % de lo solicitado y mantiene un ahorro efectivo estimado de ${(bestPackage.effectiveSavings ?? bestPackage.savings).toFixed(
             2
           )} €.`,
 
         secondaryReason:
-          `${highestSavingsPackage.packageName} deja fuera: ${missing}.`,
+          `${highestGrossSavingsPackage.packageName} deja fuera: ${missing}.`,
 
         tone: "positive",
       };
@@ -179,7 +306,7 @@ export function buildRecommendationExplanation(
         "Es la opción que combina cobertura completa y ahorro positivo para tu perfil.",
 
       reason:
-        `Su ahorro estimado es de ${bestPackage.savings.toFixed(
+        `Su ahorro efectivo estimado es de ${(bestPackage.effectiveSavings ?? bestPackage.savings).toFixed(
           2
         )} € y su cobertura es del ${bestPackage.coverageScore.toFixed(
           0
@@ -202,20 +329,70 @@ export function buildRecommendationExplanation(
     );
 
   if (fullyCoveredPackages.length > 0) {
+    const comparableCoveredPackages =
+      fullyCoveredPackages.filter(
+        (pkg) =>
+          pkg.effectiveSavings !== null
+      );
+
+    /*
+     * Si ningún paquete completamente cubierto
+     * tiene un ahorro efectivo cuantificable,
+     * no debemos afirmar empate ni sobrecoste.
+     */
+    if (
+      comparableCoveredPackages.length === 0
+    ) {
+      const bestCoveredPackage =
+        [...fullyCoveredPackages].sort(
+          (a, b) =>
+            b.savings -
+            a.savings
+        )[0];
+
+      return {
+        title:
+          "Tus preferencias están cubiertas, pero el resultado económico no es definitivo",
+
+        summary:
+          `${bestCoveredPackage.packageName} cubre completamente lo que has indicado, pero todavía existen costes que DrinkPilot no puede cuantificar con suficiente fiabilidad.`,
+
+        reason:
+          `El ahorro bruto calculado es de ${bestCoveredPackage.savings.toFixed(
+            2
+          )} €, pero no debe interpretarse como ahorro final.`,
+
+        secondaryReason:
+          "Por eso DrinkPilot no recomienda contratar el paquete únicamente por motivos económicos hasta poder cerrar esos costes pendientes.",
+
+        tone: "warning",
+      };
+    }
+
     const bestCoveredPackage =
-      [...fullyCoveredPackages].sort(
-        (a, b) => b.savings - a.savings
+      [...comparableCoveredPackages].sort(
+        (a, b) =>
+          (b.effectiveSavings ?? -Infinity) -
+          (a.effectiveSavings ?? -Infinity)
       )[0];
+
+    const effectiveSavings =
+      bestCoveredPackage.effectiveSavings;
+
+    if (effectiveSavings === null) {
+      throw new Error(
+        "Unexpected null effectiveSavings"
+      );
+    }
 
     /*
      * EMPATE ECONÓMICO
      *
-     * Si la diferencia es inferior a medio céntimo,
-     * la tratamos como empate para evitar mensajes
-     * incorrectos provocados por decimales.
+     * Si la diferencia efectiva es inferior
+     * a medio céntimo, la tratamos como empate.
      */
     const isEconomicTie =
-      Math.abs(bestCoveredPackage.savings) <
+      Math.abs(effectiveSavings) <
       0.005;
 
     if (isEconomicTie) {
@@ -227,7 +404,7 @@ export function buildRecommendationExplanation(
           `${bestCoveredPackage.packageName} cubre completamente lo que has indicado y ambas opciones cuestan aproximadamente lo mismo.`,
 
         reason:
-          "Con esta estimación no existe un ahorro económico claro al contratar el paquete.",
+          "Con esta estimación no existe un ahorro económico efectivo claro al contratar el paquete.",
 
         secondaryReason:
           "En este caso puedes decidir en función de la comodidad del paquete y de las condiciones concretas de tu crucero.",
@@ -239,10 +416,10 @@ export function buildRecommendationExplanation(
     /*
      * Existe al menos un paquete que
      * cubre completamente al usuario,
-     * pero económicamente cuesta más.
+     * pero su ahorro efectivo no es positivo.
      */
     const extraCost =
-      Math.abs(bestCoveredPackage.savings);
+      Math.abs(effectiveSavings);
 
     return {
       title:

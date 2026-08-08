@@ -1,5 +1,20 @@
 export type CalculationInput = {
+  /*
+   * Días completos de consumo durante
+   * el crucero.
+   */
   days: number;
+
+  /*
+   * Días realmente facturables del
+   * paquete.
+   *
+   * undefined conserva el comportamiento
+   * histórico y utiliza todos los días
+   * del crucero.
+   */
+  packageChargeDays?: number;
+
   people: number;
 
   packagePricePerDay: number;
@@ -96,26 +111,36 @@ export function calculateRecommendation(
    * durante todo el crucero
    */
 
-  const multiplier =
+  /*
+   * El consumo utiliza siempre la
+   * duración completa del crucero.
+   */
+  const consumptionMultiplier =
     input.days * input.people;
 
   const coffeeCost =
-    dailyCoffeeCost * multiplier;
+    dailyCoffeeCost *
+    consumptionMultiplier;
 
   const waterCost =
-    dailyWaterCost * multiplier;
+    dailyWaterCost *
+    consumptionMultiplier;
 
   const sodaCost =
-    dailySodaCost * multiplier;
+    dailySodaCost *
+    consumptionMultiplier;
 
   const beerCost =
-    dailyBeerCost * multiplier;
+    dailyBeerCost *
+    consumptionMultiplier;
 
   const wineCost =
-    dailyWineCost * multiplier;
+    dailyWineCost *
+    consumptionMultiplier;
 
   const cocktailCost =
-    dailyCocktailCost * multiplier;
+    dailyCocktailCost *
+    consumptionMultiplier;
 
   /*
    * Coste total pagando bebidas por separado
@@ -133,9 +158,17 @@ export function calculateRecommendation(
    * Coste total del paquete
    */
 
+  const packageChargeDays =
+    input.packageChargeDays ??
+    input.days;
+
+  const packageMultiplier =
+    packageChargeDays *
+    input.people;
+
   const packageCost =
     input.packagePricePerDay *
-    multiplier;
+    packageMultiplier;
 
   /*
    * Diferencia total

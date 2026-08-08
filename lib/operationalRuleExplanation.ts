@@ -6,6 +6,10 @@ import {
   filterAdultPackageItems,
 } from "@/lib/adultPackageFilter";
 
+import {
+  explainVenueCoverage,
+} from "@/lib/venueCoverageExplanation";
+
 export type OperationalRuleNotice = {
   id: string;
 
@@ -18,7 +22,10 @@ export type OperationalRuleNotice = {
     | "alcohol-daily-limit"
     | "drink-price-threshold"
     | "aqua-unlimited"
-    | "minors-only";
+    | "minors-only"
+    | "venue-coverage"
+    | "package-purchase-group-requirement"
+    | "package-pricing-day-policy";
 
   message: string;
 
@@ -53,6 +60,142 @@ export type OperationalRuleNotice = {
   appliedContextualRuleIds:
     string[];
 };
+
+export function getOperationalRuleNoticeImpactLabel(
+  calculationImpact:
+    OperationalRuleNotice["calculationImpact"]
+): string | null {
+  if (calculationImpact === "economic") {
+    return "Aplicado al cálculo económico";
+  }
+
+  return null;
+}
+
+function buildPackagePricingDayPolicyMessage(
+  rule: PackageOperationalRules
+): string | null {
+  if (
+    rule.packagePricingDayPolicy ===
+    "exclude-disembarkation-day"
+  ) {
+    return (
+      `${rule.packageName}: el día de desembarque ` +
+      `no se factura dentro del precio del paquete.`
+    );
+  }
+
+  return null;
+}
+
+function buildPackagePurchaseGroupRequirementMessage(
+  rule: PackageOperationalRules
+): string | null {
+  if (
+    rule.packagePurchaseGroupRequirement ===
+    "same-cabin"
+  ) {
+    return (
+      `${rule.packageName}: el paquete debe contratarse ` +
+      `para los huéspedes sujetos a la condición de mismo camarote.`
+    );
+  }
+
+  if (
+    rule.packagePurchaseGroupRequirement ===
+    "same-booking-or-cabin"
+  ) {
+    return (
+      `${rule.packageName}: el paquete debe contratarse ` +
+      `para los pasajeros sujetos a las condiciones de la misma reserva o camarote.`
+    );
+  }
+
+  return null;
+}
+
+function buildVenueCoverageMessage(
+  rule: PackageOperationalRules
+): string | null {
+  const explanation =
+    explainVenueCoverage(
+      rule.venueCoverage
+    );
+
+  if (
+    !explanation
+      .hasKnownLimitations
+  ) {
+    return null;
+  }
+
+  const parts:
+    string[] = [];
+
+  const appendStatus = (
+    label: string,
+    status:
+      typeof explanation
+        .specialityRestaurants
+        .status
+  ) => {
+    if (status === "limited") {
+      parts.push(
+        `${label}: cobertura limitada`
+      );
+    } else if (
+      status === "conditional"
+    ) {
+      parts.push(
+        `${label}: cobertura condicional`
+      );
+    } else if (
+      status === "excluded"
+    ) {
+      parts.push(
+        `${label}: excluidos`
+      );
+    }
+  };
+
+  appendStatus(
+    "Restaurantes de especialidad",
+    explanation
+      .specialityRestaurants
+      .status
+  );
+
+  appendStatus(
+    "Islas privadas",
+    explanation
+      .privateIslands
+      .status
+  );
+
+  appendStatus(
+    "Venues temáticos",
+    explanation
+      .themedVenues
+      .status
+  );
+
+  if (
+    explanation
+      .excludedVenues
+      .length > 0
+  ) {
+    parts.push(
+      `Venues excluidos: ${explanation.excludedVenues.join(
+        ", "
+      )}`
+    );
+  }
+
+  return (
+    `${rule.packageName}: ` +
+    `${parts.join("; ")}.`
+  );
+}
 
 export function buildOperationalRuleNotices(
   rules: PackageOperationalRules[]
@@ -116,12 +259,17 @@ export function buildOperationalRuleNotices(
           "drink-price-threshold",
 
         calculationImpact:
-          "informational",
+          "economic",
 
         message:
           `${rule.packageName}: para el contexto indicado se ha resuelto un límite de ${rule.drinkPriceThreshold.toFixed(
             2
-          )} € por bebida.`,
+          )}${
+            rule
+              .drinkPriceThresholdCurrency
+              ? ` ${rule.drinkPriceThresholdCurrency}`
+              : ""
+          } por bebida.`,
 
         source:
           rule
@@ -167,6 +315,127 @@ export function buildOperationalRuleNotices(
         appliedContextualRuleIds:
           rule
             .aquaUnlimitedSource
+            .contextualRuleIds,
+      });
+    }
+
+    const venueMessage =
+      buildVenueCoverageMessage(
+        rule
+      );
+
+    if (venueMessage) {
+      notices.push({
+        id:
+          `${rule.packageKey}-venue-coverage`,
+
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        type:
+          "venue-coverage",
+
+        calculationImpact:
+          "informational",
+
+        message:
+          venueMessage,
+
+        source:
+          rule
+            .venueCoverageSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
+        appliedContextualRuleIds:
+          rule
+            .venueCoverageSource
+            .contextualRuleIds,
+      });
+    }
+
+    const packagePurchaseGroupRequirementMessage =
+      buildPackagePurchaseGroupRequirementMessage(
+        rule
+      );
+
+    if (
+      packagePurchaseGroupRequirementMessage
+    ) {
+      notices.push({
+        id:
+          `${rule.packageKey}-package-purchase-group-requirement`,
+
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        type:
+          "package-purchase-group-requirement",
+
+        calculationImpact:
+          "informational",
+
+        message:
+          packagePurchaseGroupRequirementMessage,
+
+        source:
+          rule
+            .packagePurchaseGroupRequirementSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
+        appliedContextualRuleIds:
+          rule
+            .packagePurchaseGroupRequirementSource
+            .contextualRuleIds,
+      });
+    }
+
+    const packagePricingDayPolicyMessage =
+      buildPackagePricingDayPolicyMessage(
+        rule
+      );
+
+    if (
+      packagePricingDayPolicyMessage
+    ) {
+      notices.push({
+        id:
+          `${rule.packageKey}-package-pricing-day-policy`,
+
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        type:
+          "package-pricing-day-policy",
+
+        calculationImpact:
+          "economic",
+
+        message:
+          packagePricingDayPolicyMessage,
+
+        source:
+          rule
+            .packagePricingDayPolicySource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
+        appliedContextualRuleIds:
+          rule
+            .packagePricingDayPolicySource
             .contextualRuleIds,
       });
     }

@@ -86,6 +86,12 @@ export default function ReviewPage() {
       market:
         data.market ?? null,
 
+      sailingRegion:
+        data.sailingRegion ?? null,
+
+      onboardCurrency:
+        data.onboardCurrency ?? null,
+
       sailingDate:
         data.sailingDate ?? null,
     });
@@ -512,6 +518,133 @@ export default function ReviewPage() {
               }
             )}
           </div>
+        </section>
+
+        {/* PRECIOS DE BEBIDAS */}
+
+        <section className="mt-4 rounded-2xl border border-slate-200 p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="font-bold text-slate-900">
+                🥤 Precios de bebidas
+              </h2>
+
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Precios individuales utilizados como referencia.
+              </p>
+            </div>
+
+            <Link
+              href="/wizard/prices"
+              className="shrink-0 text-sm font-semibold text-sky-700 hover:text-sky-900"
+            >
+              Editar
+            </Link>
+          </div>
+
+          {Object.keys(
+            data.selectedDrinkPrices
+          ).length > 0 ? (
+            <div className="mt-4 space-y-3">
+              {Object.entries(
+                data.selectedDrinkPrices
+              ).map(
+                ([
+                  category,
+                  selectedPrice,
+                ]) => {
+                  if (!selectedPrice) {
+                    return null;
+                  }
+
+                  const drink =
+                    drinks.find(
+                      (item) =>
+                        item.label ===
+                        ({
+                          coffee: "Café",
+                          water: "Agua",
+                          soda: "Refrescos",
+                          beer: "Cerveza",
+                          wine: "Vino",
+                          cocktail: "Cócteles",
+                        } as Record<
+                          string,
+                          string
+                        >)[category]
+                    );
+
+                  const sourceLabel =
+                    selectedPrice.source ===
+                    "official"
+                      ? "Información oficial"
+                      : selectedPrice.source ===
+                        "documented-menu"
+                      ? "Información documentada"
+                      : "Precio introducido por ti";
+
+                  const relevanceLabel =
+                    selectedPrice.source ===
+                      "documented-menu" &&
+                    selectedPrice.contextRelevance ===
+                      "exact"
+                      ? "Contexto coincidente"
+                      : selectedPrice.source ===
+                          "documented-menu" &&
+                        selectedPrice.contextRelevance ===
+                          "compatible"
+                      ? "Compatible · faltan datos"
+                      : null;
+
+                  return (
+                    <div
+                      key={category}
+                      className="rounded-xl bg-slate-50 p-3 sm:p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800">
+                            {drink?.icon ??
+                              "🥤"}{" "}
+                            {drink?.label ??
+                              category}
+                          </p>
+
+                          <p className="mt-1 text-xs font-medium text-slate-500">
+                            {sourceLabel}
+                          </p>
+
+                          {relevanceLabel ? (
+                            <p
+                              className={`mt-1 text-xs font-medium ${
+                                selectedPrice.contextRelevance ===
+                                "exact"
+                                  ? "text-emerald-700"
+                                  : "text-amber-700"
+                              }`}
+                            >
+                              {relevanceLabel}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <p className="shrink-0 font-bold text-slate-900">
+                          {formatCurrency(
+                            selectedPrice.price,
+                            selectedPrice.currency
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-5 text-slate-500">
+              No has indicado precios individuales de bebidas.
+            </p>
+          )}
         </section>
 
         {/* CONFIRMACIÓN */}
