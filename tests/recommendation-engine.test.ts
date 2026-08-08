@@ -2327,3 +2327,103 @@ describe(
     );
   }
 );
+
+describe(
+  "package charge days calculator integration",
+  () => {
+    it(
+      "separa los días de consumo de los días facturables del paquete",
+      () => {
+        const result =
+          calculateRecommendation({
+            days: 7,
+
+            packageChargeDays: 6,
+
+            people: 1,
+
+            packagePricePerDay: 40,
+
+            coffee: 1,
+            water: 1,
+            soda: 1,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+
+            coffeePrice: 4,
+            waterPrice: 3,
+            sodaPrice: 4,
+            beerPrice: 8,
+            winePrice: 9,
+            cocktailPrice: 12,
+          });
+
+        /*
+         * Coste diario:
+         *
+         * 4 + 3 + 4 + 8 + 9 + 12
+         * = 40
+         *
+         * El consumo mantiene los
+         * 7 días completos:
+         *
+         * 40 × 7 = 280
+         */
+        expect(
+          result.drinksCost
+        ).toBe(280);
+
+        /*
+         * El paquete utiliza únicamente
+         * los días facturables:
+         *
+         * 40 × 6 = 240
+         */
+        expect(
+          result.packageCost
+        ).toBe(240);
+
+        expect(
+          result.savings
+        ).toBe(40);
+      }
+    );
+
+    it(
+      "mantiene compatibilidad cuando no se proporcionan días facturables separados",
+      () => {
+        const result =
+          calculateRecommendation({
+            days: 7,
+
+            people: 1,
+
+            packagePricePerDay: 40,
+
+            coffee: 1,
+            water: 1,
+            soda: 1,
+            beer: 1,
+            wine: 1,
+            cocktail: 1,
+
+            coffeePrice: 4,
+            waterPrice: 3,
+            sodaPrice: 4,
+            beerPrice: 8,
+            winePrice: 9,
+            cocktailPrice: 12,
+          });
+
+        expect(
+          result.drinksCost
+        ).toBe(280);
+
+        expect(
+          result.packageCost
+        ).toBe(280);
+      }
+    );
+  }
+);
