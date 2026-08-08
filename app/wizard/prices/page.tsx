@@ -43,6 +43,10 @@ import {
   resolveMscDocumentedDrinkPriceSelectionForContext,
 } from "@/lib/mscDocumentedDrinkPriceService";
 
+import {
+  useWizardRouteGuard,
+} from "@/lib/useWizardRouteGuard";
+
 const drinkCategoryLabels:
   Record<OnboardPriceKey, string> = {
     coffee: "Café",
@@ -1519,14 +1523,28 @@ function PricesForm() {
 }
 
 export default function PricesPage() {
-  const { hydrated } =
-    useStore();
+  const {
+    hydrated,
+    ready,
+  } = useWizardRouteGuard(
+    "consumption"
+  );
 
   if (!hydrated) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <p className="font-medium text-slate-600">
           Recuperando tu análisis...
+        </p>
+      </main>
+    );
+  }
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <p className="font-medium text-slate-600">
+          Comprobando los datos de tu análisis...
         </p>
       </main>
     );

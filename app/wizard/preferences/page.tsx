@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
 
+import {
+  useWizardRouteGuard,
+} from "@/lib/useWizardRouteGuard";
+
 type PreferenceCardProps = {
   title: string;
   description: string;
@@ -58,6 +62,11 @@ export default function PreferencesPage() {
   const { data, setData } =
     useStore();
 
+  const { ready } =
+    useWizardRouteGuard(
+      "consumption"
+    );
+
   /*
    * Agua ilimitada implica internamente
    * también cobertura diaria, pero para
@@ -74,6 +83,16 @@ export default function PreferencesPage() {
     data.bottledWaterUnlimited ||
       data.bottledWaterDailyAllowance,
   ].filter(Boolean).length;
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <p className="font-medium text-slate-600">
+          Comprobando los datos de tu análisis...
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">

@@ -10,16 +10,26 @@ import {
   updateCocktailComposition,
 } from "@/lib/cocktailComposition";
 
+import {
+  useWizardRouteGuard,
+} from "@/lib/useWizardRouteGuard";
+
+import {
+  getTotalDrinksPerDay,
+} from "@/lib/wizardProgress";
+
 export default function ConsumptionPage() {
   const { data, setData } = useStore();
 
+  const { ready } =
+    useWizardRouteGuard(
+      "cruise"
+    );
+
   const totalDrinksPerDay =
-    data.coffee +
-    data.water +
-    data.soda +
-    data.beer +
-    data.wine +
-    data.cocktail;
+    getTotalDrinksPerDay(
+      data
+    );
 
   const hasConsumption =
     totalDrinksPerDay > 0;
@@ -39,6 +49,16 @@ export default function ConsumptionPage() {
     hasCocktailComposition &&
     cocktailCompositionTotal ===
       data.cocktail;
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <p className="font-medium text-slate-600">
+          Comprobando los datos de tu análisis...
+        </p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
@@ -314,14 +334,7 @@ export default function ConsumptionPage() {
             onClick={(event) => {
               if (!hasConsumption) {
                 event.preventDefault();
-                return;
               }
-
-              setData((prev) => ({
-                ...prev,
-                drinksPerDay:
-                  totalDrinksPerDay,
-              }));
             }}
             className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
               hasConsumption
