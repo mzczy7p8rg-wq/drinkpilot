@@ -46,6 +46,8 @@ describe(
             price: 2.5,
             currency: "USD",
             source: "documented-menu",
+            referenceId:
+              "msc-world-america-espresso-fleetwide-2025-07",
 
             contextRelevance:
               relevance === "exact" ||
@@ -74,6 +76,8 @@ describe(
             price: 2.5,
             currency: "USD",
             source: "documented-menu",
+            referenceId:
+              "msc-world-america-espresso-fleetwide-2025-07",
             contextRelevance: "compatible",
           },
         });

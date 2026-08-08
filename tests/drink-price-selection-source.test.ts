@@ -5,6 +5,7 @@ import {
 } from "vitest";
 
 import {
+  resolveDrinkPriceReferenceSelection,
   resolveDrinkPriceSelectionSource,
 } from "@/lib/drinkPriceSelectionSource";
 
@@ -64,6 +65,79 @@ describe(
             "documented-menu"
           )
         ).toBe("user");
+      }
+    );
+  }
+);
+
+describe(
+  "stored drink price reference selection",
+  () => {
+    it(
+      "restaura las referencias oficiales y documentadas del wizard",
+      () => {
+        expect(
+          resolveDrinkPriceReferenceSelection({
+            water: {
+              category: "water",
+              price: 3,
+              currency: "EUR",
+              source: "official",
+              referenceId:
+                "msc-aqua-1l-main-restaurant",
+            },
+            coffee: {
+              category: "coffee",
+              price: 2.5,
+              currency: "USD",
+              source: "documented-menu",
+              referenceId:
+                "msc-world-america-espresso-fleetwide-2025-07",
+              contextRelevance:
+                "compatible",
+            },
+          })
+        ).toEqual({
+          referenceIds: {
+            water:
+              "msc-aqua-1l-main-restaurant",
+            coffee:
+              "msc-world-america-espresso-fleetwide-2025-07",
+          },
+          referenceSources: {
+            water: "official",
+            coffee:
+              "documented-menu",
+          },
+        });
+      }
+    );
+
+    it(
+      "no restaura precios manuales ni selecciones antiguas sin identificador",
+      () => {
+        expect(
+          resolveDrinkPriceReferenceSelection({
+            beer: {
+              category: "beer",
+              price: 8,
+              currency: "EUR",
+              source: "user",
+            },
+            wine: {
+              category: "wine",
+              price: 14,
+              currency: "USD",
+              source:
+                "documented-menu",
+              contextRelevance:
+                "exact",
+            },
+          })
+        ).toEqual({
+          referenceIds: {},
+          referenceSources: {},
+        });
       }
     );
   }
