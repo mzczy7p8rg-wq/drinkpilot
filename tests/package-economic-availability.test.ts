@@ -5,6 +5,7 @@ import {
 } from "vitest";
 
 import {
+  resolveEconomicComparisonAvailability,
   resolvePackageEconomicAvailability,
 } from "@/lib/packageEconomicAvailability";
 
@@ -69,6 +70,57 @@ describe(
           explanation:
             "No participa actualmente en la comparación económica de adultos.",
         });
+      }
+    );
+  }
+);
+
+describe(
+  "economic comparison availability",
+  () => {
+    it(
+      "prioriza los precios de bebidas que todavía faltan",
+      () => {
+        expect(
+          resolveEconomicComparisonAvailability({
+            economicDrinkPricesAvailable:
+              false,
+            comparedPackageCount:
+              0,
+          })
+        ).toBe(
+          "drink-prices-required"
+        );
+      }
+    );
+
+    it(
+      "no presenta una comparación vacía como completada",
+      () => {
+        expect(
+          resolveEconomicComparisonAvailability({
+            economicDrinkPricesAvailable:
+              true,
+            comparedPackageCount:
+              0,
+          })
+        ).toBe(
+          "package-price-required"
+        );
+      }
+    );
+
+    it(
+      "confirma la comparación cuando ambas fuentes están disponibles",
+      () => {
+        expect(
+          resolveEconomicComparisonAvailability({
+            economicDrinkPricesAvailable:
+              true,
+            comparedPackageCount:
+              1,
+          })
+        ).toBe("available");
       }
     );
   }

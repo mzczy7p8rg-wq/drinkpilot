@@ -11,6 +11,19 @@ export type PackageEconomicAvailability = {
     string;
 };
 
+export type EconomicComparisonAvailabilityStatus =
+  | "available"
+  | "drink-prices-required"
+  | "package-price-required";
+
+export type EconomicComparisonAvailabilityInput = {
+  economicDrinkPricesAvailable:
+    boolean;
+
+  comparedPackageCount:
+    number;
+};
+
 const disabledAvailability:
   PackageEconomicAvailability = {
   status: "disabled",
@@ -46,4 +59,34 @@ export function resolvePackageEconomicAvailability(
   }
 
   return disabledAvailability;
+}
+
+/*
+ * Distingue las dos fuentes económicas que
+ * necesita una comparación completa:
+ *
+ * - una cesta utilizable de precios de bebidas;
+ * - al menos un paquete con precio comparable.
+ *
+ * Tener solo la primera permite calcular el coste
+ * de las bebidas por separado, pero no afirmar que
+ * los paquetes ya han sido comparados.
+ */
+export function resolveEconomicComparisonAvailability(
+  input:
+    EconomicComparisonAvailabilityInput
+): EconomicComparisonAvailabilityStatus {
+  if (
+    !input.economicDrinkPricesAvailable
+  ) {
+    return "drink-prices-required";
+  }
+
+  if (
+    input.comparedPackageCount <= 0
+  ) {
+    return "package-price-required";
+  }
+
+  return "available";
 }
