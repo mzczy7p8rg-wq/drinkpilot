@@ -26,6 +26,10 @@ import {
 } from "@/lib/store";
 
 import {
+  resolveEconomicDrinkPriceForCurrency,
+} from "@/lib/economicDrinkPriceResolution";
+
+import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
@@ -79,6 +83,12 @@ export default function ReviewPage() {
     getCruiseLine(
       data.cruiseLine
     );
+
+  const economicCurrency =
+    data.onboardCurrency
+      ?.trim()
+      .toUpperCase() ||
+    cruiseLine.currency;
 
   /*
    * PAQUETES DINÁMICOS
@@ -548,7 +558,7 @@ export default function ReviewPage() {
               </h2>
 
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Precios individuales utilizados como referencia.
+                Precios individuales seleccionados y su uso en el cálculo.
               </p>
             </div>
 
@@ -614,6 +624,12 @@ export default function ReviewPage() {
                       ? "Compatible · faltan datos"
                       : null;
 
+                  const isEconomicallyUsable =
+                    resolveEconomicDrinkPriceForCurrency(
+                      selectedPrice,
+                      economicCurrency
+                    ) !== null;
+
                   return (
                     <div
                       key={category}
@@ -644,6 +660,18 @@ export default function ReviewPage() {
                               {relevanceLabel}
                             </p>
                           ) : null}
+
+                          <p
+                            className={`mt-1 text-xs font-semibold ${
+                              isEconomicallyUsable
+                                ? "text-emerald-700"
+                                : "text-amber-700"
+                            }`}
+                          >
+                            {isEconomicallyUsable
+                              ? "Apto para el cálculo económico"
+                              : "Solo informativo · no participa todavía en el cálculo económico"}
+                          </p>
                         </div>
 
                         <p className="shrink-0 font-bold text-slate-900">
@@ -668,9 +696,13 @@ export default function ReviewPage() {
         {/* CONFIRMACIÓN */}
 
         <div className="mt-5 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Todo listo. DrinkPilot
-          utilizará estos datos para
-          comparar coste y cobertura.
+          💡 Todo listo. DrinkPilot solo
+          incorporará al cálculo los
+          precios con moneda y evidencia
+          compatibles. Las demás
+          referencias se conservarán como
+          información, sin alterar los
+          importes.
         </div>
 
         {/* NAVEGACIÓN */}

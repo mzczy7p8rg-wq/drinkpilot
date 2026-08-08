@@ -6,6 +6,7 @@ import {
 
 import {
   resolveEconomicDrinkPrice,
+  resolveEconomicDrinkPriceForCurrency,
   resolveEconomicDrinkPrices,
   resolveEffectiveDrinkPrices,
 } from "@/lib/economicDrinkPriceResolution";
@@ -54,6 +55,49 @@ describe("economic drink price resolution", () => {
         source: "documented-menu",
         contextRelevance: "compatible",
       })
+    ).toBeNull();
+  });
+
+  it("expone la misma elegibilidad económica que utiliza la interfaz", () => {
+    expect(
+      resolveEconomicDrinkPriceForCurrency(
+        {
+          category: "beer",
+          price: 9,
+          currency: "USD",
+          source: "documented-menu",
+          contextRelevance:
+            "compatible",
+        },
+        "USD"
+      )
+    ).toBeNull();
+
+    expect(
+      resolveEconomicDrinkPriceForCurrency(
+        {
+          category: "beer",
+          price: 9,
+          currency: "USD",
+          source: "documented-menu",
+          contextRelevance: "exact",
+        },
+        "usd"
+      )
+    ).toBe(9);
+  });
+
+  it("rechaza para la interfaz una selección expresada en otra moneda", () => {
+    expect(
+      resolveEconomicDrinkPriceForCurrency(
+        {
+          category: "coffee",
+          price: 5,
+          currency: "USD",
+          source: "user",
+        },
+        "EUR"
+      )
     ).toBeNull();
   });
 
