@@ -64,6 +64,8 @@ describe(
           price: 1,
           currency: "EUR",
           source: "official",
+          referenceId:
+            "msc-aqua-50cl-refill",
         });
       }
     );
@@ -105,6 +107,8 @@ describe(
           price: 2,
           currency: "EUR",
           source: "official",
+          referenceId:
+            "msc-aqua-1l-main-restaurant",
         });
 
         expect(

@@ -108,6 +108,9 @@ export function createSelectedDrinkPriceFromMscDocumentedReference(
 
     source:
       "documented-menu",
+
+    referenceId:
+      reference.id,
   });
 }
 

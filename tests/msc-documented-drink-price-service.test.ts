@@ -211,6 +211,9 @@ describe(
 
           source:
             "documented-menu",
+
+          referenceId:
+            "msc-world-america-espresso-coffee-emporium-2025-07",
         });
       }
     );
@@ -243,6 +246,9 @@ describe(
 
           source:
             "documented-menu",
+
+          referenceId:
+            "msc-world-america-espresso-coffee-emporium-2025-07",
         });
 
         expect(
