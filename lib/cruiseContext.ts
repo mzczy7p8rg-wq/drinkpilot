@@ -20,7 +20,7 @@ export type CruiseContext = {
   cruiseLine: CruiseLineKey;
 
   /*
-   * Mercado o región de la reserva.
+   * Mercado de compra o reserva.
    *
    * Ejemplos futuros:
    *
@@ -33,7 +33,8 @@ export type CruiseContext = {
   market: string | null;
 
   /*
-   * Región operativa de la navegación.
+   * Región geográfica u operativa de la
+   * navegación.
    *
    * Es deliberadamente distinta del
    * mercado de compra o reserva.

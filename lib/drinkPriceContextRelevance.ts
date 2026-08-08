@@ -110,6 +110,14 @@ export function evaluateDrinkPriceContextRelevance(
     unknowns
   );
 
+  compareOptionalContextValue(
+    "sailingRegion",
+    cruiseContext.sailingRegion,
+    evidenceContext.sailingRegion,
+    mismatches,
+    unknowns
+  );
+
   /*
    * CruiseContext todavía no contiene
    * un barco concreto ni itinerario

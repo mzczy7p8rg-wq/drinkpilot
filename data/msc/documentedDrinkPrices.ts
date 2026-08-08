@@ -53,7 +53,12 @@ export type MscDocumentedDrinkPrice = {
   ship?:
     string | null;
 
-  market?:
+  /*
+   * Zona geográfica documentada por la
+   * carta. No representa el mercado de
+   * compra o reserva del usuario.
+   */
+  sailingRegion?:
     string | null;
 
   itinerary?:
@@ -104,7 +109,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -149,7 +154,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -194,7 +199,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -239,7 +244,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -283,7 +288,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -327,7 +332,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -371,7 +376,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:
@@ -416,7 +421,7 @@ export const mscDocumentedDrinkPrices:
     ship:
       "MSC World America",
 
-    market:
+    sailingRegion:
       "North America",
 
     itinerary:

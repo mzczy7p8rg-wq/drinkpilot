@@ -7,6 +7,7 @@ export type DrinkPriceEvidence =
 export type DrinkPriceEvidenceContext = {
   ship?: string | null;
   market?: string | null;
+  sailingRegion?: string | null;
   itinerary?: string | null;
   currency: "EUR" | "USD";
   sourceUrl?: string | null;

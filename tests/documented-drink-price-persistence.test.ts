@@ -92,8 +92,8 @@ describe(
             "msc-world-america-espresso-fleetwide-2025-07",
             {
               cruiseLine: "msc",
-              market: "Europe",
-              sailingRegion: null,
+              market: "US",
+              sailingRegion: "Europe",
               onboardCurrency: "USD",
               sailingDate: null,
             }
