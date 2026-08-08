@@ -41,13 +41,14 @@ describe(
     );
 
     it(
-      "filtra por barco mercado menú moneda y fecha",
+      "filtra por barco región menú moneda y fecha",
       () => {
         const coffee =
           getMscDocumentedDrinkPrices({
             category: "coffee",
             ship: "MSC World America",
-            market: "North America",
+            sailingRegion:
+              "North America",
             menuName: "Fleetwide menu",
             currency: "USD",
             observedAt: "2025-07",
@@ -270,10 +271,15 @@ describe(
         );
 
         expect(
-          result?.evidence.context.market
+          result?.evidence.context
+            .sailingRegion
         ).toBe(
           "North America"
         );
+
+        expect(
+          result?.evidence.context.market
+        ).toBeUndefined();
 
         expect(
           result?.evidence.context.currency
@@ -353,7 +359,7 @@ describe(
         expect(
           result?.contextRelevance.unknowns
         ).toEqual([
-          "market",
+          "sailingRegion",
           "ship",
         ]);
       }
@@ -373,8 +379,9 @@ describe(
             "msc-world-america-espresso-coffee-emporium-2025-07",
             {
               cruiseLine: "msc",
-              market: "Europe",
-              sailingRegion: null,
+              market: "US",
+              sailingRegion:
+                "Europe",
               onboardCurrency:
                 "USD",
               sailingDate: null,
@@ -390,7 +397,7 @@ describe(
         expect(
           result?.contextRelevance.mismatches
         ).toContain(
-          "market"
+          "sailingRegion"
         );
 
         expect(

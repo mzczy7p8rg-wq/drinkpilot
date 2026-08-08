@@ -49,13 +49,13 @@ describe(
         const result =
           evaluateDrinkPriceContextRelevance(
             createContext({
-              market:
+              sailingRegion:
                 "North America",
               onboardCurrency:
                 "USD",
             }),
             createEvidence({
-              market:
+              sailingRegion:
                 "North America",
             })
           );
@@ -78,7 +78,7 @@ describe(
                 "USD",
             }),
             createEvidence({
-              market:
+              sailingRegion:
                 "North America",
               ship:
                 "MSC World America",
@@ -96,7 +96,7 @@ describe(
         expect(
           result.unknowns
         ).toEqual([
-          "market",
+          "sailingRegion",
           "ship",
         ]);
       }
@@ -157,6 +157,38 @@ describe(
         ).toContain(
           "market"
         );
+      }
+    );
+
+    it(
+      "detecta región de navegación incompatible sin confundirla con el mercado",
+      () => {
+        const result =
+          evaluateDrinkPriceContextRelevance(
+            createContext({
+              market: "US",
+              sailingRegion:
+                "Europe",
+              onboardCurrency:
+                "USD",
+            }),
+            createEvidence({
+              sailingRegion:
+                "North America",
+              currency:
+                "USD",
+            })
+          );
+
+        expect(
+          result.mismatches
+        ).toContain(
+          "sailingRegion"
+        );
+
+        expect(
+          result.mismatches
+        ).not.toContain("market");
       }
     );
 

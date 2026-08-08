@@ -216,7 +216,7 @@ describe(
             (item) =>
               item.ship ===
                 "MSC World America" &&
-              item.market ===
+              item.sailingRegion ===
                 "North America" &&
               item.currency ===
                 "USD" &&

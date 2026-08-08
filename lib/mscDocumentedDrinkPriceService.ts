@@ -28,7 +28,7 @@ import {
 export type MscDocumentedDrinkPriceQuery = {
   category?: OnboardPriceKey;
   ship?: string;
-  market?: string;
+  sailingRegion?: string;
   itinerary?: string;
   menuName?: string;
   currency?: "EUR" | "USD";
@@ -58,8 +58,8 @@ export function getMscDocumentedDrinkPrices(
         query.ship
       ) &&
       matchesOptionalString(
-        item.market,
-        query.market
+        item.sailingRegion,
+        query.sailingRegion
       ) &&
       matchesOptionalString(
         item.itinerary,
@@ -157,8 +157,8 @@ export function resolveMscDocumentedDrinkPriceSelection(
         ship:
           reference.ship,
 
-        market:
-          reference.market,
+        sailingRegion:
+          reference.sailingRegion,
 
         itinerary:
           reference.itinerary,
