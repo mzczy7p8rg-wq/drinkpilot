@@ -93,6 +93,19 @@ export const mscPackages = {
 
       alcoholicDrinksDailyLimit:
         15,
+
+      venueCoverage: {
+        specialityRestaurants:
+          "limited",
+
+        privateIslands:
+          "limited",
+
+        themedVenues:
+          "limited",
+
+        excludedVenues: [],
+      },
     },
 
     restrictions:
@@ -179,6 +192,19 @@ export const mscPackages = {
 
       alcoholicDrinksDailyLimit:
         15,
+
+      venueCoverage: {
+        specialityRestaurants:
+          "conditional",
+
+        privateIslands:
+          "conditional",
+
+        themedVenues:
+          "unknown",
+
+        excludedVenues: [],
+      },
     },
 
     restrictions:
@@ -269,6 +295,19 @@ export const mscPackages = {
 
       nonAlcoholicWine:
         true,
+
+      venueCoverage: {
+        specialityRestaurants:
+          "limited",
+
+        privateIslands:
+          "limited",
+
+        themedVenues:
+          "limited",
+
+        excludedVenues: [],
+      },
     },
 
     restrictions:

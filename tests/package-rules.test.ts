@@ -650,3 +650,132 @@ describe(
     );
   }
 );
+
+it(
+  "expone cobertura operativa de venues sin inferirla desde restrictions",
+  () => {
+    const costaRules =
+      getPackageOperationalRules({
+        cruiseLine: "costa",
+      });
+
+    const mscRules =
+      getPackageOperationalRules({
+        cruiseLine: "msc",
+      });
+
+    const costaMyDrinks =
+      costaRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "myDrinks"
+      );
+
+    const costaMyDrinksPlus =
+      costaRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "myDrinksPlus"
+      );
+
+    const mscEasy =
+      mscRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "mscEasy"
+      );
+
+    const mscPremiumExtra =
+      mscRules.find(
+        (rule) =>
+          rule.packageKey ===
+          "mscPremiumExtra"
+      );
+
+    expect(
+      costaMyDrinks?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "unknown",
+      privateIslands:
+        "unknown",
+      themedVenues:
+        "limited",
+      excludedVenues: [
+        "Archipelago",
+        "Casanova",
+      ],
+    });
+
+    expect(
+      costaMyDrinksPlus?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "unknown",
+      privateIslands:
+        "unknown",
+      themedVenues:
+        "limited",
+      excludedVenues: [
+        "Archipelago",
+        "Casanova",
+      ],
+    });
+
+    expect(
+      mscEasy?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "limited",
+      privateIslands:
+        "limited",
+      themedVenues:
+        "limited",
+      excludedVenues: [],
+    });
+
+    expect(
+      mscPremiumExtra?.venueCoverage
+    ).toEqual({
+      specialityRestaurants:
+        "conditional",
+      privateIslands:
+        "conditional",
+      themedVenues:
+        "unknown",
+      excludedVenues: [],
+    });
+  }
+);
+
+
+it(
+  "mantiene procedencia base para venueCoverage cuando procede de observedCoverage",
+  () => {
+    const mscEasy =
+      getPackageOperationalRule(
+        "msc",
+        "mscEasy"
+      );
+
+    const costaMyDrinks =
+      getPackageOperationalRule(
+        "costa",
+        "myDrinks"
+      );
+
+    expect(
+      mscEasy?.venueCoverageSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+
+    expect(
+      costaMyDrinks?.venueCoverageSource
+    ).toEqual({
+      source: "base",
+      contextualRuleIds: [],
+    });
+  }
+);

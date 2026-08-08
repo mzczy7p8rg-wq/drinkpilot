@@ -52,6 +52,28 @@ export type OperationalRuleSource = {
     string[];
 };
 
+export type PackageVenueCoverageStatus =
+  | "unknown"
+  | "included"
+  | "limited"
+  | "conditional"
+  | "excluded";
+
+export type PackageVenueCoverage = {
+  specialityRestaurants:
+    PackageVenueCoverageStatus;
+
+  privateIslands:
+    PackageVenueCoverageStatus;
+
+  themedVenues:
+    PackageVenueCoverageStatus;
+
+  excludedVenues:
+    string[];
+};
+
+
 export type PackageOperationalRules = {
   packageKey: PackageKey;
 
@@ -141,6 +163,26 @@ export type PackageOperationalRules = {
     OperationalRuleSource;
 
   /*
+   * Cobertura operativa conocida según
+   * el tipo de venue.
+   *
+   * No se infiere desde restrictions:
+   * procede únicamente de datos
+   * estructurados.
+   */
+  venueCoverage:
+    PackageVenueCoverage;
+
+  /*
+   * Procedencia de la cobertura de venues.
+   *
+   * La cobertura base procede únicamente
+   * de observedCoverage estructurado.
+   */
+  venueCoverageSource:
+    OperationalRuleSource;
+
+  /*
    * IDs de reglas contextuales que
    * realmente participaron en la
    * resolución.
@@ -181,6 +223,92 @@ function readPositiveNumber(
   )
     ? value
     : null;
+}
+
+function readVenueCoverageStatus(
+  value: unknown
+): PackageVenueCoverageStatus {
+  if (
+    value === "included" ||
+    value === "limited" ||
+    value === "conditional" ||
+    value === "excluded"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function readVenueCoverage(
+  value: unknown
+): PackageVenueCoverage {
+  const fallback:
+    PackageVenueCoverage = {
+      specialityRestaurants:
+        "unknown",
+
+      privateIslands:
+        "unknown",
+
+      themedVenues:
+        "unknown",
+
+      excludedVenues: [],
+    };
+
+  if (
+    !value ||
+    typeof value !== "object"
+  ) {
+    return fallback;
+  }
+
+  const record =
+    value as Record<
+      string,
+      unknown
+    >;
+
+  const excludedVenues =
+    Array.isArray(
+      record.excludedVenues
+    )
+      ? record.excludedVenues
+          .filter(
+            (
+              venue
+            ): venue is string =>
+              typeof venue ===
+                "string" &&
+              venue.trim().length >
+                0
+          )
+          .map(
+            (venue) =>
+              venue.trim()
+          )
+      : [];
+
+  return {
+    specialityRestaurants:
+      readVenueCoverageStatus(
+        record
+          .specialityRestaurants
+      ),
+
+    privateIslands:
+      readVenueCoverageStatus(
+        record.privateIslands
+      ),
+
+    themedVenues:
+      readVenueCoverageStatus(
+        record.themedVenues
+      ),
+
+    excludedVenues,
+  };
 }
 
 /*
@@ -420,6 +548,20 @@ function resolvePackageRules(
   let minorsOnly =
     false;
 
+  let venueCoverage:
+    PackageVenueCoverage = {
+      specialityRestaurants:
+        "unknown",
+
+      privateIslands:
+        "unknown",
+
+      themedVenues:
+        "unknown",
+
+      excludedVenues: [],
+    };
+
   /*
    * REGLAS BASE
    *
@@ -458,6 +600,16 @@ function resolvePackageRules(
     ) {
       minorsOnly =
         true;
+    }
+
+    if (
+      "venueCoverage" in
+        observed
+    ) {
+      venueCoverage =
+        readVenueCoverage(
+          observed.venueCoverage
+        );
     }
   }
 
@@ -535,6 +687,20 @@ function resolvePackageRules(
 
       minorsOnlySource:
         minorsOnly
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
+      venueCoverage,
+
+      venueCoverageSource:
+        observed &&
+        "venueCoverage" in observed
           ? {
               source: "base",
               contextualRuleIds: [],

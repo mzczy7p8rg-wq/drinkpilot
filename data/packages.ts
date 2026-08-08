@@ -92,6 +92,22 @@ export const costaPackages = {
      */
     observedCoverage: {
       nonAlcoholicCocktails: true,
+
+      venueCoverage: {
+        specialityRestaurants:
+          "unknown",
+
+        privateIslands:
+          "unknown",
+
+        themedVenues:
+          "limited",
+
+        excludedVenues: [
+          "Archipelago",
+          "Casanova",
+        ],
+      },
     },
 
     restrictions:
@@ -175,6 +191,22 @@ export const costaPackages = {
      */
     observedCoverage: {
       bottledWaterDailyAllowance: 1,
+
+      venueCoverage: {
+        specialityRestaurants:
+          "unknown",
+
+        privateIslands:
+          "unknown",
+
+        themedVenues:
+          "limited",
+
+        excludedVenues: [
+          "Archipelago",
+          "Casanova",
+        ],
+      },
     },
 
     restrictions:
@@ -251,6 +283,22 @@ export const costaPackages = {
         null,
 
       bottledWaterUnlimited: true,
+
+      venueCoverage: {
+        specialityRestaurants:
+          "unknown",
+
+        privateIslands:
+          "unknown",
+
+        themedVenues:
+          "limited",
+
+        excludedVenues: [
+          "Archipelago",
+          "Casanova",
+        ],
+      },
     },
 
     restrictions:
