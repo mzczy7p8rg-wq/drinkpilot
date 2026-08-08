@@ -8,6 +8,11 @@ import {
   useStore,
 } from "@/lib/store";
 
+import {
+  resolvePackageEconomicAvailability,
+  type PackageEconomicAvailabilityStatus,
+} from "@/lib/packageEconomicAvailability";
+
 type ConfidenceLevel =
   | "verified"
   | "partial"
@@ -80,12 +85,13 @@ function getPackageConfidenceLevel(
 }
 
 function getEconomicConfidenceLevel(
-  economicActivation: string,
+  availabilityStatus:
+    PackageEconomicAvailabilityStatus,
   status: string
 ): ConfidenceLevel {
   if (
-    economicActivation ===
-    "user-price-only"
+    availabilityStatus !==
+    "available"
   ) {
     return "pending";
   }
@@ -364,9 +370,15 @@ export default function DataConfidencePanel() {
                   pkg.inclusionsStatus
                 );
 
+              const economicAvailability =
+                resolvePackageEconomicAvailability(
+                  pkg.economicActivation,
+                );
+
               const economicConfidence =
                 getEconomicConfidenceLevel(
-                  pkg.economicActivation,
+                  economicAvailability
+                    .status,
                   pkg.status
                 );
 
@@ -378,10 +390,6 @@ export default function DataConfidencePanel() {
                 ) &&
                 pkg.pricePerDay >
                   0;
-
-              const isUserPriceOnly =
-                pkg.economicActivation ===
-                "user-price-only";
 
               return (
                 <div
@@ -500,29 +508,12 @@ export default function DataConfidencePanel() {
                       />
                     </div>
 
-                    {isUserPriceOnly ? (
-                      <p className="mt-2 text-xs leading-5 text-slate-600">
-                        El paquete está
-                        identificado, pero
-                        necesita un precio
-                        real introducido
-                        por el usuario
-                        para participar en
-                        la comparación
-                        económica.
-                      </p>
-                    ) : (
-                      <p className="mt-2 text-xs leading-5 text-slate-600">
-                        Habilitado para la
-                        comparación. Si
-                        introduces el
-                        precio real de tu
-                        reserva,
-                        DrinkPilot lo
-                        utiliza con
-                        prioridad.
-                      </p>
-                    )}
+                    <p className="mt-2 text-xs leading-5 text-slate-600">
+                      {
+                        economicAvailability
+                          .explanation
+                      }
+                    </p>
                   </div>
 
                   {/* NOTA */}
