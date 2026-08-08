@@ -592,7 +592,12 @@ export function resolveEconomicComparison(
   savings: number,
 
   thresholdImpact?:
-    PackageThresholdCruiseImpact
+    PackageThresholdCruiseImpact,
+
+  operationalEconomicImpact?:
+    PackageOperationalRuleImpact[
+      "economicImpact"
+    ]
 ): {
   status:
     EconomicComparisonStatus;
@@ -624,6 +629,35 @@ export function resolveEconomicComparison(
   if (
     thresholdImpact?.status ===
       "known-unquantified"
+  ) {
+    return {
+      status:
+        "partial-unknown",
+
+      effectiveSavings:
+        null,
+    };
+  }
+
+  /*
+   * LÍMITE DIARIO DE ALCOHOL
+   *
+   * Solo cerramos el ahorro efectivo
+   * cuando conocemos tanto el exceso como
+   * la política económica aplicable.
+   *
+   * El coste permanece sin cuantificar:
+   * no sabemos qué bebidas concretas se
+   * consumen después de alcanzar el límite
+   * ni el importe exacto de las propinas.
+   */
+  if (
+    operationalEconomicImpact
+      ?.status ===
+      "known-unquantified" &&
+    operationalEconomicImpact
+      .chargePolicy !==
+      "unknown"
   ) {
     return {
       status:
@@ -1304,11 +1338,19 @@ export function compareDrinkPackages(
                 packageKey
             )?.cruiseImpact;
 
+          const operationalEconomicImpact =
+            operationalRuleImpacts.find(
+              (impact) =>
+                impact.packageKey ===
+                packageKey
+            )?.economicImpact;
+
           const economicComparison =
             resolveEconomicComparison(
               coverage,
               calculation.savings,
-              thresholdImpact
+              thresholdImpact,
+              operationalEconomicImpact
             );
 
           return {
