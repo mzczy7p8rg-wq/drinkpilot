@@ -835,3 +835,84 @@ it(
     });
   }
 );
+describe(
+  "package pricing day policy",
+  () => {
+    it(
+      "expone que MSC excluye el día de desembarque del precio del paquete sin alterar todavía el cálculo",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            "msc"
+          );
+
+        const mscEasy =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        const mscPremiumExtra =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscPremiumExtra"
+          );
+
+        const mscAlcoholFree =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscAlcoholFree"
+          );
+
+        expect(
+          mscEasy
+            ?.packagePricingDayPolicy
+        ).toBe(
+          "exclude-disembarkation-day"
+        );
+
+        expect(
+          mscPremiumExtra
+            ?.packagePricingDayPolicy
+        ).toBe(
+          "exclude-disembarkation-day"
+        );
+
+        expect(
+          mscAlcoholFree
+            ?.packagePricingDayPolicy
+        ).toBe(
+          "exclude-disembarkation-day"
+        );
+
+        expect(
+          mscEasy
+            ?.packagePricingDayPolicySource
+            .source
+        ).toBe("base");
+      }
+    );
+
+    it(
+      "no inventa una política de días facturables para Costa",
+      () => {
+        const rules =
+          getPackageOperationalRules(
+            "costa"
+          );
+
+        expect(
+          rules.every(
+            (rule) =>
+              rule
+                .packagePricingDayPolicy ===
+              "unknown"
+          )
+        ).toBe(true);
+      }
+    );
+  }
+);

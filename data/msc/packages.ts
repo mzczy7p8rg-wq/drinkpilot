@@ -109,6 +109,9 @@ export const mscPackages = {
 
       packagePurchaseGroupRequirement:
         "same-cabin",
+
+      packagePricingDayPolicy:
+        "exclude-disembarkation-day",
     },
 
     restrictions:
@@ -211,6 +214,9 @@ export const mscPackages = {
 
       packagePurchaseGroupRequirement:
         "same-cabin",
+
+      packagePricingDayPolicy:
+        "exclude-disembarkation-day",
     },
 
     restrictions:
@@ -317,6 +323,9 @@ export const mscPackages = {
 
       packagePurchaseGroupRequirement:
         "same-cabin",
+
+      packagePricingDayPolicy:
+        "exclude-disembarkation-day",
     },
 
     restrictions:
@@ -411,6 +420,9 @@ export const mscPackages = {
 
       packagePurchaseGroupRequirement:
         "same-cabin",
+
+      packagePricingDayPolicy:
+        "exclude-disembarkation-day",
     },
 
     restrictions:

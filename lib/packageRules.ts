@@ -78,6 +78,10 @@ export type PackagePurchaseGroupRequirement =
   | "same-cabin"
   | "same-booking-or-cabin";
 
+export type PackagePricingDayPolicy =
+  | "unknown"
+  | "exclude-disembarkation-day";
+
 
 export type PackageOperationalRules = {
   packageKey: PackageKey;
@@ -202,6 +206,20 @@ export type PackageOperationalRules = {
     OperationalRuleSource;
 
   /*
+   * Política conocida sobre qué días
+   * del crucero son facturables para
+   * el paquete.
+   *
+   * Todavía no modifica el cálculo
+   * económico de DrinkPilot.
+   */
+  packagePricingDayPolicy:
+    PackagePricingDayPolicy;
+
+  packagePricingDayPolicySource:
+    OperationalRuleSource;
+
+  /*
    * IDs de reglas contextuales que
    * realmente participaron en la
    * resolución.
@@ -252,6 +270,19 @@ function readVenueCoverageStatus(
     value === "limited" ||
     value === "conditional" ||
     value === "excluded"
+  ) {
+    return value;
+  }
+
+  return "unknown";
+}
+
+function readPackagePricingDayPolicy(
+  value: unknown
+): PackagePricingDayPolicy {
+  if (
+    value ===
+    "exclude-disembarkation-day"
   ) {
     return value;
   }
@@ -598,6 +629,10 @@ function resolvePackageRules(
     PackagePurchaseGroupRequirement =
       "unknown";
 
+  let packagePricingDayPolicy:
+    PackagePricingDayPolicy =
+      "unknown";
+
   /*
    * REGLAS BASE
    *
@@ -656,6 +691,17 @@ function resolvePackageRules(
         readPackagePurchaseGroupRequirement(
           observed
             .packagePurchaseGroupRequirement
+        );
+    }
+
+    if (
+      "packagePricingDayPolicy" in
+        observed
+    ) {
+      packagePricingDayPolicy =
+        readPackagePricingDayPolicy(
+          observed
+            .packagePricingDayPolicy
         );
     }
   }
@@ -761,6 +807,20 @@ function resolvePackageRules(
 
       packagePurchaseGroupRequirementSource:
         packagePurchaseGroupRequirement !==
+        "unknown"
+          ? {
+              source: "base",
+              contextualRuleIds: [],
+            }
+          : {
+              source: "none",
+              contextualRuleIds: [],
+            },
+
+      packagePricingDayPolicy,
+
+      packagePricingDayPolicySource:
+        packagePricingDayPolicy !==
         "unknown"
           ? {
               source: "base",
