@@ -131,12 +131,12 @@ describe(
         expect(
           result.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(
           result.additionalCostPerDay
-        ).toBeNull();
+        ).toBe(2);
       }
     );
 
@@ -241,7 +241,7 @@ describe(
     );
 
     it(
-      "no inventa coste aunque conozca varias bebidas afectadas",
+      "suma el copago de varias bebidas afectadas",
       () => {
         const result =
           evaluatePackageThresholdConsumptionImpact(
@@ -268,12 +268,12 @@ describe(
         expect(
           result.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(
           result.additionalCostPerDay
-        ).toBeNull();
+        ).toBe(4);
       }
     );
 
@@ -414,7 +414,7 @@ describe(
     );
 
     it(
-      "mantiene known-unquantified si alguna bebida afectada no puede cuantificarse",
+      "cuantifica todas las bebidas afectadas cuando sus precios son conocidos",
       () => {
         const rule =
           getPackageOperationalRule(
@@ -449,7 +449,7 @@ describe(
         expect(
           result.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(
@@ -458,7 +458,7 @@ describe(
 
         expect(
           result.additionalCostPerDay
-        ).toBeNull();
+        ).toBe(8);
       }
     );
   }
@@ -504,7 +504,7 @@ describe(
 
         expect(
           result.additionalCostPerDay
-        ).toBeNull();
+        ).toBe(6);
       }
     );
 

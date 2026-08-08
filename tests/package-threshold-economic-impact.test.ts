@@ -76,7 +76,7 @@ describe(
         expect(
           result.impact.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(
@@ -91,7 +91,7 @@ describe(
         expect(
           result.impact
             .additionalCostPerDrink
-        ).toBeNull();
+        ).toBe(1);
       }
     );
 
@@ -146,7 +146,7 @@ describe(
         expect(
           result.impact.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(

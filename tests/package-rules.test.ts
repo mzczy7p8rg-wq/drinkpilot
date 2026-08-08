@@ -534,7 +534,7 @@ describe(
   "drink price threshold charge policy",
   () => {
     it(
-      "mantiene la política desconocida cuando solo conocemos el threshold",
+      "resuelve la política difference cuando el threshold MSC la documenta",
       () => {
         const rule =
           getPackageOperationalRule(
@@ -555,14 +555,16 @@ describe(
         expect(
           rule
             ?.drinkPriceThresholdChargePolicy
-        ).toBe("unknown");
+        ).toBe("difference");
 
         expect(
           rule
             ?.drinkPriceThresholdChargePolicySource
         ).toEqual({
-          source: "none",
-          contextualRuleIds: [],
+          source: "contextual",
+          contextualRuleIds: [
+            "msc-premium-extra-threshold-eur",
+          ],
         });
       }
     );

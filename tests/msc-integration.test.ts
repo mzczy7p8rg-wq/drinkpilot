@@ -509,7 +509,7 @@ describe(
             ?.dailyImpact
             .status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(
@@ -541,19 +541,19 @@ describe(
             ?.cruiseImpact
             .status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         /*
-         * No asumimos que el pasajero
-         * pague 1 EUR, el precio completo
-         * ni ningún otro importe.
+         * La política contextual "difference"
+         * permite cuantificar 1 EUR adicional
+         * por cada cóctel de 15 EUR.
          */
         expect(
           premiumImpact
             ?.cruiseImpact
             .additionalCostTotal
-        ).toBeNull();
+        ).toBe(28);
 
         /*
          * Confirmamos además que la cadena
@@ -606,7 +606,7 @@ describe(
   "MSC threshold coverage integration",
   () => {
     it(
-      "propaga cobertura excluida por encima del threshold sin atribuir una política de cobro",
+      "propaga cobertura excluida y política de copago contextual",
       () => {
         const result =
           compareDrinkPackages({
@@ -673,7 +673,7 @@ describe(
           premiumRule
             ?.drinkPriceThresholdChargePolicy
         ).toBe(
-          "unknown"
+          "difference"
         );
 
         expect(
@@ -681,10 +681,11 @@ describe(
             ?.drinkPriceThresholdChargePolicySource
         ).toEqual({
           source:
-            "none",
+            "contextual",
 
-          contextualRuleIds:
-            [],
+          contextualRuleIds: [
+            "msc-premium-extra-threshold-eur",
+          ],
         });
       }
     );

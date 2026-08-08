@@ -90,7 +90,7 @@ describe(
           result.packageImpact
             .impact.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
 
         expect(
@@ -106,7 +106,7 @@ describe(
         expect(
           result.packageImpact
             .impact.additionalCostPerDrink
-        ).toBeNull();
+        ).toBe(1);
       }
     );
 
@@ -306,7 +306,7 @@ describe(
           result.packageImpact
             .impact.status
         ).toBe(
-          "known-unquantified"
+          "quantified"
         );
       }
     );
@@ -381,7 +381,7 @@ describe(
           result.packageImpact
             .impact
             .additionalCostPerDrink
-        ).toBeNull();
+        ).toBe(1);
       }
     );
 

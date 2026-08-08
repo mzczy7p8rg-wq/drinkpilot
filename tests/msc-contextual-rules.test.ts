@@ -288,7 +288,7 @@ describe(
   "MSC threshold coverage policy",
   () => {
     it(
-      "marca Premium Extra EUR como excluido por encima del threshold sin inventar política de cobro",
+      "marca Premium Extra EUR como excluido por encima del threshold con copago por diferencia",
       () => {
         const rules =
           getMatchingContextualPackageRules(
@@ -324,12 +324,12 @@ describe(
         expect(
           rule?.rules
             .drinkPriceThresholdChargePolicy
-        ).toBeUndefined();
+        ).toBe("difference");
       }
     );
 
     it(
-      "marca Premium Extra USD como excluido por encima del threshold sin inventar política de cobro",
+      "marca Premium Extra USD como excluido por encima del threshold con copago por diferencia",
       () => {
         const rules =
           getMatchingContextualPackageRules(
@@ -365,7 +365,72 @@ describe(
         expect(
           rule?.rules
             .drinkPriceThresholdChargePolicy
-        ).toBeUndefined();
+        ).toBe("difference");
+      }
+    );
+  }
+);
+
+describe(
+  "MSC Premium Extra threshold charge policy",
+  () => {
+    it(
+      "resuelve copago por diferencia para el threshold EUR",
+      () => {
+        const rules =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate: "2026-08-15",
+            }
+          );
+
+        const thresholdRule =
+          rules.find(
+            (rule) =>
+              rule.id ===
+              "msc-premium-extra-threshold-eur"
+          );
+
+        expect(
+          thresholdRule
+            ?.rules
+            .drinkPriceThresholdChargePolicy
+        ).toBe("difference");
+      }
+    );
+
+    it(
+      "resuelve copago por diferencia para el threshold USD",
+      () => {
+        const rules =
+          getMatchingContextualPackageRules(
+            mscContextualPackageRules,
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate: "2026-08-15",
+            }
+          );
+
+        const thresholdRule =
+          rules.find(
+            (rule) =>
+              rule.id ===
+              "msc-premium-extra-threshold-usd"
+          );
+
+        expect(
+          thresholdRule
+            ?.rules
+            .drinkPriceThresholdChargePolicy
+        ).toBe("difference");
       }
     );
   }
