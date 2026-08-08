@@ -30,6 +30,11 @@ import {
 } from "@/lib/packageRules";
 
 import {
+  resolvePackageChargeDays,
+} from "@/lib/packageChargeDays";
+
+
+import {
   resolveAlcoholConsumption,
   type AlcoholConsumptionResolution,
 } from "@/lib/alcoholConsumption";
@@ -748,9 +753,13 @@ export function compareDrinkPackages(
    * Construimos el contexto real recibido
    * desde el wizard.
    *
-   * Todavía no utilizamos estas reglas
-   * para alterar cálculo, cobertura ni
-   * recomendación.
+   * La mayoría de reglas continúan siendo
+   * descriptivas.
+   *
+   * Algunas reglas explícitamente modeladas
+   * pueden participar en el cálculo económico,
+   * como la política de días facturables
+   * del paquete.
    */
   const operationalRules =
     getPackageOperationalRules({
@@ -1201,10 +1210,32 @@ export function compareDrinkPackages(
           referencePrice,
           resolvedPrice,
         }) => {
+          const operationalRule =
+            operationalRules.find(
+              (rule) =>
+                rule.packageKey ===
+                packageKey
+            );
+
+          const packageChargeDays =
+            resolvePackageChargeDays({
+              cruiseDays:
+                input.days,
+
+              packagePricingDayPolicy:
+                operationalRule
+                  ?.packagePricingDayPolicy ??
+                "unknown",
+            });
+
           const calculation =
             calculateRecommendation({
               days:
                 input.days,
+
+              packageChargeDays:
+                packageChargeDays
+                  .chargeDays,
 
               people:
                 input.people,

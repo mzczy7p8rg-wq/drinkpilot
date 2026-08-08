@@ -60,3 +60,76 @@ describe(
     );
   }
 );
+
+import {
+  getPackageOperationalRule,
+} from "@/lib/packageRules";
+
+describe(
+  "package charge days from operational rules",
+  () => {
+    it(
+      "resuelve 6 días facturables para MSC Easy en un crucero de 7 días",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+            },
+            "mscEasy"
+          );
+
+        if (!rule) {
+          throw new Error(
+            "MSC Easy operational rule missing"
+          );
+        }
+
+        const result =
+          resolvePackageChargeDays({
+            cruiseDays: 7,
+
+            packagePricingDayPolicy:
+              rule.packagePricingDayPolicy,
+          });
+
+        expect(result).toEqual({
+          chargeDays: 6,
+          applied: true,
+        });
+      }
+    );
+
+    it(
+      "mantiene 7 días facturables para Costa cuando la política es desconocida",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "costa",
+            },
+            "myDrinks"
+          );
+
+        if (!rule) {
+          throw new Error(
+            "Costa My Drinks operational rule missing"
+          );
+        }
+
+        const result =
+          resolvePackageChargeDays({
+            cruiseDays: 7,
+
+            packagePricingDayPolicy:
+              rule.packagePricingDayPolicy,
+          });
+
+        expect(result).toEqual({
+          chargeDays: 7,
+          applied: false,
+        });
+      }
+    );
+  }
+);
