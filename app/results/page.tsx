@@ -12,6 +12,7 @@ import { buildRecommendationExplanation } from "@/lib/recommendationExplanation"
 import {
   buildOperationalRuleNotices,
   filterAdultOperationalRuleNotices,
+  getOperationalRuleNoticeImpactLabel,
 } from "@/lib/operationalRuleExplanation";
 
 import {
@@ -735,7 +736,7 @@ export default function ResultsPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-sky-900">
-                  Estas condiciones forman parte de las reglas operativas conocidas y no modifican todavía el cálculo económico de DrinkPilot.
+                  Estas condiciones forman parte de las reglas operativas conocidas. Cuando una de ellas ya modifica la comparación económica, lo indicamos expresamente.
                 </p>
 
                 <div className="mt-4 grid gap-3">
@@ -748,6 +749,16 @@ export default function ResultsPage() {
                         <p className="text-sm leading-6 text-slate-700">
                           {notice.message}
                         </p>
+
+                        {getOperationalRuleNoticeImpactLabel(
+                          notice.calculationImpact
+                        ) && (
+                          <p className="mt-2 text-xs font-semibold text-emerald-700">
+                            ✓ {getOperationalRuleNoticeImpactLabel(
+                              notice.calculationImpact
+                            )}
+                          </p>
+                        )}
                       </div>
                     )
                   )}
@@ -2036,6 +2047,16 @@ export default function ResultsPage() {
                       <p className="text-sm leading-6 text-slate-700">
                         {notice.message}
                       </p>
+
+                      {getOperationalRuleNoticeImpactLabel(
+                        notice.calculationImpact
+                      ) && (
+                        <p className="mt-2 text-xs font-semibold text-emerald-700">
+                          ✓ {getOperationalRuleNoticeImpactLabel(
+                            notice.calculationImpact
+                          )}
+                        </p>
+                      )}
                     </div>
                   )
                 )}

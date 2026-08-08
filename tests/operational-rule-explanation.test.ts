@@ -6,6 +6,7 @@ import {
 
 import {
   buildOperationalRuleNotices,
+  getOperationalRuleNoticeImpactLabel,
 } from "@/lib/operationalRuleExplanation";
 
 import {
@@ -1055,6 +1056,25 @@ describe(
 describe(
   "package pricing day policy notices",
   () => {
+    it(
+      "proporciona una etiqueta económica reutilizable por results",
+      () => {
+        expect(
+          getOperationalRuleNoticeImpactLabel(
+            "economic"
+          )
+        ).toBe(
+          "Aplicado al cálculo económico"
+        );
+
+        expect(
+          getOperationalRuleNoticeImpactLabel(
+            "informational"
+          )
+        ).toBeNull();
+      }
+    );
+
     it(
       "explica que MSC no factura el día de desembarque y marca impacto económico",
       () => {

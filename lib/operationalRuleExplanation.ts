@@ -61,6 +61,17 @@ export type OperationalRuleNotice = {
     string[];
 };
 
+export function getOperationalRuleNoticeImpactLabel(
+  calculationImpact:
+    OperationalRuleNotice["calculationImpact"]
+): string | null {
+  if (calculationImpact === "economic") {
+    return "Aplicado al cálculo económico";
+  }
+
+  return null;
+}
+
 function buildPackagePricingDayPolicyMessage(
   rule: PackageOperationalRules
 ): string | null {
