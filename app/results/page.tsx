@@ -42,6 +42,10 @@ import {
 } from "@/lib/economicDrinkPriceResolution";
 
 import {
+  resolveEconomicComparisonAvailability,
+} from "@/lib/packageEconomicAvailability";
+
+import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
@@ -266,6 +270,18 @@ export default function ResultsPage() {
   const economicCurrency =
     comparison.economicCurrency;
 
+  const economicComparisonAvailability =
+    resolveEconomicComparisonAvailability({
+      economicDrinkPricesAvailable:
+        comparison.economicDataAvailable &&
+        hasCompleteOnboardPriceValues(
+          economicDrinkPrices
+        ),
+
+      comparedPackageCount:
+        comparison.packages.length,
+    });
+
   /*
    * AVISOS OPERATIVOS
    *
@@ -317,11 +333,16 @@ export default function ResultsPage() {
    * DrinkPilot sí puede verificar.
    */
   if (
-    !comparison.economicDataAvailable ||
+    economicComparisonAvailability !==
+      "available" ||
     !hasCompleteOnboardPriceValues(
       economicDrinkPrices
     )
   ) {
+    const missingDrinkPrices =
+      economicComparisonAvailability ===
+      "drink-prices-required";
+
     const adultOperationalNotices =
       filterAdultOperationalRuleNotices(
         allOperationalNotices,
@@ -373,38 +394,49 @@ export default function ResultsPage() {
                 <strong>
                   {cruiseLine.name}
                 </strong>{" "}
-                cubren tus preferencias, pero todavía no dispone de suficientes precios individuales fiables para calcular ahorro o rentabilidad.
+                cubren tus preferencias, pero{" "}
+                {missingDrinkPrices
+                  ? "todavía no dispone de suficientes precios individuales fiables para calcular ahorro o rentabilidad."
+                  : `no dispone de ningún precio de paquete utilizable en ${economicCurrency} para completar la comparación económica.`}
               </p>
             </div>
 
             <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
               <h2 className="font-bold text-amber-950">
-                ⚠️ Comparación económica pendiente
+                {missingDrinkPrices
+                  ? "⚠️ Comparación económica pendiente"
+                  : "⚠️ Falta un precio de paquete comparable"}
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Faltan referencias económicas suficientemente fiables para:
+                {missingDrinkPrices
+                  ? "Faltan referencias económicas suficientemente fiables para:"
+                  : `La cesta de bebidas está completa, pero no hay ningún paquete con un precio económico utilizable en ${economicCurrency}.`}
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                {comparison.missingOnboardPriceKeys.map(
-                  (key) => (
-                    <span
-                      key={key}
-                      className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-amber-900"
-                    >
-                      {
-                        missingPriceLabels[
-                          key
-                        ]
-                      }
-                    </span>
-                  )
-                )}
-              </div>
+              {missingDrinkPrices && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {comparison.missingOnboardPriceKeys.map(
+                    (key) => (
+                      <span
+                        key={key}
+                        className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-amber-900"
+                      >
+                        {
+                          missingPriceLabels[
+                            key
+                          ]
+                        }
+                      </span>
+                    )
+                  )}
+                </div>
+              )}
 
               <p className="mt-4 text-xs leading-5 text-amber-800">
-                No utilizamos precios cero ni importes inventados para completar estos datos.
+                {missingDrinkPrices
+                  ? "No utilizamos precios cero ni importes inventados para completar estos datos."
+                  : "Introduce el precio real de tu reserva cuando corresponda y revisa la moneda operativa. DrinkPilot no convierte ni reinterpreta importes entre monedas."}
               </p>
             </div>
 

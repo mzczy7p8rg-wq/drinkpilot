@@ -7,6 +7,9 @@ import {
 import { calculateRecommendation } from "@/lib/calculator";
 import { compareDrinkPackages } from "@/lib/comparison";
 import { calculatePackageCoverage } from "@/lib/coverage";
+import {
+  resolveEconomicComparisonAvailability,
+} from "@/lib/packageEconomicAvailability";
 
 describe("DrinkPilot recommendation engine", () => {
   describe("calculator", () => {
@@ -233,6 +236,17 @@ describe("DrinkPilot recommendation engine", () => {
 
       expect(result.packages).toEqual(
         []
+      );
+
+      expect(
+        resolveEconomicComparisonAvailability({
+          economicDrinkPricesAvailable:
+            result.economicDataAvailable,
+          comparedPackageCount:
+            result.packages.length,
+        })
+      ).toBe(
+        "package-price-required"
       );
     });
 
