@@ -86,9 +86,6 @@ export default function ResultsPage() {
       data.cruiseLine
     );
 
-  const onboardPriceValues =
-    cruiseLine.onboardPriceValues;
-
   const totalDrinksPerDay =
     data.coffee +
     data.water +
@@ -293,6 +290,9 @@ export default function ResultsPage() {
         data.selectedDrinkPrices,
     });
 
+  const economicDrinkPrices =
+    comparison.economicDrinkPrices;
+
   /*
    * AVISOS OPERATIVOS
    *
@@ -346,7 +346,7 @@ export default function ResultsPage() {
   if (
     !comparison.economicDataAvailable ||
     !hasCompleteOnboardPriceValues(
-      onboardPriceValues
+      economicDrinkPrices
     )
   ) {
     const adultOperationalNotices =
@@ -806,8 +806,8 @@ export default function ResultsPage() {
   /*
    * COSTE BASE DE BEBIDAS
    *
-   * Utiliza los precios individuales
-   * de la naviera activa.
+   * Utiliza la misma cesta efectiva que
+   * el comparador de paquetes.
    */
   const baseline =
     calculateRecommendation({
@@ -839,22 +839,22 @@ export default function ResultsPage() {
         data.cocktail,
 
       coffeePrice:
-        onboardPriceValues.coffee,
+        economicDrinkPrices.coffee,
 
       waterPrice:
-        onboardPriceValues.water,
+        economicDrinkPrices.water,
 
       sodaPrice:
-        onboardPriceValues.soda,
+        economicDrinkPrices.soda,
 
       beerPrice:
-        onboardPriceValues.beer,
+        economicDrinkPrices.beer,
 
       winePrice:
-        onboardPriceValues.wine,
+        economicDrinkPrices.wine,
 
       cocktailPrice:
-        onboardPriceValues.cocktail,
+        economicDrinkPrices.cocktail,
     });
 
   const bestPackage =
@@ -966,8 +966,8 @@ export default function ResultsPage() {
   /*
    * TABLA DE CONSUMO
    *
-   * Utiliza también los precios
-   * de la naviera activa.
+   * Utiliza también la cesta efectiva
+   * del comparador.
    */
   const consumptionRows = [
     {
@@ -980,7 +980,7 @@ export default function ResultsPage() {
         data.coffee,
 
       price:
-        onboardPriceValues.coffee,
+        economicDrinkPrices.coffee,
 
       total:
         baseline.coffeeCost,
@@ -996,7 +996,7 @@ export default function ResultsPage() {
         data.water,
 
       price:
-        onboardPriceValues.water,
+        economicDrinkPrices.water,
 
       total:
         baseline.waterCost,
@@ -1012,7 +1012,7 @@ export default function ResultsPage() {
         data.soda,
 
       price:
-        onboardPriceValues.soda,
+        economicDrinkPrices.soda,
 
       total:
         baseline.sodaCost,
@@ -1028,7 +1028,7 @@ export default function ResultsPage() {
         data.beer,
 
       price:
-        onboardPriceValues.beer,
+        economicDrinkPrices.beer,
 
       total:
         baseline.beerCost,
@@ -1044,7 +1044,7 @@ export default function ResultsPage() {
         data.wine,
 
       price:
-        onboardPriceValues.wine,
+        economicDrinkPrices.wine,
 
       total:
         baseline.wineCost,
@@ -1060,7 +1060,7 @@ export default function ResultsPage() {
         data.cocktail,
 
       price:
-        onboardPriceValues.cocktail,
+        economicDrinkPrices.cocktail,
 
       total:
         baseline.cocktailCost,

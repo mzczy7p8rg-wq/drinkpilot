@@ -7,6 +7,7 @@ import {
 import {
   resolveEconomicDrinkPrice,
   resolveEconomicDrinkPrices,
+  resolveEffectiveDrinkPrices,
 } from "@/lib/economicDrinkPriceResolution";
 
 describe("economic drink price resolution", () => {
@@ -90,6 +91,45 @@ describe("economic drink price resolution", () => {
       beer: null,
       wine: null,
       cocktail: null,
+    });
+  });
+
+  it("superpone selecciones válidas y conserva el resto de referencias", () => {
+    const result =
+      resolveEffectiveDrinkPrices(
+        {
+          coffee: 3,
+          water: 2,
+          soda: 4,
+          beer: 8,
+          wine: 10,
+          cocktail: 12,
+        },
+        {
+          coffee: {
+            category: "coffee",
+            price: 5,
+            currency: "EUR",
+            source: "user",
+          },
+          beer: {
+            category: "beer",
+            price: 9,
+            currency: "EUR",
+            source: "documented-menu",
+            contextRelevance:
+              "compatible",
+          },
+        }
+      );
+
+    expect(result).toEqual({
+      coffee: 5,
+      water: 2,
+      soda: 4,
+      beer: 8,
+      wine: 10,
+      cocktail: 12,
     });
   });
 });

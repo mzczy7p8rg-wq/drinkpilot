@@ -83,6 +83,43 @@ describe("DrinkPilot recommendation engine", () => {
   });
 
   describe("package comparison", () => {
+    it("utiliza los precios seleccionados en toda la comparación económica", () => {
+      const result = compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 1,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+
+        selectedDrinkPrices: {
+          coffee: {
+            category: "coffee",
+            price: 10,
+            currency: "EUR",
+            source: "user",
+          },
+        },
+      });
+
+      expect(
+        result.economicDrinkPrices
+          .coffee
+      ).toBe(10);
+
+      expect(
+        result.packages.every(
+          (pkg) =>
+            pkg.dailyDrinkCost ===
+              10 &&
+            pkg.drinksCost === 70
+        )
+      ).toBe(true);
+    });
+
     it("no recomienda ningún paquete con consumo bajo", () => {
       const result = compareDrinkPackages({
         days: 7,

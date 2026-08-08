@@ -52,6 +52,7 @@ import {
 
 import {
   resolveEconomicDrinkPrice,
+  resolveEffectiveDrinkPrices,
 } from "@/lib/economicDrinkPriceResolution";
 
 import type {
@@ -268,6 +269,13 @@ export type PackageThresholdCruiseImpactResult = {
 };
 
 export type ComparisonResult = {
+  /*
+   * Cesta efectiva utilizada por todos los
+   * cálculos económicos y por la UI.
+   */
+  economicDrinkPrices:
+    PartialOnboardPriceValues;
+
   /*
    * true = existen precios individuales
    * suficientes para ejecutar el cálculo
@@ -1075,18 +1083,24 @@ export function compareDrinkPackages(
    * dispongamos de una cesta económica
    * completa.
    */
-  const onboardPriceValues =
+  const referenceDrinkPrices =
     cruiseLine.onboardPriceValues as
       PartialOnboardPriceValues;
 
+  const economicDrinkPrices =
+    resolveEffectiveDrinkPrices(
+      referenceDrinkPrices,
+      input.selectedDrinkPrices ?? {}
+    );
+
   const economicDataAvailable =
     hasCompleteOnboardPriceValues(
-      onboardPriceValues
+      economicDrinkPrices
     );
 
   const missingOnboardPriceKeys =
     getMissingOnboardPriceKeys(
-      onboardPriceValues
+      economicDrinkPrices
     );
 
   /*
@@ -1209,6 +1223,8 @@ export function compareDrinkPackages(
     !economicDataAvailable
   ) {
     return {
+      economicDrinkPrices,
+
       economicDataAvailable:
         false,
 
@@ -1307,31 +1323,31 @@ export function compareDrinkPackages(
                 input.cocktail,
 
               /*
-               * Estos precios ya proceden
-               * de la naviera activa.
+               * Todos los cálculos utilizan
+               * la misma cesta económica.
                */
               coffeePrice:
-                onboardPriceValues
+                economicDrinkPrices
                   .coffee,
 
               waterPrice:
-                onboardPriceValues
+                economicDrinkPrices
                   .water,
 
               sodaPrice:
-                onboardPriceValues
+                economicDrinkPrices
                   .soda,
 
               beerPrice:
-                onboardPriceValues
+                economicDrinkPrices
                   .beer,
 
               winePrice:
-                onboardPriceValues
+                economicDrinkPrices
                   .wine,
 
               cocktailPrice:
-                onboardPriceValues
+                economicDrinkPrices
                   .cocktail,
             });
 
@@ -1502,6 +1518,8 @@ export function compareDrinkPackages(
     );
 
   return {
+    economicDrinkPrices,
+
     economicDataAvailable:
       true,
 
