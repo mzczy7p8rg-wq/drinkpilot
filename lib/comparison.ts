@@ -745,9 +745,19 @@ export function resolveEconomicComparison(
   };
 }
 
-export function findBestPackageByEffectiveSavings(
-  packages: PackageComparisonResult[]
-): PackageComparisonResult | null {
+type EffectiveSavingsCandidate = {
+  fullyCovered: boolean;
+
+  effectiveSavings:
+    number | null;
+};
+
+export function findBestPackageByEffectiveSavings<
+  Candidate extends
+    EffectiveSavingsCandidate,
+>(
+  packages: Candidate[]
+): Candidate | null {
   return (
     packages.find(
       (pkg) =>

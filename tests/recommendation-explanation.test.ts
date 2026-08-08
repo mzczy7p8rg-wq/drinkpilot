@@ -4,8 +4,13 @@ import {
   it,
 } from "vitest";
 
-import { compareDrinkPackages } from "@/lib/comparison";
-import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
+import {
+  compareDrinkPackages,
+} from "@/lib/comparison";
+import {
+  buildRecommendationExplanation,
+  type RecommendationComparison,
+} from "@/lib/recommendationExplanation";
 
 describe("DrinkPilot recommendation explanations", () => {
   it("explica correctamente una recomendación rentable de My Drinks", () => {
@@ -225,7 +230,8 @@ describe("DrinkPilot recommendation explanations", () => {
 });
 describe("threshold uncertainty in recommendation explanation", () => {
   it("keeps a positive recommendation when the best package has no unquantified threshold impact", () => {
-    const comparison = {
+    const comparison:
+      RecommendationComparison = {
       packages: [
         {
           packageKey: "test-package",
@@ -234,6 +240,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
           packageCost: 280,
           drinksCost: 350,
           savings: 70,
+          effectiveSavings: 70,
           savingsPercentage: 20,
           dailyMargin: 10,
           breakEvenDrinksPerDay: 5,
@@ -254,6 +261,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
         packageCost: 280,
         drinksCost: 350,
         savings: 70,
+        effectiveSavings: 70,
         savingsPercentage: 20,
         dailyMargin: 10,
         breakEvenDrinksPerDay: 5,
@@ -267,7 +275,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
       },
 
       thresholdCruiseImpacts: [],
-    } as any;
+    };
 
     const explanation =
       buildRecommendationExplanation(
@@ -284,13 +292,17 @@ describe("threshold uncertainty in recommendation explanation", () => {
   });
 
   it("marks the recommendation as provisional when the best package has an unquantified threshold impact", () => {
-    const bestPackage = {
+    const bestPackage:
+      RecommendationComparison[
+        "packages"
+      ][number] = {
       packageKey: "test-package",
       packageName: "Test Package",
       packagePricePerDay: 40,
       packageCost: 280,
       drinksCost: 350,
       savings: 70,
+      effectiveSavings: 70,
       savingsPercentage: 20,
       dailyMargin: 10,
       breakEvenDrinksPerDay: 5,
@@ -303,7 +315,8 @@ describe("threshold uncertainty in recommendation explanation", () => {
       economicComparisonStatus: "complete",
     };
 
-    const comparison = {
+    const comparison:
+      RecommendationComparison = {
       packages: [bestPackage],
 
       bestPackage,
@@ -324,7 +337,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
           },
         },
       ],
-    } as any;
+    };
 
     const explanation =
       buildRecommendationExplanation(
@@ -357,7 +370,8 @@ describe(
     it(
       "no presenta como definitivo un paquete completamente cubierto con ahorro efectivo desconocido",
       () => {
-        const comparison = {
+        const comparison:
+          RecommendationComparison = {
           packages: [
             {
               packageKey:
@@ -388,7 +402,7 @@ describe(
 
           thresholdCruiseImpacts:
             [],
-        } as any;
+        };
 
         const explanation =
           buildRecommendationExplanation(
@@ -424,7 +438,8 @@ describe(
     it(
       "calcula el sobrecoste con ahorro efectivo y no con ahorro bruto",
       () => {
-        const comparison = {
+        const comparison:
+          RecommendationComparison = {
           packages: [
             {
               packageKey:
@@ -455,7 +470,7 @@ describe(
 
           thresholdCruiseImpacts:
             [],
-        } as any;
+        };
 
         const explanation =
           buildRecommendationExplanation(
@@ -490,7 +505,10 @@ describe(
     it(
       "explica explícitamente cuando las bebidas afectadas quedan fuera de cobertura",
       () => {
-        const bestPackage = {
+        const bestPackage:
+          RecommendationComparison[
+            "packages"
+          ][number] = {
           packageKey:
             "test-package",
 
@@ -543,7 +561,8 @@ describe(
             "complete",
         };
 
-        const comparison = {
+        const comparison:
+          RecommendationComparison = {
           packages: [
             bestPackage,
           ],
@@ -573,7 +592,7 @@ describe(
               },
             },
           ],
-        } as any;
+        };
 
         const explanation =
           buildRecommendationExplanation(
@@ -610,7 +629,10 @@ describe(
     it(
       "no afirma que estén fuera de cobertura si esa cobertura es desconocida",
       () => {
-        const bestPackage = {
+        const bestPackage:
+          RecommendationComparison[
+            "packages"
+          ][number] = {
           packageKey:
             "test-package",
 
@@ -663,7 +685,8 @@ describe(
             "complete",
         };
 
-        const comparison = {
+        const comparison:
+          RecommendationComparison = {
           packages: [
             bestPackage,
           ],
@@ -693,7 +716,7 @@ describe(
               },
             },
           ],
-        } as any;
+        };
 
         const explanation =
           buildRecommendationExplanation(
