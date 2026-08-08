@@ -107,19 +107,45 @@ describe(
 
         expect(
           notices.length
-        ).toBe(3);
+        ).toBe(6);
 
         expect(
           notices.every(
             (notice) =>
-              notice.type ===
-                "venue-coverage" &&
               notice.source ===
                 "base" &&
               notice.calculationImpact ===
                 "informational"
           )
         ).toBe(true);
+
+        for (
+          const packageKey of [
+            "myDrinksSoft",
+            "myDrinks",
+            "myDrinksPlus",
+          ] as const
+        ) {
+          expect(
+            notices.some(
+              (notice) =>
+                notice.packageKey ===
+                  packageKey &&
+                notice.type ===
+                  "venue-coverage"
+            )
+          ).toBe(true);
+
+          expect(
+            notices.some(
+              (notice) =>
+                notice.packageKey ===
+                  packageKey &&
+                notice.type ===
+                  "package-purchase-group-requirement"
+            )
+          ).toBe(true);
+        }
       }
     );
   }
@@ -857,6 +883,146 @@ describe(
             (notice) =>
               notice.type ===
               "venue-coverage"
+          )
+        ).toBe(false);
+      }
+    );
+  }
+);
+
+describe(
+  "package purchase group requirement notices",
+  () => {
+    it(
+      "explica el requisito de mismo camarote de MSC sin inferir cumplimiento",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const notice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (item) =>
+              item.packageKey ===
+                "mscEasy" &&
+              item.type ===
+                "package-purchase-group-requirement"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "mismo camarote"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+
+        expect(
+          notice?.source
+        ).toBe("base");
+
+        expect(
+          notice
+            ?.appliedContextualRuleIds
+        ).toEqual([]);
+      }
+    );
+
+    it(
+      "distingue la regla de misma reserva o camarote de Costa",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "costa",
+          });
+
+        const notice =
+          buildOperationalRuleNotices(
+            rules
+          ).find(
+            (item) =>
+              item.packageKey ===
+                "myDrinks" &&
+              item.type ===
+                "package-purchase-group-requirement"
+          );
+
+        expect(
+          notice
+        ).toBeDefined();
+
+        expect(
+          notice?.message
+        ).toContain(
+          "misma reserva o camarote"
+        );
+
+        expect(
+          notice?.message
+        ).not.toContain(
+          "solo el mismo camarote"
+        );
+
+        expect(
+          notice?.calculationImpact
+        ).toBe(
+          "informational"
+        );
+      }
+    );
+
+    it(
+      "no genera aviso cuando el alcance de contratación es desconocido",
+      () => {
+        const rules =
+          getPackageOperationalRules({
+            cruiseLine: "msc",
+          });
+
+        const easy =
+          rules.find(
+            (rule) =>
+              rule.packageKey ===
+              "mscEasy"
+          );
+
+        if (!easy) {
+          throw new Error(
+            "MSC Easy rule missing"
+          );
+        }
+
+        const notices =
+          buildOperationalRuleNotices([
+            {
+              ...easy,
+
+              packagePurchaseGroupRequirement:
+                "unknown",
+
+              packagePurchaseGroupRequirementSource: {
+                source: "none",
+                contextualRuleIds: [],
+              },
+            },
+          ]);
+
+        expect(
+          notices.some(
+            (notice) =>
+              notice.type ===
+              "package-purchase-group-requirement"
           )
         ).toBe(false);
       }

@@ -23,7 +23,8 @@ export type OperationalRuleNotice = {
     | "drink-price-threshold"
     | "aqua-unlimited"
     | "minors-only"
-    | "venue-coverage";
+    | "venue-coverage"
+    | "package-purchase-group-requirement";
 
   message: string;
 
@@ -58,6 +59,32 @@ export type OperationalRuleNotice = {
   appliedContextualRuleIds:
     string[];
 };
+
+function buildPackagePurchaseGroupRequirementMessage(
+  rule: PackageOperationalRules
+): string | null {
+  if (
+    rule.packagePurchaseGroupRequirement ===
+    "same-cabin"
+  ) {
+    return (
+      `${rule.packageName}: el paquete debe contratarse ` +
+      `para los huéspedes sujetos a la condición de mismo camarote.`
+    );
+  }
+
+  if (
+    rule.packagePurchaseGroupRequirement ===
+    "same-booking-or-cabin"
+  ) {
+    return (
+      `${rule.packageName}: el paquete debe contratarse ` +
+      `para los pasajeros sujetos a las condiciones de la misma reserva o camarote.`
+    );
+  }
+
+  return null;
+}
 
 function buildVenueCoverageMessage(
   rule: PackageOperationalRules
@@ -299,6 +326,47 @@ export function buildOperationalRuleNotices(
         appliedContextualRuleIds:
           rule
             .venueCoverageSource
+            .contextualRuleIds,
+      });
+    }
+
+    const packagePurchaseGroupRequirementMessage =
+      buildPackagePurchaseGroupRequirementMessage(
+        rule
+      );
+
+    if (
+      packagePurchaseGroupRequirementMessage
+    ) {
+      notices.push({
+        id:
+          `${rule.packageKey}-package-purchase-group-requirement`,
+
+        packageKey:
+          rule.packageKey,
+
+        packageName:
+          rule.packageName,
+
+        type:
+          "package-purchase-group-requirement",
+
+        calculationImpact:
+          "informational",
+
+        message:
+          packagePurchaseGroupRequirementMessage,
+
+        source:
+          rule
+            .packagePurchaseGroupRequirementSource
+            .source === "contextual"
+            ? "contextual"
+            : "base",
+
+        appliedContextualRuleIds:
+          rule
+            .packagePurchaseGroupRequirementSource
             .contextualRuleIds,
       });
     }
