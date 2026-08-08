@@ -15,6 +15,7 @@ export type StoredSelectedDrinkPrices =
         price?: unknown;
         currency?: unknown;
         source?: unknown;
+        contextRelevance?: unknown;
       }
     >
   >;
@@ -89,6 +90,12 @@ export function resolveStoredSelectedDrinkPrices(
           candidate.source === "documented-menu"
             ? candidate.source
             : "user",
+
+        contextRelevance:
+          candidate.contextRelevance === "exact" ||
+          candidate.contextRelevance === "compatible"
+            ? candidate.contextRelevance
+            : undefined,
       });
 
     if (price !== null) {

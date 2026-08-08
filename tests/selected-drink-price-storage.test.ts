@@ -238,3 +238,102 @@ describe(
     );
   }
 );
+
+describe(
+  "selected drink price context relevance storage",
+  () => {
+    it(
+      "conserva relevancia exact de una referencia documentada",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            coffee: {
+              price: 4,
+              currency: "USD",
+              source: "documented-menu",
+              contextRelevance: "exact",
+            },
+          })
+        ).toEqual({
+          coffee: {
+            category: "coffee",
+            price: 4,
+            currency: "USD",
+            source: "documented-menu",
+            contextRelevance: "exact",
+          },
+        });
+      }
+    );
+
+    it(
+      "conserva relevancia compatible de una referencia documentada",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            beer: {
+              price: 9,
+              currency: "USD",
+              source: "documented-menu",
+              contextRelevance: "compatible",
+            },
+          })
+        ).toEqual({
+          beer: {
+            category: "beer",
+            price: 9,
+            currency: "USD",
+            source: "documented-menu",
+            contextRelevance: "compatible",
+          },
+        });
+      }
+    );
+
+    it(
+      "no conserva mismatch como relevancia válida",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            wine: {
+              price: 14,
+              currency: "USD",
+              source: "documented-menu",
+              contextRelevance: "mismatch",
+            },
+          })
+        ).toEqual({
+          wine: {
+            category: "wine",
+            price: 14,
+            currency: "USD",
+            source: "documented-menu",
+          },
+        });
+      }
+    );
+
+    it(
+      "no asigna relevancia contextual a precios de usuario",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            cocktail: {
+              price: 12,
+              currency: "EUR",
+              source: "user",
+              contextRelevance: "exact",
+            },
+          })
+        ).toEqual({
+          cocktail: {
+            category: "cocktail",
+            price: 12,
+            currency: "EUR",
+            source: "user",
+          },
+        });
+      }
+    );
+  }
+);

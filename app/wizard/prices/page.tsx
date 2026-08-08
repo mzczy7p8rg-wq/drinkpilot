@@ -596,6 +596,23 @@ export default function PricesPage() {
         )
       );
 
+    const cruiseContext = {
+      cruiseLine:
+        data.cruiseLine,
+
+      market:
+        data.market,
+
+      sailingRegion:
+        data.sailingRegion,
+
+      onboardCurrency:
+        data.onboardCurrency,
+
+      sailingDate:
+        data.sailingDate,
+    };
+
     const nextSelectedDrinkPrices =
       Object.fromEntries(
         onboardPriceKeys.flatMap(
@@ -613,10 +630,39 @@ export default function PricesPage() {
               return [];
             }
 
-            const existingPrice =
-              data.selectedDrinkPrices[
+            const referenceId =
+              selectedDrinkReferenceIds[
                 category
               ];
+
+            const source =
+              resolveDrinkPriceSelectionSource(
+                referenceId,
+                selectedDrinkReferenceSources[
+                  category
+                ] ?? "official"
+              );
+
+            const contextualSelection =
+              source === "documented-menu" &&
+              referenceId
+                ? resolveMscDocumentedDrinkPriceSelectionForContext(
+                    referenceId,
+                    cruiseContext
+                  )
+                : null;
+
+            const resolvedRelevance =
+              contextualSelection
+                ?.contextRelevance
+                .relevance;
+
+            const contextRelevance =
+              resolvedRelevance === "exact" ||
+              resolvedRelevance ===
+                "compatible"
+                ? resolvedRelevance
+                : undefined;
 
             const selectedPrice =
               createSelectedDrinkPrice({
@@ -628,15 +674,9 @@ export default function PricesPage() {
                 currency:
                   selectedDrinkCurrency,
 
-                source:
-                  resolveDrinkPriceSelectionSource(
-                    selectedDrinkReferenceIds[
-                      category
-                    ],
-                    selectedDrinkReferenceSources[
-                      category
-                    ] ?? "official"
-                  ),
+                source,
+
+                contextRelevance,
               });
 
             return selectedPrice

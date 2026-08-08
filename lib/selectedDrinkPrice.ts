@@ -7,6 +7,10 @@ export type SelectedDrinkPriceSource =
   | "official"
   | "documented-menu";
 
+export type SelectedDrinkPriceContextRelevance =
+  | "exact"
+  | "compatible";
+
 export type SelectedDrinkPrice = {
   category:
     OnboardPriceKey;
@@ -19,6 +23,9 @@ export type SelectedDrinkPrice = {
 
   source:
     SelectedDrinkPriceSource;
+
+  contextRelevance?:
+    SelectedDrinkPriceContextRelevance;
 };
 
 export type SelectedDrinkPriceInput = {
@@ -33,6 +40,9 @@ export type SelectedDrinkPriceInput = {
 
   source?:
     SelectedDrinkPriceSource;
+
+  contextRelevance?:
+    SelectedDrinkPriceContextRelevance;
 };
 
 function normalizeCurrency(
@@ -99,5 +109,14 @@ export function createSelectedDrinkPrice(
 
     source:
       input.source ?? "user",
+
+    ...(input.source === "documented-menu" &&
+    (input.contextRelevance === "exact" ||
+      input.contextRelevance === "compatible")
+      ? {
+          contextRelevance:
+            input.contextRelevance,
+        }
+      : {}),
   };
 }
