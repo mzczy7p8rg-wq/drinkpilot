@@ -18,6 +18,7 @@ import {
 
 import {
   getContextualPackageRulesForPackage,
+  type AlcoholicDrinksDailyLimitChargePolicy,
   type ContextualPackageRule,
   type DrinkPriceThresholdChargePolicy,
   type DrinkPriceThresholdCoveragePolicy,
@@ -102,6 +103,17 @@ export type PackageOperationalRules = {
     number | null;
 
   alcoholicDrinksDailyLimitSource:
+    OperationalRuleSource;
+
+  /*
+   * Política económica conocida para las
+   * bebidas alcohólicas que exceden el
+   * límite diario.
+   */
+  alcoholicDrinksDailyLimitChargePolicy:
+    AlcoholicDrinksDailyLimitChargePolicy;
+
+  alcoholicDrinksDailyLimitChargePolicySource:
     OperationalRuleSource;
 
   /*
@@ -412,6 +424,23 @@ function applyContextualRules(
         : result
             .alcoholicDrinksDailyLimitSource;
 
+    const alcoholicDrinksDailyLimitChargePolicySource =
+      values
+        .alcoholicDrinksDailyLimitChargePolicy !==
+      undefined
+        ? {
+            source:
+              "contextual" as const,
+            contextualRuleIds: [
+              ...result
+                .alcoholicDrinksDailyLimitChargePolicySource
+                .contextualRuleIds,
+              rule.id,
+            ],
+          }
+        : result
+            .alcoholicDrinksDailyLimitChargePolicySource;
+
     const drinkPriceThresholdSource =
       values.drinkPriceThreshold !==
       undefined
@@ -508,6 +537,15 @@ function applyContextualRules(
           : result
               .alcoholicDrinksDailyLimit,
 
+      alcoholicDrinksDailyLimitChargePolicy:
+        values
+          .alcoholicDrinksDailyLimitChargePolicy !==
+        undefined
+          ? values
+              .alcoholicDrinksDailyLimitChargePolicy
+          : result
+              .alcoholicDrinksDailyLimitChargePolicy,
+
       drinkPriceThreshold:
         values
           .drinkPriceThreshold !==
@@ -570,6 +608,8 @@ function applyContextualRules(
           : result.minorsOnly,
 
       alcoholicDrinksDailyLimitSource,
+
+      alcoholicDrinksDailyLimitChargePolicySource,
 
       drinkPriceThresholdSource,
 
@@ -728,6 +768,14 @@ function resolvePackageRules(
               source: "none",
               contextualRuleIds: [],
             },
+
+      alcoholicDrinksDailyLimitChargePolicy:
+        "unknown",
+
+      alcoholicDrinksDailyLimitChargePolicySource: {
+        source: "none",
+        contextualRuleIds: [],
+      },
 
       /*
        * Los umbrales no se consideran

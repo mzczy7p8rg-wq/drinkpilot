@@ -916,3 +916,97 @@ describe(
     );
   }
 );
+
+describe(
+  "alcohol daily limit charge policy resolution",
+  () => {
+    it(
+      "resuelve precio completo más propinas para Premium Extra US",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-04-01",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicy
+        ).toBe(
+          "full-price-plus-gratuities"
+        );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicySource
+        ).toEqual({
+          source: "contextual",
+          contextualRuleIds: [
+            "msc-premium-extra-alcohol-limit-full-price-us",
+          ],
+        });
+      }
+    );
+
+    it(
+      "mantiene desconocida la política localizada fuera de US",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "ES",
+              sailingRegion: null,
+              onboardCurrency: "EUR",
+              sailingDate:
+                "2026-08-15",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicy
+        ).toBe("unknown");
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicySource
+        ).toEqual({
+          source: "none",
+          contextualRuleIds: [],
+        });
+      }
+    );
+
+    it(
+      "mantiene desconocida la política antes de la fecha documentada",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine: "msc",
+              market: "US",
+              sailingRegion: null,
+              onboardCurrency: "USD",
+              sailingDate:
+                "2025-03-31",
+            },
+            "mscPremiumExtra"
+          );
+
+        expect(
+          rule
+            ?.alcoholicDrinksDailyLimitChargePolicy
+        ).toBe("unknown");
+      }
+    );
+  }
+);
