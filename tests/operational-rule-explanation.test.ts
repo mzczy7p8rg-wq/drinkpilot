@@ -349,7 +349,7 @@ describe(
   "operational notice calculation impact",
   () => {
     it(
-      "marca las reglas operativas actuales como informativas",
+      "mantiene informativas las reglas que no participan en el cálculo",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -372,7 +372,9 @@ describe(
           notices.filter(
             (notice) =>
               notice.type !==
-              "package-pricing-day-policy"
+                "package-pricing-day-policy" &&
+              notice.type !==
+                "drink-price-threshold"
           );
 
         expect(
@@ -393,7 +395,7 @@ describe(
     );
 
     it(
-      "no convierte un umbral contextual ficticio en impacto económico antes de que el motor lo utilice",
+      "marca como económico un umbral contextual porque el motor evalúa su impacto",
       () => {
         const rules =
           getPackageOperationalRules(
@@ -437,7 +439,7 @@ describe(
           thresholdNotice
             ?.calculationImpact
         ).toBe(
-          "informational"
+          "economic"
         );
 
         expect(
@@ -454,7 +456,7 @@ describe(
   "operational notice calculation impact",
   () => {
     it(
-      "marca las reglas operativas actuales como informativas",
+      "mantiene informativas las reglas que no participan en el cálculo",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -477,7 +479,9 @@ describe(
           notices.filter(
             (notice) =>
               notice.type !==
-              "package-pricing-day-policy"
+                "package-pricing-day-policy" &&
+              notice.type !==
+                "drink-price-threshold"
           );
 
         expect(
@@ -498,7 +502,7 @@ describe(
     );
 
     it(
-      "mantiene informativo un umbral contextual mientras el motor no lo utilice",
+      "marca económico un umbral contextual que el motor ya utiliza",
       () => {
         const rules =
           getPackageOperationalRules(
@@ -542,7 +546,7 @@ describe(
           thresholdNotice
             ?.calculationImpact
         ).toBe(
-          "informational"
+          "economic"
         );
 
         expect(
@@ -614,7 +618,7 @@ describe(
   "MSC Premium Extra contextual threshold end to end",
   () => {
     it(
-      "explica el umbral EUR real como regla contextual informativa",
+      "explica el umbral EUR real como regla contextual económica",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -662,12 +666,12 @@ describe(
 
         expect(
           notice?.calculationImpact
-        ).toBe("informational");
+        ).toBe("economic");
       }
     );
 
     it(
-      "explica el umbral USD real sin confundir su moneda",
+      "explica el umbral USD real como regla económica sin confundir su moneda",
       () => {
         const rules =
           getPackageOperationalRules({
@@ -715,7 +719,7 @@ describe(
 
         expect(
           notice?.calculationImpact
-        ).toBe("informational");
+        ).toBe("economic");
       }
     );
 

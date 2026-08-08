@@ -259,7 +259,7 @@ export function buildOperationalRuleNotices(
           "drink-price-threshold",
 
         calculationImpact:
-          "informational",
+          "economic",
 
         message:
           `${rule.packageName}: para el contexto indicado se ha resuelto un límite de ${rule.drinkPriceThreshold.toFixed(
