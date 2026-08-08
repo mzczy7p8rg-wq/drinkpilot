@@ -20,6 +20,7 @@ import {
 import {
   getMissingOnboardPriceKeys,
   hasCompleteOnboardPriceValues,
+  onboardPriceKeys,
   type OnboardPriceKey,
   type PartialOnboardPriceValues,
 } from "@/lib/onboardPriceService";
@@ -196,6 +197,8 @@ export type PackageComparisonResult = {
 
   packageName: string;
 
+  currency: string;
+
   /*
    * Precio realmente utilizado
    * en el cálculo.
@@ -261,6 +264,9 @@ export type PackageThresholdCruiseImpactResult = {
   packageName:
     string;
 
+  currency:
+    string | null;
+
   dailyImpact:
     PackageThresholdConsumptionImpact;
 
@@ -269,6 +275,13 @@ export type PackageThresholdCruiseImpactResult = {
 };
 
 export type ComparisonResult = {
+  /*
+   * Moneda común de la cesta económica.
+   * Todos los importes base se expresan
+   * en este código ISO.
+   */
+  economicCurrency: string;
+
   /*
    * Cesta efectiva utilizada por todos los
    * cálculos económicos y por la UI.
@@ -799,6 +812,12 @@ export function compareDrinkPackages(
       activeCruiseLine
     );
 
+  const economicCurrency =
+    input.onboardCurrency
+      ?.trim()
+      .toUpperCase() ||
+    cruiseLine.currency;
+
   /*
    * REGLAS OPERATIVAS
    *
@@ -1059,6 +1078,10 @@ export function compareDrinkPackages(
               operationalRule
                 .packageName,
 
+            currency:
+              operationalRule
+                .drinkPriceThresholdCurrency,
+
             dailyImpact,
 
             cruiseImpact:
@@ -1084,13 +1107,24 @@ export function compareDrinkPackages(
    * completa.
    */
   const referenceDrinkPrices =
-    cruiseLine.onboardPriceValues as
-      PartialOnboardPriceValues;
+    economicCurrency ===
+    cruiseLine.currency
+      ? (cruiseLine.onboardPriceValues as
+          PartialOnboardPriceValues)
+      : (Object.fromEntries(
+          onboardPriceKeys.map(
+            (category) => [
+              category,
+              null,
+            ]
+          )
+        ) as PartialOnboardPriceValues);
 
   const economicDrinkPrices =
     resolveEffectiveDrinkPrices(
       referenceDrinkPrices,
-      input.selectedDrinkPrices ?? {}
+      input.selectedDrinkPrices ?? {},
+      economicCurrency
     );
 
   const economicDataAvailable =
@@ -1126,7 +1160,13 @@ export function compareDrinkPackages(
         (
           result
         ): result is ResolvedEconomicPackage =>
-          result !== null
+          result !== null &&
+          result.pkg.currency
+            .trim()
+            .toUpperCase() ===
+            economicCurrency
+              .trim()
+              .toUpperCase()
       );
 
   /*
@@ -1223,6 +1263,8 @@ export function compareDrinkPackages(
     !economicDataAvailable
   ) {
     return {
+      economicCurrency,
+
       economicDrinkPrices,
 
       economicDataAvailable:
@@ -1386,6 +1428,9 @@ export function compareDrinkPackages(
             packageName:
               pkg.name,
 
+            currency:
+              pkg.currency,
+
             packagePricePerDay:
               resolvedPrice.price,
 
@@ -1518,6 +1563,8 @@ export function compareDrinkPackages(
     );
 
   return {
+    economicCurrency,
+
     economicDrinkPrices,
 
     economicDataAvailable:

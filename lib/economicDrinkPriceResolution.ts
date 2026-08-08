@@ -19,6 +19,9 @@ export type EconomicDrinkPriceInput =
 
       contextRelevance?:
         SelectedDrinkPriceContextRelevance;
+
+      currency?:
+        string | null | undefined;
     }
   | null
   | undefined;
@@ -125,21 +128,45 @@ export function resolveEffectiveDrinkPrices(
   referencePrices:
     PartialOnboardPriceValues,
   selections:
-    EconomicDrinkPriceSelections
+    EconomicDrinkPriceSelections,
+  expectedCurrency?:
+    string | null
 ): PartialOnboardPriceValues {
+  const normalizedExpectedCurrency =
+    expectedCurrency
+      ?.trim()
+      .toUpperCase() ?? null;
+
   return Object.fromEntries(
     onboardPriceKeys.map(
       (category) => {
         const selectedPrice =
-          resolveEconomicDrinkPrice(
-            selections[
-              category
-            ]
-          );
+          selections[category];
+
+        const selectedCurrency =
+          selectedPrice &&
+          "currency" in
+            selectedPrice &&
+          typeof selectedPrice.currency ===
+            "string"
+            ? selectedPrice.currency
+                .trim()
+                .toUpperCase()
+            : null;
+
+        const selectedEconomicPrice =
+          normalizedExpectedCurrency ===
+            null ||
+          selectedCurrency ===
+            normalizedExpectedCurrency
+            ? resolveEconomicDrinkPrice(
+                selectedPrice
+              )
+            : null;
 
         return [
           category,
-          selectedPrice ??
+          selectedEconomicPrice ??
             referencePrices[
               category
             ],

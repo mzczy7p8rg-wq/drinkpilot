@@ -111,6 +111,17 @@ describe("DrinkPilot recommendation engine", () => {
       ).toBe(10);
 
       expect(
+        result.economicCurrency
+      ).toBe("EUR");
+
+      expect(
+        result.packages.every(
+          (pkg) =>
+            pkg.currency === "EUR"
+        )
+      ).toBe(true);
+
+      expect(
         result.packages.every(
           (pkg) =>
             pkg.dailyDrinkCost ===
@@ -118,6 +129,111 @@ describe("DrinkPilot recommendation engine", () => {
             pkg.drinksCost === 70
         )
       ).toBe(true);
+    });
+
+    it("no mezcla un precio seleccionado en USD con una comparación en EUR", () => {
+      const reference =
+        compareDrinkPackages({
+          days: 7,
+          people: 1,
+          coffee: 1,
+          water: 0,
+          soda: 0,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+        });
+
+      const withUsdSelection =
+        compareDrinkPackages({
+          days: 7,
+          people: 1,
+          coffee: 1,
+          water: 0,
+          soda: 0,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+          selectedDrinkPrices: {
+            coffee: {
+              category: "coffee",
+              price: 99,
+              currency: "USD",
+              source: "user",
+            },
+          },
+        });
+
+      expect(
+        withUsdSelection
+          .economicDrinkPrices
+          .coffee
+      ).toBe(
+        reference.economicDrinkPrices
+          .coffee
+      );
+    });
+
+    it("resuelve una cesta USD completa sin mezclar paquetes EUR", () => {
+      const selectedDrinkPrices =
+        Object.fromEntries(
+          [
+            "coffee",
+            "water",
+            "soda",
+            "beer",
+            "wine",
+            "cocktail",
+          ].map(
+            (category) => [
+              category,
+              {
+                category,
+                price: 5,
+                currency: "USD",
+                source: "user",
+              },
+            ]
+          )
+        ) as NonNullable<
+          Parameters<
+            typeof compareDrinkPackages
+          >[0]["selectedDrinkPrices"]
+        >;
+
+      const result =
+        compareDrinkPackages({
+          onboardCurrency: "usd",
+          days: 7,
+          people: 1,
+          coffee: 1,
+          water: 1,
+          soda: 1,
+          beer: 1,
+          wine: 1,
+          cocktail: 1,
+          selectedDrinkPrices,
+        });
+
+      expect(
+        result.economicCurrency
+      ).toBe("USD");
+
+      expect(
+        result.economicDataAvailable
+      ).toBe(true);
+
+      expect(
+        Object.values(
+          result.economicDrinkPrices
+        )
+      ).toEqual([
+        5, 5, 5, 5, 5, 5,
+      ]);
+
+      expect(result.packages).toEqual(
+        []
+      );
     });
 
     it("no recomienda ningún paquete con consumo bajo", () => {
