@@ -1,29 +1,33 @@
 # DrinkPilot
 
-DrinkPilot es una miniapp para ayudar a viajeros de crucero a decidir si un paquete de bebidas compensa económicamente según su consumo, preferencias y precios disponibles.
+DrinkPilot ayuda a viajeros de crucero a decidir si un paquete de bebidas compensa según su consumo, preferencias, contexto de navegación y calidad de los precios disponibles.
 
 ## Estado del proyecto
 
-MVP funcional para Costa Cruceros.
+Aplicación funcional con soporte para Costa Cruceros y MSC Cruises.
 
-DrinkPilot permite:
+- Costa dispone de comparación económica con precios de referencia o precios reales introducidos por el usuario.
+- MSC dispone de análisis de cobertura, precios documentados y reglas contextuales verificadas. DrinkPilot no calcula ahorro mientras falte una cesta completa de precios individuales fiables.
+- Los costes operativos conocidos pero no cuantificables mantienen el ahorro efectivo como desconocido y no pueden producir una recomendación positiva.
 
-- indicar la duración del crucero;
-- estimar el consumo diario por persona;
-- seleccionar preferencias premium;
-- introducir precios reales de la reserva;
-- comparar automáticamente My Drinks y My Drinks Plus;
-- evaluar cobertura y ahorro;
-- mostrar una recomendación explicada;
-- distinguir entre precios de referencia y datos verificados;
-- revisar los datos antes de calcular el resultado.
+## Funcionalidades
+
+- selección de naviera y duración del crucero;
+- estimación del consumo diario por persona;
+- preferencias de cobertura estándar y premium;
+- precios reales de paquetes y bebidas;
+- análisis de cobertura y ahorro efectivo;
+- recomendación explicada y conservadora;
+- trazabilidad entre datos base, reglas contextuales y evidencia;
+- políticas de días facturables, límites por bebida y límites diarios de alcohol;
+- distinción entre precios verificados, documentados, de referencia y pendientes.
 
 ## Flujo actual
 
-1. Duración
+1. Naviera y duración
 2. Consumo
 3. Preferencias
-4. Precios de la reserva
+4. Precios
 5. Personas
 6. Revisión
 7. Resultado
@@ -32,33 +36,23 @@ DrinkPilot permite:
 
 DrinkPilot recomienda un paquete únicamente cuando:
 
-- genera ahorro positivo;
-- cubre completamente las categorías y preferencias indicadas.
+- cubre completamente las categorías y preferencias indicadas;
+- el ahorro efectivo puede calcularse;
+- el ahorro efectivo es positivo.
 
-Entre los paquetes válidos, se prioriza el que genera mayor ahorro estimado.
+El ahorro efectivo incorpora los costes adicionales cuantificados. Si existe un coste demostrado pero todavía no cuantificable, el paquete no puede convertirse en la mejor opción.
 
-Si ningún paquete cumple ambas condiciones, DrinkPilot recomienda pagar las bebidas por separado.
-
-## Precios personalizados
-
-El usuario puede introducir el precio diario que aparece en su reserva para:
-
-- My Drinks
-- My Drinks Plus
-
-Si no introduce un precio, DrinkPilot utiliza precios de referencia.
-
-Los precios personalizados tienen prioridad sobre los valores de referencia durante el cálculo.
-
-## Calidad de los datos
+## Política de datos
 
 DrinkPilot distingue entre:
 
-- información verificada sobre inclusiones y restricciones;
-- precios de referencia utilizados para realizar estimaciones;
-- precios reales introducidos por el usuario.
+- información oficial verificada;
+- evidencia documentada con relevancia contextual;
+- precios de referencia utilizados para estimaciones;
+- precios reales introducidos por el usuario;
+- datos pendientes que no participan en el cálculo.
 
-Los precios reales pueden variar según crucero, tarifa, mercado y momento de compra.
+No se utilizan precios cero ni valores inventados para completar información ausente. Los precios y condiciones pueden variar según naviera, mercado, región, moneda, barco, itinerario y fecha.
 
 ## Stack
 
@@ -68,10 +62,13 @@ Los precios reales pueden variar según crucero, tarifa, mercado y momento de co
 - Tailwind CSS 4
 - App Router
 - LocalStorage para persistencia del wizard
+- Vitest
 
 ## Desarrollo local
 
-Instala dependencias:
-
 ```bash
 npm install
+npm test
+npm run lint
+npm run build
+```

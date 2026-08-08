@@ -690,7 +690,7 @@ export default function ResultsPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-amber-900">
-                  Estas condiciones afectan a tu consumo declarado, pero DrinkPilot todavía no utiliza ese exceso para modificar el cálculo económico.
+                  Estas condiciones afectan a tu consumo declarado. Cuando existe una política económica conocida, DrinkPilot refleja la incertidumbre en el ahorro efectivo sin inventar un coste.
                 </p>
 
                 <div className="mt-4 grid gap-3">
@@ -1986,7 +1986,7 @@ export default function ResultsPage() {
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Estas condiciones afectan a tu consumo declarado, pero DrinkPilot todavía no utiliza ese exceso para modificar el cálculo económico.
+                Estas condiciones afectan a tu consumo declarado. Cuando existe una política económica conocida, DrinkPilot refleja la incertidumbre en el ahorro efectivo sin inventar un coste.
               </p>
 
               <div className="mt-4 grid gap-3">

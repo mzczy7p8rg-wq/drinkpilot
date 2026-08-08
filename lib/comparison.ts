@@ -82,9 +82,9 @@ export type ComparisonInput = {
    * Naviera que debe utilizar
    * el motor.
    *
-   * Mientras el wizard todavía no
-   * permita seleccionarla, Costa
-   * continúa siendo el valor por defecto.
+   * Se mantiene opcional por compatibilidad;
+   * Costa continúa siendo el valor por
+   * defecto cuando no se proporciona.
    */
   cruiseLine?: CruiseLineKey;
 
@@ -305,8 +305,8 @@ export type ComparisonResult = {
 
   /*
    * Impacto del threshold durante todo
-   * el crucero, separado del cálculo
-   * económico principal.
+   * el crucero. Puede ajustar o volver
+   * desconocido el ahorro efectivo.
    */
   thresholdCruiseImpacts:
     PackageThresholdCruiseImpactResult[];
@@ -315,19 +315,19 @@ export type ComparisonResult = {
    * Resolución del consumo alcohólico
    * diario conocido.
    *
-   * Por ahora es únicamente informativa:
-   * no modifica cálculo, cobertura ni
-   * recomendación.
+   * No modifica por sí sola el cálculo:
+   * alimenta la evaluación posterior de
+   * las reglas operativas.
    */
   alcoholConsumption:
     AlcoholConsumptionResolution;
 
   /*
-   * Impacto descriptivo de las reglas
+   * Impacto estructurado de las reglas
    * operativas sobre el consumo conocido.
-   *
-   * No modifica todavía cobertura,
-   * economía ni recomendación.
+   * La comparación puede utilizar una
+   * incertidumbre económica demostrada
+   * para calificar el ahorro efectivo.
    */
   operationalRuleImpacts:
     PackageOperationalRuleImpact[];
@@ -823,8 +823,8 @@ export function compareDrinkPackages(
    * está completa, alcoholicDrinksPerDay
    * permanecerá en null.
    *
-   * Todavía no aplicamos límites
-   * operativos sobre este valor.
+   * Este valor alimenta la evaluación
+   * posterior de límites operativos.
    */
   const alcoholConsumption =
     resolveAlcoholConsumption({
@@ -850,8 +850,9 @@ export function compareDrinkPackages(
    * Cruzamos las reglas de cada paquete
    * con el consumo alcohólico conocido.
    *
-   * El resultado sigue siendo únicamente
-   * descriptivo.
+   * El resultado conserva el detalle
+   * descriptivo; la comparación económica
+   * decide después si debe utilizarlo.
    */
   const operationalRuleImpacts =
     evaluateOperationalRuleImpacts(

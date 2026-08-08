@@ -167,6 +167,20 @@ describe(
         ).toContain(
           "no puede cuantificar"
         );
+
+        expect(
+          explanation
+            .economicMessage
+        ).toContain(
+          "mantiene el ahorro efectivo como desconocido"
+        );
+
+        expect(
+          explanation
+            .economicMessage
+        ).not.toContain(
+          "no lo incorpora todavía"
+        );
       }
     );
 

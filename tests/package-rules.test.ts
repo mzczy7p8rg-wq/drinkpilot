@@ -839,7 +839,7 @@ describe(
   "package pricing day policy",
   () => {
     it(
-      "expone que MSC excluye el día de desembarque del precio del paquete sin alterar todavía el cálculo",
+      "expone que MSC excluye el día de desembarque del precio del paquete",
       () => {
         const rules =
           getPackageOperationalRules(

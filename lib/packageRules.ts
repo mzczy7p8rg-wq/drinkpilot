@@ -222,8 +222,8 @@ export type PackageOperationalRules = {
    * del crucero son facturables para
    * el paquete.
    *
-   * Todavía no modifica el cálculo
-   * económico de DrinkPilot.
+   * Cuando se conoce, participa en el
+   * coste económico del paquete.
    */
   packagePricingDayPolicy:
     PackagePricingDayPolicy;
