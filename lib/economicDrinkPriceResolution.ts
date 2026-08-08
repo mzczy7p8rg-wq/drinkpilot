@@ -5,11 +5,23 @@ import {
 } from "@/lib/onboardPriceService";
 
 import type {
-  SelectedDrinkPrice,
+  SelectedDrinkPriceContextRelevance,
+  SelectedDrinkPriceSource,
 } from "@/lib/selectedDrinkPrice";
 
 export type EconomicDrinkPriceInput =
-  SelectedDrinkPrice | null | undefined;
+  | {
+      price:
+        number | null | undefined;
+
+      source?:
+        SelectedDrinkPriceSource;
+
+      contextRelevance?:
+        SelectedDrinkPriceContextRelevance;
+    }
+  | null
+  | undefined;
 
 export type EconomicDrinkPriceSelections =
   Partial<
@@ -43,6 +55,8 @@ export function resolveEconomicDrinkPrice(
   }
 
   if (
+    typeof selectedPrice.price !==
+      "number" ||
     !Number.isFinite(
       selectedPrice.price
     ) ||
@@ -94,6 +108,43 @@ export function resolveEconomicDrinkPrices(
           ]
         ),
       ]
+    )
+  ) as PartialOnboardPriceValues;
+}
+
+/*
+ * Construye la única cesta de precios que
+ * debe utilizar el motor económico.
+ *
+ * Una selección económicamente admisible
+ * prevalece sobre la referencia de la
+ * naviera. Las categorías sin selección
+ * válida conservan su precio de referencia.
+ */
+export function resolveEffectiveDrinkPrices(
+  referencePrices:
+    PartialOnboardPriceValues,
+  selections:
+    EconomicDrinkPriceSelections
+): PartialOnboardPriceValues {
+  return Object.fromEntries(
+    onboardPriceKeys.map(
+      (category) => {
+        const selectedPrice =
+          resolveEconomicDrinkPrice(
+            selections[
+              category
+            ]
+          );
+
+        return [
+          category,
+          selectedPrice ??
+            referencePrices[
+              category
+            ],
+        ];
+      }
     )
   ) as PartialOnboardPriceValues;
 }
