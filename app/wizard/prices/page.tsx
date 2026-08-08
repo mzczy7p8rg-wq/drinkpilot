@@ -39,6 +39,7 @@ import {
 
 import {
   getMscDocumentedDrinkPrices,
+  resolveMscDocumentedDrinkPriceSelectionForContext,
 } from "@/lib/mscDocumentedDrinkPriceService";
 
 const drinkCategoryLabels:
@@ -1129,6 +1130,66 @@ export default function PricesPage() {
                           })
                         : [];
 
+                    const cruiseContext = {
+                      cruiseLine:
+                        data.cruiseLine,
+
+                      market:
+                        data.market,
+
+                      sailingRegion:
+                        data.sailingRegion,
+
+                      onboardCurrency:
+                        data.onboardCurrency,
+
+                      sailingDate:
+                        data.sailingDate,
+                    };
+
+                    const contextualDocumentedReferences =
+                      documentedReferences
+                        .map((reference) => {
+                          const selection =
+                            resolveMscDocumentedDrinkPriceSelectionForContext(
+                              reference.id,
+                              cruiseContext
+                            );
+
+                          return selection
+                            ? {
+                                reference,
+                                contextRelevance:
+                                  selection.contextRelevance,
+                              }
+                            : null;
+                        })
+                        .filter(
+                          (
+                            item
+                          ): item is NonNullable<
+                            typeof item
+                          > => item !== null
+                        )
+                        .sort((left, right) => {
+                          const relevanceOrder = {
+                            exact: 0,
+                            compatible: 1,
+                            mismatch: 2,
+                          } as const;
+
+                          return (
+                            relevanceOrder[
+                              left.contextRelevance
+                                .relevance
+                            ] -
+                            relevanceOrder[
+                              right.contextRelevance
+                                .relevance
+                            ]
+                          );
+                        });
+
                     const selectedReferenceId =
                       selectedDrinkReferenceIds[
                         category
@@ -1210,77 +1271,105 @@ export default function PricesPage() {
                           </div>
                         ) : null}
 
-                        {documentedReferences.length > 0 ? (
+                        {contextualDocumentedReferences.some(
+                          (item) =>
+                            item.contextRelevance.relevance !==
+                            "mismatch"
+                        ) ? (
                           <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
                             <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
                               Precios documentados en menús MSC
                             </p>
 
                             <div className="mt-2 flex flex-wrap gap-2">
-                              {documentedReferences.map(
-                                (reference) => {
-                                  const isSelected =
-                                    selectedReferenceId ===
-                                    reference.id;
+                              {contextualDocumentedReferences
+                                .filter(
+                                  (item) =>
+                                    item.contextRelevance
+                                      .relevance !==
+                                    "mismatch"
+                                )
+                                .map(
+                                  ({
+                                    reference,
+                                    contextRelevance,
+                                  }) => {
+                                    const isSelected =
+                                      selectedReferenceId ===
+                                      reference.id;
 
-                                  return (
-                                    <button
-                                      key={reference.id}
-                                      type="button"
-                                      onClick={() =>
-                                        selectDocumentedDrinkReference(
-                                          category,
-                                          reference.id,
-                                          reference.price
-                                        )
-                                      }
-                                      className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
-                                        isSelected
-                                          ? "border-slate-700 bg-slate-800 text-white"
-                                          : "border-slate-300 bg-white text-slate-900 hover:border-slate-500"
-                                      }`}
-                                    >
-                                      <span className="block font-semibold">
-                                        {reference.productName}
-                                      </span>
-
-                                      <span
-                                        className={`mt-1 block ${
+                                    return (
+                                      <button
+                                        key={reference.id}
+                                        type="button"
+                                        onClick={() =>
+                                          selectDocumentedDrinkReference(
+                                            category,
+                                            reference.id,
+                                            reference.price
+                                          )
+                                        }
+                                        className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
                                           isSelected
-                                            ? "text-slate-200"
-                                            : "text-slate-500"
+                                            ? "border-slate-700 bg-slate-800 text-white"
+                                            : "border-slate-300 bg-white text-slate-900 hover:border-slate-500"
                                         }`}
                                       >
-                                        {reference.format
-                                          ? `${reference.format} · `
-                                          : ""}
-                                        {formatCurrency(
-                                          reference.price,
-                                          reference.currency
-                                        )}
-                                      </span>
+                                        <span className="block font-semibold">
+                                          {reference.productName}
+                                        </span>
 
-                                      <span
-                                        className={`mt-1 block ${
-                                          isSelected
-                                            ? "text-slate-300"
-                                            : "text-slate-500"
-                                        }`}
-                                      >
-                                        {reference.menuName ??
-                                          "Menú documentado"}
-                                        {reference.ship
-                                          ? ` · ${reference.ship}`
-                                          : ""}
-                                      </span>
-                                    </button>
-                                  );
-                                }
-                              )}
+                                        <span
+                                          className={`mt-1 block ${
+                                            isSelected
+                                              ? "text-slate-200"
+                                              : "text-slate-500"
+                                          }`}
+                                        >
+                                          {reference.format
+                                            ? `${reference.format} · `
+                                            : ""}
+                                          {formatCurrency(
+                                            reference.price,
+                                            reference.currency
+                                          )}
+                                        </span>
+
+                                        <span
+                                          className={`mt-1 block ${
+                                            isSelected
+                                              ? "text-slate-300"
+                                              : "text-slate-500"
+                                          }`}
+                                        >
+                                          {reference.menuName
+                                            ? `${reference.menuName} · menú documentado`
+                                            : "Menú MSC documentado"}
+                                        </span>
+
+                                        <span
+                                          className={`mt-1 block font-medium ${
+                                            isSelected
+                                              ? "text-slate-200"
+                                              : contextRelevance.relevance ===
+                                                "exact"
+                                                ? "text-emerald-700"
+                                                : "text-amber-700"
+                                          }`}
+                                        >
+                                          {contextRelevance.relevance ===
+                                          "exact"
+                                            ? "Contexto coincidente"
+                                            : "Compatible · faltan datos"}
+                                        </span>
+                                      </button>
+                                    );
+                                  }
+                                )}
                             </div>
 
                             <p className="mt-2 text-xs leading-5 text-slate-600">
-                              Precios observados en menús documentados. No se presentan como precios oficiales vigentes para toda la flota.
+                              Precios observados en menús documentados. Solo mostramos referencias sin contradicciones conocidas con el contexto de tu crucero.
                             </p>
                           </div>
                         ) : null}
