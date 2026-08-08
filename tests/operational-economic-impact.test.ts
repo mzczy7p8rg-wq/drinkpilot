@@ -24,6 +24,7 @@ describe(
         ).toEqual({
           status: "unknown",
           excessDrinksPerDay: null,
+          chargePolicy: "unknown",
           additionalCostPerDay: null,
         });
       }
@@ -42,6 +43,7 @@ describe(
         ).toEqual({
           status: "none",
           excessDrinksPerDay: 0,
+          chargePolicy: "unknown",
           additionalCostPerDay: 0,
         });
       }
@@ -60,6 +62,7 @@ describe(
         ).toEqual({
           status: "none",
           excessDrinksPerDay: 0,
+          chargePolicy: "unknown",
           additionalCostPerDay: 0,
         });
       }
@@ -79,8 +82,41 @@ describe(
           status:
             "known-unquantified",
           excessDrinksPerDay: 3,
+          chargePolicy: "unknown",
           additionalCostPerDay: null,
         });
+      }
+    );
+
+    it(
+      "conserva la política de precio completo más propinas sin inventar un importe",
+      () => {
+        const result =
+          evaluateOperationalEconomicImpact(
+            {
+              status: "over-limit",
+              alcoholicDrinksPerDay: 18,
+              alcoholicDrinksDailyLimit: 15,
+              excessDrinksPerDay: 3,
+            },
+            "full-price-plus-gratuities"
+          );
+
+        expect(
+          result.status
+        ).toBe(
+          "known-unquantified"
+        );
+
+        expect(
+          result.chargePolicy
+        ).toBe(
+          "full-price-plus-gratuities"
+        );
+
+        expect(
+          result.additionalCostPerDay
+        ).toBeNull();
       }
     );
   }
