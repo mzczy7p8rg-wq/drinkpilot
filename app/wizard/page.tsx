@@ -26,7 +26,7 @@ import {
 
 import ProgressBar from "@/components/ProgressBar";
 
-export default function WizardPage() {
+function WizardForm() {
   const router =
     useRouter();
 
@@ -436,4 +436,21 @@ export default function WizardPage() {
       </div>
     </main>
   );
+}
+
+export default function WizardPage() {
+  const { hydrated } =
+    useStore();
+
+  if (!hydrated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <p className="font-medium text-slate-600">
+          Recuperando tu análisis...
+        </p>
+      </main>
+    );
+  }
+
+  return <WizardForm />;
 }

@@ -201,7 +201,7 @@ function formatCurrency(
   }
 }
 
-export default function PricesPage() {
+function PricesForm() {
   const {
     data,
     setData,
@@ -1516,4 +1516,21 @@ export default function PricesPage() {
       </div>
     </main>
   );
+}
+
+export default function PricesPage() {
+  const { hydrated } =
+    useStore();
+
+  if (!hydrated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <p className="font-medium text-slate-600">
+          Recuperando tu análisis...
+        </p>
+      </main>
+    );
+  }
+
+  return <PricesForm />;
 }
