@@ -54,6 +54,8 @@ export function createSelectedDrinkPriceFromMscReference(
     price: reference.price,
     currency: reference.currency,
     source: "official",
+    referenceId:
+      reference.id,
   });
 }
 
