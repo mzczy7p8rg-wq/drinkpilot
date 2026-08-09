@@ -37,7 +37,11 @@ const defaultWizardProgress:
   beer: 0,
   wine: 0,
 
-  people: 1,
+  /*
+   * 0 representa que el paso Personas
+   * todavía no ha sido confirmado.
+   */
+  people: 0,
 };
 
 function sanitizeNonNegativeInteger(
@@ -51,15 +55,30 @@ function sanitizeNonNegativeInteger(
       : 0;
 }
 
-function sanitizePositiveInteger(
+function sanitizePeopleCount(
   value: unknown,
   fallback: number
 ): number {
-  return isPositiveSafeInteger(value)
-    ? value
-    : isPositiveSafeInteger(fallback)
-      ? fallback
-      : 1;
+  /*
+   * Un valor positivo representa una
+   * confirmación válida.
+   *
+   * 0 se conserva únicamente como estado
+   * interno "pendiente de confirmar".
+   */
+  if (
+    isPositiveSafeInteger(
+      value
+    )
+  ) {
+    return value;
+  }
+
+  return isNonNegativeSafeInteger(
+    fallback
+  )
+    ? fallback
+    : 0;
 }
 
 /*
@@ -70,7 +89,8 @@ function sanitizePositiveInteger(
  * El wizard solo produce números enteros:
  *
  * - días y bebidas admiten 0 como estado vacío;
- * - personas debe ser siempre mayor que 0.
+ * - personas usa 0 como estado no confirmado y
+ *   un entero positivo después de confirmarse.
  */
 export function resolveStoredWizardProgress(
   input:
@@ -117,7 +137,7 @@ export function resolveStoredWizardProgress(
       ),
 
     people:
-      sanitizePositiveInteger(
+      sanitizePeopleCount(
         input.people,
         fallback.people
       ),

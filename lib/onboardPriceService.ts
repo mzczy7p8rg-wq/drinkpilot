@@ -47,6 +47,20 @@ export type CompleteOnboardPriceValues =
     number
   >;
 
+/*
+ * Valores estrictamente matemáticos
+ * enviados al calculador.
+ *
+ * A diferencia de CompleteOnboardPriceValues,
+ * una categoría no consumida puede valer 0
+ * porque no contribuye al coste.
+ */
+export type CalculationOnboardPriceValues =
+  Record<
+    OnboardPriceKey,
+    number
+  >;
+
 function isValidOnboardPrice(
   value: unknown
 ): value is number {
@@ -89,4 +103,97 @@ export function getMissingOnboardPriceKeys(
         values[key]
       )
   );
+}
+
+/*
+ * Consumo diario utilizado para decidir
+ * qué precios son realmente necesarios.
+ */
+export type OnboardPriceConsumptionValues =
+  Record<
+    OnboardPriceKey,
+    number
+  >;
+
+/*
+ * Devuelve únicamente categorías consumidas
+ * cuyo precio todavía falta.
+ */
+export function getMissingRequiredOnboardPriceKeys(
+  values: PartialOnboardPriceValues,
+  consumption: OnboardPriceConsumptionValues
+): OnboardPriceKey[] {
+  return onboardPriceKeys.filter(
+    (key) =>
+      consumption[key] > 0 &&
+      !isValidOnboardPrice(
+        values[key]
+      )
+  );
+}
+
+/*
+ * Construye la cesta numérica que necesita
+ * calculator.ts.
+ *
+ * Importante:
+ *
+ * - consumo > 0 exige un precio válido;
+ * - consumo = 0 utiliza 0 únicamente como
+ *   neutro matemático;
+ * - no modifica la evidencia original,
+ *   donde un precio desconocido sigue
+ *   siendo null.
+ */
+export function resolveOnboardPriceValuesForConsumption(
+  values: PartialOnboardPriceValues,
+  consumption: OnboardPriceConsumptionValues
+): CalculationOnboardPriceValues | null {
+  const result =
+    {} as CalculationOnboardPriceValues;
+
+  let hasConsumption =
+    false;
+
+  for (
+    const key of onboardPriceKeys
+  ) {
+    const quantity =
+      consumption[key];
+
+    if (
+      !Number.isSafeInteger(
+        quantity
+      ) ||
+      quantity < 0
+    ) {
+      return null;
+    }
+
+    if (quantity === 0) {
+      result[key] = 0;
+      continue;
+    }
+
+    hasConsumption =
+      true;
+
+    const price =
+      values[key];
+
+    if (
+      !isValidOnboardPrice(
+        price
+      )
+    ) {
+      return null;
+    }
+
+    result[key] =
+      price;
+  }
+
+  return hasConsumption
+    ? result
+    : null;
 }

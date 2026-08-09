@@ -81,7 +81,7 @@ describe(
           soda: 0,
           beer: 0,
           wine: 0,
-          people: 1,
+          people: 0,
         });
       }
     );
@@ -109,7 +109,7 @@ describe(
           soda: 0,
           beer: 0,
           wine: 0,
-          people: 1,
+          people: 0,
         });
       }
     );
@@ -171,7 +171,7 @@ describe(
           soda: 0,
           beer: 0,
           wine: 0,
-          people: 1,
+          people: 0,
         });
       }
     );

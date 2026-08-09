@@ -48,7 +48,7 @@ describe(
     );
 
     it(
-      "no bloquea la comparación cuando la política económica sigue siendo desconocida",
+      "mantiene desconocido el ahorro cuando existe exceso y la política económica sigue siendo desconocida",
       () => {
         const result =
           resolveEconomicComparison(
@@ -68,11 +68,13 @@ describe(
 
         expect(
           result.status
-        ).toBe("complete");
+        ).toBe(
+          "partial-unknown"
+        );
 
         expect(
           result.effectiveSavings
-        ).toBe(120);
+        ).toBeNull();
       }
     );
 
