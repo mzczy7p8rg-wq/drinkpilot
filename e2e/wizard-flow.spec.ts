@@ -74,4 +74,12 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: /Tu recomendación DrinkPilot/i })
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Tus preferencias están cubiertas, pero el paquete no compensa",
+    })
+  ).toBeVisible();
+  await expect(
+    page.getByText("Sin opción completa con ahorro")
+  ).toBeVisible();
 });
