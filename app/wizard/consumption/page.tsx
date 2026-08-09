@@ -16,6 +16,7 @@ import {
 
 import {
   getTotalDrinksPerDay,
+  hasValidConsumptionStep,
 } from "@/lib/wizardProgress";
 
 export default function ConsumptionPage() {
@@ -32,7 +33,9 @@ export default function ConsumptionPage() {
     );
 
   const hasConsumption =
-    totalDrinksPerDay > 0;
+    hasValidConsumptionStep(
+      data
+    );
 
   const hasCocktails =
     data.cocktail > 0;

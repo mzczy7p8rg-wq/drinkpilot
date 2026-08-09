@@ -7,6 +7,10 @@ import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
 
 import {
+  isPositiveSafeInteger,
+} from "@/lib/wizardNumberValidation";
+
+import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
@@ -25,8 +29,9 @@ function PeopleForm() {
 
   const isValid =
     people.trim() !== "" &&
-    Number.isInteger(parsedPeople) &&
-    parsedPeople > 0;
+    isPositiveSafeInteger(
+      parsedPeople
+    );
 
   function handleReview() {
     if (!isValid) {
