@@ -1,0 +1,48 @@
+import { expect, test } from "@playwright/test";
+
+test("conserva mercado y región hasta la revisión", async ({ page }) => {
+  await page.goto("/wizard");
+
+  await page
+    .getByRole("button", { name: /MSC Cruises/i })
+    .click();
+  await page.getByLabel("Duración del crucero").fill("7");
+  await page
+    .getByLabel("Mercado de la reserva")
+    .selectOption({ label: "Estados Unidos" });
+  await page
+    .getByLabel("Región de navegación")
+    .selectOption({ label: "Norteamérica" });
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await page
+    .getByRole("button", { name: /Aumentar.*Cafés/i })
+    .click();
+  await page.getByRole("link", { name: "Continuar" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/preferences$/);
+  await expect(
+    page.getByRole("heading", { name: "¿Qué extras valoras a bordo?" })
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Continuar" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/prices$/);
+  await expect(
+    page.getByRole("heading", { name: "¿Tienes el precio de tu reserva?" })
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Continuar" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/people$/);
+  await expect(
+    page.getByRole("heading", { name: "¿Cuántas personas viajarán?" })
+  ).toBeVisible();
+  await page.getByLabel("Número de viajeros").fill("1");
+  await page
+    .getByRole("button", { name: "Revisar análisis" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard\/review$/);
+  await expect(page.getByText("MSC Cruises").first()).toBeVisible();
+  await expect(page.getByText("Estados Unidos")).toBeVisible();
+  await expect(page.getByText("Norteamérica")).toBeVisible();
+});

@@ -36,6 +36,10 @@ import {
 import {
   getTotalDrinksPerDay,
 } from "@/lib/wizardProgress";
+import {
+  getMarketLabel,
+  getSailingRegionLabel,
+} from "@/lib/cruiseContextOptions";
 
 function formatCurrency(
   amount: number,
@@ -256,6 +260,26 @@ export default function ReviewPage() {
           <p className="mt-2 text-lg font-bold text-slate-900 sm:text-xl">
             {cruiseLine.name}
           </p>
+
+          <dl className="mt-4 grid gap-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs font-medium text-slate-500">
+                Mercado de la reserva
+              </dt>
+              <dd className="mt-1 text-sm font-semibold text-slate-800">
+                {getMarketLabel(data.market)}
+              </dd>
+            </div>
+
+            <div>
+              <dt className="text-xs font-medium text-slate-500">
+                Región de navegación
+              </dt>
+              <dd className="mt-1 text-sm font-semibold text-slate-800">
+                {getSailingRegionLabel(data.sailingRegion)}
+              </dd>
+            </div>
+          </dl>
         </section>
 
         {/* DATOS BÁSICOS */}

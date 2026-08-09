@@ -29,6 +29,10 @@ import {
 import {
   isPositiveSafeInteger,
 } from "@/lib/wizardNumberValidation";
+import {
+  marketOptions,
+  sailingRegionOptions,
+} from "@/lib/cruiseContextOptions";
 
 import ProgressBar from "@/components/ProgressBar";
 
@@ -76,6 +80,14 @@ function WizardForm() {
     setSailingDate,
   ] = useState(
     data.sailingDate ?? ""
+  );
+
+  const [market, setMarket] = useState(
+    data.market ?? ""
+  );
+
+  const [sailingRegion, setSailingRegion] = useState(
+    data.sailingRegion ?? ""
   );
 
   const parsedDays =
@@ -138,14 +150,14 @@ function WizardForm() {
            * de compra del usuario.
            */
           market:
-            cruiseLineChanged
+            market === ""
               ? null
-              : previous.market,
+              : market,
 
           sailingRegion:
-            cruiseLineChanged
+            sailingRegion === ""
               ? null
-              : previous.sailingRegion,
+              : sailingRegion,
 
           onboardCurrency:
             cruiseLineChanged
@@ -222,9 +234,9 @@ function WizardForm() {
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
             Selecciona tu naviera,
-            introduce la duración y,
-            si la conoces, la fecha de
-            salida.
+            introduce la duración y añade
+            el contexto que conozcas de tu
+            reserva y navegación.
           </p>
         </div>
 
@@ -376,6 +388,74 @@ function WizardForm() {
                 que 0.
               </p>
             )}
+        </section>
+
+        {/* CONTEXTO OPCIONAL */}
+
+        <section className="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-slate-700">
+                Contexto del crucero
+              </h2>
+
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Ayuda a aplicar condiciones específicas sin deducir datos de la naviera.
+              </p>
+            </div>
+
+            <span className="text-xs font-medium text-slate-400">
+              Opcional
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label
+                htmlFor="bookingMarket"
+                className="text-sm font-semibold text-slate-700"
+              >
+                Mercado de la reserva
+              </label>
+
+              <select
+                id="bookingMarket"
+                value={market}
+                onChange={(event) => setMarket(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+              >
+                <option value="">No lo sé</option>
+                {marketOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="sailingRegion"
+                className="text-sm font-semibold text-slate-700"
+              >
+                Región de navegación
+              </label>
+
+              <select
+                id="sailingRegion"
+                value={sailingRegion}
+                onChange={(event) => setSailingRegion(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+              >
+                <option value="">No lo sé</option>
+                {sailingRegionOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </section>
 
         {/* FECHA DE SALIDA */}

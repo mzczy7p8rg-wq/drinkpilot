@@ -296,7 +296,8 @@ function PricesForm() {
           return [
             pkg.key,
 
-            storedPrice !== null
+            storedPrice !== null &&
+            storedPrice !== undefined
               ? String(
                   storedPrice.price
                 )
