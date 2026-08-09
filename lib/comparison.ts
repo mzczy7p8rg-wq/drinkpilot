@@ -1445,6 +1445,82 @@ export function compareDrinkPackages(
               operationalEconomicImpact
             );
 
+          /*
+           * MÉTRICAS DIARIAS EFECTIVAS
+           *
+           * calculator.ts resuelve la economía
+           * base del paquete.
+           *
+           * Si posteriormente conocemos un coste
+           * adicional de threshold, las métricas
+           * que mostramos al usuario deben contar
+           * la misma historia que effectiveSavings.
+           */
+          const economicMultiplier =
+            input.days *
+            input.people;
+
+          const effectiveDailyMargin =
+            economicComparison
+              .effectiveSavings !==
+                null &&
+            economicMultiplier > 0
+              ? economicComparison
+                  .effectiveSavings /
+                economicMultiplier
+              : calculation
+                  .dailyMargin;
+
+          const thresholdAdditionalCostTotal =
+            thresholdImpact?.status ===
+                "quantified" &&
+              thresholdImpact
+                .additionalCostTotal !==
+                null
+              ? thresholdImpact
+                  .additionalCostTotal
+              : 0;
+
+          const thresholdAdditionalCostPerPersonDay =
+            economicMultiplier > 0
+              ? thresholdAdditionalCostTotal /
+                economicMultiplier
+              : 0;
+
+          /*
+           * Valor diario que realmente aporta
+           * el patrón de bebidas frente al paquete
+           * después de descontar los cargos por
+           * superar thresholds conocidos.
+           */
+          const effectiveDailyDrinkValue =
+            calculation
+              .dailyDrinkCost -
+            thresholdAdditionalCostPerPersonDay;
+
+          const effectiveAverageDrinkValue =
+            totalDrinksPerDay > 0
+              ? effectiveDailyDrinkValue /
+                totalDrinksPerDay
+              : 0;
+
+          const effectivePackageCostPerPersonDay =
+            economicMultiplier > 0
+              ? calculation
+                  .packageCost /
+                economicMultiplier
+              : 0;
+
+          const effectiveBreakEvenDrinksPerDay =
+            economicComparison
+              .effectiveSavings !==
+                null &&
+            effectiveAverageDrinkValue > 0
+              ? effectivePackageCostPerPersonDay /
+                effectiveAverageDrinkValue
+              : calculation
+                  .breakEvenDrinksPerDay;
+
           return {
             packageKey,
 
@@ -1484,7 +1560,7 @@ export function compareDrinkPackages(
               calculation.dailyDrinkCost,
 
             dailyMargin:
-              calculation.dailyMargin,
+              effectiveDailyMargin,
 
             savingsPercentage:
               calculation
@@ -1498,8 +1574,7 @@ export function compareDrinkPackages(
                 .recommendationLevel,
 
             breakEvenDrinksPerDay:
-              calculation
-                .breakEvenDrinksPerDay,
+              effectiveBreakEvenDrinksPerDay,
 
             coverageScore:
               coverage

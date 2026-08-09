@@ -1736,7 +1736,10 @@ export default function ResultsPage() {
 
                       <div className="mt-5 border-t border-slate-200 pt-4">
                         <p className="text-sm leading-6 text-slate-600">
-                          Margen diario:{" "}
+                          {pkg.effectiveSavings !==
+                          null
+                            ? "Margen diario efectivo:"
+                            : "Margen diario teórico:"}{" "}
                           <strong
                             className={
                               pkg.dailyMargin >
@@ -1754,8 +1757,10 @@ export default function ResultsPage() {
                         </p>
 
                         <p className="mt-2 text-sm leading-6 text-slate-600">
-                          Punto de
-                          equilibrio:{" "}
+                          {pkg.effectiveSavings !==
+                          null
+                            ? "Punto de equilibrio efectivo:"
+                            : "Punto de equilibrio teórico:"}{" "}
                           <strong>
                             {pkg.breakEvenDrinksPerDay.toFixed(
                               1
