@@ -190,6 +190,27 @@ describe(
     );
 
     it(
+      "compara los códigos de mercado sin depender de mayúsculas",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                " es ",
+
+              sailingDate:
+                "2026-07-15",
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
       "rechaza una naviera distinta",
       () => {
         expect(
@@ -375,6 +396,30 @@ describe(
 
               sailingRegion:
                 "MED",
+
+              sailingDate:
+                "2026-08-15",
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "compara la región sin depender de mayúsculas",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            regionalRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingRegion:
+                " med ",
 
               sailingDate:
                 "2026-08-15",
@@ -625,6 +670,33 @@ describe(
 
               onboardCurrency:
                 "EUR",
+
+              sailingDate:
+                null,
+            }
+          )
+        ).toBe(true);
+      }
+    );
+
+    it(
+      "compara la moneda sin depender de mayúsculas",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            eurRule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                null,
+
+              sailingRegion:
+                null,
+
+              onboardCurrency:
+                " eur ",
 
               sailingDate:
                 null,

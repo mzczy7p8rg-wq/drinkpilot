@@ -33,6 +33,14 @@ function sanitizeOptionalString(
     : null;
 }
 
+function sanitizeOptionalCode(
+  value: unknown
+): string | null {
+  return sanitizeOptionalString(
+    value
+  )?.toUpperCase() ?? null;
+}
+
 function sanitizeSailingDate(
   value: unknown
 ): string | null {
@@ -77,17 +85,17 @@ export function resolveStoredCruiseContext(
 ): StoredCruiseContext {
   return {
     market:
-      sanitizeOptionalString(
+      sanitizeOptionalCode(
         input.market
       ),
 
     sailingRegion:
-      sanitizeOptionalString(
+      sanitizeOptionalCode(
         input.sailingRegion
       ),
 
     onboardCurrency:
-      sanitizeOptionalString(
+      sanitizeOptionalCode(
         input.onboardCurrency
       ),
 

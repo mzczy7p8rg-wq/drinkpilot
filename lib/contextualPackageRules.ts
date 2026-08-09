@@ -169,6 +169,32 @@ export type ContextualPackageRule = {
     ContextualRuleValues;
 };
 
+function normalizeContextCode(
+  value: string
+): string {
+  return value
+    .trim()
+    .toUpperCase();
+}
+
+function includesContextCode(
+  allowedValues: string[],
+  contextValue: string
+): boolean {
+  const normalizedContextValue =
+    normalizeContextCode(
+      contextValue
+    );
+
+  return allowedValues.some(
+    (allowedValue) =>
+      normalizeContextCode(
+        allowedValue
+      ) ===
+      normalizedContextValue
+  );
+}
+
 function matchesMarket(
   rule: ContextualPackageRule,
   context: CruiseContext
@@ -184,7 +210,8 @@ function matchesMarket(
     return false;
   }
 
-  return rule.markets.includes(
+  return includesContextCode(
+    rule.markets,
     context.market
   );
 }
@@ -209,7 +236,8 @@ function matchesSailingRegion(
     return false;
   }
 
-  return rule.sailingRegions.includes(
+  return includesContextCode(
+    rule.sailingRegions,
     context.sailingRegion
   );
 }
@@ -234,7 +262,8 @@ function matchesOnboardCurrency(
     return false;
   }
 
-  return rule.onboardCurrencies.includes(
+  return includesContextCode(
+    rule.onboardCurrencies,
     context.onboardCurrency
   );
 }

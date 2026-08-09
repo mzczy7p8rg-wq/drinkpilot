@@ -73,6 +73,23 @@ describe(
     );
 
     it(
+      "normaliza los códigos contextuales a mayúsculas",
+      () => {
+        expect(
+          resolveStoredCruiseContext({
+            market: " es ",
+            sailingRegion: " med ",
+            onboardCurrency: " eur ",
+          })
+        ).toMatchObject({
+          market: "ES",
+          sailingRegion: "MED",
+          onboardCurrency: "EUR",
+        });
+      }
+    );
+
+    it(
       "descarta valores vacíos o de tipo incorrecto",
       () => {
         expect(
