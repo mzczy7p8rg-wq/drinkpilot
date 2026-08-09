@@ -194,9 +194,15 @@ describe(
           evidence
         ).toBeDefined();
 
+        if (!evidence) {
+          throw new Error(
+            "EUR threshold evidence missing"
+          );
+        }
+
         expect(
           "onboardCurrency" in
-            (evidence ?? {})
+            evidence
             ? evidence
                 .onboardCurrency
             : null
@@ -204,7 +210,7 @@ describe(
 
         expect(
           "value" in
-            (evidence ?? {})
+            evidence
             ? evidence.value
             : null
         ).toBe(14);
@@ -227,9 +233,15 @@ describe(
           evidence
         ).toBeDefined();
 
+        if (!evidence) {
+          throw new Error(
+            "USD threshold evidence missing"
+          );
+        }
+
         expect(
           "onboardCurrency" in
-            (evidence ?? {})
+            evidence
             ? evidence
                 .onboardCurrency
             : null
@@ -237,7 +249,7 @@ describe(
 
         expect(
           "value" in
-            (evidence ?? {})
+            evidence
             ? evidence.value
             : null
         ).toBe(16);
@@ -260,9 +272,15 @@ describe(
           evidence
         ).toBeDefined();
 
+        if (!evidence) {
+          throw new Error(
+            "Legacy transition evidence missing"
+          );
+        }
+
         expect(
           "effectivePurchaseDate" in
-            (evidence ?? {})
+            evidence
             ? evidence
                 .effectivePurchaseDate
             : null

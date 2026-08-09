@@ -61,6 +61,8 @@ describe(
 
             themedVenues:
               "unknown",
+
+            excludedVenues: [],
           });
 
         expect(
@@ -90,6 +92,8 @@ describe(
 
             themedVenues:
               "unknown",
+
+            excludedVenues: [],
           });
 
         expect(
@@ -123,6 +127,8 @@ describe(
 
             themedVenues:
               "limited",
+
+            excludedVenues: [],
           });
 
         expect(

@@ -10,8 +10,27 @@ import {
 } from "@/lib/operationalRuleExplanation";
 
 import {
-  getPackageOperationalRules,
+  getPackageOperationalRules as getPackageOperationalRulesWithContext,
 } from "@/lib/packageRules";
+
+import {
+  resolvePackageRulesContextFixture,
+  type PackageRulesContextFixture,
+} from "@/tests/fixtures/cruiseContext";
+
+function getPackageOperationalRules(
+  input: PackageRulesContextFixture,
+  options?: Parameters<
+    typeof getPackageOperationalRulesWithContext
+  >[1]
+) {
+  return getPackageOperationalRulesWithContext(
+    resolvePackageRulesContextFixture(
+      input
+    ),
+    options
+  );
+}
 
 describe(
   "operational rule explanation",
@@ -794,6 +813,8 @@ describe(
 
                 themedVenues:
                   "unknown",
+
+                excludedVenues: [],
               },
             },
           ]);

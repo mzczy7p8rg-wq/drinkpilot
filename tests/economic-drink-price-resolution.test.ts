@@ -15,7 +15,6 @@ describe("economic drink price resolution", () => {
   it("rechaza precios fuera del rango seguro", () => {
     expect(
       resolveEconomicDrinkPrice({
-        category: "coffee",
         price:
           Number.MAX_SAFE_INTEGER + 1,
         currency: "USD",
@@ -27,7 +26,6 @@ describe("economic drink price resolution", () => {
   it("acepta un precio introducido por el usuario", () => {
     expect(
       resolveEconomicDrinkPrice({
-        category: "coffee",
         price: 4,
         currency: "USD",
         source: "user",
@@ -38,7 +36,6 @@ describe("economic drink price resolution", () => {
   it("acepta un precio oficial", () => {
     expect(
       resolveEconomicDrinkPrice({
-        category: "water",
         price: 3.25,
         currency: "USD",
         source: "official",
@@ -49,7 +46,6 @@ describe("economic drink price resolution", () => {
   it("acepta un precio documentado con contexto exacto", () => {
     expect(
       resolveEconomicDrinkPrice({
-        category: "beer",
         price: 9,
         currency: "USD",
         source: "documented-menu",
@@ -61,7 +57,6 @@ describe("economic drink price resolution", () => {
   it("no acepta económicamente un precio documentado solo compatible", () => {
     expect(
       resolveEconomicDrinkPrice({
-        category: "beer",
         price: 9,
         currency: "USD",
         source: "documented-menu",
@@ -74,7 +69,6 @@ describe("economic drink price resolution", () => {
     expect(
       resolveEconomicDrinkPriceForCurrency(
         {
-          category: "beer",
           price: 9,
           currency: "USD",
           source: "documented-menu",
@@ -88,7 +82,6 @@ describe("economic drink price resolution", () => {
     expect(
       resolveEconomicDrinkPriceForCurrency(
         {
-          category: "beer",
           price: 9,
           currency: "USD",
           source: "documented-menu",
@@ -103,7 +96,6 @@ describe("economic drink price resolution", () => {
     expect(
       resolveEconomicDrinkPriceForCurrency(
         {
-          category: "coffee",
           price: 5,
           currency: "USD",
           source: "user",
@@ -117,14 +109,12 @@ describe("economic drink price resolution", () => {
     const result =
       resolveEconomicDrinkPrices({
         coffee: {
-          category: "coffee",
           price: 4,
           currency: "USD",
           source: "user",
         },
 
         water: {
-          category: "water",
           price: 3.25,
           currency: "USD",
           source: "documented-menu",
@@ -132,7 +122,6 @@ describe("economic drink price resolution", () => {
         },
 
         beer: {
-          category: "beer",
           price: 9,
           currency: "USD",
           source: "documented-menu",
@@ -163,13 +152,11 @@ describe("economic drink price resolution", () => {
         },
         {
           coffee: {
-            category: "coffee",
             price: 5,
             currency: "EUR",
             source: "user",
           },
           beer: {
-            category: "beer",
             price: 9,
             currency: "EUR",
             source: "documented-menu",
@@ -202,7 +189,6 @@ describe("economic drink price resolution", () => {
         },
         {
           coffee: {
-            category: "coffee",
             price: 7,
             currency: "USD",
             source: "user",
