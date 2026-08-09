@@ -2,12 +2,14 @@
 
 type DrinkCounterProps = {
   label: string;
+  accessibleLabel: string;
   value: number;
   onChange: (value: number) => void;
 };
 
 export default function DrinkCounter({
   label,
+  accessibleLabel,
   value,
   onChange,
 }: DrinkCounterProps) {
@@ -16,7 +18,11 @@ export default function DrinkCounter({
     value < Number.MAX_SAFE_INTEGER;
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+    <div
+      role="group"
+      aria-label={accessibleLabel}
+      className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+    >
 
       <span className="min-w-0 text-base font-medium text-slate-800 sm:text-lg">
         {label}
@@ -26,7 +32,7 @@ export default function DrinkCounter({
 
         <button
           type="button"
-          aria-label={`Reducir ${label}`}
+          aria-label={`Reducir ${accessibleLabel}`}
           onClick={() =>
             onChange(Math.max(0, value - 1))
           }
@@ -35,13 +41,16 @@ export default function DrinkCounter({
           −
         </button>
 
-        <span className="w-8 text-center text-xl font-bold text-slate-900">
+        <output
+          aria-label={`Cantidad de ${accessibleLabel}`}
+          className="w-8 text-center text-xl font-bold text-slate-900"
+        >
           {value}
-        </span>
+        </output>
 
         <button
           type="button"
-          aria-label={`Aumentar ${label}`}
+          aria-label={`Aumentar ${accessibleLabel}`}
           disabled={!canIncrement}
           onClick={() =>
             canIncrement &&
