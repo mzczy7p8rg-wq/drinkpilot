@@ -144,9 +144,7 @@ export default function ResultsPage() {
       data.customPackagePrices
     ).filter(
       (price) =>
-        typeof price === "number" &&
-        Number.isFinite(price) &&
-        price > 0
+        price !== null
     ).length;
 
   if (!hydrated) {

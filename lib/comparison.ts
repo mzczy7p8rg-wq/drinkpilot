@@ -60,6 +60,10 @@ import {
 import {
   isPositiveSafePrice,
 } from "@/lib/priceValidation";
+import {
+  resolveStoredCustomPackagePrice,
+  type CustomPackagePrice,
+} from "@/lib/customPackagePrice";
 
 import type {
   SelectedDrinkConsumption,
@@ -162,7 +166,10 @@ export type ComparisonInput = {
    */
   customPackagePrices?: Record<
     string,
-    number | null | undefined
+    | CustomPackagePrice
+    | number
+    | null
+    | undefined
   >;
 
 
@@ -392,6 +399,8 @@ type ResolvedEconomicPackage = {
   resolvedPrice: {
     price: number;
 
+    currency: string;
+
     source: PriceSource;
   };
 };
@@ -403,11 +412,11 @@ type ResolvedEconomicPackage = {
  */
 function isValidCustomPrice(
   value:
-    | number
+    | CustomPackagePrice
     | null
     | undefined
-): value is number {
-  return isPositiveSafePrice(value);
+): value is CustomPackagePrice {
+  return value !== null && value !== undefined;
 }
 
 /*
@@ -419,15 +428,20 @@ function isValidCustomPrice(
  */
 function getCustomPrice(
   packageKey: PackageKey,
+  fallbackCurrency: string,
   input: ComparisonInput
 ):
-  | number
+  | CustomPackagePrice
   | null
   | undefined {
-  return (
+  const storedPrice =
     input.customPackagePrices?.[
       packageKey
-    ]
+    ];
+
+  return resolveStoredCustomPackagePrice(
+    storedPrice,
+    fallbackCurrency
   );
 }
 
@@ -448,6 +462,7 @@ function resolveEconomicPackage(
   const customPrice =
     getCustomPrice(
       packageKey,
+      pkg.currency,
       input
     );
 
@@ -487,7 +502,10 @@ function resolveEconomicPackage(
 
       resolvedPrice: {
         price:
-          customPrice,
+          customPrice.price,
+
+        currency:
+          customPrice.currency,
 
         source:
           "user",
@@ -544,7 +562,10 @@ function resolveEconomicPackage(
 
       resolvedPrice: {
         price:
-          customPrice,
+          customPrice.price,
+
+        currency:
+          customPrice.currency,
 
         source:
           "user",
@@ -567,6 +588,9 @@ function resolveEconomicPackage(
     resolvedPrice: {
       price:
         pkg.pricePerDay,
+
+      currency:
+        pkg.currency,
 
       source:
         "reference",
@@ -1183,7 +1207,7 @@ export function compareDrinkPackages(
           result
         ): result is ResolvedEconomicPackage =>
           result !== null &&
-          result.pkg.currency
+          result.resolvedPrice.currency
             .trim()
             .toUpperCase() ===
             economicCurrency
@@ -1528,7 +1552,7 @@ export function compareDrinkPackages(
               pkg.name,
 
             currency:
-              pkg.currency,
+              resolvedPrice.currency,
 
             packagePricePerDay:
               resolvedPrice.price,

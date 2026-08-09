@@ -44,8 +44,30 @@ describe("DrinkPilot recommendation explanations", () => {
     );
 
     expect(explanation.summary).toContain(
-      "126.00 €"
+      "126,00\u00a0€"
     );
+  });
+
+  it("explica en USD una recomendación calculada en USD", () => {
+    const bestPackage = {
+      packageKey: "mscEasy",
+      packageName: "Easy Package",
+      currency: "USD",
+      savings: 25,
+      effectiveSavings: 25,
+      coverageScore: 100,
+      fullyCovered: true,
+      uncoveredCategories: [],
+    } satisfies RecommendationComparison["packages"][number];
+
+    const explanation = buildRecommendationExplanation({
+      packages: [bestPackage],
+      bestPackage,
+      thresholdCruiseImpacts: [],
+    });
+
+    expect(explanation.summary).toContain("25,00\u00a0US$");
+    expect(explanation.summary).not.toContain("€");
   });
 
   it("explica por qué My Drinks Plus gana cuando existen preferencias premium", () => {
@@ -424,7 +446,7 @@ describe(
         expect(
           explanation.reason
         ).toContain(
-          "120.00 €"
+          "120,00\u00a0€"
         );
 
         expect(
@@ -486,7 +508,7 @@ describe(
         expect(
           explanation.reason
         ).toContain(
-          "15.00 € más"
+          "15,00\u00a0€ más"
         );
 
         expect(

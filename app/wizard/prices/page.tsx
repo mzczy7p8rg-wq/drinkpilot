@@ -50,6 +50,9 @@ import {
 import {
   isPositiveSafePrice,
 } from "@/lib/priceValidation";
+import {
+  createCustomPackagePrice,
+} from "@/lib/customPackagePrice";
 
 const drinkCategoryLabels:
   Record<OnboardPriceKey, string> = {
@@ -244,10 +247,14 @@ function PricesForm() {
       data.cruiseLine
     );
 
-  const currencySymbol =
-    getCurrencySymbol(
-      cruiseLine.currency
+  const [packagePriceCurrency, setPackagePriceCurrency] =
+    useState(() =>
+      Object.values(data.customPackagePrices).find(
+        (price) => price !== null
+      )?.currency ?? cruiseLine.currency
     );
+
+  const currencySymbol = getCurrencySymbol(packagePriceCurrency);
 
   /*
    * Los precios concretos de bebidas
@@ -289,14 +296,9 @@ function PricesForm() {
           return [
             pkg.key,
 
-            typeof storedPrice ===
-              "number" &&
-            Number.isFinite(
-              storedPrice
-            ) &&
-            storedPrice > 0
+            storedPrice !== null
               ? String(
-                  storedPrice
+                  storedPrice.price
                 )
               : "",
           ];
@@ -615,10 +617,12 @@ function PricesForm() {
           (pkg) => [
             pkg.key,
 
-            validations[
-              pkg.key
-            ]?.value ??
-              null,
+            validations[pkg.key]?.value === null
+              ? null
+              : createCustomPackagePrice({
+                  price: validations[pkg.key]?.value,
+                  currency: packagePriceCurrency,
+                }),
           ]
         )
       );
@@ -783,6 +787,34 @@ function PricesForm() {
           comparación económica cuando
           proporciones un precio real.
         </div>
+
+        <fieldset className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
+          <legend className="px-1 text-sm font-semibold text-slate-900">
+            Moneda del precio de tu reserva
+          </legend>
+
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Selecciona la moneda en la que aparece el paquete en tu reserva.
+          </p>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {(["EUR", "USD"] as const).map((currency) => (
+              <button
+                key={currency}
+                type="button"
+                aria-pressed={packagePriceCurrency === currency}
+                onClick={() => setPackagePriceCurrency(currency)}
+                className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                  packagePriceCurrency === currency
+                    ? "border-sky-500 bg-sky-600 text-white"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
+                }`}
+              >
+                {currency} ({getCurrencySymbol(currency)})
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         {/* PAQUETES */}
 

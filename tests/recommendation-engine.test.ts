@@ -1790,7 +1790,67 @@ describe("DrinkPilot recommendation engine", () => {
       "myDrinksSoft"
     );
   });
-});describe("Generic custom package prices", () => {
+});
+
+describe("Generic custom package prices", () => {
+  it("compara un paquete MSC reservado en USD con bebidas en USD", () => {
+    const result = compareDrinkPackages({
+      cruiseLine: "msc",
+      onboardCurrency: "USD",
+      days: 7,
+      people: 1,
+      coffee: 2,
+      water: 2,
+      soda: 2,
+      beer: 1,
+      wine: 1,
+      cocktail: 1,
+      customPackagePrices: {
+        mscEasy: { price: 45, currency: "USD" },
+      },
+      selectedDrinkPrices: {
+        coffee: {
+          price: 4,
+          currency: "USD",
+          source: "user",
+        },
+        water: {
+          price: 3,
+          currency: "USD",
+          source: "user",
+        },
+        soda: {
+          price: 4,
+          currency: "USD",
+          source: "user",
+        },
+        beer: {
+          price: 8,
+          currency: "USD",
+          source: "user",
+        },
+        wine: {
+          price: 10,
+          currency: "USD",
+          source: "user",
+        },
+        cocktail: {
+          price: 14,
+          currency: "USD",
+          source: "user",
+        },
+      },
+    });
+
+    const easy = result.packages.find(
+      (pkg) => pkg.packageKey === "mscEasy"
+    );
+
+    expect(easy).toBeDefined();
+    expect(easy?.currency).toBe("USD");
+    expect(easy?.packagePricePerDay).toBe(45);
+  });
+
   it("utiliza customPackagePrices para My Drinks", () => {
     const result =
       compareDrinkPackages({
