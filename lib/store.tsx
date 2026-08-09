@@ -271,7 +271,16 @@ function createInitialData(
     selectedDrinkPrices:
       {},
 
-    people: 1,
+    /*
+     * 0 = paso Personas todavía
+     * no confirmado.
+     *
+     * PeopleForm propone visualmente 1,
+     * pero el estado solo se vuelve
+     * positivo cuando el usuario confirma
+     * explícitamente el paso.
+     */
+    people: 0,
   };
 }
 
