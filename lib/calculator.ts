@@ -181,12 +181,32 @@ export function calculateRecommendation(
     drinksCost - packageCost;
 
   /*
-   * Diferencia diaria por persona
+   * Coste equivalente diario del paquete
+   * por persona durante todos los días
+   * reales de consumo.
+   *
+   * Si el paquete se factura menos días
+   * que la duración del crucero, repartimos
+   * ese coste entre los días de consumo para
+   * mantener coherentes savings, dailyMargin
+   * y recommendationLevel.
+   */
+
+  const effectivePackagePricePerCruiseDay =
+    input.days > 0
+      ? (
+          input.packagePricePerDay *
+          packageChargeDays
+        ) / input.days
+      : input.packagePricePerDay;
+
+  /*
+   * Diferencia diaria equivalente por persona
    */
 
   const dailyMargin =
     dailyDrinkCost -
-    input.packagePricePerDay;
+    effectivePackagePricePerCruiseDay;
 
   /*
    * Porcentaje de ahorro sobre el coste
@@ -226,7 +246,7 @@ export function calculateRecommendation(
 
   const breakEvenDrinksPerDay =
     averageDrinkPrice > 0
-      ? input.packagePricePerDay /
+      ? effectivePackagePricePerCruiseDay /
         averageDrinkPrice
       : 0;
 
