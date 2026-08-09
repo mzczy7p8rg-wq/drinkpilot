@@ -148,6 +148,27 @@ describe(
     );
 
     it(
+      "no aplica una regla temporal con una fecha imposible",
+      () => {
+        expect(
+          matchesContextualPackageRule(
+            rule,
+            {
+              cruiseLine:
+                "msc",
+
+              market:
+                "ES",
+
+              sailingDate:
+                "2026-06-31",
+            }
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
       "no aplica una regla de mercado si desconocemos el mercado",
       () => {
         expect(

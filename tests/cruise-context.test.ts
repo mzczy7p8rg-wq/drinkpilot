@@ -62,5 +62,57 @@ describe(
         ).toBe(false);
       }
     );
+
+    it(
+      "rechaza fechas de calendario imposibles",
+      () => {
+        expect(
+          isIsoSailingDate(
+            "2026-02-31"
+          )
+        ).toBe(false);
+
+        expect(
+          isIsoSailingDate(
+            "2026-13-01"
+          )
+        ).toBe(false);
+
+        expect(
+          isIsoSailingDate(
+            "2026-04-31"
+          )
+        ).toBe(false);
+      }
+    );
+
+    it(
+      "distingue correctamente los años bisiestos",
+      () => {
+        expect(
+          isIsoSailingDate(
+            "2028-02-29"
+          )
+        ).toBe(true);
+
+        expect(
+          isIsoSailingDate(
+            "2026-02-29"
+          )
+        ).toBe(false);
+
+        expect(
+          isIsoSailingDate(
+            "2100-02-29"
+          )
+        ).toBe(false);
+
+        expect(
+          isIsoSailingDate(
+            "2000-02-29"
+          )
+        ).toBe(true);
+      }
+    );
   }
 );

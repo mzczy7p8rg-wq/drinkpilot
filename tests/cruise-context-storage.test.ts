@@ -91,5 +91,24 @@ describe(
         });
       }
     );
+
+    it(
+      "descarta fechas guardadas con formato o calendario inválido",
+      () => {
+        expect(
+          resolveStoredCruiseContext({
+            sailingDate:
+              "2026-02-31",
+          }).sailingDate
+        ).toBeNull();
+
+        expect(
+          resolveStoredCruiseContext({
+            sailingDate:
+              "31/02/2026",
+          }).sailingDate
+        ).toBeNull();
+      }
+    );
   }
 );
