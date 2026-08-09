@@ -1,3 +1,7 @@
+import {
+  isPositiveSafePrice,
+} from "@/lib/priceValidation";
+
 /*
  * Categorías de precios individuales
  * utilizadas actualmente por el motor
@@ -46,11 +50,7 @@ export type CompleteOnboardPriceValues =
 function isValidOnboardPrice(
   value: unknown
 ): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    value > 0
-  );
+  return isPositiveSafePrice(value);
 }
 
 /*

@@ -2,6 +2,10 @@ import type {
   OnboardPriceKey,
 } from "@/lib/onboardPriceService";
 
+import {
+  isPositiveSafePrice,
+} from "@/lib/priceValidation";
+
 export type SelectedDrinkPriceSource =
   | "user"
   | "official"
@@ -73,15 +77,9 @@ function normalizePrice(
   value:
     number | null | undefined
 ): number | null {
-  if (
-    typeof value !== "number" ||
-    !Number.isFinite(value) ||
-    value <= 0
-  ) {
-    return null;
-  }
-
-  return value;
+  return isPositiveSafePrice(value)
+    ? value
+    : null;
 }
 
 function normalizeReferenceId(

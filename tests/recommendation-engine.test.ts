@@ -1859,6 +1859,44 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe("user");
   });
 
+  it("ignora un precio personalizado fuera del rango seguro", () => {
+    const result =
+      compareDrinkPackages({
+        days: 7,
+        people: 1,
+
+        coffee: 2,
+        water: 2,
+        soda: 2,
+        beer: 1,
+        wine: 1,
+        cocktail: 1,
+
+        customPackagePrices: {
+          myDrinks:
+            Number.MAX_SAFE_INTEGER + 1,
+        },
+      });
+
+    const myDrinks =
+      result.packages.find(
+        (pkg) =>
+          pkg.packageKey ===
+          "myDrinks"
+      );
+
+    expect(
+      myDrinks?.priceSource
+    ).toBe("reference");
+
+    expect(
+      Number.isFinite(
+        myDrinks?.packageCost ??
+          Number.NaN
+      )
+    ).toBe(true);
+  });
+
   it("puede activar My Drinks Soft mediante customPackagePrices", () => {
     const result =
       compareDrinkPackages({

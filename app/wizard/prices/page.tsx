@@ -47,6 +47,10 @@ import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
+import {
+  isPositiveSafePrice,
+} from "@/lib/priceValidation";
+
 const drinkCategoryLabels:
   Record<OnboardPriceKey, string> = {
     coffee: "Café",
@@ -101,6 +105,16 @@ function validateOptionalPrice(
       value: null,
       error:
         "El precio debe ser mayor que 0.",
+      warning: null,
+    };
+  }
+
+  if (!isPositiveSafePrice(parsed)) {
+    return {
+      valid: false,
+      value: null,
+      error:
+        "El precio es demasiado grande para calcularlo de forma segura.",
       warning: null,
     };
   }
