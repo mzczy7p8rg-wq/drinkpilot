@@ -2243,7 +2243,7 @@ export default function ResultsPage() {
 
                       <div className="rounded-lg bg-slate-50 p-3">
                         <p className="text-xs text-slate-500">
-                          Precio ref.
+                          Precio usado
                         </p>
 
                         <p className="mt-1 text-base font-bold text-slate-900">
@@ -2290,7 +2290,7 @@ export default function ResultsPage() {
                     </th>
 
                     <th className="p-3 text-center">
-                      Precio ref.
+                      Precio usado
                     </th>
 
                     <th className="p-3 text-right">
