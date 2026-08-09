@@ -18,9 +18,10 @@ import {
 } from "@/data/cruiseLines";
 
 import {
-  getMissingOnboardPriceKeys,
-  hasCompleteOnboardPriceValues,
+  getMissingRequiredOnboardPriceKeys,
   onboardPriceKeys,
+  resolveOnboardPriceValuesForConsumption,
+  type OnboardPriceConsumptionValues,
   type OnboardPriceKey,
   type PartialOnboardPriceValues,
 } from "@/lib/onboardPriceService";
@@ -1121,14 +1122,41 @@ export function compareDrinkPackages(
       economicCurrency
     );
 
-  const economicDataAvailable =
-    hasCompleteOnboardPriceValues(
-      economicDrinkPrices
+  const onboardPriceConsumption:
+    OnboardPriceConsumptionValues = {
+    coffee:
+      input.coffee,
+
+    water:
+      input.water,
+
+    soda:
+      input.soda,
+
+    beer:
+      input.beer,
+
+    wine:
+      input.wine,
+
+    cocktail:
+      input.cocktail,
+  };
+
+  const calculationDrinkPrices =
+    resolveOnboardPriceValuesForConsumption(
+      economicDrinkPrices,
+      onboardPriceConsumption
     );
 
+  const economicDataAvailable =
+    calculationDrinkPrices !==
+    null;
+
   const missingOnboardPriceKeys =
-    getMissingOnboardPriceKeys(
-      economicDrinkPrices
+    getMissingRequiredOnboardPriceKeys(
+      economicDrinkPrices,
+      onboardPriceConsumption
     );
 
   /*
@@ -1254,7 +1282,8 @@ export function compareDrinkPackages(
    * para la UI y para análisis futuros.
    */
   if (
-    !economicDataAvailable
+    calculationDrinkPrices ===
+    null
   ) {
     return {
       economicCurrency,
@@ -1363,27 +1392,27 @@ export function compareDrinkPackages(
                * la misma cesta económica.
                */
               coffeePrice:
-                economicDrinkPrices
+                calculationDrinkPrices
                   .coffee,
 
               waterPrice:
-                economicDrinkPrices
+                calculationDrinkPrices
                   .water,
 
               sodaPrice:
-                economicDrinkPrices
+                calculationDrinkPrices
                   .soda,
 
               beerPrice:
-                economicDrinkPrices
+                calculationDrinkPrices
                   .beer,
 
               winePrice:
-                economicDrinkPrices
+                calculationDrinkPrices
                   .wine,
 
               cocktailPrice:
-                economicDrinkPrices
+                calculationDrinkPrices
                   .cocktail,
             });
 

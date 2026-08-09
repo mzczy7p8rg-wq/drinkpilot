@@ -297,7 +297,7 @@ export default function DataConfidencePanel({
 
   const drinkPriceStatus =
     comparison.economicDataAvailable
-      ? "Cesta económica completa"
+      ? "Precios necesarios disponibles"
       : availableDrinkPriceCount > 0
         ? `${availableDrinkPriceCount} de ${drinkPriceRows.length} disponibles`
         : "Pendiente";
@@ -668,8 +668,8 @@ export default function DataConfidencePanel({
             }
             label={
               comparison.economicDataAvailable
-                ? "Cesta completa"
-                : "Cesta incompleta"
+                ? "Datos necesarios completos"
+                : "Faltan precios necesarios"
             }
           />
         </div>

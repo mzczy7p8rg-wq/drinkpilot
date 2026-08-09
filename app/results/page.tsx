@@ -23,7 +23,7 @@ import {
 } from "@/lib/adultPackageFilter";
 
 import {
-  hasCompleteOnboardPriceValues,
+  resolveOnboardPriceValuesForConsumption,
 } from "@/lib/onboardPriceService";
 
 import {
@@ -267,6 +267,30 @@ export default function ResultsPage() {
   const economicDrinkPrices =
     comparison.economicDrinkPrices;
 
+  const calculationDrinkPrices =
+    resolveOnboardPriceValuesForConsumption(
+      economicDrinkPrices,
+      {
+        coffee:
+          data.coffee,
+
+        water:
+          data.water,
+
+        soda:
+          data.soda,
+
+        beer:
+          data.beer,
+
+        wine:
+          data.wine,
+
+        cocktail:
+          data.cocktail,
+      }
+    );
+
   const economicCurrency =
     comparison.economicCurrency;
 
@@ -274,9 +298,8 @@ export default function ResultsPage() {
     resolveEconomicComparisonAvailability({
       economicDrinkPricesAvailable:
         comparison.economicDataAvailable &&
-        hasCompleteOnboardPriceValues(
-          economicDrinkPrices
-        ),
+        calculationDrinkPrices !==
+          null,
 
       comparedPackageCount:
         comparison.packages.length,
@@ -335,9 +358,8 @@ export default function ResultsPage() {
   if (
     economicComparisonAvailability !==
       "available" ||
-    !hasCompleteOnboardPriceValues(
-      economicDrinkPrices
-    )
+    calculationDrinkPrices ===
+      null
   ) {
     const missingDrinkPrices =
       economicComparisonAvailability ===
@@ -847,22 +869,22 @@ export default function ResultsPage() {
         data.cocktail,
 
       coffeePrice:
-        economicDrinkPrices.coffee,
+        calculationDrinkPrices.coffee,
 
       waterPrice:
-        economicDrinkPrices.water,
+        calculationDrinkPrices.water,
 
       sodaPrice:
-        economicDrinkPrices.soda,
+        calculationDrinkPrices.soda,
 
       beerPrice:
-        economicDrinkPrices.beer,
+        calculationDrinkPrices.beer,
 
       winePrice:
-        economicDrinkPrices.wine,
+        calculationDrinkPrices.wine,
 
       cocktailPrice:
-        economicDrinkPrices.cocktail,
+        calculationDrinkPrices.cocktail,
     });
 
   const bestPackage =
@@ -2220,10 +2242,12 @@ export default function ResultsPage() {
                         </p>
 
                         <p className="mt-1 text-base font-bold text-slate-900">
-                          {formatCurrency(
-                            row.price,
-                            economicCurrency
-                          )}
+                          {row.price !== null
+                            ? formatCurrency(
+                                row.price,
+                                economicCurrency
+                              )
+                            : "No necesario"}
                         </p>
 
                         <div className="mt-3 border-t border-slate-200 pt-3">
@@ -2292,10 +2316,12 @@ export default function ResultsPage() {
                         </td>
 
                         <td className="p-3 text-center">
-                          {formatCurrency(
-                            row.price,
-                            economicCurrency
-                          )}
+                          {row.price !== null
+                            ? formatCurrency(
+                                row.price,
+                                economicCurrency
+                              )
+                            : "No necesario"}
                         </td>
 
                         <td className="p-3 text-right font-semibold">
