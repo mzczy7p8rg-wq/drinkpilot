@@ -73,6 +73,22 @@ export type CalculationResult = {
   breakEvenDrinksPerDay: number;
 };
 
+function assertSafeCalculationValues(
+  values: readonly number[]
+): void {
+  if (
+    values.some(
+      (value) =>
+        !Number.isFinite(value) ||
+        Math.abs(value) > Number.MAX_SAFE_INTEGER
+    )
+  ) {
+    throw new RangeError(
+      "Calculation exceeds the safe numeric range"
+    );
+  }
+}
+
 export function calculateRecommendation(
   input: CalculationInput
 ): CalculationResult {
@@ -249,6 +265,22 @@ export function calculateRecommendation(
       ? effectivePackagePricePerCruiseDay /
         averageDrinkPrice
       : 0;
+
+  assertSafeCalculationValues([
+    packageCost,
+    drinksCost,
+    savings,
+    dailyDrinkCost,
+    dailyMargin,
+    savingsPercentage,
+    coffeeCost,
+    waterCost,
+    sodaCost,
+    beerCost,
+    wineCost,
+    cocktailCost,
+    breakEvenDrinksPerDay,
+  ]);
 
   /*
    * Nivel de recomendación

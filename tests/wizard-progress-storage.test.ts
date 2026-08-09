@@ -115,6 +115,31 @@ describe(
     );
 
     it(
+      "descarta valores que superan los límites del dominio",
+      () => {
+        expect(
+          resolveStoredWizardProgress({
+            days: 366,
+            coffee: 101,
+            water: 1,
+            soda: 0,
+            beer: 0,
+            wine: 0,
+            people: 101,
+          })
+        ).toEqual({
+          days: 0,
+          coffee: 0,
+          water: 1,
+          soda: 0,
+          beer: 0,
+          wine: 0,
+          people: 0,
+        });
+      }
+    );
+
+    it(
       "respeta fallbacks explícitos durante una migración",
       () => {
         expect(

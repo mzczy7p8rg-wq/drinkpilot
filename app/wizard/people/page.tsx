@@ -7,7 +7,8 @@ import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
 
 import {
-  isPositiveSafeInteger,
+  MAX_TRAVELERS,
+  isValidTravelerCount,
 } from "@/lib/wizardNumberValidation";
 
 import {
@@ -29,7 +30,7 @@ function PeopleForm() {
 
   const isValid =
     people.trim() !== "" &&
-    isPositiveSafeInteger(
+    isValidTravelerCount(
       parsedPeople
     );
 
@@ -84,9 +85,16 @@ function PeopleForm() {
               id="people"
               type="number"
               min="1"
+              max={MAX_TRAVELERS}
               step="1"
               inputMode="numeric"
               value={people}
+              aria-invalid={people !== "" && !isValid}
+              aria-describedby={
+                people !== "" && !isValid
+                  ? "peopleError"
+                  : undefined
+              }
               onChange={(event) =>
                 setPeople(event.target.value)
               }
@@ -112,8 +120,11 @@ function PeopleForm() {
 
           {people !== "" && !isValid && (
             <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
-              <p className="text-sm font-medium text-red-700">
-                Introduce un número entero de personas mayor que 0.
+              <p
+                id="peopleError"
+                className="text-sm font-medium text-red-700"
+              >
+                Introduce un número entero de personas entre 1 y {MAX_TRAVELERS}.
               </p>
             </div>
           )}

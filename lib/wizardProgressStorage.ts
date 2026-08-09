@@ -1,6 +1,7 @@
 import {
-  isNonNegativeSafeInteger,
-  isPositiveSafeInteger,
+  isValidCruiseDays,
+  isValidDailyDrinkCount,
+  isValidTravelerCount,
 } from "@/lib/wizardNumberValidation";
 
 export type StoredWizardProgressInput = {
@@ -44,13 +45,24 @@ const defaultWizardProgress:
   people: 0,
 };
 
-function sanitizeNonNegativeInteger(
+function sanitizeDailyDrinkCount(
   value: unknown,
   fallback: number
 ): number {
-  return isNonNegativeSafeInteger(value)
+  return isValidDailyDrinkCount(value)
     ? value
-    : isNonNegativeSafeInteger(fallback)
+    : isValidDailyDrinkCount(fallback)
+      ? fallback
+      : 0;
+}
+
+function sanitizeCruiseDays(
+  value: unknown,
+  fallback: number
+): number {
+  return isValidCruiseDays(value)
+    ? value
+    : isValidCruiseDays(fallback)
       ? fallback
       : 0;
 }
@@ -67,16 +79,14 @@ function sanitizePeopleCount(
    * interno "pendiente de confirmar".
    */
   if (
-    isPositiveSafeInteger(
+    isValidTravelerCount(
       value
     )
   ) {
     return value;
   }
 
-  return isNonNegativeSafeInteger(
-    fallback
-  )
+  return fallback === 0 || isValidTravelerCount(fallback)
     ? fallback
     : 0;
 }
@@ -101,37 +111,37 @@ export function resolveStoredWizardProgress(
 ): StoredWizardProgress {
   return {
     days:
-      sanitizeNonNegativeInteger(
+      sanitizeCruiseDays(
         input.days,
         fallback.days
       ),
 
     coffee:
-      sanitizeNonNegativeInteger(
+      sanitizeDailyDrinkCount(
         input.coffee,
         fallback.coffee
       ),
 
     water:
-      sanitizeNonNegativeInteger(
+      sanitizeDailyDrinkCount(
         input.water,
         fallback.water
       ),
 
     soda:
-      sanitizeNonNegativeInteger(
+      sanitizeDailyDrinkCount(
         input.soda,
         fallback.soda
       ),
 
     beer:
-      sanitizeNonNegativeInteger(
+      sanitizeDailyDrinkCount(
         input.beer,
         fallback.beer
       ),
 
     wine:
-      sanitizeNonNegativeInteger(
+      sanitizeDailyDrinkCount(
         input.wine,
         fallback.wine
       ),

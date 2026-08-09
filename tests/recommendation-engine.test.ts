@@ -13,6 +13,28 @@ import {
 
 describe("DrinkPilot recommendation engine", () => {
   describe("calculator", () => {
+    it("rechaza resultados que exceden el rango numérico seguro", () => {
+      expect(() =>
+        calculateRecommendation({
+          days: Number.MAX_SAFE_INTEGER,
+          people: Number.MAX_SAFE_INTEGER,
+          packagePricePerDay: Number.MAX_SAFE_INTEGER,
+          coffee: 1,
+          water: 0,
+          soda: 0,
+          beer: 0,
+          wine: 0,
+          cocktail: 0,
+          coffeePrice: 1,
+          waterPrice: 1,
+          sodaPrice: 1,
+          beerPrice: 1,
+          winePrice: 1,
+          cocktailPrice: 1,
+        })
+      ).toThrow(RangeError);
+    });
+
     it("calcula correctamente el coste diario y total", () => {
       const result = calculateRecommendation({
         days: 7,

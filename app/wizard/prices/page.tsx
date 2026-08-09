@@ -937,6 +937,12 @@ function PricesForm() {
                         value={
                           inputValue
                         }
+                        aria-invalid={Boolean(validation?.error)}
+                        aria-describedby={
+                          validation?.error
+                            ? `${inputId}-error`
+                            : undefined
+                        }
                         onChange={(
                           event
                         ) =>
@@ -978,7 +984,10 @@ function PricesForm() {
                     validation
                       ?.error && (
                     <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
-                      <p className="text-sm font-medium text-red-700">
+                      <p
+                        id={`${inputId}-error`}
+                        className="text-sm font-medium text-red-700"
+                      >
                         {
                           validation.error
                         }
@@ -1116,6 +1125,7 @@ function PricesForm() {
             <div className="mt-3 grid grid-cols-3 gap-2">
               <button
                 type="button"
+                aria-pressed={selectedDrinkCurrency === "EUR"}
                 onClick={() =>
                   updateOnboardCurrency(
                     "EUR"
@@ -1133,6 +1143,7 @@ function PricesForm() {
 
               <button
                 type="button"
+                aria-pressed={selectedDrinkCurrency === "USD"}
                 onClick={() =>
                   updateOnboardCurrency(
                     "USD"
@@ -1150,6 +1161,7 @@ function PricesForm() {
 
               <button
                 type="button"
+                aria-pressed={selectedDrinkCurrency === null}
                 onClick={() =>
                   updateOnboardCurrency(
                     ""
@@ -1331,6 +1343,7 @@ function PricesForm() {
                                     <button
                                       key={reference.id}
                                       type="button"
+                                      aria-pressed={isSelected}
                                       onClick={() =>
                                         selectOfficialDrinkReference(
                                           category,
@@ -1404,6 +1417,7 @@ function PricesForm() {
                                       <button
                                         key={reference.id}
                                         type="button"
+                                        aria-pressed={isSelected}
                                         onClick={() =>
                                           selectDocumentedDrinkReference(
                                             category,
@@ -1490,6 +1504,12 @@ function PricesForm() {
                             step="0.01"
                             inputMode="decimal"
                             value={inputValue}
+                            aria-invalid={!validation.valid}
+                            aria-describedby={
+                              validation.error
+                                ? `${inputId}-error`
+                                : undefined
+                            }
                             onChange={(event) =>
                               updateDrinkPriceInput(
                                 category,
@@ -1511,7 +1531,10 @@ function PricesForm() {
                         </p>
 
                         {validation.error ? (
-                          <p className="mt-2 text-sm font-medium text-red-600">
+                          <p
+                            id={`${inputId}-error`}
+                            className="mt-2 text-sm font-medium text-red-600"
+                          >
                             {
                               validation.error
                             }
