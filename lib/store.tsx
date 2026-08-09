@@ -31,6 +31,10 @@ import {
 } from "@/lib/wizardProgressStorage";
 
 import {
+  resolveStoredWizardPreferences,
+} from "@/lib/wizardPreferencesStorage";
+
+import {
   isPositiveSafePrice,
 } from "@/lib/priceValidation";
 
@@ -587,6 +591,12 @@ export function StoreProvider({
             baseData
           );
 
+        const storedWizardPreferences =
+          resolveStoredWizardPreferences(
+            parsedData,
+            baseData
+          );
+
         /*
          * La hidratación posmontaje desde
          * localStorage evita divergencias
@@ -649,60 +659,32 @@ export function StoreProvider({
               .nonAlcoholicCocktail,
 
           alcoholicCocktails:
-            typeof parsedData.alcoholicCocktails ===
-            "boolean"
-              ? parsedData
-                  .alcoholicCocktails
-              : baseData
-                  .alcoholicCocktails,
+            storedWizardPreferences
+              .alcoholicCocktails,
 
           nonAlcoholicCocktails:
-            typeof parsedData.nonAlcoholicCocktails ===
-            "boolean"
-              ? parsedData
-                  .nonAlcoholicCocktails
-              : baseData
-                  .nonAlcoholicCocktails,
+            storedWizardPreferences
+              .nonAlcoholicCocktails,
 
           premiumCocktails:
-            typeof parsedData.premiumCocktails ===
-            "boolean"
-              ? parsedData
-                  .premiumCocktails
-              : baseData
-                  .premiumCocktails,
+            storedWizardPreferences
+              .premiumCocktails,
 
           bottledBeer:
-            typeof parsedData.bottledBeer ===
-            "boolean"
-              ? parsedData
-                  .bottledBeer
-              : baseData
-                  .bottledBeer,
+            storedWizardPreferences
+              .bottledBeer,
 
           premiumSpirits:
-            typeof parsedData.premiumSpirits ===
-            "boolean"
-              ? parsedData
-                  .premiumSpirits
-              : baseData
-                  .premiumSpirits,
+            storedWizardPreferences
+              .premiumSpirits,
 
           bottledWaterDailyAllowance:
-            typeof parsedData.bottledWaterDailyAllowance ===
-            "boolean"
-              ? parsedData
-                  .bottledWaterDailyAllowance
-              : baseData
-                  .bottledWaterDailyAllowance,
+            storedWizardPreferences
+              .bottledWaterDailyAllowance,
 
           bottledWaterUnlimited:
-            typeof parsedData.bottledWaterUnlimited ===
-            "boolean"
-              ? parsedData
-                  .bottledWaterUnlimited
-              : baseData
-                  .bottledWaterUnlimited,
+            storedWizardPreferences
+              .bottledWaterUnlimited,
 
           customPackagePrices,
 
