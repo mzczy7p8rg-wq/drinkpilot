@@ -140,4 +140,29 @@ describe("onboard price service", () => {
       "beer",
     ]);
   });
+
+  it("rechaza precios fuera del rango seguro", () => {
+    const prices:
+      PartialOnboardPriceValues = {
+        coffee:
+          Number.MAX_SAFE_INTEGER + 1,
+        water: 2.5,
+        soda: 3.5,
+        beer: 7,
+        wine: 8,
+        cocktail: 9,
+      };
+
+    expect(
+      hasCompleteOnboardPriceValues(
+        prices
+      )
+    ).toBe(false);
+
+    expect(
+      getMissingOnboardPriceKeys(
+        prices
+      )
+    ).toContain("coffee");
+  });
 });

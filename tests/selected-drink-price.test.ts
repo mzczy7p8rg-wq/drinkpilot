@@ -126,6 +126,24 @@ describe(
     );
 
     it(
+      "rechaza un precio fuera del rango seguro",
+      () => {
+        expect(
+          createSelectedDrinkPrice({
+            category:
+              "cocktail",
+
+            price:
+              Number.MAX_SAFE_INTEGER + 1,
+
+            currency:
+              "EUR",
+          })
+        ).toBeNull();
+      }
+    );
+
+    it(
       "rechaza una moneda vacía",
       () => {
         expect(

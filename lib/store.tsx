@@ -31,6 +31,10 @@ import {
 } from "@/lib/wizardProgressStorage";
 
 import {
+  isPositiveSafePrice,
+} from "@/lib/priceValidation";
+
+import {
   resolveStoredSelectedDrinkPrices,
   type SelectedDrinkPrices,
 } from "@/lib/selectedDrinkPriceStorage";
@@ -278,11 +282,7 @@ const StoreContext =
 function sanitizePrice(
   value: unknown
 ): number | null {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    value > 0
-  )
+  return isPositiveSafePrice(value)
     ? value
     : null;
 }

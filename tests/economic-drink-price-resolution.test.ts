@@ -12,6 +12,18 @@ import {
 } from "@/lib/economicDrinkPriceResolution";
 
 describe("economic drink price resolution", () => {
+  it("rechaza precios fuera del rango seguro", () => {
+    expect(
+      resolveEconomicDrinkPrice({
+        category: "coffee",
+        price:
+          Number.MAX_SAFE_INTEGER + 1,
+        currency: "USD",
+        source: "user",
+      })
+    ).toBeNull();
+  });
+
   it("acepta un precio introducido por el usuario", () => {
     expect(
       resolveEconomicDrinkPrice({

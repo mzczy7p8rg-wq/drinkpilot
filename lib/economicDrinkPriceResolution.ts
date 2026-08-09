@@ -9,6 +9,10 @@ import type {
   SelectedDrinkPriceSource,
 } from "@/lib/selectedDrinkPrice";
 
+import {
+  isPositiveSafePrice,
+} from "@/lib/priceValidation";
+
 export type EconomicDrinkPriceInput =
   | {
       price:
@@ -58,12 +62,9 @@ export function resolveEconomicDrinkPrice(
   }
 
   if (
-    typeof selectedPrice.price !==
-      "number" ||
-    !Number.isFinite(
+    !isPositiveSafePrice(
       selectedPrice.price
-    ) ||
-    selectedPrice.price <= 0
+    )
   ) {
     return null;
   }

@@ -56,6 +56,10 @@ import {
   resolveEffectiveDrinkPrices,
 } from "@/lib/economicDrinkPriceResolution";
 
+import {
+  isPositiveSafePrice,
+} from "@/lib/priceValidation";
+
 import type {
   SelectedDrinkConsumption,
 } from "@/lib/selectedDrinkConsumption";
@@ -402,11 +406,7 @@ function isValidCustomPrice(
     | null
     | undefined
 ): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    value > 0
-  );
+  return isPositiveSafePrice(value);
 }
 
 /*
@@ -517,12 +517,9 @@ function resolveEconomicPackage(
    * de referencia numérico.
    */
   if (
-    typeof pkg.pricePerDay !==
-      "number" ||
-    !Number.isFinite(
+    !isPositiveSafePrice(
       pkg.pricePerDay
-    ) ||
-    pkg.pricePerDay <= 0
+    )
   ) {
     return null;
   }
