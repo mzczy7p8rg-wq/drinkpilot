@@ -4,6 +4,7 @@ import {
 } from "@/lib/comparison";
 
 import { CoverageCategory } from "@/lib/coverage";
+import { formatCurrency } from "@/lib/currencyFormatting";
 
 export type RecommendationExplanation = {
   title: string;
@@ -194,6 +195,7 @@ function getUnquantifiedThresholdImpact(
 function buildThresholdUncertaintyExplanation(
   packageName: string,
   savings: number,
+  currency: string,
   affectedDrinks: number,
   excludedDrinks: number | null
 ): RecommendationExplanation {
@@ -202,9 +204,10 @@ function buildThresholdUncertaintyExplanation(
       `${packageName} es la mejor opción provisional`,
 
     summary:
-      `Con los costes que DrinkPilot puede cuantificar actualmente, este paquete presenta un ahorro teórico de ${savings.toFixed(
-        2
-      )} € durante el crucero.`,
+      `Con los costes que DrinkPilot puede cuantificar actualmente, este paquete presenta un ahorro teórico de ${formatCurrency(
+        savings,
+        currency
+      )} durante el crucero.`,
 
     reason:
       excludedDrinks !== null &&
@@ -260,6 +263,7 @@ export function buildRecommendationExplanation(
       return buildThresholdUncertaintyExplanation(
         bestPackage.packageName,
         bestPackage.savings,
+        bestPackage.currency ?? "EUR",
         affectedThresholdDrinks,
         excludedThresholdDrinks
       );
@@ -301,9 +305,10 @@ export function buildRecommendationExplanation(
           `${bestPackage.packageName} es la mejor opción para tu perfil`,
 
         summary:
-          `Cubre todo lo que has indicado y podría ahorrarte aproximadamente ${(bestPackage.effectiveSavings ?? bestPackage.savings).toFixed(
-            2
-          )} € durante el crucero.`,
+          `Cubre todo lo que has indicado y podría ahorrarte aproximadamente ${formatCurrency(
+            bestPackage.effectiveSavings ?? bestPackage.savings,
+            bestPackage.currency ?? "EUR"
+          )} durante el crucero.`,
 
         reason:
           `Además de ofrecer una cobertura del ${bestPackage.coverageScore.toFixed(
@@ -339,9 +344,10 @@ export function buildRecommendationExplanation(
           `Aunque ${highestGrossSavingsPackage.packageName} tendría un ahorro bruto mayor, no cubre completamente tus preferencias.`,
 
         reason:
-          `${bestPackage.packageName} cubre el 100 % de lo solicitado y mantiene un ahorro efectivo estimado de ${(bestPackage.effectiveSavings ?? bestPackage.savings).toFixed(
-            2
-          )} €.`,
+          `${bestPackage.packageName} cubre el 100 % de lo solicitado y mantiene un ahorro efectivo estimado de ${formatCurrency(
+            bestPackage.effectiveSavings ?? bestPackage.savings,
+            bestPackage.currency ?? "EUR"
+          )}.`,
 
         secondaryReason:
           `${highestGrossSavingsPackage.packageName} deja fuera: ${missing}.`,
@@ -362,9 +368,10 @@ export function buildRecommendationExplanation(
         "Es la opción que combina cobertura completa y ahorro positivo para tu perfil.",
 
       reason:
-        `Su ahorro efectivo estimado es de ${(bestPackage.effectiveSavings ?? bestPackage.savings).toFixed(
-          2
-        )} € y su cobertura es del ${bestPackage.coverageScore.toFixed(
+        `Su ahorro efectivo estimado es de ${formatCurrency(
+          bestPackage.effectiveSavings ?? bestPackage.savings,
+          bestPackage.currency ?? "EUR"
+        )} y su cobertura es del ${bestPackage.coverageScore.toFixed(
           0
         )} %.`,
 
@@ -414,9 +421,10 @@ export function buildRecommendationExplanation(
           `${bestCoveredPackage.packageName} cubre completamente lo que has indicado, pero todavía existen costes que DrinkPilot no puede cuantificar con suficiente fiabilidad.`,
 
         reason:
-          `El ahorro bruto calculado es de ${bestCoveredPackage.savings.toFixed(
-            2
-          )} €, pero no debe interpretarse como ahorro final.`,
+          `El ahorro bruto calculado es de ${formatCurrency(
+            bestCoveredPackage.savings,
+            bestCoveredPackage.currency ?? "EUR"
+          )}, pero no debe interpretarse como ahorro final.`,
 
         secondaryReason:
           "Por eso DrinkPilot no recomienda contratar el paquete únicamente por motivos económicos hasta poder cerrar esos costes pendientes.",
@@ -485,9 +493,10 @@ export function buildRecommendationExplanation(
         `${bestCoveredPackage.packageName} cubre completamente lo que has indicado, pero pagar las bebidas por separado sigue siendo más económico.`,
 
       reason:
-        `Con esta estimación, ${bestCoveredPackage.packageName} costaría aproximadamente ${extraCost.toFixed(
-          2
-        )} € más que comprar las bebidas por separado.`,
+        `Con esta estimación, ${bestCoveredPackage.packageName} costaría aproximadamente ${formatCurrency(
+          extraCost,
+          bestCoveredPackage.currency ?? "EUR"
+        )} más que comprar las bebidas por separado.`,
 
       secondaryReason:
         "Por eso DrinkPilot no recomienda contratarlo únicamente por motivos económicos.",

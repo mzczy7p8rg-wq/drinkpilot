@@ -46,11 +46,13 @@ import {
 import {
   resolveSelectedDrinkPricesForCruiseContext,
 } from "@/lib/selectedDrinkPriceContext";
+import {
+  createCustomPackagePrice,
+  resolveStoredCustomPackagePrice,
+  type CustomPackagePrices,
+} from "@/lib/customPackagePrice";
 
-export type CustomPackagePrices = Record<
-  string,
-  number | null
->;
+export type { CustomPackagePrices } from "@/lib/customPackagePrice";
 
 export type WizardData = {
   /*
@@ -301,7 +303,8 @@ function sanitizePrice(
 }
 
 function sanitizeCustomPackagePrices(
-  value: unknown
+  value: unknown,
+  cruiseLine: CruiseLineKey
 ): CustomPackagePrices {
   if (
     !value ||
@@ -311,17 +314,16 @@ function sanitizeCustomPackagePrices(
     return {};
   }
 
-  const result:
-    CustomPackagePrices = {};
+  const stored = value as Record<string, unknown>;
+  const result: CustomPackagePrices = {};
 
-  for (
-    const [key, rawValue] of
-    Object.entries(value)
-  ) {
-    result[key] =
-      sanitizePrice(
-        rawValue
+  for (const pkg of getAllPackages(cruiseLine)) {
+    if (pkg.key in stored) {
+      result[pkg.key] = resolveStoredCustomPackagePrice(
+        stored[pkg.key],
+        pkg.currency
       );
+    }
   }
 
   return result;
@@ -429,7 +431,8 @@ export function StoreProvider({
         const storedCustomPrices =
           sanitizeCustomPackagePrices(
             parsedData
-              .customPackagePrices
+              .customPackagePrices,
+            cruiseLine
           );
 
         /*
@@ -490,7 +493,10 @@ export function StoreProvider({
           ) {
             storedCustomPrices
               .myDrinksSoft =
-              legacySoftPrice;
+              createCustomPackagePrice({
+                price: legacySoftPrice,
+                currency: "EUR",
+              });
           }
 
           if (
@@ -503,7 +509,10 @@ export function StoreProvider({
           ) {
             storedCustomPrices
               .myDrinks =
-              legacyStandardPrice;
+              createCustomPackagePrice({
+                price: legacyStandardPrice,
+                currency: "EUR",
+              });
           }
 
           if (
@@ -516,7 +525,10 @@ export function StoreProvider({
           ) {
             storedCustomPrices
               .myDrinksPlus =
-              legacyPlusPrice;
+              createCustomPackagePrice({
+                price: legacyPlusPrice,
+                currency: "EUR",
+              });
           }
         }
 

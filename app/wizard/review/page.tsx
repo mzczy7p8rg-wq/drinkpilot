@@ -453,12 +453,7 @@ export default function ReviewPage() {
                   ] ?? null;
 
                 const hasCustomPrice =
-                  typeof customPrice ===
-                    "number" &&
-                  Number.isFinite(
-                    customPrice
-                  ) &&
-                  customPrice > 0;
+                  customPrice !== null;
 
                 const hasReferencePrice =
                   typeof pkg.pricePerDay ===
@@ -471,7 +466,7 @@ export default function ReviewPage() {
 
                 const displayedPrice =
                   hasCustomPrice
-                    ? customPrice
+                    ? customPrice.price
                     : hasReferencePrice
                     ? pkg.pricePerDay
                     : null;
@@ -506,7 +501,9 @@ export default function ReviewPage() {
                           null
                             ? formatCurrency(
                                 displayedPrice,
-                                cruiseLine.currency
+                                hasCustomPrice
+                                  ? customPrice.currency
+                                  : cruiseLine.currency
                               )
                             : "Pendiente"}
                         </p>

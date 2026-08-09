@@ -233,24 +233,26 @@ export default function DataConfidencePanel({
     );
 
   const packageRows =
-    packages.map((pkg) => ({
-      pkg,
+    packages.map((pkg) => {
+      const customPrice =
+        data.customPackagePrices[pkg.key];
 
-      confidence:
-        resolvePackageDataConfidence({
+      return {
+        pkg,
+
+        confidence:
+          resolvePackageDataConfidence({
           economicActivation:
             pkg.economicActivation,
 
           customPrice:
-            data.customPackagePrices[
-              pkg.key
-            ],
+            customPrice?.price,
 
           referencePrice:
             pkg.pricePerDay,
 
           packageCurrency:
-            pkg.currency,
+            customPrice?.currency ?? pkg.currency,
 
           economicCurrency:
             comparison.economicCurrency,
@@ -264,8 +266,9 @@ export default function DataConfidencePanel({
                 result.packageKey ===
                 pkg.key
             ),
-        }),
-    }));
+          }),
+      };
+    });
 
   const drinkPriceRows =
     resolveDrinkPriceDataConfidence({
