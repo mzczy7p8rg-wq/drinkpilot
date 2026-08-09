@@ -1,10 +1,13 @@
 "use client";
 
+import { MAX_DAILY_DRINKS_PER_CATEGORY } from "@/lib/wizardNumberValidation";
+
 type DrinkCounterProps = {
   label: string;
   accessibleLabel: string;
   value: number;
   onChange: (value: number) => void;
+  max?: number;
 };
 
 export default function DrinkCounter({
@@ -12,10 +15,11 @@ export default function DrinkCounter({
   accessibleLabel,
   value,
   onChange,
+  max = MAX_DAILY_DRINKS_PER_CATEGORY,
 }: DrinkCounterProps) {
   const canIncrement =
     Number.isSafeInteger(value) &&
-    value < Number.MAX_SAFE_INTEGER;
+    value < max;
 
   return (
     <div

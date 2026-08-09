@@ -214,6 +214,7 @@ export default function ConsumptionPage() {
                     data.alcoholicCocktail ??
                     0
                   }
+                  max={data.cocktail}
                   onChange={(value) =>
                     setData((prev) => {
                       const composition =
@@ -249,6 +250,7 @@ export default function ConsumptionPage() {
                     data.nonAlcoholicCocktail ??
                     0
                   }
+                  max={data.cocktail}
                   onChange={(value) =>
                     setData((prev) => {
                       const composition =

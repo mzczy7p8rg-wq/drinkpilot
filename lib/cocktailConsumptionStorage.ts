@@ -1,5 +1,5 @@
 import {
-  isNonNegativeSafeInteger,
+  isValidDailyDrinkCount,
 } from "@/lib/wizardNumberValidation";
 
 export type StoredCocktailConsumptionInput = {
@@ -24,9 +24,9 @@ function sanitizeCount(
   value: unknown,
   fallback: number
 ): number {
-  return isNonNegativeSafeInteger(value)
+  return isValidDailyDrinkCount(value)
     ? value
-    : isNonNegativeSafeInteger(fallback)
+    : isValidDailyDrinkCount(fallback)
       ? fallback
       : 0;
 }
@@ -34,7 +34,7 @@ function sanitizeCount(
 function sanitizeOptionalCount(
   value: unknown
 ): number | null {
-  return isNonNegativeSafeInteger(value)
+  return isValidDailyDrinkCount(value)
     ? value
     : null;
 }

@@ -27,7 +27,8 @@ import {
 } from "@/lib/store";
 
 import {
-  isPositiveSafeInteger,
+  MAX_CRUISE_DAYS,
+  isValidCruiseDays,
 } from "@/lib/wizardNumberValidation";
 import {
   marketOptions,
@@ -95,7 +96,7 @@ function WizardForm() {
 
   const isValidDays =
     days.trim() !== "" &&
-    isPositiveSafeInteger(
+    isValidCruiseDays(
       parsedDays
     );
 
@@ -274,6 +275,7 @@ function WizardForm() {
                       cruiseLine.id
                     }
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() =>
                       setSelectedCruiseLine(
                         cruiseLine.id
@@ -343,10 +345,17 @@ function WizardForm() {
               id="cruiseDays"
               type="number"
               min="1"
+              max={MAX_CRUISE_DAYS}
               step="1"
               inputMode="numeric"
               value={
                 days
+              }
+              aria-invalid={days !== "" && !isValidDays}
+              aria-describedby={
+                days !== "" && !isValidDays
+                  ? "cruiseDaysError"
+                  : undefined
               }
               onChange={(
                 event
@@ -382,10 +391,13 @@ function WizardForm() {
 
           {days !== "" &&
             !isValidDays && (
-              <p className="mt-3 text-sm font-medium text-red-600">
+              <p
+                id="cruiseDaysError"
+                className="mt-3 text-sm font-medium text-red-600"
+              >
                 Introduce un número
-                entero de días mayor
-                que 0.
+                entero de días entre 1
+                y {MAX_CRUISE_DAYS}.
               </p>
             )}
         </section>
