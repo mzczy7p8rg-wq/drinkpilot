@@ -108,6 +108,28 @@ export type CruiseLineKey =
   keyof typeof cruiseLines;
 
 /*
+ * Comprueba que un valor externo
+ * corresponde a una clave propia del
+ * registro de navieras.
+ *
+ * La comprobación de propiedad propia
+ * evita aceptar claves heredadas de
+ * Object.prototype como "constructor"
+ * o "toString".
+ */
+export function isCruiseLineKey(
+  value: unknown
+): value is CruiseLineKey {
+  return (
+    typeof value === "string" &&
+    Object.prototype.hasOwnProperty.call(
+      cruiseLines,
+      value
+    )
+  );
+}
+
+/*
  * NAVIERA POR DEFECTO
  *
  * Costa continúa siendo el valor

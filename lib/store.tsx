@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import {
-  cruiseLines,
+  isCruiseLineKey,
   type CruiseLineKey,
 } from "@/data/cruiseLines";
 
@@ -289,20 +289,6 @@ function sanitizePrice(
   return isPositiveSafePrice(value)
     ? value
     : null;
-}
-
-/*
- * Comprueba que una clave almacenada
- * corresponde realmente a una naviera
- * registrada.
- */
-function isCruiseLineKey(
-  value: unknown
-): value is CruiseLineKey {
-  return (
-    typeof value === "string" &&
-    value in cruiseLines
-  );
 }
 
 function sanitizeCustomPackagePrices(
