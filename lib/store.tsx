@@ -27,6 +27,10 @@ import {
 } from "@/lib/cocktailConsumptionStorage";
 
 import {
+  resolveStoredWizardProgress,
+} from "@/lib/wizardProgressStorage";
+
+import {
   resolveStoredSelectedDrinkPrices,
   type SelectedDrinkPrices,
 } from "@/lib/selectedDrinkPriceStorage";
@@ -561,6 +565,12 @@ export function StoreProvider({
             baseData.cocktail
           );
 
+        const storedWizardProgress =
+          resolveStoredWizardProgress(
+            parsedData,
+            baseData
+          );
+
         /*
          * La hidratación posmontaje desde
          * localStorage evita divergencias
@@ -587,40 +597,28 @@ export function StoreProvider({
               .sailingDate,
 
           days:
-            typeof parsedData.days ===
-            "number"
-              ? parsedData.days
-              : baseData.days,
+            storedWizardProgress
+              .days,
 
           coffee:
-            typeof parsedData.coffee ===
-            "number"
-              ? parsedData.coffee
-              : baseData.coffee,
+            storedWizardProgress
+              .coffee,
 
           water:
-            typeof parsedData.water ===
-            "number"
-              ? parsedData.water
-              : baseData.water,
+            storedWizardProgress
+              .water,
 
           soda:
-            typeof parsedData.soda ===
-            "number"
-              ? parsedData.soda
-              : baseData.soda,
+            storedWizardProgress
+              .soda,
 
           beer:
-            typeof parsedData.beer ===
-            "number"
-              ? parsedData.beer
-              : baseData.beer,
+            storedWizardProgress
+              .beer,
 
           wine:
-            typeof parsedData.wine ===
-            "number"
-              ? parsedData.wine
-              : baseData.wine,
+            storedWizardProgress
+              .wine,
 
           cocktail:
             storedCocktailConsumption
@@ -696,10 +694,8 @@ export function StoreProvider({
             storedSelectedDrinkPrices,
 
           people:
-            typeof parsedData.people ===
-            "number"
-              ? parsedData.people
-              : baseData.people,
+            storedWizardProgress
+              .people,
         });
       }
     } catch (error) {
