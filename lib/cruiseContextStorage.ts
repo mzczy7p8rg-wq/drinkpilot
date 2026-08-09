@@ -1,3 +1,7 @@
+import {
+  isIsoSailingDate,
+} from "@/lib/cruiseContext";
+
 export type StoredCruiseContextInput = {
   market?: unknown;
   sailingRegion?: unknown;
@@ -29,6 +33,24 @@ function sanitizeOptionalString(
     : null;
 }
 
+function sanitizeSailingDate(
+  value: unknown
+): string | null {
+  const normalized =
+    sanitizeOptionalString(
+      value
+    );
+
+  return (
+    normalized !== null &&
+    isIsoSailingDate(
+      normalized
+    )
+  )
+    ? normalized
+    : null;
+}
+
 /*
  * Normaliza el contexto recuperado de
  * una sesión guardada.
@@ -45,9 +67,10 @@ function sanitizeOptionalString(
  * Conservan los valores almacenados,
  * eliminando espacios accidentales.
  *
- * La validación semántica de la fecha
- * continúa perteneciendo a
- * cruiseContext.ts.
+ * Las fechas se validan mediante la regla
+ * canónica de cruiseContext.ts para impedir
+ * que una sesión dañada active condiciones
+ * temporales con una fecha imposible.
  */
 export function resolveStoredCruiseContext(
   input: StoredCruiseContextInput
@@ -69,7 +92,7 @@ export function resolveStoredCruiseContext(
       ),
 
     sailingDate:
-      sanitizeOptionalString(
+      sanitizeSailingDate(
         input.sailingDate
       ),
   };

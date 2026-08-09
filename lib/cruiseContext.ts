@@ -95,8 +95,13 @@ export function createCruiseContext(
 }
 
 /*
- * Comprueba únicamente el formato básico
- * ISO de fecha.
+ * Comprueba que el valor sea una fecha de
+ * calendario real con formato ISO.
+ *
+ * La expresión regular por sí sola aceptaría
+ * fechas imposibles como 2026-02-31. Ese tipo
+ * de valor no debe alcanzar las comparaciones
+ * temporales de las reglas contextuales.
  *
  * No intenta decidir todavía si una fecha
  * concreta activa una versión de paquete.
@@ -110,7 +115,57 @@ export function isIsoSailingDate(
     return false;
   }
 
-  return /^\d{4}-\d{2}-\d{2}$/.test(
-    value
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})$/.exec(
+      value
+    );
+
+  if (!match) {
+    return false;
+  }
+
+  const year = Number(
+    match[1]
   );
+
+  const month = Number(
+    match[2]
+  );
+
+  const day = Number(
+    match[3]
+  );
+
+  if (
+    month < 1 ||
+    month > 12 ||
+    day < 1
+  ) {
+    return false;
+  }
+
+  const isLeapYear =
+    year % 4 === 0 &&
+    (year % 100 !== 0 ||
+      year % 400 === 0);
+
+  const daysInMonth = [
+    31,
+    isLeapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+
+  return day <=
+    daysInMonth[
+      month - 1
+    ];
 }
