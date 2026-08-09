@@ -672,10 +672,7 @@ export function resolveEconomicComparison(
   if (
     operationalEconomicImpact
       ?.status ===
-      "known-unquantified" &&
-    operationalEconomicImpact
-      .chargePolicy !==
-      "unknown"
+      "known-unquantified"
   ) {
     return {
       status:
