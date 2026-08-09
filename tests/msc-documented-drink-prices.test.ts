@@ -64,9 +64,6 @@ describe(
           ship:
             null,
 
-          market:
-            null,
-
           itinerary:
             null,
         };
@@ -115,10 +112,6 @@ describe(
 
         expect(
           reference.ship
-        ).toBeUndefined();
-
-        expect(
-          reference.market
         ).toBeUndefined();
 
         expect(
@@ -231,12 +224,12 @@ describe(
       "no eleva ninguna referencia a official",
       () => {
         expect(
-          mscDocumentedDrinkPrices.some(
+          mscDocumentedDrinkPrices.every(
             (item) =>
               item.evidence ===
-              "official"
+              "documented-menu"
           )
-        ).toBe(false);
+        ).toBe(true);
       }
     );
   }

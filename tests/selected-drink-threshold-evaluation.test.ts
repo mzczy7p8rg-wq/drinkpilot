@@ -516,23 +516,28 @@ describe(
 it(
   "marca como credited una bebida que supera un threshold con crédito parcial",
   () => {
+    const baseRule =
+      getPackageOperationalRule(
+        {
+          cruiseLine: "msc",
+          market: null,
+          sailingRegion: null,
+          onboardCurrency: "EUR",
+          sailingDate: null,
+        },
+        "mscPremiumExtra"
+      );
+
+    if (!baseRule) {
+      throw new Error(
+        "Premium Extra operational rule missing"
+      );
+    }
+
     const result =
       evaluateSelectedDrinkAgainstPackageThreshold(
         {
-          packageKey:
-            "mscPremiumExtra",
-
-          packageName:
-            "Premium Extra",
-
-          alcoholicDrinksDailyLimit:
-            null,
-
-          aquaUnlimited:
-            false,
-
-          minorsOnly:
-            false,
+          ...baseRule,
 
           drinkPriceThreshold:
             14,

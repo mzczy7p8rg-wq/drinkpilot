@@ -62,8 +62,27 @@ describe(
 );
 
 import {
-  getPackageOperationalRule,
+  getPackageOperationalRule as getPackageOperationalRuleWithContext,
 } from "@/lib/packageRules";
+
+import {
+  createCruiseContextFixture,
+  type CruiseContextFixture,
+} from "@/tests/fixtures/cruiseContext";
+
+function getPackageOperationalRule(
+  input: CruiseContextFixture,
+  packageKey: Parameters<
+    typeof getPackageOperationalRuleWithContext
+  >[1]
+) {
+  return getPackageOperationalRuleWithContext(
+    createCruiseContextFixture(
+      input
+    ),
+    packageKey
+  );
+}
 
 describe(
   "package charge days from operational rules",

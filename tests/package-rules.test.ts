@@ -5,9 +5,42 @@ import {
 } from "vitest";
 
 import {
-  getPackageOperationalRule,
-  getPackageOperationalRules,
+  getPackageOperationalRule as getPackageOperationalRuleWithContext,
+  getPackageOperationalRules as getPackageOperationalRulesWithContext,
 } from "@/lib/packageRules";
+
+import {
+  resolvePackageRulesContextFixture,
+  type PackageRulesContextFixture,
+} from "@/tests/fixtures/cruiseContext";
+
+function getPackageOperationalRules(
+  input: PackageRulesContextFixture
+) {
+  return getPackageOperationalRulesWithContext(
+    resolvePackageRulesContextFixture(
+      input
+    )
+  );
+}
+
+function getPackageOperationalRule(
+  input: PackageRulesContextFixture,
+  packageKey: Parameters<
+    typeof getPackageOperationalRuleWithContext
+  >[1],
+  options?: Parameters<
+    typeof getPackageOperationalRuleWithContext
+  >[2]
+) {
+  return getPackageOperationalRuleWithContext(
+    resolvePackageRulesContextFixture(
+      input
+    ),
+    packageKey,
+    options
+  );
+}
 
 describe(
   "package operational rules",
@@ -166,6 +199,7 @@ describe(
           cruiseLine: "msc",
           market: "ES",
           sailingRegion: null,
+          onboardCurrency: null,
           sailingDate:
             "2026-08-15",
         });

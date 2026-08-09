@@ -8,6 +8,7 @@
     "start": "next start",
     "start:e2e": "next build && next start --hostname 127.0.0.1 --port 3100",
     "lint": "eslint",
+    "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.tests.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"

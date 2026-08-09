@@ -144,9 +144,11 @@ export const DEFAULT_CRUISE_LINE:
  * Devuelve la configuración completa
  * de una naviera.
  */
-export function getCruiseLine(
-  cruiseLine: CruiseLineKey
-) {
+export function getCruiseLine<
+  TCruiseLine extends CruiseLineKey
+>(
+  cruiseLine: TCruiseLine
+): (typeof cruiseLines)[TCruiseLine] {
   return cruiseLines[
     cruiseLine
   ];

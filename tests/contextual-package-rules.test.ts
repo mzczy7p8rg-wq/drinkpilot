@@ -5,11 +5,60 @@ import {
 } from "vitest";
 
 import {
-  getContextualPackageRulesForPackage,
-  getMatchingContextualPackageRules,
-  matchesContextualPackageRule,
+  getContextualPackageRulesForPackage as getContextualPackageRulesForPackageWithContext,
+  getMatchingContextualPackageRules as getMatchingContextualPackageRulesWithContext,
+  matchesContextualPackageRule as matchesContextualPackageRuleWithContext,
   type ContextualPackageRule,
 } from "@/lib/contextualPackageRules";
+
+import {
+  createCruiseContextFixture,
+  type CruiseContextFixture,
+} from "@/tests/fixtures/cruiseContext";
+
+function matchesContextualPackageRule(
+  rule: ContextualPackageRule,
+  context: CruiseContextFixture
+) {
+  return matchesContextualPackageRuleWithContext(
+    rule,
+    createCruiseContextFixture(
+      context
+    )
+  );
+}
+
+function getMatchingContextualPackageRules(
+  rules: Parameters<
+    typeof getMatchingContextualPackageRulesWithContext
+  >[0],
+  context: CruiseContextFixture
+) {
+  return getMatchingContextualPackageRulesWithContext(
+    rules,
+    createCruiseContextFixture(
+      context
+    )
+  );
+}
+
+function getContextualPackageRulesForPackage(
+  rules: Parameters<
+    typeof getContextualPackageRulesForPackageWithContext
+  >[0],
+  context: CruiseContextFixture,
+  packageKey: Parameters<
+    typeof getContextualPackageRulesForPackageWithContext
+  >[2]
+) {
+  return getContextualPackageRulesForPackageWithContext(
+    rules,
+    createCruiseContextFixture(
+      context
+    ),
+    packageKey
+  );
+}
 
 const rule:
   ContextualPackageRule = {
