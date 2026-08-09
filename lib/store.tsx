@@ -35,6 +35,10 @@ import {
   type SelectedDrinkPrices,
 } from "@/lib/selectedDrinkPriceStorage";
 
+import {
+  resolveSelectedDrinkPricesForCruiseContext,
+} from "@/lib/selectedDrinkPriceContext";
+
 export type CustomPackagePrices = Record<
   string,
   number | null
@@ -543,10 +547,22 @@ export function StoreProvider({
               parsedData.sailingDate,
           });
 
+        const hydratedCruiseContext = {
+          cruiseLine,
+
+          ...storedCruiseContext,
+        };
+
         const storedSelectedDrinkPrices =
-          resolveStoredSelectedDrinkPrices(
-            parsedData.selectedDrinkPrices
-          );
+          resolveSelectedDrinkPricesForCruiseContext({
+            cruiseContext:
+              hydratedCruiseContext,
+
+            selectedDrinkPrices:
+              resolveStoredSelectedDrinkPrices(
+                parsedData.selectedDrinkPrices
+              ),
+          });
 
         const storedCocktailConsumption =
           resolveStoredCocktailConsumption(
@@ -581,19 +597,19 @@ export function StoreProvider({
           cruiseLine,
 
           market:
-            storedCruiseContext
+            hydratedCruiseContext
               .market,
 
           sailingRegion:
-            storedCruiseContext
+            hydratedCruiseContext
               .sailingRegion,
 
           onboardCurrency:
-            storedCruiseContext
+            hydratedCruiseContext
               .onboardCurrency,
 
           sailingDate:
-            storedCruiseContext
+            hydratedCruiseContext
               .sailingDate,
 
           days:

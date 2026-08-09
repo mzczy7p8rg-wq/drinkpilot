@@ -14,10 +14,12 @@ import {
 
 import {
   isIsoSailingDate,
+  type CruiseContext,
 } from "@/lib/cruiseContext";
 
 import {
   resolveSelectedDrinkPricesAfterCruiseLineChange,
+  resolveSelectedDrinkPricesForCruiseContext,
 } from "@/lib/selectedDrinkPriceContext";
 
 import {
@@ -117,9 +119,8 @@ function WizardForm() {
           previous.cruiseLine !==
           selectedCruiseLine;
 
-        return {
-          ...previous,
-
+        const nextCruiseContext:
+          CruiseContext = {
           cruiseLine:
             selectedCruiseLine,
 
@@ -152,6 +153,24 @@ function WizardForm() {
             sailingDate === ""
               ? null
               : sailingDate,
+        };
+
+        const pricesAfterCruiseLineChange =
+          resolveSelectedDrinkPricesAfterCruiseLineChange({
+            previousCruiseLine:
+              previous.cruiseLine,
+
+            nextCruiseLine:
+              selectedCruiseLine,
+
+            selectedDrinkPrices:
+              previous.selectedDrinkPrices,
+          });
+
+        return {
+          ...previous,
+
+          ...nextCruiseContext,
 
           days:
             parsedDays,
@@ -163,15 +182,12 @@ function WizardForm() {
                   .customPackagePrices,
 
           selectedDrinkPrices:
-            resolveSelectedDrinkPricesAfterCruiseLineChange({
-              previousCruiseLine:
-                previous.cruiseLine,
-
-              nextCruiseLine:
-                selectedCruiseLine,
+            resolveSelectedDrinkPricesForCruiseContext({
+              cruiseContext:
+                nextCruiseContext,
 
               selectedDrinkPrices:
-                previous.selectedDrinkPrices,
+                pricesAfterCruiseLineChange,
             }),
         };
       }
