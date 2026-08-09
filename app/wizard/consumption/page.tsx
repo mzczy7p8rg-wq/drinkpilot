@@ -104,6 +104,7 @@ export default function ConsumptionPage() {
 
           <DrinkCounter
             label="☕ Cafés"
+            accessibleLabel="Cafés"
             value={data.coffee}
             onChange={(value) =>
               setData((prev) => ({
@@ -115,6 +116,7 @@ export default function ConsumptionPage() {
 
           <DrinkCounter
             label="💧 Agua"
+            accessibleLabel="Agua"
             value={data.water}
             onChange={(value) =>
               setData((prev) => ({
@@ -126,6 +128,7 @@ export default function ConsumptionPage() {
 
           <DrinkCounter
             label="🥤 Refrescos"
+            accessibleLabel="Refrescos"
             value={data.soda}
             onChange={(value) =>
               setData((prev) => ({
@@ -137,6 +140,7 @@ export default function ConsumptionPage() {
 
           <DrinkCounter
             label="🍺 Cervezas"
+            accessibleLabel="Cervezas"
             value={data.beer}
             onChange={(value) =>
               setData((prev) => ({
@@ -148,6 +152,7 @@ export default function ConsumptionPage() {
 
           <DrinkCounter
             label="🍷 Vinos"
+            accessibleLabel="Vinos"
             value={data.wine}
             onChange={(value) =>
               setData((prev) => ({
@@ -159,6 +164,7 @@ export default function ConsumptionPage() {
 
           <DrinkCounter
             label="🍸 Cócteles"
+            accessibleLabel="Cócteles"
             value={data.cocktail}
             onChange={(value) =>
               setData((prev) => ({
@@ -203,6 +209,7 @@ export default function ConsumptionPage() {
               <div className="mt-4 space-y-3">
                 <DrinkCounter
                   label="🍸 Con alcohol"
+                  accessibleLabel="Cócteles con alcohol"
                   value={
                     data.alcoholicCocktail ??
                     0
@@ -237,6 +244,7 @@ export default function ConsumptionPage() {
 
                 <DrinkCounter
                   label="🍹 Sin alcohol"
+                  accessibleLabel="Cócteles sin alcohol"
                   value={
                     data.nonAlcoholicCocktail ??
                     0

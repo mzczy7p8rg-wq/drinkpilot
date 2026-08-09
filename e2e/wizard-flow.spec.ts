@@ -15,7 +15,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await page
     .getByRole("button", { name: /Costa Cruceros/i })
     .click();
-  await page.locator("#cruiseDays").fill("7");
+  await page.getByLabel("Duración del crucero").fill("7");
   await page.getByRole("button", { name: "Continuar" }).click();
 
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
@@ -40,8 +40,11 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Qué extras valoras a bordo?" })
   ).toBeVisible();
-  await page.getByText("🍺 Cerveza embotellada").click();
-  await expect(page.getByRole("checkbox").nth(3)).toBeChecked();
+  const bottledBeerPreference = page.getByRole("checkbox", {
+    name: /Cerveza embotellada/i,
+  });
+  await bottledBeerPreference.check();
+  await expect(bottledBeerPreference).toBeChecked();
   await page.getByRole("link", { name: "Continuar" }).click();
 
   await expect(page).toHaveURL(/\/wizard\/prices$/);
