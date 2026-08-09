@@ -9,9 +9,24 @@ import {
 } from "@/lib/store";
 
 import {
-  resolvePackageEconomicAvailability,
-  type PackageEconomicAvailabilityStatus,
-} from "@/lib/packageEconomicAvailability";
+  getAllPackages,
+} from "@/lib/packageService";
+
+import type {
+  ComparisonResult,
+} from "@/lib/comparison";
+
+import {
+  formatCurrency,
+} from "@/lib/currencyFormatting";
+
+import {
+  resolveDrinkPriceDataConfidence,
+  resolvePackageDataConfidence,
+  type DrinkPriceConfidenceSource,
+  type PackageEconomicConfidenceStatus,
+  type PackagePriceConfidenceSource,
+} from "@/lib/dataConfidenceResolution";
 
 type ConfidenceLevel =
   | "verified"
@@ -21,10 +36,13 @@ type ConfidenceLevel =
 
 type ConfidenceBadgeProps = {
   level: ConfidenceLevel;
+
+  label?: string;
 };
 
 function ConfidenceBadge({
   level,
+  label,
 }: ConfidenceBadgeProps) {
   const config = {
     verified: {
@@ -59,7 +77,7 @@ function ConfidenceBadge({
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${current.className}`}
     >
-      {current.label}
+      {label ?? current.label}
     </span>
   );
 }
@@ -85,48 +103,109 @@ function getPackageConfidenceLevel(
 }
 
 function getEconomicConfidenceLevel(
-  availabilityStatus:
-    PackageEconomicAvailabilityStatus,
-  status: string
+  status:
+    PackageEconomicConfidenceStatus
 ): ConfidenceLevel {
-  if (
-    availabilityStatus !==
-    "available"
-  ) {
-    return "pending";
+  if (status === "available") {
+    return "verified";
   }
 
   if (
     status ===
-    "verified"
+      "waiting-drink-prices" ||
+    status ===
+      "currency-mismatch"
   ) {
-    return "verified";
+    return "partial";
   }
 
   return "pending";
 }
 
-function getPriceLabel(
-  priceStatus: string
+function getEconomicStatusLabel(
+  status:
+    PackageEconomicConfidenceStatus
 ): string {
+  if (status === "available") {
+    return "Disponible";
+  }
+
   if (
-    priceStatus ===
-    "reference"
+    status ===
+    "waiting-drink-prices"
   ) {
+    return "Precio preparado";
+  }
+
+  if (
+    status ===
+    "currency-mismatch"
+  ) {
+    return "Monedas distintas";
+  }
+
+  if (status === "disabled") {
+    return "No participa";
+  }
+
+  return "Pendiente";
+}
+
+function getPackagePriceSourceLabel(
+  source:
+    PackagePriceConfidenceSource
+): string {
+  if (source === "user") {
+    return "Precio introducido por ti";
+  }
+
+  if (source === "reference") {
     return "Precio de referencia";
   }
 
-  if (
-    priceStatus ===
-    "pending"
-  ) {
-    return "Precio pendiente";
-  }
-
-  return priceStatus;
+  return "Precio pendiente";
 }
 
-export default function DataConfidencePanel() {
+function getDrinkPriceSourceLabel(
+  source:
+    DrinkPriceConfidenceSource
+): string {
+  if (source === "user") {
+    return "Precio introducido por ti";
+  }
+
+  if (source === "official") {
+    return "Referencia oficial seleccionada";
+  }
+
+  if (
+    source ===
+    "documented-menu"
+  ) {
+    return "Menú documentado seleccionado";
+  }
+
+  if (source === "reference") {
+    return "Precio de referencia";
+  }
+
+  return "Precio pendiente";
+}
+
+type DataConfidencePanelProps = {
+  comparison:
+    Pick<
+      ComparisonResult,
+      | "economicCurrency"
+      | "economicDrinkPrices"
+      | "economicDataAvailable"
+      | "packages"
+    >;
+};
+
+export default function DataConfidencePanel({
+  comparison,
+}: DataConfidencePanelProps) {
   const {
     data,
   } = useStore();
@@ -149,24 +228,79 @@ export default function DataConfidencePanel() {
     cruiseLine.onboardPrices;
 
   const packages =
-    Object.values(
-      cruiseLine.packages
+    getAllPackages(
+      data.cruiseLine
     );
 
-  const referenceDrinkPrices =
-    Object.values(
-      onboardPrices
-    ).filter(
-      (drink) =>
-        drink.status ===
-        "reference"
-    );
+  const packageRows =
+    packages.map((pkg) => ({
+      pkg,
 
-  const allDrinkPricesAreReference =
-    referenceDrinkPrices.length ===
-    Object.keys(
-      onboardPrices
+      confidence:
+        resolvePackageDataConfidence({
+          economicActivation:
+            pkg.economicActivation,
+
+          customPrice:
+            data.customPackagePrices[
+              pkg.key
+            ],
+
+          referencePrice:
+            pkg.pricePerDay,
+
+          packageCurrency:
+            pkg.currency,
+
+          economicCurrency:
+            comparison.economicCurrency,
+
+          economicDataAvailable:
+            comparison.economicDataAvailable,
+
+          comparedPackage:
+            comparison.packages.find(
+              (result) =>
+                result.packageKey ===
+                pkg.key
+            ),
+        }),
+    }));
+
+  const drinkPriceRows =
+    resolveDrinkPriceDataConfidence({
+      economicDrinkPrices:
+        comparison.economicDrinkPrices,
+
+      economicCurrency:
+        comparison.economicCurrency,
+
+      selectedDrinkPrices:
+        data.selectedDrinkPrices,
+    });
+
+  const availableDrinkPriceCount =
+    drinkPriceRows.filter(
+      (row) => row.price !== null
     ).length;
+
+  const packagePriceStatus =
+    comparison.packages.length > 0
+      ? "Aplicados en la comparación"
+      : packageRows.some(
+          ({ confidence }) =>
+            confidence.pricePerDay !==
+            null
+        )
+        ? "Precios disponibles; comparación pendiente"
+        : "Pendiente";
+
+  const drinkPriceStatus =
+    comparison.economicDataAvailable
+      ? "Cesta económica completa"
+      : availableDrinkPriceCount > 0
+        ? `${availableDrinkPriceCount} de ${drinkPriceRows.length} disponibles`
+        : "Pendiente";
 
   const verifiedPackages =
     packages.filter(
@@ -272,7 +406,7 @@ export default function DataConfidencePanel() {
           </div>
         </div>
 
-        {/* PRECIOS DE REFERENCIA */}
+        {/* ESTADO ECONÓMICO */}
 
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
           <div className="flex items-center justify-between gap-3">
@@ -282,7 +416,7 @@ export default function DataConfidencePanel() {
               </span>
 
               <h4 className="font-bold text-amber-950">
-                Precios de referencia
+                Estado económico
               </h4>
             </div>
 
@@ -300,10 +434,11 @@ export default function DataConfidencePanel() {
 
               <br />
 
-              Los importes utilizados
-              como referencia son
-              orientativos y pueden
-              variar según reserva.
+              Los precios introducidos
+              por ti tienen prioridad.
+              Las referencias solo se
+              utilizan cuando son
+              aplicables.
             </li>
 
             <li>
@@ -313,9 +448,10 @@ export default function DataConfidencePanel() {
 
               <br />
 
-              Se utilizan para estimar
-              cuánto costaría pagar el
-              consumo por separado.
+              Solo aparecen como
+              utilizados cuando forman
+              parte de la cesta económica
+              resuelta.
             </li>
           </ul>
 
@@ -323,25 +459,14 @@ export default function DataConfidencePanel() {
             <p>
               Estado paquetes:{" "}
               <strong>
-                {metadata
-                  .verification
-                  .packagePricesStatus ===
-                "reference"
-                  ? "Referencia"
-                  : metadata
-                      .verification
-                      .packagePricesStatus}
+                {packagePriceStatus}
               </strong>
             </p>
 
             <p className="mt-1">
               Estado bebidas:{" "}
               <strong>
-                {allDrinkPricesAreReference
-                  ? "Referencia"
-                  : metadata
-                      .verification
-                      .individualDrinkPricesStatus}
+                {drinkPriceStatus}
               </strong>
             </p>
           </div>
@@ -363,33 +488,20 @@ export default function DataConfidencePanel() {
         </div>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          {packages.map(
-            (pkg) => {
+          {packageRows.map(
+            ({
+              pkg,
+              confidence,
+            }) => {
               const packageConfidence =
                 getPackageConfidenceLevel(
                   pkg.inclusionsStatus
                 );
 
-              const economicAvailability =
-                resolvePackageEconomicAvailability(
-                  pkg.economicActivation,
-                );
-
               const economicConfidence =
                 getEconomicConfidenceLevel(
-                  economicAvailability
-                    .status,
-                  pkg.status
+                  confidence.economicStatus
                 );
-
-              const hasReferencePrice =
-                typeof pkg.pricePerDay ===
-                  "number" &&
-                Number.isFinite(
-                  pkg.pricePerDay
-                ) &&
-                pkg.pricePerDay >
-                  0;
 
               return (
                 <div
@@ -468,26 +580,22 @@ export default function DataConfidencePanel() {
                         Precio
                       </p>
 
-                      {hasReferencePrice ? (
+                      {confidence.pricePerDay !==
+                      null ? (
                         <p>
-                          {
-                            pkg.pricePerDay
-                          }{" "}
-                          {
-                            pkg.currency
-                          }{" "}
-                          / día como
-                          referencia.
+                          {formatCurrency(
+                            confidence.pricePerDay,
+                            confidence.currency
+                          )}{" "}
+                          / día.
+                          <span className="mt-1 block text-xs text-slate-500">
+                            {getPackagePriceSourceLabel(
+                              confidence.priceSource
+                            )}
+                          </span>
                         </p>
                       ) : (
-                        <p>
-                          {
-                            getPriceLabel(
-                              pkg.priceStatus
-                            )
-                          }
-                          .
-                        </p>
+                        <p>Precio pendiente.</p>
                       )}
                     </div>
                   </div>
@@ -505,13 +613,16 @@ export default function DataConfidencePanel() {
                         level={
                           economicConfidence
                         }
+                        label={getEconomicStatusLabel(
+                          confidence.economicStatus
+                        )}
                       />
                     </div>
 
                     <p className="mt-2 text-xs leading-5 text-slate-600">
                       {
-                        economicAvailability
-                          .explanation
+                        confidence
+                          .economicExplanation
                       }
                     </p>
                   </div>
@@ -550,63 +661,69 @@ export default function DataConfidencePanel() {
           </div>
 
           <ConfidenceBadge
-            level="reference"
+            level={
+              comparison.economicDataAvailable
+                ? "verified"
+                : "pending"
+            }
+            label={
+              comparison.economicDataAvailable
+                ? "Cesta completa"
+                : "Cesta incompleta"
+            }
           />
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-          {Object.values(
-            onboardPrices
-          ).map(
-            (drink) => (
-              <div
-                key={drink.name}
-                className="rounded-lg border border-slate-200 bg-white p-3"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-slate-800">
-                    {
-                      drink.icon
-                    }{" "}
-                    {
-                      drink.name
-                    }
-                  </span>
+          {drinkPriceRows.map(
+            (row) => {
+              const drink =
+                onboardPrices[
+                  row.category
+                ];
 
-                  <span className="font-bold text-slate-900">
-                    {typeof drink.price ===
-                      "number" &&
-                    Number.isFinite(
-                      drink.price
-                    )
-                      ? `${drink.price.toFixed(
-                          2
-                        )} ${cruiseLine.currency}`
-                      : "Pendiente"}
-                  </span>
-                </div>
-
-                <p
-                  className={`mt-2 text-xs font-medium ${
-                    typeof drink.price ===
-                      "number" &&
-                    Number.isFinite(
-                      drink.price
-                    )
-                      ? "text-amber-700"
-                      : "text-slate-500"
-                  }`}
+              return (
+                <div
+                  key={row.category}
+                  className="rounded-lg border border-slate-200 bg-white p-3"
                 >
-                  {typeof drink.price ===
-                    "number" &&
-                  Number.isFinite(
-                    drink.price
-                  )
-                    ? "Precio de referencia"
-                    : "Precio pendiente"}
-                </p>
-              </div>
-            )
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-medium text-slate-800">
+                      {
+                        drink.icon
+                      }{" "}
+                      {
+                        drink.name
+                      }
+                    </span>
+
+                    <span className="font-bold text-slate-900">
+                      {row.price !== null
+                        ? formatCurrency(
+                            row.price,
+                            row.currency
+                          )
+                        : "Pendiente"}
+                    </span>
+                  </div>
+
+                  <p
+                    className={`mt-2 text-xs font-medium ${
+                      row.price !== null
+                        ? row.source ===
+                          "user"
+                          ? "text-sky-700"
+                          : "text-amber-700"
+                        : "text-slate-500"
+                    }`}
+                  >
+                    {getDrinkPriceSourceLabel(
+                      row.source
+                    )}
+                  </p>
+                </div>
+              );
+            }
           )}
         </div>
       </div>

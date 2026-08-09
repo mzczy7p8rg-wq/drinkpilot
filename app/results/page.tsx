@@ -773,7 +773,9 @@ export default function ResultsPage() {
             )}
 
             <div className="mt-8">
-              <DataConfidencePanel />
+              <DataConfidencePanel
+                comparison={comparison}
+              />
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -2169,7 +2171,9 @@ export default function ResultsPage() {
           {/* CALIDAD DE DATOS */}
 
           <div className="mt-8">
-            <DataConfidencePanel />
+            <DataConfidencePanel
+              comparison={comparison}
+            />
           </div>
 
           {/* CONSUMO */}
