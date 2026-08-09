@@ -23,6 +23,7 @@ function sanitizeCount(
   return (
     typeof value === "number" &&
     Number.isFinite(value) &&
+    Number.isInteger(value) &&
     value >= 0
   )
     ? value
@@ -35,6 +36,7 @@ function sanitizeOptionalCount(
   return (
     typeof value === "number" &&
     Number.isFinite(value) &&
+    Number.isInteger(value) &&
     value >= 0
   )
     ? value

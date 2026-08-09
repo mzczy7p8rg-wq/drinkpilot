@@ -116,5 +116,33 @@ describe(
         });
       }
     );
+
+    it(
+      "descarta cantidades decimales que el wizard no puede generar",
+      () => {
+        expect(
+          resolveStoredCocktailConsumption(
+            {
+              cocktail: 2.5,
+
+              alcoholicCocktail:
+                1.5,
+
+              nonAlcoholicCocktail:
+                1,
+            },
+            2
+          )
+        ).toEqual({
+          cocktail: 2,
+
+          alcoholicCocktail:
+            null,
+
+          nonAlcoholicCocktail:
+            1,
+        });
+      }
+    );
   }
 );
