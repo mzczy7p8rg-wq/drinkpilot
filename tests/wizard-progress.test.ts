@@ -6,6 +6,7 @@ import {
 
 import {
   getTotalDrinksPerDay,
+  hasValidConsumptionStep,
   resolveWizardRedirect,
 } from "@/lib/wizardProgress";
 
@@ -27,6 +28,25 @@ describe("wizard progress", () => {
         completeProgress
       )
     ).toBe(2);
+  });
+
+  it("rechaza contadores inseguros y totales que salen del rango seguro", () => {
+    expect(
+      hasValidConsumptionStep({
+        ...completeProgress,
+        coffee:
+          Number.MAX_SAFE_INTEGER + 1,
+      })
+    ).toBe(false);
+
+    expect(
+      hasValidConsumptionStep({
+        ...completeProgress,
+        coffee:
+          Number.MAX_SAFE_INTEGER,
+        water: 1,
+      })
+    ).toBe(false);
   });
 
   it("redirige al inicio cuando falta la duración", () => {

@@ -144,5 +144,62 @@ describe(
         });
       }
     );
+
+    it(
+      "descarta enteros fuera del rango seguro",
+      () => {
+        const unsafeInteger =
+          Number.MAX_SAFE_INTEGER + 1;
+
+        expect(
+          resolveStoredCocktailConsumption(
+            {
+              cocktail: unsafeInteger,
+              alcoholicCocktail:
+                unsafeInteger,
+              nonAlcoholicCocktail: 1,
+            },
+            unsafeInteger
+          )
+        ).toEqual({
+          cocktail: 0,
+          alcoholicCocktail: null,
+          nonAlcoholicCocktail: null,
+        });
+      }
+    );
+
+    it(
+      "descarta una categoría que supera el total de cócteles",
+      () => {
+        expect(
+          resolveStoredCocktailConsumption({
+            cocktail: 3,
+            alcoholicCocktail: 4,
+          })
+        ).toEqual({
+          cocktail: 3,
+          alcoholicCocktail: null,
+          nonAlcoholicCocktail: null,
+        });
+      }
+    );
+
+    it(
+      "descarta un reparto completo cuya suma supera el total",
+      () => {
+        expect(
+          resolveStoredCocktailConsumption({
+            cocktail: 3,
+            alcoholicCocktail: 2,
+            nonAlcoholicCocktail: 2,
+          })
+        ).toEqual({
+          cocktail: 3,
+          alcoholicCocktail: null,
+          nonAlcoholicCocktail: null,
+        });
+      }
+    );
   }
 );

@@ -26,6 +26,10 @@ import {
   useStore,
 } from "@/lib/store";
 
+import {
+  isPositiveSafeInteger,
+} from "@/lib/wizardNumberValidation";
+
 import ProgressBar from "@/components/ProgressBar";
 
 function WizardForm() {
@@ -79,10 +83,9 @@ function WizardForm() {
 
   const isValidDays =
     days.trim() !== "" &&
-    Number.isInteger(
+    isPositiveSafeInteger(
       parsedDays
-    ) &&
-    parsedDays > 0;
+    );
 
   /*
    * Vacío = válido porque todavía

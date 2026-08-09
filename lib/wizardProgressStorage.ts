@@ -1,3 +1,8 @@
+import {
+  isNonNegativeSafeInteger,
+  isPositiveSafeInteger,
+} from "@/lib/wizardNumberValidation";
+
 export type StoredWizardProgressInput = {
   days?: unknown;
 
@@ -39,28 +44,22 @@ function sanitizeNonNegativeInteger(
   value: unknown,
   fallback: number
 ): number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    Number.isInteger(value) &&
-    value >= 0
-  )
+  return isNonNegativeSafeInteger(value)
     ? value
-    : fallback;
+    : isNonNegativeSafeInteger(fallback)
+      ? fallback
+      : 0;
 }
 
 function sanitizePositiveInteger(
   value: unknown,
   fallback: number
 ): number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    Number.isInteger(value) &&
-    value > 0
-  )
+  return isPositiveSafeInteger(value)
     ? value
-    : fallback;
+    : isPositiveSafeInteger(fallback)
+      ? fallback
+      : 1;
 }
 
 /*

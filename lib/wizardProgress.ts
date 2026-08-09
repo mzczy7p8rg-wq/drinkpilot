@@ -2,6 +2,11 @@ import type {
   WizardData,
 } from "@/lib/store";
 
+import {
+  isNonNegativeSafeInteger,
+  isPositiveSafeInteger,
+} from "@/lib/wizardNumberValidation";
+
 export type WizardRequirement =
   | "cruise"
   | "consumption"
@@ -36,24 +41,41 @@ export function getTotalDrinksPerDay(
 export function hasValidCruiseStep(
   data: WizardProgressData
 ): boolean {
-  return (
-    Number.isInteger(data.days) &&
-    data.days > 0
+  return isPositiveSafeInteger(
+    data.days
   );
 }
 
 export function hasValidConsumptionStep(
   data: WizardProgressData
 ): boolean {
-  return getTotalDrinksPerDay(data) > 0;
+  const counts = [
+    data.coffee,
+    data.water,
+    data.soda,
+    data.beer,
+    data.wine,
+    data.cocktail,
+  ];
+
+  if (
+    !counts.every(
+      isNonNegativeSafeInteger
+    )
+  ) {
+    return false;
+  }
+
+  return isPositiveSafeInteger(
+    getTotalDrinksPerDay(data)
+  );
 }
 
 export function hasValidPeopleStep(
   data: WizardProgressData
 ): boolean {
-  return (
-    Number.isInteger(data.people) &&
-    data.people > 0
+  return isPositiveSafeInteger(
+    data.people
   );
 }
 
