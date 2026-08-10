@@ -191,6 +191,30 @@ function WizardForm() {
           days:
             parsedDays,
 
+          /*
+           * El consumo pertenece al análisis
+           * realizado para la naviera activa.
+           *
+           * Al cambiar de compañía no debemos
+           * arrastrarlo al nuevo contexto.
+           */
+          ...(cruiseLineChanged
+            ? {
+                coffee: 0,
+                water: 0,
+                soda: 0,
+                beer: 0,
+                wine: 0,
+                cocktail: 0,
+
+                alcoholicCocktail:
+                  null,
+
+                nonAlcoholicCocktail:
+                  null,
+              }
+            : {}),
+
           customPackagePrices:
             cruiseLineChanged
               ? {}
