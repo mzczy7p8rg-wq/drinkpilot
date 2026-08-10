@@ -1,0 +1,85 @@
+import { expect, test } from "@playwright/test";
+
+test("distingue la moneda de referencia de la moneda de la reserva", async ({
+  page,
+}) => {
+  await page.goto("/wizard");
+
+  await page
+    .getByRole("button", { name: /Costa Cruceros/i })
+    .click();
+
+  await page
+    .getByLabel("Duración del crucero")
+    .fill("7");
+
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard\/consumption$/);
+
+  await page
+    .getByRole("button", { name: /Aumentar.*Cafés/i })
+    .click();
+
+  await page
+    .getByRole("link", { name: "Continuar" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard\/preferences$/);
+
+  await page
+    .getByRole("link", { name: "Continuar" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard\/prices$/);
+
+  const packageCurrencyGroup = page.getByRole("group", {
+    name: "Moneda del precio de tu reserva",
+  });
+
+  const eurButton = packageCurrencyGroup.getByRole("button", {
+    name: "EUR (€)",
+    exact: true,
+  });
+
+  const usdButton = packageCurrencyGroup.getByRole("button", {
+    name: "USD ($)",
+    exact: true,
+  });
+
+  await expect(eurButton).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+
+  await expect(
+    page.getByText(/Referencia original EUR/i).first()
+  ).toBeVisible();
+
+  await usdButton.click();
+
+  await expect(usdButton).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+
+  await expect(
+    page.getByText(
+      /Las referencias se mantienen en su moneda original/i
+    )
+  ).toBeVisible();
+
+  await expect(
+    page.getByText(/Referencia original EUR/i).first()
+  ).toBeVisible();
+
+  await expect(
+    page
+      .getByLabel(
+        "Moneda del precio de tu reserva: USD"
+      )
+      .first()
+  ).toHaveText("$");
+});

@@ -654,6 +654,17 @@ function PricesForm() {
           </div>
         </fieldset>
 
+        {packagePriceCurrency !== cruiseLine.currency && (
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+            <strong>Monedas distintas.</strong>{" "}
+            Las referencias se mantienen en su moneda original.
+            Los importes que introduzcas se interpretarán como{" "}
+            <strong>{packagePriceCurrency}</strong>, la moneda del
+            precio de tu reserva. DrinkPilot no realiza conversiones
+            automáticas entre monedas.
+          </div>
+        )}
+
         {/* PAQUETES */}
 
         <div className="mt-6 space-y-5 sm:mt-8 sm:space-y-6">
@@ -731,10 +742,11 @@ function PricesForm() {
                       </span>
                     ) : (
                       <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                        Referencia{" "}
+                        Referencia original{" "}
+                        {pkg.currency}{" "}
                         {formatCurrency(
                           pkg.pricePerDay as number,
-                          cruiseLine.currency
+                          pkg.currency
                         )}{" "}
                         / día
                       </span>
@@ -807,7 +819,10 @@ function PricesForm() {
                         }`}
                       />
 
-                      <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500">
+                      <span
+                        aria-label={`Moneda del precio de tu reserva: ${packagePriceCurrency}`}
+                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500"
+                      >
                         {
                           currencySymbol
                         }
