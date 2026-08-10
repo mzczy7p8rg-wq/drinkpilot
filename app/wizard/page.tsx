@@ -321,7 +321,7 @@ function WizardForm() {
                         </p>
 
                         <p className="mt-1 text-sm text-slate-500">
-                          Mercado de
+                          Región de
                           referencia:{" "}
                           {
                             cruiseLine.market

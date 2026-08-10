@@ -1,7 +1,7 @@
 export const costaMetadata = {
   cruiseLine: "Costa Cruceros",
 
-  market: "España",
+  market: "Europa",
 
   currency: "EUR",
 
