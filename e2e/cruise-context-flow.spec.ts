@@ -114,3 +114,15 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
     nextCoffeeCounter.getByLabel("Cantidad de Cafés")
   ).toHaveText("0");
 });
+
+test("muestra Europa como región de referencia de Costa", async ({ page }) => {
+  await page.goto("/wizard");
+
+  const costaButton = page.getByRole("button", {
+    name: /Costa Cruceros/i,
+  });
+
+  await expect(costaButton).toContainText(
+    "Región de referencia: Europa"
+  );
+});
