@@ -46,3 +46,71 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
   await expect(page.getByText("Estados Unidos")).toBeVisible();
   await expect(page.getByText("Norteamérica")).toBeVisible();
 });
+
+test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
+  await page.goto("/wizard");
+
+  await page
+    .getByRole("button", { name: /Costa Cruceros/i })
+    .click();
+  await page.getByLabel("Duración del crucero").fill("7");
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard\/consumption$/);
+
+  const beerCounter = page.getByRole("group", {
+    name: "Cervezas",
+  });
+  const coffeeCounter = page.getByRole("group", {
+    name: "Cafés",
+  });
+
+  await beerCounter
+    .getByRole("button", { name: "Aumentar Cervezas" })
+    .click();
+
+  await coffeeCounter
+    .getByRole("button", { name: "Aumentar Cafés" })
+    .click();
+
+  await expect(
+    beerCounter.getByLabel("Cantidad de Cervezas")
+  ).toHaveText("1");
+
+  await expect(
+    coffeeCounter.getByLabel("Cantidad de Cafés")
+  ).toHaveText("1");
+
+  await page
+    .getByRole("link", { name: "Atrás" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard$/);
+
+  await page
+    .getByRole("button", { name: /MSC Cruises/i })
+    .click();
+
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  await expect(page).toHaveURL(/\/wizard\/consumption$/);
+
+  const nextBeerCounter = page.getByRole("group", {
+    name: "Cervezas",
+  });
+  const nextCoffeeCounter = page.getByRole("group", {
+    name: "Cafés",
+  });
+
+  await expect(
+    nextBeerCounter.getByLabel("Cantidad de Cervezas")
+  ).toHaveText("0");
+
+  await expect(
+    nextCoffeeCounter.getByLabel("Cantidad de Cafés")
+  ).toHaveText("0");
+});
