@@ -7,7 +7,6 @@ import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
 
 import {
-  MAX_TRAVELERS,
   isValidTravelerCount,
 } from "@/lib/wizardNumberValidation";
 
@@ -15,16 +14,26 @@ import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
+const MIN_VISIBLE_PEOPLE = 1;
+const MAX_VISIBLE_PEOPLE = 10;
+
 function PeopleForm() {
   const router = useRouter();
 
   const { data, setData } = useStore();
 
-  const [people, setPeople] = useState(
-    data.people > 0
-      ? String(data.people)
-      : "1"
-  );
+  const [people, setPeople] = useState(() => {
+    const initialPeople = Number.isSafeInteger(data.people)
+      ? data.people
+      : MIN_VISIBLE_PEOPLE;
+
+    return String(
+      Math.min(
+        MAX_VISIBLE_PEOPLE,
+        Math.max(MIN_VISIBLE_PEOPLE, initialPeople)
+      )
+    );
+  });
 
   const parsedPeople = Number(people);
 
@@ -73,61 +82,65 @@ function PeopleForm() {
 
         <div className="mt-7 sm:mt-8">
 
-          <label
-            htmlFor="people"
-            className="text-sm font-semibold text-slate-700"
-          >
+          <p className="text-sm font-semibold text-slate-700">
             Número de viajeros
-          </label>
+          </p>
 
-          <div className="relative mt-2">
-            <input
-              id="people"
-              type="number"
-              min="1"
-              max={MAX_TRAVELERS}
-              step="1"
-              inputMode="numeric"
-              value={people}
-              aria-invalid={people !== "" && !isValid}
-              aria-describedby={
-                people !== "" && !isValid
-                  ? "peopleError"
-                  : undefined
+          <div className="mt-4 flex items-center justify-center gap-5">
+            <button
+              type="button"
+              aria-label="Disminuir personas"
+              disabled={parsedPeople <= MIN_VISIBLE_PEOPLE}
+              onClick={() =>
+                setPeople(
+                  String(
+                    Math.max(
+                      MIN_VISIBLE_PEOPLE,
+                      parsedPeople - 1
+                    )
+                  )
+                )
               }
-              onChange={(event) =>
-                setPeople(event.target.value)
-              }
-              onKeyDown={(event) => {
-                if (
-                  event.key === "Enter" &&
-                  isValid
-                ) {
-                  handleReview();
-                }
-              }}
-              className={`w-full rounded-xl border bg-white px-4 py-4 pr-24 text-xl font-semibold text-slate-900 outline-none transition ${
-                people !== "" && !isValid
-                  ? "border-red-300 focus:ring-2 focus:ring-red-400"
-                  : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
-              }`}
-            />
+              className="h-14 w-14 rounded-xl border border-slate-300 text-2xl font-bold text-slate-700 transition hover:bg-slate-100 active:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              −
+            </button>
 
-            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">
-              personas
-            </span>
+            <div
+              aria-label="Cantidad de personas"
+              className="flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 text-slate-900"
+            >
+              <span className="text-3xl font-bold">
+                {people}
+              </span>
+              <span className="text-xs font-medium text-slate-500">
+                {parsedPeople === 1 ? "persona" : "personas"}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Aumentar personas"
+              disabled={parsedPeople >= MAX_VISIBLE_PEOPLE}
+              onClick={() =>
+                setPeople(
+                  String(
+                    Math.min(
+                      MAX_VISIBLE_PEOPLE,
+                      parsedPeople + 1
+                    )
+                  )
+                )
+              }
+              className="h-14 w-14 rounded-xl border border-slate-300 text-2xl font-bold text-slate-700 transition hover:bg-slate-100 active:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              +
+            </button>
           </div>
 
-          {people !== "" && !isValid && (
-            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
-              <p
-                id="peopleError"
-                className="text-sm font-medium text-red-700"
-              >
-                Introduce un número entero de personas entre 1 y {MAX_TRAVELERS}.
-              </p>
-            </div>
-          )}
+          <p className="mt-3 text-center text-sm text-slate-500">
+            Selecciona entre 1 y 10 personas.
+          </p>
 
         </div>
 

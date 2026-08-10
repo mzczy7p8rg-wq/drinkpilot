@@ -58,7 +58,13 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Cuántas personas viajarán?" })
   ).toBeVisible();
-  await page.getByLabel("Número de viajeros").fill("2");
+  await page
+    .getByRole("button", { name: "Aumentar personas" })
+    .click();
+
+  await expect(
+    page.getByLabel("Cantidad de personas")
+  ).toContainText("2");
   await page.getByRole("button", { name: "Revisar análisis" }).click();
 
   await expect(page).toHaveURL(/\/wizard\/review$/);

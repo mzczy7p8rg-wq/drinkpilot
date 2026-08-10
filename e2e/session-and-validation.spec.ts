@@ -35,6 +35,32 @@ test("recupera el wizard ante una sesión corrupta", async ({ page }) => {
   await expect(page.getByLabel("Duración del crucero")).toHaveValue("");
 });
 
+test("normaliza sesiones antiguas con más de 10 personas", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "drinkpilot-wizard",
+      JSON.stringify({
+        cruiseLine: "costa",
+        days: 7,
+        coffee: 1,
+        people: 25,
+      })
+    );
+  });
+
+  await page.goto("/wizard/people");
+
+  await expect(
+    page.getByLabel("Cantidad de personas")
+  ).toContainText("10");
+
+  await expect(
+    page.getByRole("button", { name: "Aumentar personas" })
+  ).toBeDisabled();
+});
+
 test("expone errores accesibles para límites de días y personas", async ({
   page,
 }) => {
@@ -61,12 +87,29 @@ test("expone errores accesibles para límites de días y personas", async ({
   });
   await page.goto("/wizard/people");
 
-  const people = page.getByLabel("Número de viajeros");
-  await people.fill("101");
+  const decreasePeople = page.getByRole("button", {
+    name: "Disminuir personas",
+  });
 
-  await expect(people).toHaveAttribute("aria-invalid", "true");
-  await expect(page.getByText("entre 1 y 100")).toBeVisible();
+  const increasePeople = page.getByRole("button", {
+    name: "Aumentar personas",
+  });
+
+  const peopleQuantity = page.getByLabel(
+    "Cantidad de personas"
+  );
+
+  await expect(peopleQuantity).toContainText("1");
+  await expect(decreasePeople).toBeDisabled();
+
+  for (let index = 0; index < 9; index += 1) {
+    await increasePeople.click();
+  }
+
+  await expect(peopleQuantity).toContainText("10");
+  await expect(increasePeople).toBeDisabled();
+
   await expect(
     page.getByRole("button", { name: "Revisar análisis" })
-  ).toBeDisabled();
+  ).toBeEnabled();
 });

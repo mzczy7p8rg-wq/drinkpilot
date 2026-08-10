@@ -36,7 +36,9 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Cuántas personas viajarán?" })
   ).toBeVisible();
-  await page.getByLabel("Número de viajeros").fill("1");
+  await expect(
+    page.getByLabel("Cantidad de personas")
+  ).toContainText("1");
   await page
     .getByRole("button", { name: "Revisar análisis" })
     .click();
