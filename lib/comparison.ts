@@ -58,12 +58,12 @@ import {
 } from "@/lib/economicDrinkPriceResolution";
 
 import {
-  isPositiveSafePrice,
-} from "@/lib/priceValidation";
-import {
-  resolveStoredCustomPackagePrice,
   type CustomPackagePrice,
 } from "@/lib/customPackagePrice";
+import {
+  resolveEconomicPackage,
+  type ResolvedEconomicPackage,
+} from "@/lib/economicPackageResolution";
 
 import type {
   SelectedDrinkConsumption,
@@ -373,230 +373,6 @@ export type ComparisonResult = {
 
   anyPackageWorthIt: boolean;
 };
-
-/*
- * Unión completa de paquetes
- * disponibles mediante la capa
- * de servicio.
- */
-type AllPackage =
-  ReturnType<
-    typeof getAllPackages
-  >[number];
-
-/*
- * Paquete resuelto para poder
- * participar en el cálculo económico.
- */
-type ResolvedEconomicPackage = {
-  pkg: AllPackage;
-
-  packageKey: PackageKey;
-
-  referencePrice:
-    number | null;
-
-  resolvedPrice: {
-    price: number;
-
-    currency: string;
-
-    source: PriceSource;
-  };
-};
-
-/*
- * Comprueba que un precio
- * introducido por el usuario
- * puede utilizarse.
- */
-function isValidCustomPrice(
-  value:
-    | CustomPackagePrice
-    | null
-    | undefined
-): value is CustomPackagePrice {
-  return value !== null && value !== undefined;
-}
-
-/*
- * Obtiene el precio personalizado
- * correspondiente al packageKey.
- *
- * Esta función es completamente
- * independiente de la naviera.
- */
-function getCustomPrice(
-  packageKey: PackageKey,
-  fallbackCurrency: string,
-  input: ComparisonInput
-):
-  | CustomPackagePrice
-  | null
-  | undefined {
-  const storedPrice =
-    input.customPackagePrices?.[
-      packageKey
-    ];
-
-  return resolveStoredCustomPackagePrice(
-    storedPrice,
-    fallbackCurrency
-  );
-}
-
-/*
- * Decide si un paquete puede
- * participar en la comparación
- * económica y qué precio utilizar.
- */
-function resolveEconomicPackage(
-  pkg: AllPackage,
-  input: ComparisonInput
-):
-  | ResolvedEconomicPackage
-  | null {
-  const packageKey =
-    pkg.key as PackageKey;
-
-  const customPrice =
-    getCustomPrice(
-      packageKey,
-      pkg.currency,
-      input
-    );
-
-  /*
-   * PAQUETES ACTIVABLES SOLO
-   * CON PRECIO DEL USUARIO
-   *
-   * Esta regla ya no depende
-   * de ningún packageKey concreto.
-   */
-  if (
-    pkg.economicActivation ===
-    "user-price-only"
-  ) {
-    if (
-      pkg.existenceStatus !==
-      "verified"
-    ) {
-      return null;
-    }
-
-    if (
-      !isValidCustomPrice(
-        customPrice
-      )
-    ) {
-      return null;
-    }
-
-    return {
-      pkg,
-
-      packageKey,
-
-      referencePrice:
-        null,
-
-      resolvedPrice: {
-        price:
-          customPrice.price,
-
-        currency:
-          customPrice.currency,
-
-        source:
-          "user",
-      },
-    };
-  }
-
-  /*
-   * PAQUETES NORMALMENTE
-   * HABILITADOS.
-   */
-  if (
-    pkg.economicEligibility !==
-    "eligible"
-  ) {
-    return null;
-  }
-
-  if (
-    pkg.status !==
-    "verified"
-  ) {
-    return null;
-  }
-
-  /*
-   * Deben disponer de precio
-   * de referencia numérico.
-   */
-  if (
-    !isPositiveSafePrice(
-      pkg.pricePerDay
-    )
-  ) {
-    return null;
-  }
-
-  /*
-   * Precio real del usuario
-   * tiene prioridad.
-   */
-  if (
-    isValidCustomPrice(
-      customPrice
-    )
-  ) {
-    return {
-      pkg,
-
-      packageKey,
-
-      referencePrice:
-        pkg.pricePerDay,
-
-      resolvedPrice: {
-        price:
-          customPrice.price,
-
-        currency:
-          customPrice.currency,
-
-        source:
-          "user",
-      },
-    };
-  }
-
-  /*
-   * Sin precio personalizado:
-   * utilizamos referencia.
-   */
-  return {
-    pkg,
-
-    packageKey,
-
-    referencePrice:
-      pkg.pricePerDay,
-
-    resolvedPrice: {
-      price:
-        pkg.pricePerDay,
-
-      currency:
-        pkg.currency,
-
-      source:
-        "reference",
-    },
-  };
-}
 
 /*
  * Categorías cuya falta de cobertura
@@ -1199,7 +975,7 @@ export function compareDrinkPackages(
       .map((pkg) =>
         resolveEconomicPackage(
           pkg,
-          input
+          input.customPackagePrices
         )
       )
       .filter(
