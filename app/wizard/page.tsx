@@ -530,6 +530,18 @@ function WizardForm() {
             }`}
           />
 
+          {sailingDate !== "" && (
+            <div className="mt-3 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSailingDate("")}
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-50 active:bg-sky-100"
+              >
+                Quitar fecha
+              </button>
+            </div>
+          )}
+
           {!isValidSailingDate && (
             <p className="mt-3 text-sm font-medium text-red-600">
               Introduce una fecha de
