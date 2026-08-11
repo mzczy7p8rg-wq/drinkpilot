@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   useWizardRouteGuard,
@@ -95,8 +96,9 @@ export default function PreferencesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+    <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
+        <WizardBrand />
         <ProgressBar
           currentStep={3}
           totalSteps={6}

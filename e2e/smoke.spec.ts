@@ -14,7 +14,7 @@ test(
         "heading",
         {
           name:
-            "DrinkPilot",
+            "¿Te compensa el paquete de bebidas?",
         }
       )
     ).toBeVisible();

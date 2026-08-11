@@ -32,6 +32,7 @@ import {
 
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 import ConsumptionSummary from "@/components/results/ConsumptionSummary";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   formatCurrency,
@@ -398,9 +399,10 @@ export default function ResultsPage() {
     } as const;
 
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-6 pb-28 sm:px-6 sm:py-10">
+      <main className="brand-ocean-bg min-h-screen px-4 py-6 pb-28 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
           <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+            <WizardBrand />
             <div className="text-center">
               <div className="text-5xl">
                 🔎
@@ -1097,14 +1099,15 @@ export default function ResultsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 pt-6 pb-28 sm:px-6 sm:py-10">
+    <main className="brand-ocean-bg min-h-screen px-4 pt-6 pb-28 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
           {/* CABECERA */}
 
+          <WizardBrand />
+
           <h1 className="text-center text-3xl font-bold text-slate-900 sm:text-4xl">
-            🍹 Tu recomendación
-            DrinkPilot
+            Tu recomendación DrinkPilot
           </h1>
 
           <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-6 text-slate-500 sm:text-base">

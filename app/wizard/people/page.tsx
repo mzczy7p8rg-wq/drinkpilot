@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   isValidTravelerCount,
@@ -57,9 +58,9 @@ function PeopleForm() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+    <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
-
+        <WizardBrand />
         <ProgressBar
           currentStep={5}
           totalSteps={6}

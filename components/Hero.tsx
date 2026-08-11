@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { hasValidCruiseStep } from "@/lib/wizardProgress";
+import { BrandHeader } from "@/components/Brand";
 
 export default function Hero() {
   const {
@@ -16,23 +17,23 @@ export default function Hero() {
     hasValidCruiseStep(data);
 
   return (
-    <section className="max-w-3xl text-center">
+    <section className="w-full max-w-4xl text-left">
+      <BrandHeader prominent />
 
-      <div className="text-6xl mb-6">🚢</div>
+      <div className="mt-14 max-w-3xl sm:mt-20">
+        <div className="mb-6 h-1 w-24 rounded-full bg-sky-500" />
 
-      <h1 className="text-5xl font-bold text-slate-900">
-        DrinkPilot
-      </h1>
+        <h1 className="text-5xl font-black leading-[0.98] tracking-[-0.045em] text-[#0B1F3A] sm:text-7xl">
+          ¿Te compensa el paquete de bebidas?
+        </h1>
+      </div>
 
-      <p className="mt-6 text-xl text-slate-600">
-        Descubre si el paquete de bebidas realmente merece la pena.
+      <p className="mt-8 text-xl font-medium leading-8 text-slate-700 sm:text-2xl">
+        Descúbrelo en menos de un minuto con{" "}
+        <span className="font-bold text-sky-500">DrinkPilot</span>.
       </p>
 
-      <p className="mt-2 text-slate-500">
-        Análisis personalizado en menos de un minuto.
-      </p>
-
-      <aside className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm leading-6 text-slate-600">
+      <aside className="mt-9 max-w-3xl rounded-2xl border border-sky-100 bg-white/90 p-5 text-sm leading-6 text-slate-600 shadow-sm shadow-sky-100/70 backdrop-blur">
         <p className="font-semibold text-slate-800">
           DrinkPilot ofrece una estimación orientativa.
         </p>
@@ -43,11 +44,11 @@ export default function Hero() {
         </p>
       </aside>
 
-      <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+      <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
         <Link
           href="/wizard"
           onNavigate={resetData}
-          className="inline-block rounded-xl bg-sky-600 px-8 py-4 text-white font-semibold hover:bg-sky-700 transition"
+          className="inline-block rounded-xl bg-sky-500 px-9 py-4 font-semibold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-600"
         >
           Empezar análisis
         </Link>

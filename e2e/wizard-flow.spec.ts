@@ -3,6 +3,12 @@ import { expect, test } from "@playwright/test";
 test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await page.goto("/");
 
+  await expect(
+    page.getByRole("img", {
+      name: "DrinkPilot, barco navegando sobre dos olas",
+    })
+  ).toBeVisible();
+
   await page
     .getByRole("link", { name: "Empezar análisis" })
     .click();
@@ -82,6 +88,11 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(page).toHaveURL(/\/results$/);
   await expect(
     page.getByRole("heading", { name: /Tu recomendación DrinkPilot/i })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: "DrinkPilot, barco navegando sobre dos olas",
+    })
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
