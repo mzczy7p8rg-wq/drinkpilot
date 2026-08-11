@@ -154,3 +154,31 @@ test("muestra Europa como región de referencia de Costa", async ({ page }) => {
     "Región de referencia: Europa"
   );
 });
+
+test("explica la cobertura y comparación de cada naviera", async ({ page }) => {
+  await page.goto("/wizard");
+
+  const cruiseLineGroup = page.getByRole("group", {
+    name: "Naviera",
+  });
+  const costaButton = cruiseLineGroup.getByRole("button", {
+    name: /Costa Cruceros/i,
+  });
+  const mscButton = cruiseLineGroup.getByRole("button", {
+    name: /MSC Cruises/i,
+  });
+
+  await expect(costaButton).toContainText(
+    "Cobertura disponible"
+  );
+  await expect(costaButton).toContainText(
+    "Comparación económica disponible"
+  );
+
+  await expect(mscButton).toContainText(
+    "Cobertura disponible"
+  );
+  await expect(mscButton).toContainText(
+    "Comparación económica limitada por precios pendientes"
+  );
+});
