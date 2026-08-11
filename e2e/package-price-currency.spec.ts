@@ -82,4 +82,24 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
       )
       .first()
   ).toHaveText("$");
+
+  /*
+   * La moneda debe conservarse aunque todavía
+   * no se haya introducido ningún precio.
+   */
+  await page.getByRole("link", { name: "Continuar" }).click();
+  await expect(page).toHaveURL(/\/wizard\/people$/);
+
+  await page.goto("/wizard/prices");
+
+  await expect(
+    page
+      .getByRole("group", {
+        name: "Moneda del precio de tu reserva",
+      })
+      .getByRole("button", {
+        name: "USD ($)",
+        exact: true,
+      })
+  ).toHaveAttribute("aria-pressed", "true");
 });

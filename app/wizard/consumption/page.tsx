@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/store";
 import DrinkCounter from "@/components/DrinkCounter";
 import ProgressBar from "@/components/ProgressBar";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   updateCocktailComposition,
@@ -64,11 +65,11 @@ export default function ConsumptionPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+    <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
-
+        <WizardBrand />
         <ProgressBar
-          currentStep={2}
+          currentStep={3}
           totalSteps={6}
         />
 
@@ -77,16 +78,15 @@ export default function ConsumptionPage() {
         <div className="mt-2 sm:mt-0">
 
           <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
-            Paso 2 de 6
+            Paso 3 de 6
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            ¿Cuántas bebidas consumes al día?
+            ¿Qué sueles beber?
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Indica el consumo aproximado de una persona durante
-            un día normal del crucero.
+            Indica cuántas bebidas tomaría un adulto en un día normal.
           </p>
 
         </div>
@@ -94,8 +94,7 @@ export default function ConsumptionPage() {
         {/* AYUDA */}
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Introduce las bebidas que consumirías aunque
-          no contrataras ningún paquete.
+          💡 Piensa en un día normal, sin contar con ningún paquete.
         </div>
 
         {/* CONTADORES */}

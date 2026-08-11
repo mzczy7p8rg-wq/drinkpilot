@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import ProgressBar from "@/components/ProgressBar";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   getCruiseLine,
@@ -226,8 +227,9 @@ export default function ReviewPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 pb-24 sm:px-6 sm:py-10 sm:pb-10">
+    <main className="brand-ocean-bg min-h-screen px-4 py-6 pb-24 sm:px-6 sm:py-10 sm:pb-10">
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
+        <WizardBrand />
         <ProgressBar
           currentStep={6}
           totalSteps={6}
@@ -322,11 +324,11 @@ export default function ReviewPage() {
                 </Link>
               </div>
 
-              <p className="mt-2 text-lg font-bold text-slate-900 sm:text-xl">
-                {data.people}{" "}
-                {data.people === 1
-                  ? "persona"
-                  : "personas"}
+              <p className="mt-2 text-base font-bold leading-6 text-slate-900 sm:text-lg">
+                {data.adults} {data.adults === 1 ? "adulto" : "adultos"}
+                {data.minors > 0 && (
+                  <> · {data.minors} {data.minors === 1 ? "menor" : "menores"}</>
+                )}
               </p>
             </div>
           </div>

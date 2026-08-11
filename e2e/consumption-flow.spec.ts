@@ -14,7 +14,7 @@ test("usuario completa consumo y avanza al siguiente paso", async ({ page }) => 
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Cuántas bebidas consumes al día?",
+      name: "¿Qué sueles beber?",
     })
   ).toBeVisible();
 
@@ -45,7 +45,7 @@ test("usuario completa consumo y avanza al siguiente paso", async ({ page }) => 
   await expect(page).toHaveURL(/\/wizard\/preferences$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Qué extras valoras a bordo?",
+      name: "¿Qué te gustaría tener incluido?",
     })
   ).toBeVisible();
 });

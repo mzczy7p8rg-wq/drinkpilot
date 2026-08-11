@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useStore } from "@/lib/store";
 import ProgressBar from "@/components/ProgressBar";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   useWizardRouteGuard,
@@ -95,34 +96,30 @@ export default function PreferencesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+    <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
+        <WizardBrand />
         <ProgressBar
-          currentStep={3}
+          currentStep={4}
           totalSteps={6}
         />
 
         <div className="mt-2 sm:mt-0">
           <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
-            Paso 3 de 6
+            Paso 4 de 6
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            ¿Qué extras valoras a bordo?
+            ¿Qué te gustaría tener incluido?
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Estas preferencias son
-            opcionales. Nos ayudan a
-            distinguir mejor qué paquete
-            cubre realmente lo que buscas.
+            Este paso es opcional. Marca solo lo que sea importante para ti.
           </p>
         </div>
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Marca únicamente aquellas
-          opciones que realmente valorarías
-          durante el crucero.
+          💡 Si no tienes preferencias, puedes continuar sin marcar nada.
         </div>
 
         <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
@@ -159,22 +156,6 @@ export default function PreferencesPage() {
           />
 
           <PreferenceCard
-            title="🍸 Cócteles premium"
-            description="Valoras una selección más amplia de cócteles y opciones premium."
-            checked={
-              data.premiumCocktails
-            }
-            onChange={(checked) =>
-              setData((prev) => ({
-                ...prev,
-
-                premiumCocktails:
-                  checked,
-              }))
-            }
-          />
-
-          <PreferenceCard
             title="🍺 Cerveza embotellada"
             description="Prefieres disponer también de cerveza embotellada además de las opciones básicas."
             checked={
@@ -190,21 +171,32 @@ export default function PreferencesPage() {
             }
           />
 
-          <PreferenceCard
-            title="🥃 Destilados premium"
-            description="Te interesan marcas de mayor gama o una selección más amplia de destilados."
-            checked={
-              data.premiumSpirits
-            }
-            onChange={(checked) =>
-              setData((prev) => ({
-                ...prev,
-
-                premiumSpirits:
-                  checked,
-              }))
-            }
-          />
+          <details className="rounded-2xl border border-slate-200 bg-white p-4">
+            <summary className="cursor-pointer font-semibold text-slate-800">
+              Opciones específicas (opcional)
+            </summary>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Ábrelo solo si buscas bebidas de gama superior.
+            </p>
+            <div className="mt-4 space-y-3">
+              <PreferenceCard
+                title="🍸 Cócteles premium"
+                description="Quieres una selección más amplia de cócteles."
+                checked={data.premiumCocktails}
+                onChange={(checked) =>
+                  setData((prev) => ({ ...prev, premiumCocktails: checked }))
+                }
+              />
+              <PreferenceCard
+                title="🥃 Destilados premium"
+                description="Te interesan marcas de gama superior."
+                checked={data.premiumSpirits}
+                onChange={(checked) =>
+                  setData((prev) => ({ ...prev, premiumSpirits: checked }))
+                }
+              />
+            </div>
+          </details>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
             <div className="mb-3">

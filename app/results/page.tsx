@@ -32,6 +32,7 @@ import {
 
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 import ConsumptionSummary from "@/components/results/ConsumptionSummary";
+import { WizardBrand } from "@/components/Brand";
 
 import {
   formatCurrency,
@@ -398,9 +399,10 @@ export default function ResultsPage() {
     } as const;
 
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-6 pb-28 sm:px-6 sm:py-10">
+      <main className="brand-ocean-bg min-h-screen px-4 py-6 pb-28 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
           <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+            <WizardBrand />
             <div className="text-center">
               <div className="text-5xl">
                 🔎
@@ -757,10 +759,16 @@ export default function ResultsPage() {
             )}
 
             {adultOperationalNotices.length > 0 && (
-              <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
-                <h2 className="text-lg font-bold text-sky-950 sm:text-xl">
-                  ℹ️ Condiciones importantes de los paquetes
-                </h2>
+              <details className="group mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-lg font-bold text-sky-950 marker:content-none sm:text-xl">
+                  <span>ℹ️ Condiciones importantes de los paquetes</span>
+                  <span className="shrink-0 text-xs font-semibold text-sky-700 group-open:hidden">
+                    Ver detalle ↓
+                  </span>
+                  <span className="hidden shrink-0 text-xs font-semibold text-sky-700 group-open:inline">
+                    Ocultar ↑
+                  </span>
+                </summary>
 
                 <p className="mt-2 text-sm leading-6 text-sky-900">
                   Estas condiciones forman parte de las reglas operativas conocidas. Cuando una de ellas ya modifica la comparación económica, lo indicamos expresamente.
@@ -790,7 +798,7 @@ export default function ResultsPage() {
                     )
                   )}
                 </div>
-              </section>
+              </details>
             )}
 
             <div className="mt-8">
@@ -812,19 +820,13 @@ export default function ResultsPage() {
                 Revisar precios
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  resetData();
-
-                  router.push(
-                    "/wizard"
-                  );
-                }}
-                className="rounded-xl bg-sky-600 px-4 py-4 font-semibold text-white transition hover:bg-sky-700"
+              <a
+                href="/wizard/people"
+                onClick={resetData}
+                className="rounded-xl bg-sky-600 px-4 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
               >
                 Nuevo análisis
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -1097,14 +1099,15 @@ export default function ResultsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 pt-6 pb-28 sm:px-6 sm:py-10">
+    <main className="brand-ocean-bg min-h-screen px-4 pt-6 pb-28 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
         <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
           {/* CABECERA */}
 
+          <WizardBrand />
+
           <h1 className="text-center text-3xl font-bold text-slate-900 sm:text-4xl">
-            🍹 Tu recomendación
-            DrinkPilot
+            Tu recomendación DrinkPilot
           </h1>
 
           <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-6 text-slate-500 sm:text-base">
@@ -1114,6 +1117,15 @@ export default function ResultsPage() {
             preferencias y precios
             disponibles.
           </p>
+
+          <div className="mx-auto mt-5 max-w-2xl rounded-xl border border-sky-200 bg-sky-50 p-4 text-left">
+            <p className="font-semibold text-sky-950">
+              ℹ️ Resultado orientativo
+            </p>
+            <p className="mt-1 text-sm leading-6 text-sky-900">
+              Los costes y posibles ahorros son estimaciones basadas en los datos que has indicado y en los precios disponibles. Comprueba siempre el precio y las condiciones finales de tu reserva antes de contratar un paquete.
+            </p>
+          </div>
 
           {/* EXPLICACIÓN PRINCIPAL */}
 
@@ -1171,9 +1183,7 @@ export default function ResultsPage() {
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
-                  {bestPackage.effectiveSavings !== null
-                    ? "de ahorro efectivo estimado durante el crucero"
-                    : "de ahorro teórico durante el crucero"}
+                  de resultado orientativo a favor del paquete durante el crucero
                 </p>
 
                 <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
@@ -1236,7 +1246,7 @@ export default function ResultsPage() {
 
             <div className="rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:p-5">
               <p className="text-sm text-slate-500 sm:text-base">
-                👥 Personas
+                👥 Adultos
               </p>
 
               <p className="mt-2 text-2xl font-bold sm:text-3xl">
@@ -1244,7 +1254,7 @@ export default function ResultsPage() {
               </p>
 
               <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-                pasajeros
+                incluidos en el cálculo
               </p>
             </div>
 
@@ -1332,7 +1342,10 @@ export default function ResultsPage() {
                   cobertura utilizando
                   los precios de tu
                   reserva cuando los has
-                  proporcionado.
+                  proporcionado. Todos
+                  los importes de esta
+                  comparación son
+                  orientativos.
                 </p>
               </div>
 
@@ -1346,7 +1359,7 @@ export default function ResultsPage() {
               ) : (
                 <span className="self-start rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
                   Sin opción completa
-                  con ahorro
+                  con resultado favorable
                 </span>
               )}
             </div>
@@ -1560,57 +1573,27 @@ export default function ResultsPage() {
                           </p>
                         </div>
 
-                        <div>
+                        <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-3">
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Ahorro bruto
+                            Resultado orientativo
                           </p>
 
                           <p
                             className={`mt-1 text-lg font-bold sm:text-xl ${
-                              pkg.savings >
+                              displayedSavings >
                               0
                                 ? "text-green-700"
-                                : pkg.savings <
+                                : displayedSavings <
                                   0
                                 ? "text-red-700"
                                 : "text-slate-700"
                             }`}
                           >
                             {formatSignedCurrency(
-                              pkg.savings,
+                              displayedSavings,
                               pkg.currency
                             )}
                           </p>
-                        </div>
-
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Ahorro efectivo
-                          </p>
-
-                          {pkg.effectiveSavings !==
-                          null ? (
-                            <p
-                              className={`mt-1 text-lg font-bold sm:text-xl ${
-                                displayedSavings >
-                                0
-                                  ? "text-green-700"
-                                  : displayedSavings <
-                                    0
-                                  ? "text-red-700"
-                                  : "text-slate-700"
-                              }`}
-                            >
-                              {formatSignedCurrency(
-                                displayedSavings,
-                                pkg.currency
-                              )}
-                            </p>
-                          ) : (
-                            <p className="mt-1 text-lg font-bold text-amber-700 sm:text-xl">
-                              Pendiente
-                            </p>
-                          )}
                         </div>
                       </div>
 
@@ -1631,7 +1614,7 @@ export default function ResultsPage() {
                             </p>
 
                             <p className="mt-1 text-xs leading-5 text-violet-800">
-                              Este importe ya está descontado del ahorro efectivo mostrado.
+                              Este importe ya está descontado del resultado orientativo mostrado.
                             </p>
                           </div>
                         )}
@@ -1653,7 +1636,7 @@ export default function ResultsPage() {
                             que has
                             indicado, por
                             lo que el
-                            ahorro
+                            resultado
                             mostrado puede
                             compararse
                             directamente
@@ -1664,11 +1647,12 @@ export default function ResultsPage() {
                         </div>
                       ) : pkg.economicComparisonStatus ===
                         "partial-unknown" ? (
-                        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                          <p className="text-sm font-semibold text-amber-900">
-                            ⚠️ Ahorro
-                            teórico
-                          </p>
+                        <details className="group mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-amber-900 marker:content-none">
+                            <span>⚠️ Cómo interpretar este resultado</span>
+                            <span className="text-xs group-open:hidden">Ver detalle ↓</span>
+                            <span className="hidden text-xs group-open:inline">Ocultar ↑</span>
+                          </summary>
 
                           <p className="mt-1 text-xs leading-5 text-amber-900">
                             Este importe no
@@ -1681,7 +1665,7 @@ export default function ResultsPage() {
                             no cubre.
                             Por eso no debe
                             interpretarse
-                            como un ahorro
+                            como un resultado
                             final.
                           </p>
 
@@ -1709,36 +1693,33 @@ export default function ResultsPage() {
                               .
                             </p>
                           )}
-                        </div>
+                        </details>
                       ) : (
-                        <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3">
-                          <p className="text-sm font-semibold text-sky-900">
-                            ℹ️ Comparación
-                            económica
-                            parcial
-                          </p>
+                        <details className="group mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3">
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-sky-900 marker:content-none">
+                            <span>ℹ️ Comparación económica parcial</span>
+                            <span className="text-xs group-open:hidden">Ver detalle ↓</span>
+                            <span className="hidden text-xs group-open:inline">Ocultar ↑</span>
+                          </summary>
 
                           <p className="mt-1 text-xs leading-5 text-sky-900">
                             Parte del
                             consumo queda
                             fuera del
                             paquete. El
-                            ahorro final
+                            resultado final
                             puede variar al
                             añadir ese
                             coste.
                           </p>
-                        </div>
+                        </details>
                       )}
 
                       {/* DATOS ADICIONALES */}
 
                       <div className="mt-5 border-t border-slate-200 pt-4">
                         <p className="text-sm leading-6 text-slate-600">
-                          {pkg.effectiveSavings !==
-                          null
-                            ? "Margen diario efectivo:"
-                            : "Margen diario teórico:"}{" "}
+                          Margen diario orientativo:{" "}
                           <strong
                             className={
                               pkg.dailyMargin >
@@ -1756,10 +1737,7 @@ export default function ResultsPage() {
                         </p>
 
                         <p className="mt-2 text-sm leading-6 text-slate-600">
-                          {pkg.effectiveSavings !==
-                          null
-                            ? "Punto de equilibrio efectivo:"
-                            : "Punto de equilibrio teórico:"}{" "}
+                          Punto de equilibrio orientativo:{" "}
                           <strong>
                             {pkg.breakEvenDrinksPerDay.toFixed(
                               1
@@ -2050,10 +2028,16 @@ export default function ResultsPage() {
           {/* CONDICIONES OPERATIVAS */}
 
           {operationalNotices.length > 0 && (
-            <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
-              <h3 className="font-bold text-sky-950 sm:text-lg">
-                ℹ️ Condiciones importantes del paquete
-              </h3>
+            <details className="group mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold text-sky-950 marker:content-none sm:text-lg">
+                <span>ℹ️ Condiciones importantes del paquete</span>
+                <span className="shrink-0 text-xs font-semibold text-sky-700 group-open:hidden">
+                  Ver detalle ↓
+                </span>
+                <span className="hidden shrink-0 text-xs font-semibold text-sky-700 group-open:inline">
+                  Ocultar ↑
+                </span>
+              </summary>
 
               <p className="mt-2 text-sm leading-6 text-sky-900">
                 Ten en cuenta estas condiciones además de la comparación económica.
@@ -2083,7 +2067,7 @@ export default function ResultsPage() {
                   )
                 )}
               </div>
-            </section>
+            </details>
           )}
 
           {/* PROCEDENCIA DE LOS PRECIOS DE BEBIDAS */}
@@ -2206,6 +2190,28 @@ export default function ResultsPage() {
             rows={consumptionRows}
             currency={economicCurrency}
           />
+
+          {/* FEEDBACK BETA */}
+
+          <section className="mt-8 rounded-2xl border border-sky-100 bg-sky-50 p-5 text-center sm:mt-10 sm:p-6">
+            <p className="text-2xl" aria-hidden="true">
+              🚢
+            </p>
+            <h2 className="mt-2 text-xl font-bold text-slate-900">
+              Gracias por probar DrinkPilot
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 sm:text-base">
+              Tu opinión nos ayuda a mejorar la experiencia antes del lanzamiento.
+            </p>
+            <a
+              href="https://tally.so/r/LZxG1y"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-sky-600 bg-white px-5 py-3.5 font-semibold text-sky-700 transition hover:bg-sky-100 sm:w-auto"
+            >
+              Enviar opinión
+            </a>
+          </section>
 
           {/* REINICIO */}
 

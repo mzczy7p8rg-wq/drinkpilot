@@ -10,6 +10,8 @@ test("muestra una página 404 propia y permite volver", async ({ page }) => {
   await page.getByRole("link", { name: "Ir al inicio" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(
-    page.getByRole("heading", { name: "DrinkPilot" })
+    page.getByRole("heading", {
+      name: "¿Te compensa el paquete de bebidas?",
+    })
   ).toBeVisible();
 });

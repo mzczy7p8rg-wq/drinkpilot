@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("selecciona entre 1 y 10 personas con controles menos y más", async ({
+test("selecciona entre 1 y 10 adultos con controles menos y más", async ({
   page,
 }) => {
   await page.goto("/wizard");
@@ -20,7 +20,7 @@ test("selecciona entre 1 y 10 personas con controles menos y más", async ({
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Cuántas bebidas consumes al día?",
+      name: "¿Qué sueles beber?",
     })
   ).toBeVisible();
 
@@ -35,7 +35,7 @@ test("selecciona entre 1 y 10 personas con controles menos y más", async ({
   await expect(page).toHaveURL(/\/wizard\/preferences$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Qué extras valoras a bordo?",
+      name: "¿Qué te gustaría tener incluido?",
     })
   ).toBeVisible();
 
@@ -61,20 +61,20 @@ test("selecciona entre 1 y 10 personas con controles menos y más", async ({
   await expect(page).toHaveURL(/\/wizard\/people$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Cuántas personas viajarán?",
+      name: "¿Quién viaja?",
     })
   ).toBeVisible();
 
   const decrease = page.getByRole("button", {
-    name: "Disminuir personas",
+    name: "Disminuir adultos",
   });
 
   const increase = page.getByRole("button", {
-    name: "Aumentar personas",
+    name: "Aumentar adultos",
   });
 
   const quantity = page.getByLabel(
-    "Cantidad de personas"
+    "Cantidad de adultos"
   );
 
   await expect(quantity).toContainText("1");

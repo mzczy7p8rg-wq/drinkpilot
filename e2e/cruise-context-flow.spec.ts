@@ -22,7 +22,7 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/wizard\/preferences$/);
   await expect(
-    page.getByRole("heading", { name: "¿Qué extras valoras a bordo?" })
+    page.getByRole("heading", { name: "¿Qué te gustaría tener incluido?" })
   ).toBeVisible();
   await page.getByRole("link", { name: "Continuar" }).click();
 
@@ -34,13 +34,13 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/wizard\/people$/);
   await expect(
-    page.getByRole("heading", { name: "¿Cuántas personas viajarán?" })
+    page.getByRole("heading", { name: "¿Quién viaja?" })
   ).toBeVisible();
   await expect(
-    page.getByLabel("Cantidad de personas")
+    page.getByLabel("Cantidad de adultos")
   ).toContainText("1");
   await page
-    .getByRole("button", { name: "Revisar análisis" })
+    .getByRole("button", { name: "Continuar" })
     .click();
 
   await expect(page).toHaveURL(/\/wizard\/review$/);
@@ -120,7 +120,7 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
 test("muestra el aviso solo al cambiar de naviera", async ({ page }) => {
   await page.goto("/wizard");
 
-  const notice = page.getByText("Cambio de naviera");
+  const notice = page.getByText(/Has cambiado de naviera/);
   const costaButton = page.getByRole("button", {
     name: /Costa Cruceros/i,
   });
@@ -138,7 +138,7 @@ test("muestra el aviso solo al cambiar de naviera", async ({ page }) => {
   await expect(notice).toBeVisible();
   await expect(
     page.getByText(
-      "Tus preferencias personales se mantienen."
+      /Mantendremos tus preferencias/
     )
   ).toBeVisible();
 });
@@ -169,16 +169,16 @@ test("explica la cobertura y comparación de cada naviera", async ({ page }) => 
   });
 
   await expect(costaButton).toContainText(
-    "Cobertura disponible"
+    "Información del paquete disponible"
   );
   await expect(costaButton).toContainText(
-    "Comparación económica disponible"
+    "Precios disponibles"
   );
 
   await expect(mscButton).toContainText(
-    "Cobertura disponible"
+    "Información del paquete disponible"
   );
   await expect(mscButton).toContainText(
-    "Comparación económica limitada por precios pendientes"
+    "Algunos precios están pendientes"
   );
 });
