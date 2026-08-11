@@ -91,4 +91,24 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByText("Sin opción completa con ahorro")
   ).toBeVisible();
+
+  const dataDetailsButton = page.getByText(
+    "Ver detalle de calidad de los datos",
+    { exact: true }
+  );
+
+  await expect(dataDetailsButton).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Datos verificados",
+    })
+  ).toBeHidden();
+
+  await dataDetailsButton.click();
+
+  await expect(
+    page.getByRole("heading", {
+      name: "Datos verificados",
+    })
+  ).toBeVisible();
 });
