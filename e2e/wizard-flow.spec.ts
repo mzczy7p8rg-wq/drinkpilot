@@ -103,6 +103,18 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     page.getByText("Sin opción completa con ahorro")
   ).toBeVisible();
 
+  const packageWarning = page
+    .locator("details")
+    .filter({ hasText: "Ahorro teórico" })
+    .first();
+
+  await expect(packageWarning).toBeVisible();
+  await expect(packageWarning).not.toHaveAttribute("open", "");
+
+  await packageWarning.locator("summary").click();
+
+  await expect(packageWarning).toHaveAttribute("open", "");
+
   const dataDetailsButton = page.getByText(
     "Ver detalle de calidad de los datos",
     { exact: true }

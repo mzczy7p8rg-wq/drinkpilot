@@ -1667,11 +1667,12 @@ export default function ResultsPage() {
                         </div>
                       ) : pkg.economicComparisonStatus ===
                         "partial-unknown" ? (
-                        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                          <p className="text-sm font-semibold text-amber-900">
-                            ⚠️ Ahorro
-                            teórico
-                          </p>
+                        <details className="group mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-amber-900 marker:content-none">
+                            <span>⚠️ Ahorro teórico</span>
+                            <span className="text-xs group-open:hidden">Ver detalle ↓</span>
+                            <span className="hidden text-xs group-open:inline">Ocultar ↑</span>
+                          </summary>
 
                           <p className="mt-1 text-xs leading-5 text-amber-900">
                             Este importe no
@@ -1712,14 +1713,14 @@ export default function ResultsPage() {
                               .
                             </p>
                           )}
-                        </div>
+                        </details>
                       ) : (
-                        <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3">
-                          <p className="text-sm font-semibold text-sky-900">
-                            ℹ️ Comparación
-                            económica
-                            parcial
-                          </p>
+                        <details className="group mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3">
+                          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-sky-900 marker:content-none">
+                            <span>ℹ️ Comparación económica parcial</span>
+                            <span className="text-xs group-open:hidden">Ver detalle ↓</span>
+                            <span className="hidden text-xs group-open:inline">Ocultar ↑</span>
+                          </summary>
 
                           <p className="mt-1 text-xs leading-5 text-sky-900">
                             Parte del
@@ -1731,7 +1732,7 @@ export default function ResultsPage() {
                             añadir ese
                             coste.
                           </p>
-                        </div>
+                        </details>
                       )}
 
                       {/* DATOS ADICIONALES */}
