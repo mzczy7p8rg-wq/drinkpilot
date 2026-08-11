@@ -32,6 +32,17 @@ export default function Hero() {
         Análisis personalizado en menos de un minuto.
       </p>
 
+      <aside className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 text-left text-sm leading-6 text-slate-600">
+        <p className="font-semibold text-slate-800">
+          DrinkPilot ofrece una estimación orientativa.
+        </p>
+
+        <p className="mt-1">
+          Los precios reales pueden variar según la naviera, la ruta, la fecha,
+          los impuestos, las propinas y las condiciones a bordo.
+        </p>
+      </aside>
+
       <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Link
           href="/wizard"
