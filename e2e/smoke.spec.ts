@@ -19,6 +19,12 @@ test(
       )
     ).toBeVisible();
 
+    await expect(
+      page.getByRole("link", {
+        name: "Continuar análisis",
+      })
+    ).toBeHidden();
+
 
     await page
       .getByRole(
@@ -48,6 +54,56 @@ test(
       )
     ).toBeVisible();
 
+  }
+);
+
+test(
+  "Continuar análisis conserva el progreso anterior",
+  async ({ page }) => {
+    await page.goto("/wizard");
+
+    await page
+      .getByRole("button", {
+        name: /MSC Cruises/i,
+      })
+      .click();
+
+    await page
+      .getByLabel("Duración del crucero")
+      .fill("7");
+
+    await page
+      .getByRole("button", {
+        name: "Continuar",
+      })
+      .click();
+
+    await expect(page).toHaveURL(
+      /\/wizard\/consumption$/
+    );
+
+    await page.goto("/");
+
+    await page
+      .getByRole("link", {
+        name: "Continuar análisis",
+      })
+      .click();
+
+    await expect(page).toHaveURL(/\/wizard$/);
+
+    await expect(
+      page.getByRole("button", {
+        name: /MSC Cruises/i,
+      })
+    ).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+
+    await expect(
+      page.getByLabel("Duración del crucero")
+    ).toHaveValue("7");
   }
 );
 
