@@ -820,19 +820,13 @@ export default function ResultsPage() {
                 Revisar precios
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  resetData();
-
-                  router.push(
-                    "/wizard"
-                  );
-                }}
-                className="rounded-xl bg-sky-600 px-4 py-4 font-semibold text-white transition hover:bg-sky-700"
+              <a
+                href="/wizard/people"
+                onClick={resetData}
+                className="rounded-xl bg-sky-600 px-4 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
               >
                 Nuevo análisis
-              </button>
+              </a>
             </div>
           </div>
         </div>
