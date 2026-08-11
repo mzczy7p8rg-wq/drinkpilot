@@ -333,6 +333,23 @@ export default function DataConfidencePanel({
         </p>
       </div>
 
+      <details className="group mt-5">
+        <summary className="cursor-pointer list-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-sky-700 transition hover:border-sky-200 hover:bg-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
+          <span className="flex items-center justify-between gap-3">
+            <span>
+              Ver detalle de calidad de los datos
+            </span>
+
+            <span
+              aria-hidden="true"
+              className="transition group-open:rotate-180"
+            >
+              ↓
+            </span>
+          </span>
+        </summary>
+
+        <div className="mt-6">
       {/* RESUMEN */}
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -836,6 +853,8 @@ export default function DataConfidencePanel({
         cobertura, las condiciones y la
         fiabilidad económica de cada dato.
       </div>
+        </div>
+      </details>
     </section>
   );
 }
