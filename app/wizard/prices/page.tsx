@@ -60,6 +60,28 @@ import {
 } from "@/lib/wizardPriceForm";
 import { formatCurrency } from "@/lib/currencyFormatting";
 
+const packageCoverageLabels = {
+  coffee: "cafés",
+  water: "agua",
+  soda: "refrescos",
+  beer: "cerveza",
+  wine: "vino",
+  cocktail: "cócteles",
+  alcoholicCocktails: "cócteles con alcohol",
+  nonAlcoholicCocktails: "cócteles sin alcohol",
+  premiumCocktails: "cócteles premium",
+  bottledBeer: "cerveza embotellada",
+  premiumSpirits: "destilados premium",
+  bottledWaterUnlimited: "agua embotellada",
+} as const;
+
+function getPackageHighlights(pkg: ReturnType<typeof getAllPackages>[number]) {
+  return Object.entries(packageCoverageLabels)
+    .filter(([key]) => pkg.coverage[key as keyof typeof pkg.coverage] === true)
+    .map(([, label]) => label)
+    .slice(0, 4);
+}
+
 function PricesForm() {
   const {
     data,
@@ -589,7 +611,7 @@ function PricesForm() {
       <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
         <WizardBrand />
         <ProgressBar
-          currentStep={4}
+          currentStep={5}
           totalSteps={6}
         />
 
@@ -597,7 +619,7 @@ function PricesForm() {
 
         <div className="mt-2 sm:mt-0">
           <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
-            Paso 4 de 6
+            Paso 5 de 6
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
@@ -621,15 +643,8 @@ function PricesForm() {
         {/* EXPLICACIÓN */}
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Este paso es opcional.
-          Los paquetes con precio de
-          referencia pueden utilizarlo
-          cuando no introduces el
-          precio de tu reserva. Los
-          paquetes sin referencia fiable
-          solo podrán entrar en la
-          comparación económica cuando
-          proporciones un precio real.
+          💡 Este paso es opcional. Si conoces el precio de tu reserva,
+          añádelo para obtener un resultado más preciso.
         </div>
 
         <fieldset className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
@@ -706,6 +721,8 @@ function PricesForm() {
               const inputId =
                 `package-price-${pkg.key}`;
 
+              const packageHighlights = getPackageHighlights(pkg);
+
               return (
                 <div
                   key={
@@ -721,11 +738,19 @@ function PricesForm() {
 
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
+                        Qué incluye
+                      </p>
+                      <p className="mt-1 font-semibold leading-6 text-slate-900">
+                        {packageHighlights.length > 0
+                          ? packageHighlights.join(" · ")
+                          : "Consulta las condiciones del paquete"}
+                      </p>
                       <label
                         htmlFor={
                           inputId
                         }
-                        className="block text-base font-semibold text-slate-900 sm:text-lg"
+                        className="mt-2 block text-sm text-slate-500"
                       >
                         {
                           pkg.icon
@@ -735,9 +760,8 @@ function PricesForm() {
                         }
                       </label>
 
-                      <p className="mt-1 text-sm text-slate-500">
-                        Precio por
-                        persona y día
+                      <p className="mt-1 text-xs text-slate-500">
+                        Precio por adulto y día
                       </p>
                     </div>
 
@@ -1427,7 +1451,7 @@ function PricesForm() {
 
           {canContinue ? (
             <Link
-              href="/wizard/people"
+              href="/wizard/review"
               onClick={
                 savePrices
               }

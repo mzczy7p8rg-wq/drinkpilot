@@ -52,7 +52,7 @@ test(
     await expect(
       page
     ).toHaveURL(
-      /\/wizard$/
+      /\/wizard\/people$/
     );
 
 
@@ -61,7 +61,7 @@ test(
         "heading",
         {
           name:
-            "Cuéntanos tu crucero",
+            "¿Quién viaja?",
         }
       )
     ).toBeVisible();
@@ -155,6 +155,13 @@ test(
         name: "Empezar análisis",
       })
       .click();
+
+    await expect(page).toHaveURL(/\/wizard\/people$/);
+
+    await expect(page.getByLabel("Cantidad de adultos")).toContainText("1");
+    await expect(page.getByLabel("Cantidad de menores")).toContainText("0");
+
+    await page.getByRole("button", { name: "Continuar" }).click();
 
     await expect(page).toHaveURL(/\/wizard$/);
 

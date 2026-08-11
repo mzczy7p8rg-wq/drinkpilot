@@ -46,7 +46,7 @@ export default function Hero() {
 
       <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
         <Link
-          href="/wizard"
+          href="/wizard/people"
           onNavigate={resetData}
           className="inline-block rounded-xl bg-sky-500 px-9 py-4 font-semibold text-white shadow-lg shadow-sky-200 transition hover:bg-sky-600"
         >

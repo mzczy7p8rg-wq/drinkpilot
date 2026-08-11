@@ -19,7 +19,7 @@ test("restaura una sesión válida en Review", async ({ page }) => {
     page.getByRole("heading", { name: "Revisa tu análisis" })
   ).toBeVisible();
   await expect(page.getByText("7 días")).toBeVisible();
-  await expect(page.getByText("2 personas")).toBeVisible();
+  await expect(page.getByText("2 adultos")).toBeVisible();
 });
 
 test("recupera el wizard ante una sesión corrupta", async ({ page }) => {
@@ -53,11 +53,11 @@ test("normaliza sesiones antiguas con más de 10 personas", async ({
   await page.goto("/wizard/people");
 
   await expect(
-    page.getByLabel("Cantidad de personas")
+    page.getByLabel("Cantidad de adultos")
   ).toContainText("10");
 
   await expect(
-    page.getByRole("button", { name: "Aumentar personas" })
+    page.getByRole("button", { name: "Aumentar adultos" })
   ).toBeDisabled();
 });
 
@@ -88,15 +88,15 @@ test("expone errores accesibles para límites de días y personas", async ({
   await page.goto("/wizard/people");
 
   const decreasePeople = page.getByRole("button", {
-    name: "Disminuir personas",
+    name: "Disminuir adultos",
   });
 
   const increasePeople = page.getByRole("button", {
-    name: "Aumentar personas",
+    name: "Aumentar adultos",
   });
 
   const peopleQuantity = page.getByLabel(
-    "Cantidad de personas"
+    "Cantidad de adultos"
   );
 
   await expect(peopleQuantity).toContainText("1");
@@ -110,6 +110,6 @@ test("expone errores accesibles para límites de días y personas", async ({
   await expect(increasePeople).toBeDisabled();
 
   await expect(
-    page.getByRole("button", { name: "Revisar análisis" })
+    page.getByRole("button", { name: "Continuar" })
   ).toBeEnabled();
 });

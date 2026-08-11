@@ -1252,7 +1252,7 @@ export default function ResultsPage() {
 
             <div className="rounded-2xl bg-slate-50 p-4 text-center shadow-sm sm:p-5">
               <p className="text-sm text-slate-500 sm:text-base">
-                👥 Personas
+                👥 Adultos
               </p>
 
               <p className="mt-2 text-2xl font-bold sm:text-3xl">
@@ -1260,7 +1260,7 @@ export default function ResultsPage() {
               </p>
 
               <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-                pasajeros
+                incluidos en el cálculo
               </p>
             </div>
 
@@ -2196,6 +2196,28 @@ export default function ResultsPage() {
             rows={consumptionRows}
             currency={economicCurrency}
           />
+
+          {/* FEEDBACK BETA */}
+
+          <section className="mt-8 rounded-2xl border border-sky-100 bg-sky-50 p-5 text-center sm:mt-10 sm:p-6">
+            <p className="text-2xl" aria-hidden="true">
+              🚢
+            </p>
+            <h2 className="mt-2 text-xl font-bold text-slate-900">
+              Gracias por probar DrinkPilot
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 sm:text-base">
+              Tu opinión nos ayuda a mejorar la experiencia antes del lanzamiento.
+            </p>
+            <a
+              href="https://tally.so/r/LZxG1y"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-sky-600 bg-white px-5 py-3.5 font-semibold text-sky-700 transition hover:bg-sky-100 sm:w-auto"
+            >
+              Enviar opinión
+            </a>
+          </section>
 
           {/* REINICIO */}
 

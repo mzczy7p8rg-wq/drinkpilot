@@ -324,11 +324,11 @@ export default function ReviewPage() {
                 </Link>
               </div>
 
-              <p className="mt-2 text-lg font-bold text-slate-900 sm:text-xl">
-                {data.people}{" "}
-                {data.people === 1
-                  ? "persona"
-                  : "personas"}
+              <p className="mt-2 text-base font-bold leading-6 text-slate-900 sm:text-lg">
+                {data.adults} {data.adults === 1 ? "adulto" : "adultos"}
+                {data.minors > 0 && (
+                  <> · {data.minors} {data.minors === 1 ? "menor" : "menores"}</>
+                )}
               </p>
             </div>
           </div>

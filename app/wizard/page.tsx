@@ -255,7 +255,7 @@ function WizardForm() {
       <div className="mx-auto w-full max-w-xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
         <WizardBrand />
         <ProgressBar
-          currentStep={1}
+          currentStep={2}
           totalSteps={6}
         />
 
@@ -263,7 +263,7 @@ function WizardForm() {
 
         <div className="mt-2 sm:mt-0">
           <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
-            Paso 1 de 6
+            Paso 2 de 6
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
@@ -271,10 +271,8 @@ function WizardForm() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Selecciona tu naviera,
-            introduce la duración y añade
-            el contexto que conozcas de tu
-            reserva y navegación.
+            Elige tu naviera y la duración. Si sabes algo más,
+            puedes añadirlo después.
           </p>
         </div>
 
@@ -371,7 +369,7 @@ function WizardForm() {
                     <div className="mt-3 grid gap-2 text-xs leading-5">
                       <p className="flex items-center gap-2 font-medium text-emerald-700">
                         <span aria-hidden="true">✓</span>
-                        Cobertura disponible
+                        Información del paquete disponible
                       </p>
 
                       <p
@@ -386,8 +384,8 @@ function WizardForm() {
                         </span>
 
                         {hasCompletePrices
-                          ? "Comparación económica disponible"
-                          : "Comparación económica limitada por precios pendientes"}
+                          ? "Precios disponibles"
+                          : "Algunos precios están pendientes"}
                       </p>
                     </div>
                   </button>
@@ -398,21 +396,8 @@ function WizardForm() {
 
           {showCruiseChangeNotice && (
             <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
-              💡 Cambio de naviera
-
-              <br />
-
-              Tus preferencias personales se mantienen.
-
-              <br />
-
-              Al continuar actualizaremos únicamente los datos específicos del crucero:
-              <br />
-              • consumo de bebidas
-              <br />
-              • precios personalizados
-              <br />
-              • condiciones del paquete
+              💡 Has cambiado de naviera. Mantendremos tus preferencias
+              y actualizaremos los datos propios del crucero.
             </div>
           )}
         </section>
@@ -495,11 +480,11 @@ function WizardForm() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-slate-700">
-                Contexto del crucero
+                Datos del crucero
               </h2>
 
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Ayuda a aplicar condiciones específicas sin deducir datos de la naviera.
+                Nos ayudan a ajustar mejor el análisis.
               </p>
             </div>
 

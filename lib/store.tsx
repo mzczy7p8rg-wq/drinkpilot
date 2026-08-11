@@ -37,6 +37,7 @@ import {
 import {
   isPositiveSafePrice,
 } from "@/lib/priceValidation";
+import { isValidTravelerCount } from "@/lib/wizardNumberValidation";
 
 import {
   resolveStoredSelectedDrinkPrices,
@@ -142,6 +143,15 @@ export type WizardData = {
     SelectedDrinkPrices;
 
   people: number;
+
+  /*
+   * Composición real del grupo.
+   * `people` se conserva como el número de adultos que participa
+   * en el cálculo económico actual. Los menores se muestran como
+   * contexto, sin inventar precios o consumos para ellos.
+   */
+  adults: number;
+  minors: number;
 };
 
 /*
@@ -296,6 +306,8 @@ function createInitialData(
      * explícitamente el paso.
      */
     people: 0,
+    adults: 0,
+    minors: 0,
   };
 }
 
@@ -720,6 +732,18 @@ export function StoreProvider({
           people:
             storedWizardProgress
               .people,
+
+          adults:
+            isValidTravelerCount(parsedData.adults)
+              ? parsedData.adults
+              : storedWizardProgress.people,
+
+          minors:
+            Number.isSafeInteger(parsedData.minors) &&
+            Number(parsedData.minors) >= 0 &&
+            Number(parsedData.minors) <= 10
+              ? Number(parsedData.minors)
+              : 0,
         });
       }
     } catch (error) {
