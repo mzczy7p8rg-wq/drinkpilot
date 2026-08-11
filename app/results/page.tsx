@@ -759,10 +759,16 @@ export default function ResultsPage() {
             )}
 
             {adultOperationalNotices.length > 0 && (
-              <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
-                <h2 className="text-lg font-bold text-sky-950 sm:text-xl">
-                  ℹ️ Condiciones importantes de los paquetes
-                </h2>
+              <details className="group mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-lg font-bold text-sky-950 marker:content-none sm:text-xl">
+                  <span>ℹ️ Condiciones importantes de los paquetes</span>
+                  <span className="shrink-0 text-xs font-semibold text-sky-700 group-open:hidden">
+                    Ver detalle ↓
+                  </span>
+                  <span className="hidden shrink-0 text-xs font-semibold text-sky-700 group-open:inline">
+                    Ocultar ↑
+                  </span>
+                </summary>
 
                 <p className="mt-2 text-sm leading-6 text-sky-900">
                   Estas condiciones forman parte de las reglas operativas conocidas. Cuando una de ellas ya modifica la comparación económica, lo indicamos expresamente.
@@ -792,7 +798,7 @@ export default function ResultsPage() {
                     )
                   )}
                 </div>
-              </section>
+              </details>
             )}
 
             <div className="mt-8">
@@ -2054,10 +2060,16 @@ export default function ResultsPage() {
           {/* CONDICIONES OPERATIVAS */}
 
           {operationalNotices.length > 0 && (
-            <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
-              <h3 className="font-bold text-sky-950 sm:text-lg">
-                ℹ️ Condiciones importantes del paquete
-              </h3>
+            <details className="group mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-bold text-sky-950 marker:content-none sm:text-lg">
+                <span>ℹ️ Condiciones importantes del paquete</span>
+                <span className="shrink-0 text-xs font-semibold text-sky-700 group-open:hidden">
+                  Ver detalle ↓
+                </span>
+                <span className="hidden shrink-0 text-xs font-semibold text-sky-700 group-open:inline">
+                  Ocultar ↑
+                </span>
+              </summary>
 
               <p className="mt-2 text-sm leading-6 text-sky-900">
                 Ten en cuenta estas condiciones además de la comparación económica.
@@ -2087,7 +2099,7 @@ export default function ResultsPage() {
                   )
                 )}
               </div>
-            </section>
+            </details>
           )}
 
           {/* PROCEDENCIA DE LOS PRECIOS DE BEBIDAS */}
