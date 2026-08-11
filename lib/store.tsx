@@ -123,6 +123,16 @@ export type WizardData = {
     CustomPackagePrices;
 
   /*
+   * Moneda elegida para los precios
+   * de paquete de la reserva.
+   *
+   * Se conserva aunque todavía no se
+   * haya introducido ningún importe.
+   */
+  packagePriceCurrency:
+    string | null;
+
+  /*
    * Precios concretos de bebidas
    * introducidos por el usuario.
    *
@@ -269,6 +279,9 @@ function createInitialData(
       createEmptyPackagePrices(
         cruiseLine
       ),
+
+    packagePriceCurrency:
+      null,
 
     selectedDrinkPrices:
       {},
@@ -694,6 +707,12 @@ export function StoreProvider({
               .bottledWaterUnlimited,
 
           customPackagePrices,
+
+          packagePriceCurrency:
+            parsedData.packagePriceCurrency === "EUR" ||
+            parsedData.packagePriceCurrency === "USD"
+              ? parsedData.packagePriceCurrency
+              : null,
 
           selectedDrinkPrices:
             storedSelectedDrinkPrices,

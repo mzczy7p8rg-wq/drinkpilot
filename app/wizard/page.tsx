@@ -227,6 +227,12 @@ function WizardForm() {
               : previous
                   .customPackagePrices,
 
+          packagePriceCurrency:
+            cruiseLineChanged
+              ? null
+              : previous
+                  .packagePriceCurrency,
+
           selectedDrinkPrices:
             resolveSelectedDrinkPricesForCruiseContext({
               cruiseContext:

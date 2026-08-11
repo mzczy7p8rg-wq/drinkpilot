@@ -87,9 +87,11 @@ function PricesForm() {
 
   const [packagePriceCurrency, setPackagePriceCurrency] =
     useState(() =>
+      data.packagePriceCurrency ??
       Object.values(data.customPackagePrices).find(
         (price) => price !== null
-      )?.currency ?? cruiseLine.currency
+      )?.currency ??
+      cruiseLine.currency
     );
 
   const currencySymbol = getCurrencySymbol(packagePriceCurrency);
@@ -573,6 +575,8 @@ function PricesForm() {
 
           ...nextPrices,
         },
+
+        packagePriceCurrency,
 
         selectedDrinkPrices:
           nextSelectedDrinkPrices,
