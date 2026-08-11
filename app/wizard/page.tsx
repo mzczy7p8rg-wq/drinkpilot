@@ -57,6 +57,11 @@ function WizardForm() {
   );
 
   const [
+    showCruiseChangeNotice,
+    setShowCruiseChangeNotice,
+  ] = useState(false);
+
+  const [
     days,
     setDays,
   ] = useState(
@@ -300,11 +305,17 @@ function WizardForm() {
                     }
                     type="button"
                     aria-pressed={isSelected}
-                    onClick={() =>
+                    onClick={() => {
+                      if (
+                        selectedCruiseLine !== cruiseLine.id
+                      ) {
+                        setShowCruiseChangeNotice(true);
+                      }
+
                       setSelectedCruiseLine(
                         cruiseLine.id
-                      )
-                    }
+                      );
+                    }}
                     className={`rounded-2xl border p-4 text-left transition ${
                       isSelected
                         ? "border-sky-500 bg-sky-50 ring-2 ring-sky-100"
@@ -352,6 +363,26 @@ function WizardForm() {
               }
             )}
           </div>
+
+          {showCruiseChangeNotice && (
+            <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+              💡 Cambio de naviera
+
+              <br />
+
+              Tus preferencias personales se mantienen.
+
+              <br />
+
+              Al continuar actualizaremos únicamente los datos específicos del crucero:
+              <br />
+              • consumo de bebidas
+              <br />
+              • precios personalizados
+              <br />
+              • condiciones del paquete
+            </div>
+          )}
         </section>
 
         {/* DURACIÓN */}
