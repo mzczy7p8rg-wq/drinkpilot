@@ -1189,9 +1189,7 @@ export default function ResultsPage() {
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
-                  {bestPackage.effectiveSavings !== null
-                    ? "de ahorro efectivo estimado durante el crucero"
-                    : "de ahorro teórico durante el crucero"}
+                  de resultado orientativo a favor del paquete durante el crucero
                 </p>
 
                 <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
@@ -1367,7 +1365,7 @@ export default function ResultsPage() {
               ) : (
                 <span className="self-start rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
                   Sin opción completa
-                  con ahorro estimado
+                  con resultado favorable
                 </span>
               )}
             </div>
@@ -1581,57 +1579,27 @@ export default function ResultsPage() {
                           </p>
                         </div>
 
-                        <div>
+                        <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-3">
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Ahorro bruto orientativo
+                            Resultado orientativo
                           </p>
 
                           <p
                             className={`mt-1 text-lg font-bold sm:text-xl ${
-                              pkg.savings >
+                              displayedSavings >
                               0
                                 ? "text-green-700"
-                                : pkg.savings <
+                                : displayedSavings <
                                   0
                                 ? "text-red-700"
                                 : "text-slate-700"
                             }`}
                           >
                             {formatSignedCurrency(
-                              pkg.savings,
+                              displayedSavings,
                               pkg.currency
                             )}
                           </p>
-                        </div>
-
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Ahorro efectivo estimado
-                          </p>
-
-                          {pkg.effectiveSavings !==
-                          null ? (
-                            <p
-                              className={`mt-1 text-lg font-bold sm:text-xl ${
-                                displayedSavings >
-                                0
-                                  ? "text-green-700"
-                                  : displayedSavings <
-                                    0
-                                  ? "text-red-700"
-                                  : "text-slate-700"
-                              }`}
-                            >
-                              {formatSignedCurrency(
-                                displayedSavings,
-                                pkg.currency
-                              )}
-                            </p>
-                          ) : (
-                            <p className="mt-1 text-lg font-bold text-amber-700 sm:text-xl">
-                              Pendiente
-                            </p>
-                          )}
                         </div>
                       </div>
 
@@ -1652,7 +1620,7 @@ export default function ResultsPage() {
                             </p>
 
                             <p className="mt-1 text-xs leading-5 text-violet-800">
-                              Este importe ya está descontado del ahorro efectivo mostrado.
+                              Este importe ya está descontado del resultado orientativo mostrado.
                             </p>
                           </div>
                         )}
@@ -1674,7 +1642,7 @@ export default function ResultsPage() {
                             que has
                             indicado, por
                             lo que el
-                            ahorro
+                            resultado
                             mostrado puede
                             compararse
                             directamente
@@ -1687,7 +1655,7 @@ export default function ResultsPage() {
                         "partial-unknown" ? (
                         <details className="group mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
                           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-amber-900 marker:content-none">
-                            <span>⚠️ Ahorro teórico orientativo</span>
+                            <span>⚠️ Cómo interpretar este resultado</span>
                             <span className="text-xs group-open:hidden">Ver detalle ↓</span>
                             <span className="hidden text-xs group-open:inline">Ocultar ↑</span>
                           </summary>
@@ -1703,7 +1671,7 @@ export default function ResultsPage() {
                             no cubre.
                             Por eso no debe
                             interpretarse
-                            como un ahorro
+                            como un resultado
                             final.
                           </p>
 
@@ -1745,7 +1713,7 @@ export default function ResultsPage() {
                             consumo queda
                             fuera del
                             paquete. El
-                            ahorro final
+                            resultado final
                             puede variar al
                             añadir ese
                             coste.
@@ -1757,10 +1725,7 @@ export default function ResultsPage() {
 
                       <div className="mt-5 border-t border-slate-200 pt-4">
                         <p className="text-sm leading-6 text-slate-600">
-                          {pkg.effectiveSavings !==
-                          null
-                            ? "Margen diario efectivo:"
-                            : "Margen diario teórico:"}{" "}
+                          Margen diario orientativo:{" "}
                           <strong
                             className={
                               pkg.dailyMargin >
@@ -1778,10 +1743,7 @@ export default function ResultsPage() {
                         </p>
 
                         <p className="mt-2 text-sm leading-6 text-slate-600">
-                          {pkg.effectiveSavings !==
-                          null
-                            ? "Punto de equilibrio efectivo:"
-                            : "Punto de equilibrio teórico:"}{" "}
+                          Punto de equilibrio orientativo:{" "}
                           <strong>
                             {pkg.breakEvenDrinksPerDay.toFixed(
                               1

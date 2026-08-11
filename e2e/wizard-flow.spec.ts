@@ -90,7 +90,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     page.getByRole("heading", { name: /Tu recomendación DrinkPilot/i })
   ).toBeVisible();
   await expect(
-    page.getByText("Resultado orientativo")
+    page.getByText("ℹ️ Resultado orientativo", { exact: true })
   ).toBeVisible();
   await expect(
     page.getByRole("img", {
@@ -103,12 +103,12 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     })
   ).toBeVisible();
   await expect(
-    page.getByText("Sin opción completa con ahorro")
+    page.getByText("Sin opción completa con resultado favorable")
   ).toBeVisible();
 
   const packageWarning = page
     .locator("details")
-    .filter({ hasText: "Ahorro teórico" })
+    .filter({ hasText: "Cómo interpretar este resultado" })
     .first();
 
   await expect(packageWarning).toBeVisible();
