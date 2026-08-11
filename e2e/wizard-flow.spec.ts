@@ -90,6 +90,9 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     page.getByRole("heading", { name: /Tu recomendación DrinkPilot/i })
   ).toBeVisible();
   await expect(
+    page.getByText("Resultado orientativo")
+  ).toBeVisible();
+  await expect(
     page.getByRole("img", {
       name: "DrinkPilot, barco navegando sobre dos olas",
     })

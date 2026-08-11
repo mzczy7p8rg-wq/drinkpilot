@@ -1124,6 +1124,15 @@ export default function ResultsPage() {
             disponibles.
           </p>
 
+          <div className="mx-auto mt-5 max-w-2xl rounded-xl border border-sky-200 bg-sky-50 p-4 text-left">
+            <p className="font-semibold text-sky-950">
+              ℹ️ Resultado orientativo
+            </p>
+            <p className="mt-1 text-sm leading-6 text-sky-900">
+              Los costes y posibles ahorros son estimaciones basadas en los datos que has indicado y en los precios disponibles. Comprueba siempre el precio y las condiciones finales de tu reserva antes de contratar un paquete.
+            </p>
+          </div>
+
           {/* EXPLICACIÓN PRINCIPAL */}
 
           <div
@@ -1341,7 +1350,10 @@ export default function ResultsPage() {
                   cobertura utilizando
                   los precios de tu
                   reserva cuando los has
-                  proporcionado.
+                  proporcionado. Todos
+                  los importes de esta
+                  comparación son
+                  orientativos.
                 </p>
               </div>
 
@@ -1355,7 +1367,7 @@ export default function ResultsPage() {
               ) : (
                 <span className="self-start rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
                   Sin opción completa
-                  con ahorro
+                  con ahorro estimado
                 </span>
               )}
             </div>
@@ -1571,7 +1583,7 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Ahorro bruto
+                            Ahorro bruto orientativo
                           </p>
 
                           <p
@@ -1594,7 +1606,7 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Ahorro efectivo
+                            Ahorro efectivo estimado
                           </p>
 
                           {pkg.effectiveSavings !==
@@ -1675,7 +1687,7 @@ export default function ResultsPage() {
                         "partial-unknown" ? (
                         <details className="group mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
                           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-amber-900 marker:content-none">
-                            <span>⚠️ Ahorro teórico</span>
+                            <span>⚠️ Ahorro teórico orientativo</span>
                             <span className="text-xs group-open:hidden">Ver detalle ↓</span>
                             <span className="hidden text-xs group-open:inline">Ocultar ↑</span>
                           </summary>
