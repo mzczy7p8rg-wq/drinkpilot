@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useStore } from "@/lib/store";
 
 export default function Hero() {
+  const { resetData } = useStore();
+
   return (
     <section className="max-w-3xl text-center">
 
@@ -20,6 +25,7 @@ export default function Hero() {
 
       <Link
         href="/wizard"
+        onNavigate={resetData}
         className="inline-block mt-10 rounded-xl bg-sky-600 px-8 py-4 text-white font-semibold hover:bg-sky-700 transition"
       >
         Empezar análisis
