@@ -117,6 +117,32 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
   ).toHaveText("0");
 });
 
+test("muestra el aviso solo al cambiar de naviera", async ({ page }) => {
+  await page.goto("/wizard");
+
+  const notice = page.getByText("Cambio de naviera");
+  const costaButton = page.getByRole("button", {
+    name: /Costa Cruceros/i,
+  });
+
+  await expect(notice).toBeHidden();
+
+  await costaButton.click();
+
+  await expect(notice).toBeHidden();
+
+  await page
+    .getByRole("button", { name: /MSC Cruises/i })
+    .click();
+
+  await expect(notice).toBeVisible();
+  await expect(
+    page.getByText(
+      "Tus preferencias personales se mantienen."
+    )
+  ).toBeVisible();
+});
+
 test("muestra Europa como región de referencia de Costa", async ({ page }) => {
   await page.goto("/wizard");
 
