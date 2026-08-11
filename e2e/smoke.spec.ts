@@ -25,6 +25,18 @@ test(
       })
     ).toBeHidden();
 
+    await expect(
+      page.getByText(
+        "DrinkPilot ofrece una estimación orientativa."
+      )
+    ).toBeVisible();
+
+    await expect(
+      page.getByText(
+        /Los precios reales pueden variar según la naviera, la ruta, la fecha, los impuestos, las propinas y las condiciones a bordo\./
+      )
+    ).toBeVisible();
+
 
     await page
       .getByRole(
