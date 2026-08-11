@@ -273,11 +273,18 @@ function WizardForm() {
         {/* NAVIERA */}
 
         <section className="mt-7 sm:mt-8">
-          <p className="text-sm font-semibold text-slate-700">
+          <p
+            id="cruise-line-label"
+            className="text-sm font-semibold text-slate-700"
+          >
             Naviera
           </p>
 
-          <div className="mt-3 grid gap-3">
+          <div
+            role="group"
+            aria-labelledby="cruise-line-label"
+            className="mt-3 grid gap-3"
+          >
             {cruiseLines.map(
               (cruiseLine) => {
                 const isSelected =
@@ -353,11 +360,28 @@ function WizardForm() {
                       </span>
                     </div>
 
-                    <p className="mt-3 text-xs leading-5 text-slate-600">
-                      {hasCompletePrices
-                        ? "Comparación económica y cobertura disponibles."
-                        : "Cobertura disponible. La comparación económica puede estar limitada por datos de precios pendientes."}
-                    </p>
+                    <div className="mt-3 grid gap-2 text-xs leading-5">
+                      <p className="flex items-center gap-2 font-medium text-emerald-700">
+                        <span aria-hidden="true">✓</span>
+                        Cobertura disponible
+                      </p>
+
+                      <p
+                        className={`flex items-center gap-2 font-medium ${
+                          hasCompletePrices
+                            ? "text-emerald-700"
+                            : "text-amber-700"
+                        }`}
+                      >
+                        <span aria-hidden="true">
+                          {hasCompletePrices ? "✓" : "!"}
+                        </span>
+
+                        {hasCompletePrices
+                          ? "Comparación económica disponible"
+                          : "Comparación económica limitada por precios pendientes"}
+                      </p>
+                    </div>
                   </button>
                 );
               }
