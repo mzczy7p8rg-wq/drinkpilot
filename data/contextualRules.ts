@@ -3,6 +3,10 @@ import type {
 } from "@/data/cruiseLines";
 
 import {
+  costaContextualPackageRules,
+} from "@/data/costa/contextualRules";
+
+import {
   mscContextualPackageRules,
 } from "@/data/msc/contextualRules";
 
@@ -23,7 +27,8 @@ const contextualRulesByCruiseLine:
     CruiseLineKey,
     ContextualPackageRule[]
   > = {
-    costa: [],
+    costa:
+      costaContextualPackageRules,
 
     msc:
       mscContextualPackageRules,
