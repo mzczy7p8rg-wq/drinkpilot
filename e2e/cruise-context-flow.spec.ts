@@ -155,6 +155,19 @@ test("muestra Europa como región de referencia de Costa", async ({ page }) => {
   );
 });
 
+test("permite volver desde el paso de crucero a seleccionar pasajeros", async ({
+  page,
+}) => {
+  await page.goto("/wizard");
+
+  await page.getByRole("link", { name: "Atrás" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/people$/);
+  await expect(
+    page.getByRole("heading", { name: "¿Quién viaja?" })
+  ).toBeVisible();
+});
+
 test("explica la cobertura y comparación de cada naviera", async ({ page }) => {
   await page.goto("/wizard");
 

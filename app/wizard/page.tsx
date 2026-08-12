@@ -8,6 +8,8 @@ import {
   useRouter,
 } from "next/navigation";
 
+import Link from "next/link";
+
 import {
   getAllCruiseLines,
 } from "@/data/cruiseLines";
@@ -274,24 +276,36 @@ function WizardForm() {
                     <li
                       key={step}
                       aria-current={isCurrent ? "step" : undefined}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
-                        isCurrent
-                          ? "bg-white font-semibold text-slate-900 shadow-sm"
-                          : "text-slate-500"
-                      }`}
                     >
-                      <span
-                        className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold ${
+                      <Link
+                        href={isComplete ? "/wizard/people" : "#"}
+                        aria-disabled={!isComplete}
+                        onClick={(event) => {
+                          if (!isComplete) {
+                            event.preventDefault();
+                          }
+                        }}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
                           isCurrent
-                            ? "bg-sky-600 text-white shadow-sm shadow-sky-200"
+                            ? "bg-white font-semibold text-slate-900 shadow-sm"
                             : isComplete
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-slate-200/80 text-slate-500"
+                              ? "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
+                              : "cursor-default text-slate-500"
                         }`}
                       >
-                        {isComplete ? "✓" : stepNumber}
-                      </span>
-                      {step}
+                        <span
+                          className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold ${
+                            isCurrent
+                              ? "bg-sky-600 text-white shadow-sm shadow-sky-200"
+                              : isComplete
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-slate-200/80 text-slate-500"
+                          }`}
+                        >
+                          {isComplete ? "✓" : stepNumber}
+                        </span>
+                        {step}
+                      </Link>
                     </li>
                   );
                 }
@@ -660,22 +674,31 @@ function WizardForm() {
 
         {/* CONTINUAR */}
 
-        <button
-          type="button"
-          disabled={
-            !isValid
-          }
-          onClick={
-            handleContinue
-          }
-          className={`mt-8 w-full rounded-2xl py-4 text-center text-base font-semibold shadow-sm transition sm:ml-auto sm:block sm:w-auto sm:min-w-48 sm:px-8 ${
-            isValid
-              ? "bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-sky-200 hover:from-sky-700 hover:to-cyan-600 active:from-sky-800"
-              : "cursor-not-allowed bg-slate-300 text-slate-500"
-          }`}
-        >
-          Continuar →
-        </button>
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+          <Link
+            href="/wizard/people"
+            className="rounded-2xl border border-slate-300 px-5 py-4 text-center text-base font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Atrás
+          </Link>
+
+          <button
+            type="button"
+            disabled={
+              !isValid
+            }
+            onClick={
+              handleContinue
+            }
+            className={`rounded-2xl px-5 py-4 text-center text-base font-semibold shadow-sm transition sm:min-w-48 sm:px-8 ${
+              isValid
+                ? "bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-sky-200 hover:from-sky-700 hover:to-cyan-600 active:from-sky-800"
+                : "cursor-not-allowed bg-slate-300 text-slate-500"
+            }`}
+          >
+            Continuar →
+          </button>
+        </div>
           </div>
         </div>
       </div>
