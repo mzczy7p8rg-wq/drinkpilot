@@ -2215,16 +2215,13 @@ export default function ResultsPage() {
 
           {/* REINICIO */}
 
-          <button
-            type="button"
-            onClick={() => {
-              resetData();
-              router.push("/");
-            }}
+          <a
+            href="/wizard/people"
+            onClick={resetData}
             className="mt-8 block w-full rounded-xl bg-sky-600 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-700 sm:mt-10 sm:text-lg"
           >
             Empezar de nuevo
-          </button>
+          </a>
         </div>
       </div>
     </main>

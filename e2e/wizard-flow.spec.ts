@@ -140,4 +140,29 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
       name: "Datos verificados",
     })
   ).toBeVisible();
+
+  await page
+    .getByRole("link", {
+      name: "Empezar de nuevo",
+    })
+    .click();
+
+  await expect(page).toHaveURL(
+    /\/wizard\/people$/
+  );
+  await expect(
+    page.getByRole("heading", {
+      name: "¿Quién viaja?",
+    })
+  ).toBeVisible();
+  await expect(
+    page.getByLabel(
+      "Cantidad de adultos"
+    )
+  ).toContainText("1");
+  await expect(
+    page.getByLabel(
+      "Cantidad de menores"
+    )
+  ).toContainText("0");
 });
