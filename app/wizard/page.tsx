@@ -251,28 +251,76 @@ function WizardForm() {
   }
 
   return (
-    <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
-      <div className="mx-auto w-full max-w-xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
-        <WizardBrand />
-        <ProgressBar
-          currentStep={2}
-          totalSteps={6}
-        />
+    <main className="brand-ocean-bg min-h-screen px-3 py-3 sm:px-6 sm:py-8 lg:flex lg:items-center lg:justify-center">
+      <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/95 shadow-[0_30px_90px_rgba(15,55,88,0.16)] backdrop-blur sm:rounded-[2rem]">
+        <div className="px-5 pt-5 sm:px-8 sm:pt-7">
+          <WizardBrand />
+        </div>
+
+        <div className="grid lg:grid-cols-[13rem_minmax(0,1fr)]">
+          <aside className="hidden border-r border-slate-200/80 bg-sky-50/70 px-5 py-8 lg:block">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+              Tu análisis
+            </p>
+
+            <ol className="mt-5 grid gap-1" aria-label="Progreso del análisis">
+              {["Viajeros", "Crucero", "Consumo", "Preferencias", "Precios", "Revisión"].map(
+                (step, index) => {
+                  const stepNumber = index + 1;
+                  const isCurrent = stepNumber === 2;
+                  const isComplete = stepNumber < 2;
+
+                  return (
+                    <li
+                      key={step}
+                      aria-current={isCurrent ? "step" : undefined}
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+                        isCurrent
+                          ? "bg-white font-semibold text-slate-900 shadow-sm"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      <span
+                        className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold ${
+                          isCurrent
+                            ? "bg-sky-600 text-white shadow-sm shadow-sky-200"
+                            : isComplete
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-slate-200/80 text-slate-500"
+                        }`}
+                      >
+                        {isComplete ? "✓" : stepNumber}
+                      </span>
+                      {step}
+                    </li>
+                  );
+                }
+              )}
+            </ol>
+          </aside>
+
+          <div className="px-5 pb-7 sm:px-10 sm:pb-10 lg:px-14 lg:pb-12">
+            <div className="lg:hidden">
+              <ProgressBar
+                currentStep={2}
+                totalSteps={6}
+              />
+            </div>
 
         {/* CABECERA */}
 
-        <div className="mt-2 sm:mt-0">
-          <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
-            Paso 2 de 6
+        <div className="mt-2 max-w-3xl sm:mt-0 lg:mt-5">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-700">
+            Paso 2 de 6 · Tu crucero
           </p>
 
-          <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            Cuéntanos tu crucero
+          <h1 className="mt-3 text-3xl font-bold leading-[1.05] tracking-[-0.04em] text-slate-950 sm:text-5xl">
+            ¿Con quién navegas?
           </h1>
 
-          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Elige tu naviera y la duración. Si sabes algo más,
-            puedes añadirlo después.
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
+            Elige la naviera y añade solo los datos que conozcas.
+            DrinkPilot ajustará el análisis sin asumir información.
           </p>
         </div>
 
@@ -289,7 +337,7 @@ function WizardForm() {
           <div
             role="group"
             aria-labelledby="cruise-line-label"
-            className="mt-3 grid gap-3"
+            className="mt-3 grid gap-3 sm:grid-cols-2"
           >
             {cruiseLines.map(
               (cruiseLine) => {
@@ -329,10 +377,10 @@ function WizardForm() {
                         cruiseLine.id
                       );
                     }}
-                    className={`rounded-2xl border p-4 text-left transition ${
+                    className={`relative min-h-40 rounded-2xl border p-5 text-left transition duration-200 ${
                       isSelected
-                        ? "border-sky-500 bg-sky-50 ring-2 ring-sky-100"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                        ? "border-sky-400 bg-gradient-to-br from-sky-50 to-cyan-50/60 shadow-[0_12px_30px_rgba(14,165,233,0.12)] ring-1 ring-sky-200"
+                        : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -354,15 +402,15 @@ function WizardForm() {
                       </div>
 
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        className={`grid h-7 min-w-7 place-items-center rounded-full px-2 text-xs font-semibold ${
                           isSelected
                             ? "bg-sky-600 text-white"
                             : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {isSelected
-                          ? "Seleccionada"
-                          : "Seleccionar"}
+                          ? "✓"
+                          : "Elegir"}
                       </span>
                     </div>
 
@@ -395,7 +443,7 @@ function WizardForm() {
           </div>
 
           {showCruiseChangeNotice && (
-            <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900">
+            <div className="mt-4 rounded-2xl border border-sky-100 bg-sky-50/80 p-4 text-sm leading-6 text-sky-900">
               💡 Has cambiado de naviera. Mantendremos tus preferencias
               y actualizaremos los datos propios del crucero.
             </div>
@@ -404,7 +452,7 @@ function WizardForm() {
 
         {/* DURACIÓN */}
 
-        <section className="mt-7">
+        <section className="mt-7 sm:max-w-sm">
           <label
             htmlFor="cruiseDays"
             className="text-sm font-semibold text-slate-700"
@@ -448,7 +496,7 @@ function WizardForm() {
                 }
               }}
               placeholder="Ej. 7"
-              className={`w-full rounded-xl border bg-white px-4 py-4 pr-20 text-xl font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
+              className={`w-full rounded-2xl border bg-white px-4 py-4 pr-20 text-xl font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
                 days !== "" &&
                 !isValidDays
                   ? "border-red-300 focus:ring-2 focus:ring-red-400"
@@ -476,7 +524,7 @@ function WizardForm() {
 
         {/* CONTEXTO OPCIONAL */}
 
-        <section className="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+        <section className="mt-8 border-t border-slate-200 pt-7">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-slate-700">
@@ -493,7 +541,7 @@ function WizardForm() {
             </span>
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <label
                 htmlFor="bookingMarket"
@@ -506,7 +554,7 @@ function WizardForm() {
                 id="bookingMarket"
                 value={market}
                 onChange={(event) => setMarket(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
               >
                 <option value="">No lo sé</option>
                 {marketOptions.map((option) => (
@@ -529,7 +577,7 @@ function WizardForm() {
                 id="sailingRegion"
                 value={sailingRegion}
                 onChange={(event) => setSailingRegion(event.target.value)}
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3.5 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
               >
                 <option value="">No lo sé</option>
                 {sailingRegionOptions.map((option) => (
@@ -544,7 +592,7 @@ function WizardForm() {
 
         {/* FECHA DE SALIDA */}
 
-        <section className="mt-7">
+        <section className="mt-6 max-w-sm">
           <div className="flex items-center justify-between gap-3">
             <label
               htmlFor="sailingDate"
@@ -571,7 +619,7 @@ function WizardForm() {
                 event.target.value
               )
             }
-            className={`mt-2 w-full rounded-xl border bg-white px-4 py-4 text-base font-semibold text-slate-900 outline-none transition ${
+            className={`mt-2 w-full rounded-2xl border bg-white px-4 py-3.5 text-base font-semibold text-slate-900 outline-none transition ${
               !isValidSailingDate
                 ? "border-red-300 focus:ring-2 focus:ring-red-400"
                 : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
@@ -597,7 +645,7 @@ function WizardForm() {
             </p>
           )}
 
-          <div className="mt-4 rounded-xl bg-slate-50 p-4">
+          <div className="mt-4 rounded-2xl bg-sky-50/70 p-4">
             <p className="text-sm leading-6 text-slate-600">
               💡 La fecha nos permitirá
               aplicar correctamente
@@ -620,14 +668,16 @@ function WizardForm() {
           onClick={
             handleContinue
           }
-          className={`mt-7 w-full rounded-xl py-4 text-center text-base font-semibold transition sm:mt-8 ${
+          className={`mt-8 w-full rounded-2xl py-4 text-center text-base font-semibold shadow-sm transition sm:ml-auto sm:block sm:w-auto sm:min-w-48 sm:px-8 ${
             isValid
-              ? "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800"
+              ? "bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-sky-200 hover:from-sky-700 hover:to-cyan-600 active:from-sky-800"
               : "cursor-not-allowed bg-slate-300 text-slate-500"
           }`}
         >
-          Continuar
+          Continuar →
         </button>
+          </div>
+        </div>
       </div>
     </main>
   );
