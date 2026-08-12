@@ -68,29 +68,56 @@ function PeopleForm() {
   }
 
   return (
-    <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
-      <div className="mx-auto w-full max-w-xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
-        <WizardBrand />
-        <ProgressBar
-          currentStep={1}
-          totalSteps={6}
-        />
+    <main className="brand-ocean-bg min-h-screen px-3 py-3 sm:px-6 sm:py-8 lg:flex lg:items-center lg:justify-center">
+      <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/95 shadow-[0_30px_90px_rgba(15,55,88,0.16)] backdrop-blur sm:rounded-[2rem]">
+        <div className="px-5 pt-5 sm:px-8 sm:pt-7">
+          <WizardBrand />
+        </div>
 
-        <div className="mt-2 sm:mt-0">
-          <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
-            Paso 1 de 6
+        <div className="grid lg:grid-cols-[13rem_minmax(0,1fr)]">
+          <aside className="hidden border-r border-slate-200/80 bg-sky-50/70 px-5 py-8 lg:block">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Tu análisis</p>
+            <ol className="mt-5 grid gap-1" aria-label="Progreso del análisis">
+              {["Viajeros", "Crucero", "Consumo", "Preferencias", "Precios", "Revisión"].map((step, index) => (
+                <li
+                  key={step}
+                  aria-current={index === 0 ? "step" : undefined}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${
+                    index === 0 ? "bg-white font-semibold text-slate-900 shadow-sm" : "text-slate-500"
+                  }`}
+                >
+                  <span className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold ${
+                    index === 0 ? "bg-sky-600 text-white shadow-sm shadow-sky-200" : "bg-slate-200/80 text-slate-500"
+                  }`}>
+                    {index + 1}
+                  </span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </aside>
+
+          <div className="px-5 pb-7 sm:px-10 sm:pb-10 lg:px-14 lg:pb-12">
+            <div className="lg:hidden">
+              <ProgressBar currentStep={1} totalSteps={6} />
+            </div>
+
+        <div className="mt-2 max-w-3xl sm:mt-0 lg:mt-5">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-700">
+            Paso 1 de 6 · Viajeros
           </p>
 
-          <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
+          <h1 className="mt-3 text-3xl font-bold leading-[1.05] tracking-[-0.04em] text-slate-950 sm:text-5xl">
             ¿Quién viaja?
           </h1>
 
-          <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Separa adultos y menores para ajustar mejor el análisis.
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base sm:leading-7">
+            Indica adultos y menores para aplicar correctamente precios y condiciones.
           </p>
         </div>
 
-        <div className="mt-7 sm:mt-8">
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <section className="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 to-cyan-50/60 p-5 sm:p-6">
 
           <p className="text-sm font-semibold text-slate-700">
             Adultos
@@ -111,14 +138,14 @@ function PeopleForm() {
                   )
                 )
               }
-              className="h-14 w-14 rounded-xl border border-slate-300 text-2xl font-bold text-slate-700 transition hover:bg-slate-100 active:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-12 w-12 rounded-2xl border border-sky-200 bg-white text-2xl font-bold text-slate-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 active:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               −
             </button>
 
             <div
               aria-label="Cantidad de adultos"
-              className="flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 text-slate-900"
+              className="flex h-24 w-28 flex-col items-center justify-center rounded-3xl bg-white text-slate-900 shadow-sm"
             >
               <span className="text-3xl font-bold">
                 {adults}
@@ -142,31 +169,37 @@ function PeopleForm() {
                   )
                 )
               }
-              className="h-14 w-14 rounded-xl border border-slate-300 text-2xl font-bold text-slate-700 transition hover:bg-slate-100 active:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-12 w-12 rounded-2xl border border-sky-200 bg-white text-2xl font-bold text-slate-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 active:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               +
             </button>
           </div>
 
-          <p className="mt-7 text-sm font-semibold text-slate-700">Menores</p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5 sm:p-6">
+          <p className="text-sm font-semibold text-slate-700">Menores</p>
           <div className="mt-4 flex items-center justify-center gap-5">
             <button type="button" aria-label="Disminuir menores" disabled={parsedMinors <= 0}
               onClick={() => setMinors(String(Math.max(0, parsedMinors - 1)))}
-              className="h-14 w-14 rounded-xl border border-slate-300 text-2xl font-bold text-slate-700 disabled:opacity-40">−</button>
-            <div aria-label="Cantidad de menores" className="flex h-20 w-28 flex-col items-center justify-center rounded-2xl border border-sky-200 bg-sky-50">
+              className="h-12 w-12 rounded-2xl border border-slate-200 bg-white text-2xl font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:opacity-40">−</button>
+            <div aria-label="Cantidad de menores" className="flex h-24 w-28 flex-col items-center justify-center rounded-3xl bg-white shadow-sm">
               <span className="text-3xl font-bold">{minors}</span>
               <span className="text-xs text-slate-500">{parsedMinors === 1 ? "menor" : "menores"}</span>
             </div>
             <button type="button" aria-label="Aumentar menores" disabled={parsedMinors >= 10}
               onClick={() => setMinors(String(Math.min(10, parsedMinors + 1)))}
-              className="h-14 w-14 rounded-xl border border-slate-300 text-2xl font-bold text-slate-700 disabled:opacity-40">+</button>
+              className="h-12 w-12 rounded-2xl border border-slate-200 bg-white text-2xl font-bold text-slate-700 shadow-sm transition hover:bg-slate-100 disabled:opacity-40">+</button>
           </div>
+          </section>
 
         </div>
 
-        <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 El cálculo económico usa el número de adultos. Guardamos los menores
+        <div className="mt-5 flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-900 sm:mt-6">
+          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">✓</span>
+          <p>El cálculo económico usa el número de adultos. Guardamos los menores
           por separado porque sus condiciones pueden variar según la naviera.
+          </p>
         </div>
 
         <div className="mt-7 grid grid-cols-2 gap-3 sm:mt-8 sm:gap-4">
@@ -176,7 +209,7 @@ function PeopleForm() {
             onClick={() =>
               router.push(isReturningFromAnalysis ? "/wizard/prices" : "/")
             }
-            className="rounded-xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
+            className="rounded-2xl border border-slate-300 px-3 py-4 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:text-base"
           >
             Atrás
           </button>
@@ -185,17 +218,19 @@ function PeopleForm() {
             type="button"
             disabled={!isValid}
             onClick={handleReview}
-            className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
+            className={`rounded-2xl px-3 py-4 text-center text-sm font-semibold shadow-sm transition sm:text-base ${
               isValid
-                ? "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800"
+                ? "bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-sky-200 hover:from-sky-700 hover:to-cyan-600"
                 : "cursor-not-allowed bg-slate-300 text-slate-500"
             }`}
           >
-            Continuar
+            Continuar →
           </button>
 
         </div>
 
+          </div>
+        </div>
       </div>
     </main>
   );

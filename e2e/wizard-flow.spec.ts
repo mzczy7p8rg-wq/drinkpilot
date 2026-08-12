@@ -22,7 +22,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/wizard$/);
   await expect(
-    page.getByRole("heading", { name: "Cuéntanos tu crucero" })
+    page.getByRole("heading", { name: "¿Con quién navegas?" })
   ).toBeVisible();
 
   await page
