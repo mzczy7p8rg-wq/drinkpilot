@@ -11,7 +11,7 @@ test("muestra una página 404 propia y permite volver", async ({ page }) => {
   await expect(page).toHaveURL(/\/$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Te compensa el paquete de bebidas?",
+      name: "El paquete correcto, sin navegar a ciegas.",
     })
   ).toBeVisible();
 });

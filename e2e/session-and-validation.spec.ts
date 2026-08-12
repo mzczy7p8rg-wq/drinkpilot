@@ -30,7 +30,7 @@ test("recupera el wizard ante una sesión corrupta", async ({ page }) => {
   await page.goto("/wizard");
 
   await expect(
-    page.getByRole("heading", { name: "Cuéntanos tu crucero" })
+    page.getByRole("heading", { name: "¿Con quién navegas?" })
   ).toBeVisible();
   await expect(page.getByLabel("Duración del crucero")).toHaveValue("");
 });

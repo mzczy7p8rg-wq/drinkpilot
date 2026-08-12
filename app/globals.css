@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #071a2f;
   --foreground: #171717;
 
   color-scheme: light;
@@ -28,7 +28,7 @@ body {
 
 .brand-ocean-bg {
   background:
-    radial-gradient(circle at 18% 12%, rgb(14 165 233 / 0.16), transparent 30rem),
-    radial-gradient(circle at 88% 88%, rgb(2 132 199 / 0.12), transparent 34rem),
-    linear-gradient(145deg, #f8fbff 0%, #eef8ff 50%, #f8fafc 100%);
+    radial-gradient(circle at 18% 12%, rgb(14 165 233 / 0.24), transparent 30rem),
+    radial-gradient(circle at 88% 88%, rgb(6 182 212 / 0.16), transparent 34rem),
+    linear-gradient(145deg, #061629 0%, #0b2945 52%, #071a2f 100%);
 }
