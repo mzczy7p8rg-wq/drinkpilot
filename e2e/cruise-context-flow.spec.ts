@@ -30,6 +30,9 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Tienes el precio de tu reserva?" })
   ).toBeVisible();
+  await expect(
+    page.getByText("¿Tu tarifa ya incluye bebidas?")
+  ).toHaveCount(0);
   await page.getByRole("link", { name: "Continuar" }).click();
 
   await expect(page).toHaveURL(/\/wizard\/people$/);

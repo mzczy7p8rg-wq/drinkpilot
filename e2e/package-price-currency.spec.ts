@@ -35,6 +35,33 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
 
   await expect(page).toHaveURL(/\/wizard\/prices$/);
 
+  const includedPackageHelp = page
+    .locator("details")
+    .filter({ hasText: "¿Tu tarifa ya incluye bebidas?" });
+
+  await expect(includedPackageHelp).toBeVisible();
+  await expect(includedPackageHelp).not.toHaveAttribute("open", "");
+
+  await includedPackageHelp.locator("summary").click();
+
+  await expect(
+    includedPackageHelp.getByText("Todo Incluido", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText("My Drinks", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText("Todo Incluido Suite", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText("My Drinks Plus", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText(
+      /No deducimos automáticamente qué paquete tienes/i
+    )
+  ).toBeVisible();
+
   const packageCurrencyGroup = page.getByRole("group", {
     name: "Moneda del precio de tu reserva",
   });
