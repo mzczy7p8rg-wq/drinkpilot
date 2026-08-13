@@ -61,6 +61,17 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
       /No deducimos automáticamente qué paquete tienes/i
     )
   ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByRole("link", {
+      name: "Consultar fuente oficial de Costa",
+    })
+  ).toHaveAttribute(
+    "href",
+    "https://www.costacruceros.es/la-experiencia/paquetes-de-bebidas.html"
+  );
+  await expect(
+    includedPackageHelp.getByText("Revisado el 14/08/2026")
+  ).toBeVisible();
 
   const packageCurrencyGroup = page.getByRole("group", {
     name: "Moneda del precio de tu reserva",
