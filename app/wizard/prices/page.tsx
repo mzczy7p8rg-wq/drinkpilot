@@ -728,11 +728,7 @@ function PricesForm() {
                   key={
                     pkg.key
                   }
-                  className={`rounded-2xl border p-4 sm:p-5 ${
-                    requiresUserPrice
-                      ? "border-sky-200 bg-sky-50/50"
-                      : "border-slate-200"
-                  }`}
+                  className="rounded-2xl border border-sky-200/30 bg-white/5 p-4 sm:p-5"
                 >
                   {/* CABECERA PAQUETE */}
 

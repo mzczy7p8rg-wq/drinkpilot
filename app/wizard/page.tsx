@@ -474,8 +474,21 @@ function WizardForm() {
             Duración del crucero
           </label>
 
-          <div className="relative mt-2">
-            <input
+          <div className="mt-2 flex items-stretch gap-2">
+            <button
+              type="button"
+              aria-label="Quitar un día"
+              disabled={days === "" || Number(days) <= 1}
+              onClick={() =>
+                setDays(String(Math.max(1, Number(days || 1) - 1)))
+              }
+              className="grid min-h-16 w-16 shrink-0 place-items-center rounded-2xl border border-sky-300/30 bg-white/10 text-2xl font-bold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              −
+            </button>
+
+            <div className="relative min-w-0 flex-1">
+              <input
               id="cruiseDays"
               type="number"
               min="1"
@@ -510,17 +523,30 @@ function WizardForm() {
                 }
               }}
               placeholder="Ej. 7"
-              className={`w-full rounded-2xl border bg-white px-4 py-4 pr-20 text-xl font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
+              className={`cruise-days-input h-full min-h-16 w-full rounded-2xl border bg-white px-4 py-4 pr-20 text-center text-xl font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
                 days !== "" &&
                 !isValidDays
                   ? "border-red-300 focus:ring-2 focus:ring-red-400"
                   : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
               }`}
-            />
+              />
 
-            <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">
-              días
-            </span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">
+                días
+              </span>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Añadir un día"
+              disabled={days !== "" && Number(days) >= MAX_CRUISE_DAYS}
+              onClick={() =>
+                setDays(String(Math.min(MAX_CRUISE_DAYS, Number(days || 0) + 1)))
+              }
+              className="grid min-h-16 w-16 shrink-0 place-items-center rounded-2xl border border-sky-300/30 bg-sky-700 text-2xl font-bold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              +
+            </button>
           </div>
 
           {days !== "" &&

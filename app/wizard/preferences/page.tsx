@@ -155,30 +155,22 @@ export default function PreferencesPage() {
             }
           />
 
-          <PreferenceCard
-            title="🍺 Cerveza embotellada"
-            description="Prefieres disponer también de cerveza embotellada además de las opciones básicas."
-            checked={
-              data.bottledBeer
-            }
-            onChange={(checked) =>
-              setData((prev) => ({
-                ...prev,
-
-                bottledBeer:
-                  checked,
-              }))
-            }
-          />
-
           <details className="rounded-2xl border border-slate-200 bg-white p-4">
             <summary className="cursor-pointer font-semibold text-slate-800">
-              Opciones específicas (opcional)
+              Opciones premium (opcional)
             </summary>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Ábrelo solo si buscas bebidas de gama superior.
+              Ábrelo si buscas cerveza embotellada o bebidas de gama superior.
             </p>
             <div className="mt-4 space-y-3">
+              <PreferenceCard
+                title="🍺 Cerveza embotellada"
+                description="La cerveza básica suele servirse de tirador; marca esta opción si prefieres cerveza embotellada."
+                checked={data.bottledBeer}
+                onChange={(checked) =>
+                  setData((prev) => ({ ...prev, bottledBeer: checked }))
+                }
+              />
               <PreferenceCard
                 title="🍸 Cócteles premium"
                 description="Quieres una selección más amplia de cócteles."

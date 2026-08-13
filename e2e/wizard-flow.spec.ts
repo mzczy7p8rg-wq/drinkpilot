@@ -56,6 +56,9 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   const bottledBeerPreference = page.getByRole("checkbox", {
     name: /Cerveza embotellada/i,
   });
+  await page
+    .getByText("Opciones premium (opcional)", { exact: true })
+    .click();
   await bottledBeerPreference.check();
   await expect(bottledBeerPreference).toBeChecked();
   await page.getByRole("link", { name: "Continuar" }).click();
