@@ -104,6 +104,7 @@ export type WizardData = {
    */
   alcoholicCocktails: boolean;
   nonAlcoholicCocktails: boolean;
+  draftBeer: boolean;
   premiumCocktails: boolean;
   bottledBeer: boolean;
   premiumSpirits: boolean;
@@ -268,6 +269,9 @@ function createInitialData(
       false,
 
     nonAlcoholicCocktails:
+      false,
+
+    draftBeer:
       false,
 
     premiumCocktails:
@@ -697,6 +701,10 @@ export function StoreProvider({
           nonAlcoholicCocktails:
             storedWizardPreferences
               .nonAlcoholicCocktails,
+
+          draftBeer:
+            storedWizardPreferences
+              .draftBeer,
 
           premiumCocktails:
             storedWizardPreferences

@@ -18,6 +18,7 @@ describe(
           resolveStoredWizardPreferences({
             alcoholicCocktails: true,
             nonAlcoholicCocktails: false,
+            draftBeer: true,
             premiumCocktails: true,
             bottledBeer: false,
             premiumSpirits: true,
@@ -27,6 +28,7 @@ describe(
         ).toEqual({
           alcoholicCocktails: true,
           nonAlcoholicCocktails: false,
+          draftBeer: true,
           premiumCocktails: true,
           bottledBeer: false,
           premiumSpirits: true,
@@ -43,6 +45,7 @@ describe(
           resolveStoredWizardPreferences({
             alcoholicCocktails: 1,
             nonAlcoholicCocktails: "true",
+            draftBeer: "yes",
             premiumCocktails: null,
             bottledBeer: {},
             premiumSpirits: [],
@@ -52,6 +55,7 @@ describe(
         ).toEqual({
           alcoholicCocktails: false,
           nonAlcoholicCocktails: false,
+          draftBeer: false,
           premiumCocktails: false,
           bottledBeer: false,
           premiumSpirits: false,
@@ -100,6 +104,7 @@ describe(
             {
               alcoholicCocktails: true,
               nonAlcoholicCocktails: true,
+              draftBeer: true,
               premiumCocktails: false,
               bottledBeer: true,
               premiumSpirits: false,
@@ -110,6 +115,7 @@ describe(
         ).toEqual({
           alcoholicCocktails: true,
           nonAlcoholicCocktails: true,
+          draftBeer: true,
           premiumCocktails: false,
           bottledBeer: true,
           premiumSpirits: false,

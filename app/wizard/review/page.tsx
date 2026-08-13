@@ -189,6 +189,9 @@ export default function ReviewPage() {
     data.nonAlcoholicCocktails &&
       "Cócteles sin alcohol",
 
+    data.draftBeer &&
+      "Cerveza de tirador",
+
     data.premiumCocktails &&
       "Cócteles premium",
 

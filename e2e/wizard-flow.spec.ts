@@ -53,7 +53,11 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Qué te gustaría tener incluido?" })
   ).toBeVisible();
-  await expect(page.getByText("🍺 Cerveza de tirador")).toBeVisible();
+  const draftBeerPreference = page.getByRole("checkbox", {
+    name: /Cerveza de tirador/i,
+  });
+  await draftBeerPreference.check();
+  await expect(draftBeerPreference).toBeChecked();
   const bottledBeerPreference = page.getByRole("checkbox", {
     name: /Cerveza embotellada/i,
   });
@@ -79,6 +83,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(page.getByText("7 días")).toBeVisible();
   await expect(page.getByText("2 adultos · 1 menor")).toBeVisible();
   await expect(page.getByText("Cerveza embotellada")).toBeVisible();
+  await expect(page.getByText("Cerveza de tirador")).toBeVisible();
   await expect(page.getByText("32,50")).toBeVisible();
 
   await page.getByRole("button", { name: "Ver recomendación" }).click();
