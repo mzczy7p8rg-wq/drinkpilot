@@ -7,16 +7,16 @@ type BrandProps = {
 };
 
 export function BrandMark({
-  className = "h-20 w-20",
+  className = "h-auto w-48",
 }: Pick<BrandProps, "className">) {
   return (
     <Image
-      src="/drinkpilot-logo.png"
+      src="/drinkpilot-logo-horizontal.png"
       alt="DrinkPilot · Tu guía para disfrutar más"
-      width={800}
-      height={800}
+      width={1200}
+      height={400}
       priority
-      className={`${className} rounded-[22%] object-contain`}
+      className={`${className} rounded-xl object-contain`}
     />
   );
 }
@@ -30,8 +30,8 @@ export default function Brand({
       <BrandMark
         className={
           compact
-            ? "h-20 w-20 sm:h-24 sm:w-24"
-            : "h-32 w-32 sm:h-40 sm:w-40"
+            ? "h-auto w-40 sm:w-48"
+            : "h-auto w-56 sm:w-72"
         }
       />
     </div>
