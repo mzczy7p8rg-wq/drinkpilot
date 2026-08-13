@@ -36,7 +36,7 @@ export const myDrinksRestrictions = [
 
   "Incluye únicamente las bebidas contempladas en la selección My Drinks publicada por Costa.",
 
-  "La disponibilidad y cantidad de agua embotellada puede estar limitada según las condiciones específicas del paquete.",
+  "La asignación de agua embotellada depende de las condiciones de la reserva y del camarote; DrinkPilot no la considera una botella diaria individual garantizada.",
 ];
 
 export const myDrinksPlusRestrictions = [

@@ -35,6 +35,44 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
 
   await expect(page).toHaveURL(/\/wizard\/prices$/);
 
+  const includedPackageHelp = page
+    .locator("details")
+    .filter({ hasText: "¿Tu tarifa ya incluye bebidas?" });
+
+  await expect(includedPackageHelp).toBeVisible();
+  await expect(includedPackageHelp).not.toHaveAttribute("open", "");
+
+  await includedPackageHelp.locator("summary").click();
+
+  await expect(
+    includedPackageHelp.getByText("Todo Incluido", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText("My Drinks", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText("Todo Incluido Suite", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText("My Drinks Plus", { exact: true })
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByText(
+      /No deducimos automáticamente qué paquete tienes/i
+    )
+  ).toBeVisible();
+  await expect(
+    includedPackageHelp.getByRole("link", {
+      name: "Consultar fuente oficial de Costa",
+    })
+  ).toHaveAttribute(
+    "href",
+    "https://www.costacruceros.es/la-experiencia/paquetes-de-bebidas.html"
+  );
+  await expect(
+    includedPackageHelp.getByText("Revisado el 14/08/2026")
+  ).toBeVisible();
+
   const packageCurrencyGroup = page.getByRole("group", {
     name: "Moneda del precio de tu reserva",
   });
@@ -55,7 +93,7 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   );
 
   await expect(
-    page.getByText(/Referencia original EUR/i).first()
+    page.getByText(/Estimación orientativa EUR/i).first()
   ).toBeVisible();
 
   await usdButton.click();
@@ -72,8 +110,12 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   ).toBeVisible();
 
   await expect(
-    page.getByText(/Referencia original EUR/i).first()
+    page.getByText(/Estimación orientativa EUR/i).first()
   ).toBeVisible();
+
+  await expect(
+    page.getByText(/Referencia original EUR/i)
+  ).toHaveCount(0);
 
   await expect(
     page

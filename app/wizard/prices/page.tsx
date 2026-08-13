@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import ProgressBar from "@/components/ProgressBar";
 import { WizardBrand } from "@/components/Brand";
+import CostaIncludedPackageGuidance from "@/components/wizard/CostaIncludedPackageGuidance";
 
 import {
   getCruiseLine,
@@ -647,6 +648,10 @@ function PricesForm() {
           añádelo para obtener un resultado más preciso.
         </div>
 
+        {data.cruiseLine === "costa" && (
+          <CostaIncludedPackageGuidance />
+        )}
+
         <fieldset className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
           <legend className="px-1 text-sm font-semibold text-slate-900">
             Moneda del precio de tu reserva
@@ -772,7 +777,7 @@ function PricesForm() {
                       </span>
                     ) : (
                       <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                        Referencia original{" "}
+                        Estimación orientativa{" "}
                         {pkg.currency}{" "}
                         {formatCurrency(
                           pkg.pricePerDay as number,
