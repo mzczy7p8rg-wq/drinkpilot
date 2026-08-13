@@ -93,7 +93,7 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   );
 
   await expect(
-    page.getByText(/Referencia original EUR/i).first()
+    page.getByText(/Estimación orientativa EUR/i).first()
   ).toBeVisible();
 
   await usdButton.click();
@@ -110,8 +110,12 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   ).toBeVisible();
 
   await expect(
-    page.getByText(/Referencia original EUR/i).first()
+    page.getByText(/Estimación orientativa EUR/i).first()
   ).toBeVisible();
+
+  await expect(
+    page.getByText(/Referencia original EUR/i)
+  ).toHaveCount(0);
 
   await expect(
     page
