@@ -158,7 +158,7 @@ export default function PreferencesPage() {
 
           <PreferenceCard
             title="🍺 Cerveza de tirador"
-            description="Quieres que el paquete incluya cerveza de tirador."
+            description="Valoras que el paquete incluya cerveza de tirador."
             checked={data.draftBeer}
             onChange={(checked) =>
               setData((prev) => ({ ...prev, draftBeer: checked }))
