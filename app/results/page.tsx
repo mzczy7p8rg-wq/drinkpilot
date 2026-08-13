@@ -402,7 +402,7 @@ export default function ResultsPage() {
     return (
       <main className="brand-ocean-bg min-h-screen px-4 py-6 pb-28 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+          <div className="dark-app-surface rounded-2xl p-5 sm:rounded-3xl sm:p-10">
             <WizardBrand />
             <div className="text-center">
               <div className="text-5xl">
@@ -829,7 +829,7 @@ export default function ResultsPage() {
               <a
                 href="/wizard/people"
                 onClick={resetData}
-                className="rounded-xl bg-sky-600 px-4 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
+                className="rounded-xl bg-sky-700 px-4 py-4 text-center font-semibold text-white transition hover:bg-sky-800"
               >
                 Nuevo análisis
               </a>
@@ -1107,7 +1107,7 @@ export default function ResultsPage() {
   return (
     <main className="brand-ocean-bg min-h-screen px-4 pt-6 pb-28 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
-        <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+        <div className="dark-app-surface rounded-2xl p-5 sm:rounded-3xl sm:p-10">
           {/* CABECERA */}
 
           <WizardBrand />
@@ -1466,7 +1466,7 @@ export default function ResultsPage() {
                         </div>
 
                         {isBest && (
-                          <span className="self-start rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
+                          <span className="self-start rounded-full bg-green-700 px-3 py-1 text-xs font-semibold text-white">
                             Mejor opción
                           </span>
                         )}
@@ -2226,16 +2226,13 @@ export default function ResultsPage() {
 
           {/* REINICIO */}
 
-          <button
-            type="button"
-            onClick={() => {
-              resetData();
-              router.push("/");
-            }}
-            className="mt-8 block w-full rounded-xl bg-sky-600 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-700 sm:mt-10 sm:text-lg"
+          <a
+            href="/wizard/people"
+            onClick={resetData}
+            className="mt-8 block w-full rounded-xl bg-sky-700 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-800 sm:mt-10 sm:text-lg"
           >
             Empezar de nuevo
-          </button>
+          </a>
         </div>
       </div>
     </main>

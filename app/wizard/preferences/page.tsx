@@ -77,6 +77,7 @@ export default function PreferencesPage() {
   const selectedPreferences = [
     data.alcoholicCocktails,
     data.nonAlcoholicCocktails,
+    data.draftBeer,
     data.premiumCocktails,
     data.bottledBeer,
     data.premiumSpirits,
@@ -97,7 +98,7 @@ export default function PreferencesPage() {
 
   return (
     <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
-      <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
+      <div className="dark-app-surface mx-auto w-full max-w-2xl rounded-2xl p-5 sm:p-10">
         <WizardBrand />
         <ProgressBar
           currentStep={4}
@@ -156,29 +157,30 @@ export default function PreferencesPage() {
           />
 
           <PreferenceCard
-            title="🍺 Cerveza embotellada"
-            description="Prefieres disponer también de cerveza embotellada además de las opciones básicas."
-            checked={
-              data.bottledBeer
-            }
+            title="🍺 Cerveza de tirador"
+            description="Valoras que el paquete incluya cerveza de tirador."
+            checked={data.draftBeer}
             onChange={(checked) =>
-              setData((prev) => ({
-                ...prev,
-
-                bottledBeer:
-                  checked,
-              }))
+              setData((prev) => ({ ...prev, draftBeer: checked }))
             }
           />
 
           <details className="rounded-2xl border border-slate-200 bg-white p-4">
             <summary className="cursor-pointer font-semibold text-slate-800">
-              Opciones específicas (opcional)
+              Opciones premium (opcional)
             </summary>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Ábrelo solo si buscas bebidas de gama superior.
+              Ábrelo si buscas cerveza embotellada o bebidas de gama superior.
             </p>
             <div className="mt-4 space-y-3">
+              <PreferenceCard
+                title="🍺 Cerveza embotellada"
+                description="La cerveza básica suele servirse de tirador; marca esta opción si prefieres cerveza embotellada."
+                checked={data.bottledBeer}
+                onChange={(checked) =>
+                  setData((prev) => ({ ...prev, bottledBeer: checked }))
+                }
+              />
               <PreferenceCard
                 title="🍸 Cócteles premium"
                 description="Quieres una selección más amplia de cócteles."
@@ -287,7 +289,7 @@ export default function PreferencesPage() {
 
           <Link
             href="/wizard/prices"
-            className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
+            className="rounded-xl bg-sky-700 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-800 active:bg-sky-800 sm:text-base"
           >
             Continuar
           </Link>

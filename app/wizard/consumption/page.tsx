@@ -66,7 +66,7 @@ export default function ConsumptionPage() {
 
   return (
     <main className="brand-ocean-bg min-h-screen px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
-      <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
+      <div className="dark-app-surface mx-auto w-full max-w-2xl rounded-2xl p-5 sm:p-10">
         <WizardBrand />
         <ProgressBar
           currentStep={3}
@@ -350,7 +350,7 @@ export default function ConsumptionPage() {
             }}
             className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
               hasConsumption
-                ? "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800"
+                ? "bg-sky-700 text-white hover:bg-sky-800 active:bg-sky-800"
                 : "pointer-events-none bg-slate-300 text-slate-500"
             }`}
           >

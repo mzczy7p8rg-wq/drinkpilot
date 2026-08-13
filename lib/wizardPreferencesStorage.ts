@@ -1,6 +1,7 @@
 export type StoredWizardPreferencesInput = {
   alcoholicCocktails?: unknown;
   nonAlcoholicCocktails?: unknown;
+  draftBeer?: unknown;
   premiumCocktails?: unknown;
   bottledBeer?: unknown;
   premiumSpirits?: unknown;
@@ -11,6 +12,7 @@ export type StoredWizardPreferencesInput = {
 export type StoredWizardPreferences = {
   alcoholicCocktails: boolean;
   nonAlcoholicCocktails: boolean;
+  draftBeer: boolean;
   premiumCocktails: boolean;
   bottledBeer: boolean;
   premiumSpirits: boolean;
@@ -22,6 +24,7 @@ const defaultWizardPreferences:
   StoredWizardPreferences = {
   alcoholicCocktails: false,
   nonAlcoholicCocktails: false,
+  draftBeer: false,
   premiumCocktails: false,
   bottledBeer: false,
   premiumSpirits: false,
@@ -74,6 +77,12 @@ export function resolveStoredWizardPreferences(
       sanitizeBoolean(
         input.nonAlcoholicCocktails,
         fallback.nonAlcoholicCocktails
+      ),
+
+    draftBeer:
+      sanitizeBoolean(
+        input.draftBeer,
+        fallback.draftBeer
       ),
 
     premiumCocktails:

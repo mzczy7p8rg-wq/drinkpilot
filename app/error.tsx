@@ -15,7 +15,7 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12">
+    <main className="brand-ocean-bg flex min-h-screen items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg rounded-2xl bg-white p-8 text-center shadow-lg sm:p-10">
         <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
           DrinkPilot
@@ -33,7 +33,7 @@ export default function ErrorPage({
           <button
             type="button"
             onClick={() => retry()}
-            className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white transition hover:bg-sky-700"
+            className="rounded-xl bg-sky-700 px-4 py-3 font-semibold text-white transition hover:bg-sky-800"
           >
             Volver a intentarlo
           </button>

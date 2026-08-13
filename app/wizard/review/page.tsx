@@ -189,6 +189,9 @@ export default function ReviewPage() {
     data.nonAlcoholicCocktails &&
       "Cócteles sin alcohol",
 
+    data.draftBeer &&
+      "Cerveza de tirador",
+
     data.premiumCocktails &&
       "Cócteles premium",
 
@@ -228,7 +231,7 @@ export default function ReviewPage() {
 
   return (
     <main className="brand-ocean-bg min-h-screen px-4 py-6 pb-24 sm:px-6 sm:py-10 sm:pb-10">
-      <div className="mx-auto w-full max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:p-10">
+      <div className="dark-app-surface mx-auto w-full max-w-2xl rounded-2xl p-5 sm:p-10">
         <WizardBrand />
         <ProgressBar
           currentStep={6}
@@ -745,7 +748,7 @@ export default function ReviewPage() {
                 "/results"
               )
             }
-            className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
+            className="rounded-xl bg-sky-700 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-800 active:bg-sky-800 sm:text-base"
           >
             Ver recomendación
           </button>

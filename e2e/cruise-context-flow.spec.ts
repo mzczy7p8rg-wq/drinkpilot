@@ -1,5 +1,24 @@
 import { expect, test } from "@playwright/test";
 
+test("permite ajustar los días con controles visibles", async ({ page }) => {
+  await page.goto("/wizard");
+
+  const duration = page.getByLabel("Duración del crucero");
+  await expect(duration).toHaveValue("");
+
+  await page.getByRole("button", { name: "Añadir un día" }).click();
+  await expect(duration).toHaveValue("1");
+
+  await page.getByRole("button", { name: "Añadir un día" }).click();
+  await expect(duration).toHaveValue("2");
+
+  await page.getByRole("button", { name: "Quitar un día" }).click();
+  await expect(duration).toHaveValue("1");
+  await expect(
+    page.getByRole("button", { name: "Quitar un día" })
+  ).toBeDisabled();
+});
+
 test("conserva mercado y región hasta la revisión", async ({ page }) => {
   await page.goto("/wizard");
 
@@ -156,6 +175,19 @@ test("muestra Europa como región de referencia de Costa", async ({ page }) => {
   await expect(costaButton).toContainText(
     "Región de referencia: Europa"
   );
+});
+
+test("permite volver desde el paso de crucero a seleccionar pasajeros", async ({
+  page,
+}) => {
+  await page.goto("/wizard");
+
+  await page.getByRole("link", { name: "Atrás" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/people$/);
+  await expect(
+    page.getByRole("heading", { name: "¿Quién viaja?" })
+  ).toBeVisible();
 });
 
 test("explica la cobertura y comparación de cada naviera", async ({ page }) => {

@@ -5,7 +5,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
 
   await expect(
     page.getByRole("img", {
-      name: "DrinkPilot, barco navegando sobre dos olas",
+      name: "DrinkPilot · Tu guía para disfrutar más",
     })
   ).toBeVisible();
   await page
@@ -22,7 +22,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/wizard$/);
   await expect(
-    page.getByRole("heading", { name: "Cuéntanos tu crucero" })
+    page.getByRole("heading", { name: "¿Con quién navegas?" })
   ).toBeVisible();
 
   await page
@@ -53,9 +53,17 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Qué te gustaría tener incluido?" })
   ).toBeVisible();
+  const draftBeerPreference = page.getByRole("checkbox", {
+    name: /Cerveza de tirador/i,
+  });
+  await draftBeerPreference.check();
+  await expect(draftBeerPreference).toBeChecked();
   const bottledBeerPreference = page.getByRole("checkbox", {
     name: /Cerveza embotellada/i,
   });
+  await page
+    .getByText("Opciones premium (opcional)", { exact: true })
+    .click();
   await bottledBeerPreference.check();
   await expect(bottledBeerPreference).toBeChecked();
   await page.getByRole("link", { name: "Continuar" }).click();
@@ -75,6 +83,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(page.getByText("7 días")).toBeVisible();
   await expect(page.getByText("2 adultos · 1 menor")).toBeVisible();
   await expect(page.getByText("Cerveza embotellada")).toBeVisible();
+  await expect(page.getByText("Cerveza de tirador")).toBeVisible();
   await expect(page.getByText("32,50")).toBeVisible();
 
   await page.getByRole("button", { name: "Ver recomendación" }).click();
@@ -130,7 +139,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(feedbackLink).toHaveAttribute("target", "_blank");
   await expect(
     page.getByRole("img", {
-      name: "DrinkPilot, barco navegando sobre dos olas",
+      name: "DrinkPilot · Tu guía para disfrutar más",
     })
   ).toBeVisible();
   await expect(
@@ -173,6 +182,31 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
       name: "Datos verificados",
     })
   ).toBeVisible();
+
+  await page
+    .getByRole("link", {
+      name: "Empezar de nuevo",
+    })
+    .click();
+
+  await expect(page).toHaveURL(
+    /\/wizard\/people$/
+  );
+  await expect(
+    page.getByRole("heading", {
+      name: "¿Quién viaja?",
+    })
+  ).toBeVisible();
+  await expect(
+    page.getByLabel(
+      "Cantidad de adultos"
+    )
+  ).toContainText("1");
+  await expect(
+    page.getByLabel(
+      "Cantidad de menores"
+    )
+  ).toContainText("0");
 });
 
 test("no muestra el aviso infantil cuando viajan solo adultos", async ({
