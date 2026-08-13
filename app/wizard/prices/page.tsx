@@ -777,7 +777,7 @@ function PricesForm() {
                       </span>
                     ) : (
                       <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                        Referencia original{" "}
+                        Estimación orientativa{" "}
                         {pkg.currency}{" "}
                         {formatCurrency(
                           pkg.pricePerDay as number,
