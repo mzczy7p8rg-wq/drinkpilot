@@ -69,7 +69,7 @@ function PeopleForm() {
 
   return (
     <main className="brand-ocean-bg min-h-screen px-3 py-3 sm:px-6 sm:py-8 lg:flex lg:items-center lg:justify-center">
-      <div className="mx-auto w-full max-w-6xl overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/95 shadow-[0_30px_90px_rgba(15,55,88,0.16)] backdrop-blur sm:rounded-[2rem]">
+      <div className="dark-app-surface mx-auto w-full max-w-6xl overflow-hidden rounded-[1.75rem] sm:rounded-[2rem]">
         <div className="px-5 pt-5 sm:px-8 sm:pt-7">
           <WizardBrand />
         </div>

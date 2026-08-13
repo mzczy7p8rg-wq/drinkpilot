@@ -91,8 +91,8 @@ export function BrandHeader({
 
 export function WizardBrand() {
   return (
-    <div className="mb-5 border-b border-slate-100/80 pb-4 sm:mb-6 sm:pb-5">
-      <BrandHeader />
+    <div className="mb-5 border-b border-white/10 pb-4 sm:mb-6 sm:pb-5">
+      <BrandHeader inverse />
     </div>
   );
 }

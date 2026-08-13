@@ -32,3 +32,81 @@ body {
     radial-gradient(circle at 88% 88%, rgb(6 182 212 / 0.16), transparent 34rem),
     linear-gradient(145deg, #061629 0%, #0b2945 52%, #071a2f 100%);
 }
+
+.dark-app-surface {
+  border: 1px solid rgb(125 211 252 / 0.18);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(14 165 233 / 0.13), transparent 28rem),
+    linear-gradient(145deg, #081d33 0%, #0a2742 100%);
+  color: #f8fafc;
+  box-shadow: 0 30px 90px rgb(0 0 0 / 0.35);
+}
+
+.dark-app-surface :is(.text-slate-950, .text-slate-900, .text-\[\#0B1F3A\]) {
+  color: #f8fafc !important;
+}
+
+.dark-app-surface :is(.text-slate-800, .text-slate-700) {
+  color: #e2e8f0 !important;
+}
+
+.dark-app-surface :is(.text-slate-600, .text-slate-500) {
+  color: #cbd5e1 !important;
+}
+
+.dark-app-surface :is(.bg-white, .bg-white\/95, .bg-white\/90, .bg-white\/70) {
+  background-color: rgb(255 255 255 / 0.08) !important;
+}
+
+.dark-app-surface :is(.bg-slate-50, .bg-slate-50\/80, .bg-slate-100, .bg-slate-200\/80) {
+  background-color: rgb(148 163 184 / 0.11) !important;
+}
+
+.dark-app-surface :is(.bg-sky-50, .bg-sky-50\/50, .bg-sky-50\/70, .bg-sky-50\/80) {
+  background-color: rgb(14 165 233 / 0.13) !important;
+}
+
+.dark-app-surface :is(section, button).bg-gradient-to-br {
+  background-image: linear-gradient(145deg, rgb(14 165 233 / 0.15), rgb(6 182 212 / 0.08)) !important;
+}
+
+.dark-app-surface :is(.bg-emerald-50, .bg-emerald-50\/80) {
+  background-color: rgb(16 185 129 / 0.12) !important;
+}
+
+.dark-app-surface :is(.text-emerald-900, .text-emerald-800, .text-emerald-700) {
+  color: #a7f3d0 !important;
+}
+
+.dark-app-surface :is(.text-amber-900, .text-amber-800, .text-amber-700) {
+  color: #fde68a !important;
+}
+
+.dark-app-surface :is(.border-slate-100, .border-slate-200, .border-slate-300) {
+  border-color: rgb(186 230 253 / 0.18) !important;
+}
+
+.dark-app-surface :is(.border-sky-100, .border-sky-200) {
+  border-color: rgb(125 211 252 / 0.25) !important;
+}
+
+.dark-app-surface :is(input, select, textarea) {
+  border-color: rgb(125 211 252 / 0.28) !important;
+  background-color: rgb(255 255 255 / 0.1) !important;
+  color: #f8fafc !important;
+}
+
+.dark-app-surface :is(input, textarea)::placeholder {
+  color: #94a3b8 !important;
+}
+
+.dark-app-surface select option {
+  background: #0b2945;
+  color: #f8fafc;
+}
+
+.dark-app-surface .hover\:bg-slate-100:hover,
+.dark-app-surface .hover\:bg-slate-50:hover,
+.dark-app-surface .hover\:bg-sky-50:hover {
+  background-color: rgb(255 255 255 / 0.14) !important;
+}

@@ -401,7 +401,7 @@ export default function ResultsPage() {
     return (
       <main className="brand-ocean-bg min-h-screen px-4 py-6 pb-28 sm:px-6 sm:py-10">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+          <div className="dark-app-surface rounded-2xl p-5 sm:rounded-3xl sm:p-10">
             <WizardBrand />
             <div className="text-center">
               <div className="text-5xl">
@@ -1101,7 +1101,7 @@ export default function ResultsPage() {
   return (
     <main className="brand-ocean-bg min-h-screen px-4 pt-6 pb-28 sm:px-6 sm:py-10">
       <div className="mx-auto max-w-4xl">
-        <div className="rounded-2xl bg-white p-5 shadow-xl sm:rounded-3xl sm:p-10">
+        <div className="dark-app-surface rounded-2xl p-5 sm:rounded-3xl sm:p-10">
           {/* CABECERA */}
 
           <WizardBrand />
