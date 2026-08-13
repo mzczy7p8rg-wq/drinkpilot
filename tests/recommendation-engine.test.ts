@@ -1153,7 +1153,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe(false);
   });
 });describe("Bottled water coverage v2", () => {
-  it("My Drinks cubre una botella de agua diaria", () => {
+  it("My Drinks no promete una botella diaria individual cuando la evidencia contractual depende del camarote", () => {
     const result =
       calculatePackageCoverage({
         coffee: 0,
@@ -1181,14 +1181,14 @@ describe("DrinkPilot recommendation engine", () => {
       );
 
     expect(
-      myDrinks?.coveredCategories
+      myDrinks?.uncoveredCategories
     ).toContain(
       "bottledWaterDailyAllowance"
     );
 
     expect(
       myDrinks?.fullyCovered
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("My Drinks no cubre agua embotellada ilimitada", () => {
@@ -1273,7 +1273,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe(true);
   });
 });describe("Bottled water integration", () => {
-  it("My Drinks cubre una botella diaria a través de compareDrinkPackages", () => {
+  it("My Drinks mantiene desconocida la botella diaria individual en compareDrinkPackages", () => {
     const result = compareDrinkPackages({
       days: 7,
       people: 1,
@@ -1296,13 +1296,13 @@ describe("DrinkPilot recommendation engine", () => {
       );
 
     expect(
-      myDrinks?.coveredCategories
+      myDrinks?.uncoveredCategories
     ).toContain(
       "bottledWaterDailyAllowance"
     );
 
     expect(
-      myDrinks?.uncoveredCategories
+      myDrinks?.coveredCategories
     ).not.toContain(
       "bottledWaterDailyAllowance"
     );
@@ -1331,7 +1331,7 @@ describe("DrinkPilot recommendation engine", () => {
       );
 
     expect(
-      myDrinks?.coveredCategories
+      myDrinks?.uncoveredCategories
     ).toContain(
       "bottledWaterDailyAllowance"
     );

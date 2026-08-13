@@ -19,6 +19,12 @@ export const costaMetadata = {
     officialTerms:
       "https://www.costacruceros.com/condiciones-generales/contrato.html",
 
+    officialSpainDrinksPage:
+      "https://www.costacruceros.es/la-experiencia/paquetes-de-bebidas.html",
+
+    officialInternationalDrinksPage:
+      "https://www.costacruises.com/experience/drink-package.html",
+
     /*
      * Información adicional sobre qué respalda
      * cada fuente oficial.
@@ -54,6 +60,56 @@ export const costaMetadata = {
         ],
 
         verifiedAt: "2026-08-03",
+      },
+
+      {
+        id: "costa-spain-drinks-page",
+
+        name:
+          "Costa Cruceros España — Paquetes de bebidas",
+
+        type: "official",
+
+        url:
+          "https://www.costacruceros.es/la-experiencia/paquetes-de-bebidas.html",
+
+        market: "España",
+
+        supports: [
+          "spain-package-price-ranges",
+          "spain-onboard-package-prices",
+          "package-inclusions",
+          "fare-package-relationship",
+          "minor-alcohol-conditions",
+          "same-booking-or-cabin-requirement",
+        ],
+
+        verifiedAt: "2026-08-14",
+      },
+
+      {
+        id: "costa-international-drinks-page",
+
+        name:
+          "Costa Cruises — My Drinks beverage packages",
+
+        type: "official",
+
+        url:
+          "https://www.costacruises.com/experience/drink-package.html",
+
+        market: "Estados Unidos / Canadá",
+
+        supports: [
+          "cruise-only-exclusion",
+          "cruise-plus-drinks-inclusion",
+          "suite-my-drinks-plus-inclusion",
+          "package-inclusions",
+          "minor-alcohol-conditions",
+          "same-booking-or-cabin-requirement",
+        ],
+
+        verifiedAt: "2026-08-14",
       },
 
       {
@@ -178,5 +234,7 @@ export const costaMetadata = {
     "Las fuentes secundarias se utilizan únicamente como apoyo y no sustituyen la información oficial de Costa Cruceros.",
 
     "DrinkPilot verifica por separado la existencia e inclusiones de los paquetes y la fiabilidad de los precios utilizados en el cálculo.",
+
+    "Las páginas comerciales publican una botella diaria de My Drinks, mientras las condiciones contractuales vinculan las botellas a dos personas; DrinkPilot no aplica esa asignación como cobertura individual automática.",
   ],
 } as const;

@@ -32,6 +32,7 @@ import {
 
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 import ConsumptionSummary from "@/components/results/ConsumptionSummary";
+import MinorsCalculationNotice from "@/components/results/MinorsCalculationNotice";
 import { WizardBrand } from "@/components/Brand";
 
 import {
@@ -423,6 +424,11 @@ export default function ResultsPage() {
                   : `no dispone de ningún precio de paquete utilizable en ${economicCurrency} para completar la comparación económica.`}
               </p>
             </div>
+
+            <MinorsCalculationNotice
+              cruiseLine={data.cruiseLine}
+              minors={data.minors}
+            />
 
             <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
               <h2 className="font-bold text-amber-950">
@@ -1126,6 +1132,11 @@ export default function ResultsPage() {
               Los costes y posibles ahorros son estimaciones basadas en los datos que has indicado y en los precios disponibles. Comprueba siempre el precio y las condiciones finales de tu reserva antes de contratar un paquete.
             </p>
           </div>
+
+          <MinorsCalculationNotice
+            cruiseLine={data.cruiseLine}
+            minors={data.minors}
+          />
 
           {/* EXPLICACIÓN PRINCIPAL */}
 
