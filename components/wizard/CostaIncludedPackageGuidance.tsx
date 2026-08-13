@@ -1,4 +1,18 @@
+import {
+  costaMetadata,
+} from "@/data/metadata";
+
+function formatVerifiedDate(value: string) {
+  const [year, month, day] = value.split("-");
+
+  return `${day}/${month}/${year}`;
+}
+
 export default function CostaIncludedPackageGuidance() {
+  const source = costaMetadata.sources.officialSourceDetails.find(
+    ({ id }) => id === "costa-spain-drinks-page"
+  );
+
   return (
     <details className="group mt-5 rounded-xl border border-sky-200 bg-white p-4">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-semibold text-sky-950 marker:content-none">
@@ -21,6 +35,20 @@ export default function CostaIncludedPackageGuidance() {
         <p>
           Comprueba el nombre y el precio que aparecen en tu reserva o en MyCosta. No deducimos automáticamente qué paquete tienes ni añadimos un coste si no lo indicas.
         </p>
+
+        {source && (
+          <p className="border-t border-sky-100 pt-3 text-xs text-slate-500">
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-sky-700 underline decoration-sky-300 underline-offset-4 hover:text-sky-900"
+            >
+              Consultar fuente oficial de Costa
+            </a>{" "}
+            · Revisado el {formatVerifiedDate(source.verifiedAt)}
+          </p>
+        )}
       </div>
     </details>
   );
