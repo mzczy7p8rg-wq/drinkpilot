@@ -33,7 +33,7 @@ export default function ErrorPage({
           <button
             type="button"
             onClick={() => retry()}
-            className="rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white transition hover:bg-sky-700"
+            className="rounded-xl bg-sky-700 px-4 py-3 font-semibold text-white transition hover:bg-sky-800"
           >
             Volver a intentarlo
           </button>

@@ -823,7 +823,7 @@ export default function ResultsPage() {
               <a
                 href="/wizard/people"
                 onClick={resetData}
-                className="rounded-xl bg-sky-600 px-4 py-4 text-center font-semibold text-white transition hover:bg-sky-700"
+                className="rounded-xl bg-sky-700 px-4 py-4 text-center font-semibold text-white transition hover:bg-sky-800"
               >
                 Nuevo análisis
               </a>
@@ -1455,7 +1455,7 @@ export default function ResultsPage() {
                         </div>
 
                         {isBest && (
-                          <span className="self-start rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
+                          <span className="self-start rounded-full bg-green-700 px-3 py-1 text-xs font-semibold text-white">
                             Mejor opción
                           </span>
                         )}
@@ -2218,7 +2218,7 @@ export default function ResultsPage() {
           <a
             href="/wizard/people"
             onClick={resetData}
-            className="mt-8 block w-full rounded-xl bg-sky-600 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-700 sm:mt-10 sm:text-lg"
+            className="mt-8 block w-full rounded-xl bg-sky-700 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-800 sm:mt-10 sm:text-lg"
           >
             Empezar de nuevo
           </a>

@@ -296,7 +296,7 @@ function WizardForm() {
                         <span
                           className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold ${
                             isCurrent
-                              ? "bg-sky-600 text-white shadow-sm shadow-sky-200"
+                              ? "bg-sky-700 text-white shadow-sm shadow-sky-200"
                               : isComplete
                                 ? "bg-emerald-100 text-emerald-700"
                                 : "bg-slate-200/80 text-slate-500"
@@ -418,7 +418,7 @@ function WizardForm() {
                       <span
                         className={`grid h-7 min-w-7 place-items-center rounded-full px-2 text-xs font-semibold ${
                           isSelected
-                            ? "bg-sky-600 text-white"
+                            ? "bg-sky-700 text-white"
                             : "bg-slate-100 text-slate-600"
                         }`}
                       >
@@ -692,7 +692,7 @@ function WizardForm() {
             }
             className={`rounded-2xl px-5 py-4 text-center text-base font-semibold shadow-sm transition sm:min-w-48 sm:px-8 ${
               isValid
-                ? "bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-sky-200 hover:from-sky-700 hover:to-cyan-600 active:from-sky-800"
+                ? "bg-gradient-to-r from-sky-700 to-cyan-700 text-white shadow-sky-200 hover:from-sky-800 hover:to-cyan-800 active:from-sky-800"
                 : "cursor-not-allowed bg-slate-300 text-slate-500"
             }`}
           >

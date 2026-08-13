@@ -40,7 +40,7 @@ export default function Hero() {
             <Link
               href="/wizard/people"
               onNavigate={resetData}
-              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-500 px-8 py-4 font-semibold text-white shadow-lg shadow-sky-200 transition hover:from-sky-700 hover:to-cyan-600"
+              className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-sky-700 to-cyan-700 px-8 py-4 font-semibold text-white shadow-lg shadow-sky-200 transition hover:from-sky-800 hover:to-cyan-800"
             >
               Empezar análisis →
             </Link>
@@ -69,7 +69,7 @@ export default function Hero() {
                 ["03", "Recibe tu comparación"],
               ].map(([number, label]) => (
                 <div key={number} className="flex items-center gap-4 rounded-2xl bg-white/10 p-4">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-sky-600 text-xs font-bold text-white">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-sky-700 text-xs font-bold text-white">
                     {number}
                   </span>
                   <span className="font-semibold text-slate-100">{label}</span>
@@ -79,7 +79,7 @@ export default function Hero() {
           </div>
 
           <div className="relative mt-5 flex items-start gap-3 rounded-2xl border border-emerald-300/25 bg-emerald-400/10 p-4 text-sm leading-6 text-emerald-100">
-            <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">✓</span>
+            <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-700 text-xs font-bold text-white">✓</span>
             <p><strong>Estimación transparente.</strong> Nunca asumimos precios, mercados o condiciones que no conozcamos.</p>
           </div>
         </aside>

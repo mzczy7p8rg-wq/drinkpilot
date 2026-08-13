@@ -350,7 +350,7 @@ export default function ConsumptionPage() {
             }}
             className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
               hasConsumption
-                ? "bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800"
+                ? "bg-sky-700 text-white hover:bg-sky-800 active:bg-sky-800"
                 : "pointer-events-none bg-slate-300 text-slate-500"
             }`}
           >

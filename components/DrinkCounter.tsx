@@ -60,7 +60,7 @@ export default function DrinkCounter({
             canIncrement &&
             onChange(value + 1)
           }
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-600 text-xl font-bold text-white transition hover:bg-sky-700 active:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:h-10 sm:w-10"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-700 text-xl font-bold text-white transition hover:bg-sky-800 active:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:h-10 sm:w-10"
         >
           +
         </button>

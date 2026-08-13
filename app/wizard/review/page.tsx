@@ -745,7 +745,7 @@ export default function ReviewPage() {
                 "/results"
               )
             }
-            className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
+            className="rounded-xl bg-sky-700 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-800 active:bg-sky-800 sm:text-base"
           >
             Ver recomendación
           </button>

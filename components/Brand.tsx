@@ -40,7 +40,7 @@ export default function Brand({
 
 export function BetaBadge() {
   return (
-    <span className="rounded-xl bg-sky-500 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-white shadow-sm shadow-sky-950/40 sm:px-4 sm:py-2 sm:text-sm">
+    <span className="rounded-xl bg-sky-700 px-3 py-1.5 text-xs font-bold tracking-[0.12em] text-white shadow-sm shadow-sky-950/40 sm:px-4 sm:py-2 sm:text-sm">
       BETA
     </span>
   );

@@ -87,7 +87,7 @@ function PeopleForm() {
                   }`}
                 >
                   <span className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-bold ${
-                    index === 0 ? "bg-sky-600 text-white shadow-sm shadow-sky-200" : "bg-slate-200/80 text-slate-500"
+                    index === 0 ? "bg-sky-700 text-white shadow-sm shadow-sky-200" : "bg-slate-200/80 text-slate-500"
                   }`}>
                     {index + 1}
                   </span>
@@ -196,7 +196,7 @@ function PeopleForm() {
         </div>
 
         <div className="mt-5 flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-900 sm:mt-6">
-          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">✓</span>
+          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-700 text-xs font-bold text-white">✓</span>
           <p>El cálculo económico usa el número de adultos. Guardamos los menores
           por separado porque sus condiciones pueden variar según la naviera.
           </p>
@@ -220,7 +220,7 @@ function PeopleForm() {
             onClick={handleReview}
             className={`rounded-2xl px-3 py-4 text-center text-sm font-semibold shadow-sm transition sm:text-base ${
               isValid
-                ? "bg-gradient-to-r from-sky-600 to-cyan-500 text-white shadow-sky-200 hover:from-sky-700 hover:to-cyan-600"
+                ? "bg-gradient-to-r from-sky-700 to-cyan-700 text-white shadow-sky-200 hover:from-sky-800 hover:to-cyan-800"
                 : "cursor-not-allowed bg-slate-300 text-slate-500"
             }`}
           >

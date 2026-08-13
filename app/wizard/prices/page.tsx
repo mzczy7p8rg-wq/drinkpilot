@@ -665,7 +665,7 @@ function PricesForm() {
                 onClick={() => setPackagePriceCurrency(currency)}
                 className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
                   packagePriceCurrency === currency
-                    ? "border-sky-500 bg-sky-600 text-white"
+                    ? "border-sky-500 bg-sky-700 text-white"
                     : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
                 }`}
               >
@@ -1016,7 +1016,7 @@ function PricesForm() {
                 className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
                   selectedDrinkCurrency ===
                   "EUR"
-                    ? "border-sky-500 bg-sky-600 text-white"
+                    ? "border-sky-500 bg-sky-700 text-white"
                     : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
                 }`}
               >
@@ -1034,7 +1034,7 @@ function PricesForm() {
                 className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
                   selectedDrinkCurrency ===
                   "USD"
-                    ? "border-sky-500 bg-sky-600 text-white"
+                    ? "border-sky-500 bg-sky-700 text-white"
                     : "border-slate-200 bg-white text-slate-700 hover:border-sky-300"
                 }`}
               >
@@ -1235,7 +1235,7 @@ function PricesForm() {
                                       }
                                       className={`rounded-lg border px-3 py-2 text-left text-xs transition ${
                                         isSelected
-                                          ? "border-sky-500 bg-sky-600 text-white"
+                                          ? "border-sky-500 bg-sky-700 text-white"
                                           : "border-sky-200 bg-white text-sky-900 hover:border-sky-400"
                                       }`}
                                     >
@@ -1455,7 +1455,7 @@ function PricesForm() {
               onClick={
                 savePrices
               }
-              className="rounded-xl bg-sky-600 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-700 active:bg-sky-800 sm:text-base"
+              className="rounded-xl bg-sky-700 px-3 py-4 text-center text-sm font-semibold text-white transition hover:bg-sky-800 active:bg-sky-800 sm:text-base"
             >
               Continuar
             </Link>
