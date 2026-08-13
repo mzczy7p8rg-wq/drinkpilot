@@ -185,3 +185,52 @@ test("explica la cobertura y comparación de cada naviera", async ({ page }) => 
     "Algunos precios están pendientes"
   );
 });
+
+test("avisa de la edad mínima de alcohol cuando el contexto puede implicar Estados Unidos", async ({
+  page,
+}) => {
+  await page.goto("/wizard");
+
+  await page
+    .getByLabel("Mercado de la reserva")
+    .selectOption("US");
+
+  const notice = page
+    .locator("details")
+    .filter({ hasText: "Edad mínima para bebidas con alcohol" });
+
+  await expect(notice).toBeVisible();
+  await expect(notice).not.toHaveAttribute("open", "");
+
+  await notice.locator("summary").click();
+
+  await expect(
+    notice.getByText(/Costa establece 21 años para cruceros que salen de puertos de Estados Unidos/i)
+  ).toBeVisible();
+  await expect(
+    notice.getByText(/no confirma por sí sola que la regla se aplique/i)
+  ).toBeVisible();
+  await expect(
+    notice.getByRole("link", { name: "Fuente oficial Costa" })
+  ).toBeVisible();
+
+  await page
+    .getByRole("button", { name: /MSC Cruises/i })
+    .click();
+
+  await expect(
+    notice.getByText(/MSC aplica 21 años cuando el itinerario incluye un puerto de Estados Unidos/i)
+  ).toBeVisible();
+  await expect(
+    notice.getByRole("link", { name: "Fuente oficial MSC" })
+  ).toBeVisible();
+
+  await page
+    .getByLabel("Mercado de la reserva")
+    .selectOption("");
+  await page
+    .getByLabel("Región de navegación")
+    .selectOption("MED");
+
+  await expect(notice).toHaveCount(0);
+});

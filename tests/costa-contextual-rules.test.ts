@@ -86,5 +86,43 @@ describe(
         ).toEqual([]);
       }
     );
+
+    it(
+      "no deduce reglas de edad o alcohol solo por seleccionar el mercado estadounidense",
+      () => {
+        const rule =
+          getPackageOperationalRule(
+            {
+              cruiseLine:
+                "costa",
+
+              market:
+                "US",
+
+              sailingRegion:
+                "NA",
+
+              onboardCurrency:
+                "USD",
+
+              sailingDate:
+                "2026-08-15",
+            },
+            "myDrinks"
+          );
+
+        expect(
+          rule?.appliedContextualRuleIds
+        ).toEqual([]);
+
+        expect(
+          rule?.alcoholicDrinksDailyLimit
+        ).toBeNull();
+
+        expect(
+          rule?.drinkPriceThreshold
+        ).toBeNull();
+      }
+    );
   }
 );
