@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import ProgressBar from "@/components/ProgressBar";
 import { WizardBrand } from "@/components/Brand";
+import CostaIncludedPackageGuidance from "@/components/wizard/CostaIncludedPackageGuidance";
 
 import {
   getCruiseLine,
@@ -646,6 +647,10 @@ function PricesForm() {
           💡 Este paso es opcional. Si conoces el precio de tu reserva,
           añádelo para obtener un resultado más preciso.
         </div>
+
+        {data.cruiseLine === "costa" && (
+          <CostaIncludedPackageGuidance />
+        )}
 
         <fieldset className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
           <legend className="px-1 text-sm font-semibold text-slate-900">
