@@ -30,8 +30,8 @@ export default function Brand({
       <BrandMark
         className={
           compact
-            ? "h-auto w-40 sm:w-48"
-            : "h-auto w-56 sm:w-72"
+            ? "h-auto w-44 sm:w-56"
+            : "h-auto w-60 sm:w-80"
         }
       />
     </div>

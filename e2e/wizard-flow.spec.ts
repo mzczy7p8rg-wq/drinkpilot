@@ -53,6 +53,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Qué te gustaría tener incluido?" })
   ).toBeVisible();
+  await expect(page.getByText("🍺 Cerveza de tirador")).toBeVisible();
   const bottledBeerPreference = page.getByRole("checkbox", {
     name: /Cerveza embotellada/i,
   });

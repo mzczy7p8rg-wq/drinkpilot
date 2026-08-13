@@ -155,6 +155,16 @@ export default function PreferencesPage() {
             }
           />
 
+          <div className="rounded-2xl border border-emerald-300/40 bg-emerald-950/20 p-4 sm:p-5">
+            <p className="text-base font-semibold text-white sm:text-lg">
+              🍺 Cerveza de tirador
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              Es la opción básica de cerveza que normalmente se sirve con los
+              paquetes que incluyen cerveza.
+            </p>
+          </div>
+
           <details className="rounded-2xl border border-slate-200 bg-white p-4">
             <summary className="cursor-pointer font-semibold text-slate-800">
               Opciones premium (opcional)
