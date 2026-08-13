@@ -76,12 +76,14 @@ export function BetaBadge() {
 
 export function BrandHeader({
   prominent = false,
+  inverse = false,
 }: {
   prominent?: boolean;
+  inverse?: boolean;
 }) {
   return (
     <div className="flex w-full items-center justify-between gap-4">
-      <Brand compact={!prominent} />
+      <Brand compact={!prominent} inverse={inverse} />
       <BetaBadge />
     </div>
   );
