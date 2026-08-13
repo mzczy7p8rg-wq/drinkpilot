@@ -37,6 +37,7 @@ import {
 
 import ProgressBar from "@/components/ProgressBar";
 import { WizardBrand } from "@/components/Brand";
+import UsAlcoholAgeNotice from "@/components/wizard/UsAlcoholAgeNotice";
 
 function WizardForm() {
   const router =
@@ -540,6 +541,13 @@ function WizardForm() {
               </select>
             </div>
           </div>
+
+          {(market === "US" ||
+            sailingRegion === "NORTH AMERICA") && (
+            <UsAlcoholAgeNotice
+              cruiseLine={selectedCruiseLine}
+            />
+          )}
         </section>
 
         {/* FECHA DE SALIDA */}
