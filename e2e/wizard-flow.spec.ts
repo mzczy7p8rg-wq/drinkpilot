@@ -86,6 +86,39 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(
     page.getByText("ℹ️ Resultado orientativo", { exact: true })
   ).toBeVisible();
+
+  const minorsNotice = page
+    .locator("details")
+    .filter({
+      hasText: "Menores incluidos en el viaje",
+    });
+
+  await expect(minorsNotice).toBeVisible();
+  await expect(minorsNotice).not.toHaveAttribute(
+    "open",
+    ""
+  );
+
+  await minorsNotice.locator("summary").click();
+
+  await expect(
+    minorsNotice.getByText(
+      "El cálculo económico incluye solo a los adultos"
+    )
+  ).toBeVisible();
+
+  await expect(
+    minorsNotice.getByText(
+      "Costa ofrece a los viajeros de 3 a 17 años un paquete sin alcohol"
+    )
+  ).toBeVisible();
+
+  await expect(
+    minorsNotice.getByText(
+      "no añade un coste infantil estimado"
+    )
+  ).toBeVisible();
+
   const feedbackLink = page.getByRole("link", {
     name: "Enviar opinión",
   });
@@ -140,4 +173,56 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
       name: "Datos verificados",
     })
   ).toBeVisible();
+});
+
+test("no muestra el aviso infantil cuando viajan solo adultos", async ({
+  page,
+}) => {
+  await page.goto("/wizard/people");
+
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  await page
+    .getByRole("button", { name: /Costa Cruceros/i })
+    .click();
+
+  await page
+    .getByLabel("Duración del crucero")
+    .fill("7");
+
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  await page
+    .getByRole("button", { name: /Aumentar.*Cafés/i })
+    .click();
+
+  await page
+    .getByRole("link", { name: "Continuar" })
+    .click();
+
+  await page
+    .getByRole("link", { name: "Continuar" })
+    .click();
+
+  await page
+    .getByLabel(/My Drinks$/)
+    .fill("32.50");
+
+  await page
+    .getByRole("link", { name: "Continuar" })
+    .click();
+
+  await page
+    .getByRole("button", { name: "Ver recomendación" })
+    .click();
+
+  await expect(page).toHaveURL(/\/results$/);
+
+  await expect(
+    page.getByText("Menores incluidos en el viaje")
+  ).toHaveCount(0);
 });
