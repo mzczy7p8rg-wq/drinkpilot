@@ -19,14 +19,22 @@ describe("Costa reference region", () => {
     ).toBe("Europa");
   });
 
-  it("conserva España en el alcance de las fuentes verificadas en España", () => {
-    expect(
+  it("separa la referencia general de los mercados documentales", () => {
+    const sourceMarkets =
       costaMetadata.sources.officialSourceDetails.map(
         (source) => source.market
-      )
-    ).toEqual([
-      "España",
-      "España",
-    ]);
+      );
+
+    expect(sourceMarkets).toContain(
+      "España"
+    );
+
+    expect(sourceMarkets).toContain(
+      "Estados Unidos / Canadá"
+    );
+
+    expect(sourceMarkets).not.toContain(
+      "Europa"
+    );
   });
 });

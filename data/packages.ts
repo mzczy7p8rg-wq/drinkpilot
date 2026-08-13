@@ -186,15 +186,7 @@ export const costaPackages = {
       status: "verified",
     },
 
-    /*
-     * My Drinks incluye una asignación
-     * limitada de agua embotellada.
-     *
-     * coverage.ts ya interpreta este dato.
-     */
     observedCoverage: {
-      bottledWaterDailyAllowance: 1,
-
       venueCoverage: {
         specialityRestaurants:
           "unknown",
