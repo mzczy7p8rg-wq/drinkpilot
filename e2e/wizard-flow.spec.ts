@@ -5,7 +5,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
 
   await expect(
     page.getByRole("img", {
-      name: "DrinkPilot, barco navegando sobre dos olas",
+      name: "DrinkPilot · Tu guía para disfrutar más",
     })
   ).toBeVisible();
   await page
@@ -97,7 +97,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(feedbackLink).toHaveAttribute("target", "_blank");
   await expect(
     page.getByRole("img", {
-      name: "DrinkPilot, barco navegando sobre dos olas",
+      name: "DrinkPilot · Tu guía para disfrutar más",
     })
   ).toBeVisible();
   await expect(
