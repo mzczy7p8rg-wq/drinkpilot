@@ -57,6 +57,7 @@ import {
   SAVED_ANALYSES_KEY,
   createSavedAnalysis,
   parseStoredAnalyses,
+  renameSavedAnalysis,
   serializeSavedAnalyses,
   upsertSavedAnalysis,
   type SavedAnalysis,
@@ -210,6 +211,8 @@ type StoreContextType = {
   loadAnalysis: (id: string) => boolean;
 
   duplicateAnalysis: (id: string) => string | null;
+
+  renameAnalysis: (id: string, name: string) => boolean;
 
   deleteAnalysis: (id: string) => void;
 };
@@ -929,7 +932,9 @@ export function StoreProvider({
       return null;
     }
 
-    const duplicate = createSavedAnalysis(source.data);
+    const duplicate = createSavedAnalysis(source.data, {
+      name: source.name ? `${source.name} (copia)` : null,
+    });
 
     setSavedAnalyses((previous) => {
       const next = [duplicate, ...previous];
@@ -938,6 +943,20 @@ export function StoreProvider({
     });
 
     return duplicate.id;
+  }
+
+  function renameAnalysis(id: string, name: string): boolean {
+    if (!savedAnalyses.some((analysis) => analysis.id === id)) {
+      return false;
+    }
+
+    setSavedAnalyses((previous) => {
+      const next = renameSavedAnalysis(previous, id, name);
+      window.localStorage.setItem(SAVED_ANALYSES_KEY, serializeSavedAnalyses(next));
+      return next;
+    });
+
+    return true;
   }
 
   function deleteAnalysis(id: string) {
@@ -963,6 +982,7 @@ export function StoreProvider({
         activeAnalysisId,
         loadAnalysis,
         duplicateAnalysis,
+        renameAnalysis,
         deleteAnalysis,
       }}
     >

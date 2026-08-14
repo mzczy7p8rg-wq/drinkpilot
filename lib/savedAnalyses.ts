@@ -12,6 +12,7 @@ const SAVED_ANALYSES_VERSION = 1;
 
 export type SavedAnalysis = {
   id: string;
+  name?: string | null;
   createdAt: string;
   updatedAt: string;
   data: WizardData;
@@ -32,6 +33,9 @@ function isStoredAnalysis(value: unknown): value is SavedAnalysis {
     Number.isFinite(Date.parse(candidate.createdAt)) &&
     typeof candidate.updatedAt === "string" &&
     Number.isFinite(Date.parse(candidate.updatedAt)) &&
+    (candidate.name === undefined ||
+      candidate.name === null ||
+      typeof candidate.name === "string") &&
     Boolean(candidateData) &&
     typeof candidateData === "object" &&
     !Array.isArray(candidateData) &&
@@ -64,7 +68,13 @@ export function resolveStoredAnalyses(value: unknown): SavedAnalysis[] {
 
   for (const item of items) {
     if (isStoredAnalysis(item)) {
-      unique.set(item.id, item);
+      unique.set(item.id, {
+        ...item,
+        name:
+          typeof item.name === "string"
+            ? normalizeAnalysisName(item.name)
+            : null,
+      });
     }
   }
 
@@ -104,6 +114,7 @@ export function createSavedAnalysis(
   data: WizardData,
   options?: {
     id?: string;
+    name?: string | null;
     now?: string;
   }
 ): SavedAnalysis {
@@ -111,6 +122,10 @@ export function createSavedAnalysis(
 
   return {
     id: options?.id ?? createAnalysisId(),
+    name:
+      typeof options?.name === "string"
+        ? normalizeAnalysisName(options.name)
+        : null,
     createdAt: now,
     updatedAt: now,
     data: structuredClone(data),
@@ -126,6 +141,7 @@ export function upsertSavedAnalysis(
   const existing = analyses.find((analysis) => analysis.id === id);
   const next: SavedAnalysis = {
     id,
+    name: existing?.name ?? null,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
     data: structuredClone(data),
@@ -151,9 +167,39 @@ export function duplicateSavedAnalysis(
   return [
     createSavedAnalysis(source.data, {
       id: options?.duplicateId,
+      name: source.name ? `${source.name} (copia)` : null,
       now: options?.now,
     }),
     ...analyses,
+  ];
+}
+
+export function normalizeAnalysisName(name: string): string | null {
+  const normalized = name.trim().replace(/\s+/g, " ").slice(0, 60);
+
+  return normalized === "" ? null : normalized;
+}
+
+export function renameSavedAnalysis(
+  analyses: SavedAnalysis[],
+  id: string,
+  name: string,
+  now = new Date().toISOString()
+): SavedAnalysis[] {
+  const nextName = normalizeAnalysisName(name);
+  const existing = analyses.find((analysis) => analysis.id === id);
+
+  if (!existing) {
+    return analyses;
+  }
+
+  return [
+    {
+      ...existing,
+      name: nextName,
+      updatedAt: now,
+    },
+    ...analyses.filter((analysis) => analysis.id !== id),
   ];
 }
 
