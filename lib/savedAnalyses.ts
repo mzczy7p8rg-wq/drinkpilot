@@ -37,7 +37,10 @@ function isStoredAnalysis(value: unknown): value is SavedAnalysis {
     !Array.isArray(candidateData) &&
     isCruiseLineKey(candidateData?.cruiseLine) &&
     typeof candidateData?.days === "number" &&
-    typeof candidateData?.people === "number"
+    typeof candidateData?.people === "number" &&
+    (candidateData?.shipName === undefined ||
+      candidateData.shipName === null ||
+      typeof candidateData.shipName === "string")
   );
 }
 
@@ -168,4 +171,21 @@ export function resolveAnalysisDestination(data: WizardData): string {
   }
 
   return "/results";
+}
+
+export function formatAnalysisSailingDate(sailingDate: string): string {
+  const date = new Date(`${sailingDate}T00:00:00Z`);
+
+  if (!Number.isFinite(date.getTime())) {
+    return sailingDate;
+  }
+
+  return new Intl.DateTimeFormat("es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  })
+    .format(date)
+    .replaceAll(".", "");
 }

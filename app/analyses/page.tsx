@@ -6,7 +6,10 @@ import { useState } from "react";
 
 import { WizardBrand } from "@/components/Brand";
 import { getCruiseLine } from "@/data/cruiseLines";
-import { resolveAnalysisDestination } from "@/lib/savedAnalyses";
+import {
+  formatAnalysisSailingDate,
+  resolveAnalysisDestination,
+} from "@/lib/savedAnalyses";
 import { useStore } from "@/lib/store";
 
 export default function AnalysesPage() {
@@ -91,15 +94,23 @@ export default function AnalysesPage() {
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-xl font-bold text-white">{cruiseLine.name}</h2>
+                        <h2 className="text-xl font-bold text-white">
+                          {analysis.data.shipName || cruiseLine.name}
+                        </h2>
                         <span className={`rounded-full px-3 py-1 text-xs font-bold ${isComplete ? "bg-emerald-400/15 text-emerald-200" : "bg-amber-300/15 text-amber-100"}`}>
                           {isComplete ? "Resultado disponible" : "En curso"}
                         </span>
                       </div>
 
+                      {analysis.data.shipName && (
+                        <p className="mt-1 text-sm font-semibold text-sky-200">
+                          {cruiseLine.name}
+                        </p>
+                      )}
+
                       <p className="mt-2 text-sm text-slate-300">
                         {analysis.data.days > 0 ? `${analysis.data.days} días` : "Duración pendiente"}
-                        {analysis.data.sailingDate ? ` · Salida ${analysis.data.sailingDate}` : ""}
+                        {analysis.data.sailingDate ? ` · Salida ${formatAnalysisSailingDate(analysis.data.sailingDate)}` : ""}
                         {` · ${analysis.data.adults} adulto${analysis.data.adults === 1 ? "" : "s"}`}
                         {analysis.data.minors > 0 ? ` · ${analysis.data.minors} menor${analysis.data.minors === 1 ? "" : "es"}` : ""}
                       </p>
