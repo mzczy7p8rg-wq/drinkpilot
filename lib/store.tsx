@@ -52,6 +52,15 @@ import {
   resolveStoredCustomPackagePrice,
   type CustomPackagePrices,
 } from "@/lib/customPackagePrice";
+import {
+  ACTIVE_ANALYSIS_KEY,
+  SAVED_ANALYSES_KEY,
+  createSavedAnalysis,
+  parseStoredAnalyses,
+  serializeSavedAnalyses,
+  upsertSavedAnalysis,
+  type SavedAnalysis,
+} from "@/lib/savedAnalyses";
 
 export type { CustomPackagePrices } from "@/lib/customPackagePrice";
 
@@ -187,6 +196,16 @@ type StoreContextType = {
   hydrated: boolean;
 
   resetData: () => void;
+
+  savedAnalyses: SavedAnalysis[];
+
+  activeAnalysisId: string | null;
+
+  loadAnalysis: (id: string) => boolean;
+
+  duplicateAnalysis: (id: string) => string | null;
+
+  deleteAnalysis: (id: string) => void;
 };
 
 const STORAGE_KEY =
@@ -418,8 +437,40 @@ export function StoreProvider({
     setHydrated,
   ] = useState(false);
 
+  const [
+    savedAnalyses,
+    setSavedAnalyses,
+  ] = useState<SavedAnalysis[]>([]);
+
+  const [
+    activeAnalysisId,
+    setActiveAnalysisId,
+  ] = useState<string | null>(null);
+
+  /*
+   * La hidratación del almacenamiento del navegador solo puede ocurrir
+   * después del montaje. Estas actualizaciones forman una única carga
+   * inicial del estado persistido.
+   */
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
+      const storedAnalyses = parseStoredAnalyses(
+        window.localStorage.getItem(SAVED_ANALYSES_KEY)
+      );
+      const storedActiveAnalysisId =
+        window.localStorage.getItem(ACTIVE_ANALYSIS_KEY);
+
+      setSavedAnalyses(storedAnalyses);
+      setActiveAnalysisId(
+        storedActiveAnalysisId &&
+        storedAnalyses.some(
+          (analysis) => analysis.id === storedActiveAnalysisId
+        )
+          ? storedActiveAnalysisId
+          : null
+      );
+
       const savedData =
         window.localStorage.getItem(
           STORAGE_KEY
@@ -638,7 +689,6 @@ export function StoreProvider({
          * localStorage evita divergencias
          * entre servidor y cliente.
          */
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setData({
           cruiseLine,
 
@@ -763,7 +813,13 @@ export function StoreProvider({
       setHydrated(true);
     }
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
+  /*
+   * Sincroniza el análisis activo con su colección local cada vez que
+   * cambia el wizard. La colección visible debe actualizarse a la vez.
+   */
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!hydrated) {
       return;
@@ -794,10 +850,33 @@ export function StoreProvider({
     hydrated,
   ]);
 
+  useEffect(() => {
+    if (!hydrated || data.people <= 0) {
+      return;
+    }
+
+    const analysisId = activeAnalysisId ?? createSavedAnalysis(data).id;
+
+    if (!activeAnalysisId) {
+      setActiveAnalysisId(analysisId);
+      window.localStorage.setItem(ACTIVE_ANALYSIS_KEY, analysisId);
+    }
+
+    setSavedAnalyses((previous) => {
+      const next = upsertSavedAnalysis(previous, analysisId, data);
+      window.localStorage.setItem(SAVED_ANALYSES_KEY, serializeSavedAnalyses(next));
+      return next;
+    });
+  }, [activeAnalysisId, data, hydrated]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
   function resetData() {
     try {
       window.localStorage.removeItem(
         STORAGE_KEY
+      );
+      window.localStorage.removeItem(
+        ACTIVE_ANALYSIS_KEY
       );
     } catch (error) {
       console.error(
@@ -809,6 +888,54 @@ export function StoreProvider({
     setData(
       createInitialData()
     );
+    setActiveAnalysisId(null);
+  }
+
+  function loadAnalysis(id: string): boolean {
+    const analysis = savedAnalyses.find((item) => item.id === id);
+
+    if (!analysis) {
+      return false;
+    }
+
+    const nextData = structuredClone(analysis.data);
+
+    setData(nextData);
+    setActiveAnalysisId(id);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+    window.localStorage.setItem(ACTIVE_ANALYSIS_KEY, id);
+
+    return true;
+  }
+
+  function duplicateAnalysis(id: string): string | null {
+    const source = savedAnalyses.find((item) => item.id === id);
+
+    if (!source) {
+      return null;
+    }
+
+    const duplicate = createSavedAnalysis(source.data);
+
+    setSavedAnalyses((previous) => {
+      const next = [duplicate, ...previous];
+      window.localStorage.setItem(SAVED_ANALYSES_KEY, serializeSavedAnalyses(next));
+      return next;
+    });
+
+    return duplicate.id;
+  }
+
+  function deleteAnalysis(id: string) {
+    setSavedAnalyses((previous) => {
+      const next = previous.filter((analysis) => analysis.id !== id);
+      window.localStorage.setItem(SAVED_ANALYSES_KEY, serializeSavedAnalyses(next));
+      return next;
+    });
+
+    if (activeAnalysisId === id) {
+      resetData();
+    }
   }
 
   return (
@@ -818,6 +945,11 @@ export function StoreProvider({
         setData,
         hydrated,
         resetData,
+        savedAnalyses,
+        activeAnalysisId,
+        loadAnalysis,
+        duplicateAnalysis,
+        deleteAnalysis,
       }}
     >
       {children}
