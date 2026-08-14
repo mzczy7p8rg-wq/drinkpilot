@@ -87,6 +87,12 @@ export type WizardData = {
 
   sailingDate: string | null;
 
+  /*
+   * Nombre opcional introducido por el usuario para identificar
+   * el crucero. No participa en ningún cálculo económico.
+   */
+  shipName?: string | null;
+
   days: number;
 
   coffee: number;
@@ -268,6 +274,8 @@ function createInitialData(
     onboardCurrency: null,
 
     sailingDate: null,
+
+    shipName: null,
 
     days: 0,
 
@@ -707,6 +715,12 @@ export function StoreProvider({
           sailingDate:
             hydratedCruiseContext
               .sailingDate,
+
+          shipName:
+            typeof parsedData.shipName === "string" &&
+            parsedData.shipName.trim() !== ""
+              ? parsedData.shipName.trim().slice(0, 80)
+              : null,
 
           days:
             storedWizardProgress

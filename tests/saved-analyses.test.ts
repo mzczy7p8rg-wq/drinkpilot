@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createSavedAnalysis,
   duplicateSavedAnalysis,
+  formatAnalysisSailingDate,
   parseStoredAnalyses,
   resolveStoredAnalyses,
   serializeSavedAnalyses,
@@ -42,6 +43,11 @@ const data = {
 } satisfies WizardData;
 
 describe("saved analyses", () => {
+  it("formatea la fecha de salida para identificar el crucero", () => {
+    expect(formatAnalysisSailingDate("2026-09-15")).toBe("15 sept 2026");
+    expect(formatAnalysisSailingDate("sin-fecha")).toBe("sin-fecha");
+  });
+
   it("descarta registros corruptos y elimina ids duplicados", () => {
     const valid = createSavedAnalysis(data, {
       id: "analysis-1",

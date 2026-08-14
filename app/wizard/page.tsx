@@ -92,6 +92,10 @@ function WizardForm() {
     data.sailingDate ?? ""
   );
 
+  const [shipName, setShipName] = useState(
+    data.shipName ?? ""
+  );
+
   const [market, setMarket] = useState(
     data.market ?? ""
   );
@@ -196,6 +200,11 @@ function WizardForm() {
           ...previous,
 
           ...nextCruiseContext,
+
+          shipName:
+            shipName.trim() === ""
+              ? null
+              : shipName.trim(),
 
           days:
             parsedDays,
@@ -466,6 +475,29 @@ function WizardForm() {
         </section>
 
         {/* DURACIÓN */}
+
+        <section className="mt-7 sm:max-w-xl">
+          <label
+            htmlFor="shipName"
+            className="text-sm font-semibold text-slate-700"
+          >
+            Nombre del barco
+          </label>
+
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            Opcional. Te ayudará a distinguir este análisis de otros cruceros.
+          </p>
+
+          <input
+            id="shipName"
+            type="text"
+            maxLength={80}
+            value={shipName}
+            onChange={(event) => setShipName(event.target.value)}
+            placeholder="Ej. Costa Toscana"
+            className="mt-2 min-h-14 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
+          />
+        </section>
 
         <section className="mt-7 sm:max-w-sm">
           <label
