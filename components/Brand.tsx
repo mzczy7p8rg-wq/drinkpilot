@@ -16,24 +16,17 @@ export function BrandMark({
       width={1200}
       height={400}
       priority
-      className={`${className} rounded-xl object-contain`}
+      className={`${className} object-contain mix-blend-lighten`}
     />
   );
 }
 
 export default function Brand({
-  compact = false,
   className = "",
 }: BrandProps) {
   return (
-    <div className={`flex items-center ${className}`}>
-      <BrandMark
-        className={
-          compact
-            ? "h-auto w-44 sm:w-56"
-            : "h-auto w-60 sm:w-80"
-        }
-      />
+    <div className={`flex min-w-0 flex-1 items-center ${className}`}>
+      <BrandMark className="h-auto w-full" />
     </div>
   );
 }
