@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #071a2f;
-  --foreground: #171717;
-
+  --background: #eef8ff;
+  --foreground: #0b1f3a;
+  --navy: #071d36;
+  --ocean: #087cf0;
+  --cyan: #19c6ea;
+  --line: rgb(15 91 143 / 0.14);
   color-scheme: light;
 }
 
@@ -12,6 +15,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 html {
@@ -23,122 +30,221 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(14 165 233 / 0.2);
+  color: var(--navy);
 }
 
 .brand-ocean-bg {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
   background:
-    radial-gradient(circle at 18% 12%, rgb(14 165 233 / 0.24), transparent 30rem),
-    radial-gradient(circle at 88% 88%, rgb(6 182 212 / 0.16), transparent 34rem),
-    linear-gradient(145deg, #061629 0%, #0b2945 52%, #071a2f 100%);
+    radial-gradient(circle at 7% 2%, rgb(25 198 234 / 0.2), transparent 25rem),
+    radial-gradient(circle at 92% 12%, rgb(8 124 240 / 0.16), transparent 30rem),
+    radial-gradient(circle at 55% 105%, rgb(34 211 238 / 0.13), transparent 35rem),
+    linear-gradient(145deg, #f9fdff 0%, #eaf7ff 48%, #f7fbff 100%);
 }
 
+.brand-ocean-bg::before,
+.brand-ocean-bg::after {
+  position: fixed;
+  z-index: -1;
+  border: 1px solid rgb(14 165 233 / 0.1);
+  border-radius: 999px;
+  content: "";
+  pointer-events: none;
+}
+
+.brand-ocean-bg::before {
+  top: -16rem;
+  right: -10rem;
+  width: 34rem;
+  height: 34rem;
+}
+
+.brand-ocean-bg::after {
+  bottom: -18rem;
+  left: -12rem;
+  width: 40rem;
+  height: 40rem;
+}
+
+/* The class name remains for compatibility with every existing screen. */
 .dark-app-surface {
-  border: 1px solid rgb(125 211 252 / 0.18);
+  border: 1px solid rgb(255 255 255 / 0.9);
   background:
-    radial-gradient(circle at 100% 0%, rgb(14 165 233 / 0.13), transparent 28rem),
-    linear-gradient(145deg, #081d33 0%, #0a2742 100%);
-  color: #f8fafc;
-  box-shadow: 0 30px 90px rgb(0 0 0 / 0.35);
+    radial-gradient(circle at 100% 0%, rgb(125 211 252 / 0.13), transparent 28rem),
+    rgb(255 255 255 / 0.78);
+  color: var(--foreground);
+  box-shadow:
+    0 32px 80px rgb(31 93 137 / 0.14),
+    0 8px 28px rgb(15 23 42 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+  backdrop-filter: blur(24px) saturate(1.15);
 }
 
 .dark-app-surface :is(.text-slate-950, .text-slate-900, .text-\[\#0B1F3A\]) {
-  color: #f8fafc !important;
+  color: #071d36 !important;
 }
 
 .dark-app-surface :is(.text-slate-800, .text-slate-700) {
-  color: #e2e8f0 !important;
+  color: #183b59 !important;
 }
 
 .dark-app-surface :is(.text-slate-600, .text-slate-500) {
-  color: #cbd5e1 !important;
+  color: #547089 !important;
 }
 
 .dark-app-surface :is(.text-sky-950, .text-sky-900, .text-sky-800, .text-sky-700, .text-sky-600) {
-  color: #bae6fd !important;
+  color: #0873d1 !important;
 }
 
 .dark-app-surface :is(.bg-white, .bg-white\/95, .bg-white\/90, .bg-white\/70) {
-  background-color: rgb(255 255 255 / 0.08) !important;
+  background-color: rgb(255 255 255 / 0.88) !important;
 }
 
 .dark-app-surface :is(.bg-slate-50, .bg-slate-50\/80, .bg-slate-100, .bg-slate-200, .bg-slate-200\/80) {
-  background-color: rgb(148 163 184 / 0.11) !important;
+  background-color: rgb(230 241 249 / 0.72) !important;
 }
 
 .dark-app-surface .bg-slate-300 {
-  background-color: rgb(51 65 85 / 0.9) !important;
+  background-color: #cadbe8 !important;
 }
 
 .dark-app-surface :is(.bg-sky-50, .bg-sky-50\/50, .bg-sky-50\/70, .bg-sky-50\/80, .bg-sky-100) {
-  background-color: rgb(14 165 233 / 0.13) !important;
+  background-color: rgb(224 244 255 / 0.78) !important;
 }
 
 .dark-app-surface :is(section, button).bg-gradient-to-br {
-  background-image: linear-gradient(145deg, rgb(14 165 233 / 0.15), rgb(6 182 212 / 0.08)) !important;
+  background-image: linear-gradient(145deg, rgb(240 250 255 / 0.96), rgb(222 244 255 / 0.76)) !important;
 }
 
 .dark-app-surface :is(.bg-emerald-50, .bg-emerald-50\/80, .bg-emerald-100) {
-  background-color: rgb(16 185 129 / 0.12) !important;
+  background-color: rgb(220 252 231 / 0.72) !important;
 }
 
 .dark-app-surface :is(.text-emerald-900, .text-emerald-800, .text-emerald-700) {
-  color: #a7f3d0 !important;
+  color: #047857 !important;
 }
 
 .dark-app-surface :is(.bg-green-50, .bg-green-100) {
-  background-color: rgb(34 197 94 / 0.12) !important;
+  background-color: rgb(220 252 231 / 0.72) !important;
 }
 
 .dark-app-surface :is(.text-green-900, .text-green-800, .text-green-700) {
-  color: #bbf7d0 !important;
+  color: #15803d !important;
 }
 
 .dark-app-surface :is(.text-amber-950, .text-amber-900, .text-amber-800, .text-amber-700) {
-  color: #fde68a !important;
+  color: #9a5a08 !important;
 }
 
 .dark-app-surface :is(.bg-amber-50, .bg-amber-100) {
-  background-color: rgb(245 158 11 / 0.12) !important;
+  background-color: rgb(254 243 199 / 0.68) !important;
 }
 
 .dark-app-surface :is(.bg-violet-50, .bg-violet-100) {
-  background-color: rgb(139 92 246 / 0.14) !important;
+  background-color: rgb(237 233 254 / 0.7) !important;
 }
 
 .dark-app-surface :is(.text-violet-950, .text-violet-900, .text-violet-800, .text-violet-700) {
-  color: #ddd6fe !important;
+  color: #6d28d9 !important;
 }
 
 .dark-app-surface :is(.bg-red-50, .bg-red-100) {
-  background-color: rgb(239 68 68 / 0.12) !important;
+  background-color: rgb(254 226 226 / 0.7) !important;
 }
 
 .dark-app-surface :is(.text-red-800, .text-red-700, .text-red-600) {
-  color: #fecaca !important;
+  color: #b91c1c !important;
 }
 
 .dark-app-surface :is(.border-slate-100, .border-slate-200, .border-slate-300) {
-  border-color: rgb(186 230 253 / 0.18) !important;
+  border-color: var(--line) !important;
 }
 
 .dark-app-surface :is(.border-sky-100, .border-sky-200) {
-  border-color: rgb(125 211 252 / 0.25) !important;
+  border-color: rgb(14 165 233 / 0.2) !important;
 }
 
 .dark-app-surface :is(input, select, textarea) {
-  border-color: rgb(125 211 252 / 0.28) !important;
-  background-color: rgb(255 255 255 / 0.1) !important;
-  color: #f8fafc !important;
+  border-color: rgb(15 91 143 / 0.2) !important;
+  background-color: rgb(255 255 255 / 0.94) !important;
+  color: #071d36 !important;
+  box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.dark-app-surface :is(input, select, textarea):focus {
+  border-color: rgb(8 124 240 / 0.65) !important;
+  outline: 3px solid rgb(14 165 233 / 0.12);
+  outline-offset: 1px;
 }
 
 .dark-app-surface :is(input, textarea)::placeholder {
-  color: #94a3b8 !important;
+  color: #8aa0b4 !important;
 }
 
 .dark-app-surface select option {
-  background: #0b2945;
-  color: #f8fafc;
+  background: #fff;
+  color: #071d36;
+}
+
+.dark-app-surface :is(.shadow-sm, .shadow-md) {
+  box-shadow: 0 10px 26px rgb(31 93 137 / 0.08) !important;
+}
+
+.dark-app-surface :is(a, button) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dark-app-surface :is(a, button):focus-visible {
+  outline: 3px solid rgb(14 165 233 / 0.28);
+  outline-offset: 3px;
+}
+
+/* Make every active choice unmistakable across cruise line, currency and references. */
+.dark-app-surface button[aria-pressed="true"] {
+  border-color: #0284c7 !important;
+  background: linear-gradient(135deg, #087cf0 0%, #1264d9 58%, #08a9c9 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    0 14px 28px rgb(2 132 199 / 0.24),
+    inset 0 1px 0 rgb(255 255 255 / 0.24) !important;
+  outline: 3px solid rgb(14 165 233 / 0.14);
+  outline-offset: 2px;
+}
+
+.dark-app-surface button[aria-pressed="true"] :is(p, span, strong) {
+  color: #fff !important;
+}
+
+.dark-app-surface button[aria-pressed="false"] {
+  border-color: rgb(15 91 143 / 0.16) !important;
+  background-color: rgb(255 255 255 / 0.9) !important;
+}
+
+.dark-app-surface button[aria-pressed="false"]:hover {
+  border-color: rgb(2 132 199 / 0.45) !important;
+  background-color: rgb(240 249 255 / 0.96) !important;
+}
+
+.dark-app-surface label:has(input[type="checkbox"]:checked) {
+  border-color: #0284c7 !important;
+  background: linear-gradient(135deg, rgb(224 242 254 / 0.95), rgb(236 254 255 / 0.92)) !important;
+  box-shadow:
+    0 12px 26px rgb(2 132 199 / 0.13),
+    inset 4px 0 0 #0284c7 !important;
+  outline: 2px solid rgb(14 165 233 / 0.1);
+  outline-offset: 2px;
+}
+
+.dark-app-surface input[type="checkbox"] {
+  accent-color: #087cf0;
 }
 
 .cruise-days-input::-webkit-inner-spin-button,
@@ -154,5 +260,24 @@ body {
 .dark-app-surface .hover\:bg-slate-100:hover,
 .dark-app-surface .hover\:bg-slate-50:hover,
 .dark-app-surface .hover\:bg-sky-50:hover {
-  background-color: rgb(255 255 255 / 0.14) !important;
+  background-color: rgb(224 244 255 / 0.88) !important;
+}
+
+@media (max-width: 639px) {
+  .dark-app-surface {
+    border-radius: 1.5rem !important;
+    box-shadow: 0 18px 48px rgb(31 93 137 / 0.12);
+    backdrop-filter: blur(18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
