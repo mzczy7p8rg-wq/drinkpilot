@@ -30,8 +30,8 @@ export default function Brand({
       <BrandMark
         className={
           compact
-            ? "h-auto w-44 sm:w-56"
-            : "h-auto w-60 sm:w-80"
+            ? "h-auto w-52 sm:w-64"
+            : "h-auto w-64 sm:w-[22rem]"
         }
       />
     </div>
@@ -54,7 +54,7 @@ export function BrandHeader({
   inverse?: boolean;
 }) {
   return (
-    <div className="flex w-full items-center justify-between gap-4">
+    <div className="flex w-full items-center justify-between gap-4 rounded-2xl bg-[#061a34] px-3 py-2.5 shadow-[0_12px_30px_rgba(7,29,54,0.16)] sm:px-4 sm:py-3">
       <Brand compact={!prominent} />
       <BetaBadge />
     </div>
