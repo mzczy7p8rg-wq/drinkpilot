@@ -813,7 +813,7 @@ export default function ResultsPage() {
               />
             </div>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={() =>
@@ -825,6 +825,13 @@ export default function ResultsPage() {
               >
                 Revisar precios
               </button>
+
+              <a
+                href="/analyses"
+                className="rounded-xl border border-sky-300 px-4 py-4 text-center font-semibold text-sky-700 transition hover:bg-sky-50"
+              >
+                Mis análisis
+              </a>
 
               <a
                 href="/wizard/people"
@@ -2226,13 +2233,22 @@ export default function ResultsPage() {
 
           {/* REINICIO */}
 
-          <a
-            href="/wizard/people"
-            onClick={resetData}
-            className="mt-8 block w-full rounded-xl bg-sky-700 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-800 sm:mt-10 sm:text-lg"
-          >
-            Empezar de nuevo
-          </a>
+          <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2">
+            <a
+              href="/analyses"
+              className="rounded-xl border border-sky-300 px-4 py-4 text-center text-base font-semibold text-sky-700 transition hover:bg-sky-50 sm:text-lg"
+            >
+              Mis análisis
+            </a>
+
+            <a
+              href="/wizard/people"
+              onClick={resetData}
+              className="rounded-xl bg-sky-700 py-4 text-center text-base font-semibold text-white transition hover:bg-sky-800 sm:text-lg"
+            >
+              Empezar de nuevo
+            </a>
+          </div>
         </div>
       </div>
     </main>
