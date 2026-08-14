@@ -49,3 +49,34 @@ test("identifica un análisis por barco, fecha y duración", async ({ page }) =>
   await expect(analysis).toContainText("7 días");
   await expect(analysis).toContainText("15 sept 2026");
 });
+
+test("permite poner y quitar un nombre personalizado", async ({ page }) => {
+  await page.goto("/wizard/people");
+  await page.getByRole("button", { name: /Continuar/i }).click();
+  await page.goto("/analyses");
+
+  const analysis = page.locator("article").first();
+
+  await analysis.getByRole("button", { name: "Editar nombre" }).click();
+  await analysis
+    .getByLabel("Nombre personalizado")
+    .fill("Crucero familiar septiembre");
+  await analysis.getByRole("button", { name: "Guardar nombre" }).click();
+
+  await expect(
+    analysis.getByRole("heading", { name: "Crucero familiar septiembre" })
+  ).toBeVisible();
+
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Crucero familiar septiembre" })
+  ).toBeVisible();
+
+  await analysis.getByRole("button", { name: "Editar nombre" }).click();
+  await analysis.getByLabel("Nombre personalizado").fill("");
+  await analysis.getByRole("button", { name: "Guardar nombre" }).click();
+
+  await expect(
+    analysis.getByRole("heading", { name: "Costa Cruceros" })
+  ).toBeVisible();
+});

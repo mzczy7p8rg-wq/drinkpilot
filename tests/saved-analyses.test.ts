@@ -5,6 +5,7 @@ import {
   duplicateSavedAnalysis,
   formatAnalysisSailingDate,
   parseStoredAnalyses,
+  renameSavedAnalysis,
   resolveStoredAnalyses,
   serializeSavedAnalyses,
   upsertSavedAnalysis,
@@ -43,6 +44,32 @@ const data = {
 } satisfies WizardData;
 
 describe("saved analyses", () => {
+  it("renombra un análisis y restaura después su nombre automático", () => {
+    const original = createSavedAnalysis(data, {
+      id: "analysis-1",
+      now: "2026-08-15T00:00:00.000Z",
+    });
+
+    const renamed = renameSavedAnalysis(
+      [original],
+      "analysis-1",
+      "  Crucero familiar septiembre  ",
+      "2026-08-15T01:00:00.000Z"
+    );
+
+    expect(renamed[0].name).toBe("Crucero familiar septiembre");
+    expect(renamed[0].updatedAt).toBe("2026-08-15T01:00:00.000Z");
+
+    const restored = renameSavedAnalysis(
+      renamed,
+      "analysis-1",
+      "   ",
+      "2026-08-15T02:00:00.000Z"
+    );
+
+    expect(restored[0].name).toBeNull();
+  });
+
   it("formatea la fecha de salida para identificar el crucero", () => {
     expect(formatAnalysisSailingDate("2026-09-15")).toBe("15 sept 2026");
     expect(formatAnalysisSailingDate("sin-fecha")).toBe("sin-fecha");
@@ -82,6 +109,7 @@ describe("saved analyses", () => {
   it("duplica con identidad propia sin compartir los datos", () => {
     const initial = createSavedAnalysis(data, {
       id: "analysis-1",
+      name: "Crucero familiar",
       now: "2026-08-15T10:00:00.000Z",
     });
 
@@ -92,6 +120,7 @@ describe("saved analyses", () => {
 
     expect(duplicated).toHaveLength(2);
     expect(duplicated[0].id).toBe("analysis-2");
+    expect(duplicated[0].name).toBe("Crucero familiar (copia)");
     expect(duplicated[0].data).toEqual(initial.data);
     expect(duplicated[0].data).not.toBe(initial.data);
   });
