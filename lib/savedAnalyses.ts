@@ -1,5 +1,5 @@
 import type { WizardData } from "@/lib/store";
-import { isCruiseLineKey } from "@/data/cruiseLines";
+import { getCruiseLine, isCruiseLineKey } from "@/data/cruiseLines";
 import {
   hasValidConsumptionStep,
   hasValidCruiseStep,
@@ -17,6 +17,71 @@ export type SavedAnalysis = {
   updatedAt: string;
   data: WizardData;
 };
+
+export type SavedAnalysisSort =
+  | "recent"
+  | "name"
+  | "cruise-line";
+
+const analysisSortCollator = new Intl.Collator("es-ES", {
+  sensitivity: "base",
+  numeric: true,
+});
+
+export function resolveAnalysisDisplayName(
+  analysis: SavedAnalysis
+): string {
+  return (
+    analysis.name ||
+    analysis.data.shipName ||
+    getCruiseLine(analysis.data.cruiseLine).name
+  );
+}
+
+function compareAnalysesByRecent(
+  left: SavedAnalysis,
+  right: SavedAnalysis
+): number {
+  const updatedComparison =
+    right.updatedAt.localeCompare(left.updatedAt);
+
+  if (updatedComparison !== 0) {
+    return updatedComparison;
+  }
+
+  return left.id.localeCompare(right.id);
+}
+
+export function sortSavedAnalyses(
+  analyses: SavedAnalysis[],
+  sort: SavedAnalysisSort
+): SavedAnalysis[] {
+  return [...analyses].sort((left, right) => {
+    if (sort === "name") {
+      const nameComparison = analysisSortCollator.compare(
+        resolveAnalysisDisplayName(left),
+        resolveAnalysisDisplayName(right)
+      );
+
+      return nameComparison !== 0
+        ? nameComparison
+        : compareAnalysesByRecent(left, right);
+    }
+
+    if (sort === "cruise-line") {
+      const cruiseLineComparison = analysisSortCollator.compare(
+        getCruiseLine(left.data.cruiseLine).name,
+        getCruiseLine(right.data.cruiseLine).name
+      );
+
+      return cruiseLineComparison !== 0
+        ? cruiseLineComparison
+        : compareAnalysesByRecent(left, right);
+    }
+
+    return compareAnalysesByRecent(left, right);
+  });
+}
 
 function isStoredAnalysis(value: unknown): value is SavedAnalysis {
   if (!value || typeof value !== "object" || Array.isArray(value)) {

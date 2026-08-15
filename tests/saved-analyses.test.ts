@@ -8,6 +8,7 @@ import {
   renameSavedAnalysis,
   resolveStoredAnalyses,
   serializeSavedAnalyses,
+  sortSavedAnalyses,
   upsertSavedAnalysis,
 } from "@/lib/savedAnalyses";
 import type { WizardData } from "@/lib/store";
@@ -44,6 +45,127 @@ const data = {
 } satisfies WizardData;
 
 describe("saved analyses", () => {
+
+  it("ordena análisis por actualización más reciente sin mutar la colección", () => {
+    const older = createSavedAnalysis(data, {
+      id: "older",
+      now: "2026-08-13T10:00:00.000Z",
+    });
+
+    const newer = createSavedAnalysis(data, {
+      id: "newer",
+      now: "2026-08-15T10:00:00.000Z",
+    });
+
+    const analyses = [older, newer];
+    const sorted = sortSavedAnalyses(analyses, "recent");
+
+    expect(sorted.map((analysis) => analysis.id)).toEqual([
+      "newer",
+      "older",
+    ]);
+    expect(analyses.map((analysis) => analysis.id)).toEqual([
+      "older",
+      "newer",
+    ]);
+  });
+
+  it("ordena por el título visible usando nombre personalizado, barco o naviera", () => {
+    const named = createSavedAnalysis(
+      {
+        ...data,
+        cruiseLine: "costa",
+        shipName: "Costa Toscana",
+      },
+      {
+        id: "named",
+        name: "Viaje familiar",
+        now: "2026-08-15T10:00:00.000Z",
+      }
+    );
+
+    const ship = createSavedAnalysis(
+      {
+        ...data,
+        cruiseLine: "costa",
+        shipName: "Costa Smeralda",
+      },
+      {
+        id: "ship",
+        now: "2026-08-14T10:00:00.000Z",
+      }
+    );
+
+    const cruiseLineOnly = createSavedAnalysis(
+      {
+        ...data,
+        cruiseLine: "msc",
+        shipName: null,
+      },
+      {
+        id: "cruise-line",
+        now: "2026-08-13T10:00:00.000Z",
+      }
+    );
+
+    const sorted = sortSavedAnalyses(
+      [named, cruiseLineOnly, ship],
+      "name"
+    );
+
+    expect(sorted.map((analysis) => analysis.id)).toEqual([
+      "ship",
+      "cruise-line",
+      "named",
+    ]);
+  });
+
+  it("ordena por naviera y usa el más reciente como desempate", () => {
+    const costaOlder = createSavedAnalysis(
+      {
+        ...data,
+        cruiseLine: "costa",
+      },
+      {
+        id: "costa-older",
+        now: "2026-08-13T10:00:00.000Z",
+      }
+    );
+
+    const costaNewer = createSavedAnalysis(
+      {
+        ...data,
+        cruiseLine: "costa",
+      },
+      {
+        id: "costa-newer",
+        now: "2026-08-15T10:00:00.000Z",
+      }
+    );
+
+    const msc = createSavedAnalysis(
+      {
+        ...data,
+        cruiseLine: "msc",
+      },
+      {
+        id: "msc",
+        now: "2026-08-14T10:00:00.000Z",
+      }
+    );
+
+    const sorted = sortSavedAnalyses(
+      [msc, costaOlder, costaNewer],
+      "cruise-line"
+    );
+
+    expect(sorted.map((analysis) => analysis.id)).toEqual([
+      "costa-newer",
+      "costa-older",
+      "msc",
+    ]);
+  });
+
   it("renombra un análisis y restaura después su nombre automático", () => {
     const original = createSavedAnalysis(data, {
       id: "analysis-1",

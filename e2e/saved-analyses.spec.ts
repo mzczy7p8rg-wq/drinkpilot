@@ -80,3 +80,94 @@ test("permite poner y quitar un nombre personalizado", async ({ page }) => {
     analysis.getByRole("heading", { name: "Costa Cruceros" })
   ).toBeVisible();
 });
+
+
+test("ordena Mis análisis por más reciente, nombre y naviera", async ({ page }) => {
+  const baseData = {
+    market: null,
+    sailingRegion: null,
+    onboardCurrency: null,
+    sailingDate: null,
+    shipName: null,
+    days: 7,
+    coffee: 1,
+    water: 1,
+    soda: 0,
+    beer: 0,
+    wine: 0,
+    cocktail: 0,
+    alcoholicCocktail: null,
+    nonAlcoholicCocktail: null,
+    alcoholicCocktails: false,
+    nonAlcoholicCocktails: false,
+    draftBeer: false,
+    premiumCocktails: false,
+    bottledBeer: false,
+    premiumSpirits: false,
+    bottledWaterDailyAllowance: false,
+    bottledWaterUnlimited: false,
+    customPackagePrices: {},
+    packagePriceCurrency: null,
+    selectedDrinkPrices: {},
+    people: 2,
+    adults: 2,
+    minors: 0,
+  };
+
+  await page.addInitScript((data) => {
+    window.localStorage.setItem(
+      "drinkpilot-saved-analyses",
+      JSON.stringify({
+        version: 1,
+        analyses: [
+          {
+            id: "costa-older",
+            name: "Zeta",
+            createdAt: "2026-08-13T10:00:00.000Z",
+            updatedAt: "2026-08-13T10:00:00.000Z",
+            data: {
+              ...data,
+              cruiseLine: "costa",
+            },
+          },
+          {
+            id: "msc-middle",
+            name: "Alfa",
+            createdAt: "2026-08-14T10:00:00.000Z",
+            updatedAt: "2026-08-14T10:00:00.000Z",
+            data: {
+              ...data,
+              cruiseLine: "msc",
+            },
+          },
+          {
+            id: "costa-newer",
+            name: "Beta",
+            createdAt: "2026-08-15T10:00:00.000Z",
+            updatedAt: "2026-08-15T10:00:00.000Z",
+            data: {
+              ...data,
+              cruiseLine: "costa",
+            },
+          },
+        ],
+      })
+    );
+  }, baseData);
+
+  await page.goto("/analyses");
+
+  const titles = page.locator("article h2");
+  const sort = page.getByLabel("Ordenar por");
+
+  await expect(titles).toHaveText(["Beta", "Alfa", "Zeta"]);
+
+  await sort.selectOption("name");
+  await expect(titles).toHaveText(["Alfa", "Beta", "Zeta"]);
+
+  await sort.selectOption("cruise-line");
+  await expect(titles).toHaveText(["Beta", "Zeta", "Alfa"]);
+
+  await sort.selectOption("recent");
+  await expect(titles).toHaveText(["Beta", "Alfa", "Zeta"]);
+});
