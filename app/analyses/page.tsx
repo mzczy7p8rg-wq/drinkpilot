@@ -9,6 +9,8 @@ import { getCruiseLine } from "@/data/cruiseLines";
 import {
   formatAnalysisSailingDate,
   resolveAnalysisDestination,
+  sortSavedAnalyses,
+  type SavedAnalysisSort,
 } from "@/lib/savedAnalyses";
 import { useStore } from "@/lib/store";
 
@@ -17,6 +19,7 @@ export default function AnalysesPage() {
   const [pendingDeletion, setPendingDeletion] = useState<string | null>(null);
   const [editingAnalysisId, setEditingAnalysisId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
+  const [sort, setSort] = useState<SavedAnalysisSort>("recent");
   const {
     hydrated,
     savedAnalyses,
@@ -25,6 +28,8 @@ export default function AnalysesPage() {
     renameAnalysis,
     deleteAnalysis,
   } = useStore();
+
+  const sortedAnalyses = sortSavedAnalyses(savedAnalyses, sort);
 
   function openAnalysis(id: string) {
     const analysis = savedAnalyses.find((item) => item.id === id);
@@ -98,7 +103,29 @@ export default function AnalysesPage() {
           </div>
         ) : (
           <div className="mt-8 grid gap-4">
-            {savedAnalyses.map((analysis) => {
+            <div className="flex flex-col gap-2 rounded-2xl border border-sky-200/20 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <label
+                htmlFor="analyses-sort"
+                className="text-sm font-semibold text-slate-200"
+              >
+                Ordenar por
+              </label>
+
+              <select
+                id="analyses-sort"
+                value={sort}
+                onChange={(event) =>
+                  setSort(event.target.value as SavedAnalysisSort)
+                }
+                className="min-h-11 rounded-xl border border-sky-300/30 bg-slate-900 px-4 py-2 text-sm font-semibold text-white outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-300/30 sm:min-w-48"
+              >
+                <option value="recent">Más reciente</option>
+                <option value="name">Nombre</option>
+                <option value="cruise-line">Naviera</option>
+              </select>
+            </div>
+
+            {sortedAnalyses.map((analysis) => {
               const cruiseLine = getCruiseLine(analysis.data.cruiseLine);
               const isComplete = resolveAnalysisDestination(analysis.data) === "/results";
 
