@@ -2,7 +2,7 @@ import type { OnboardPriceKey } from "@/lib/onboardPriceService";
 import { isPositiveSafePrice } from "@/lib/priceValidation";
 
 export const drinkCategoryLabels: Record<OnboardPriceKey, string> = {
-  coffee: "Café",
+  coffee: "Cafés, tés e infusiones",
   water: "Agua",
   soda: "Refresco",
   juice: "Zumo",
