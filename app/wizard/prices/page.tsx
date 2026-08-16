@@ -124,6 +124,10 @@ function PricesForm() {
 
   const currencySymbol = getCurrencySymbol(packagePriceCurrency);
 
+  const [includedPackageKey, setIncludedPackageKey] = useState<string | null>(
+    data.includedPackageKey ?? null
+  );
+
   /*
    * Los precios concretos de bebidas
    * deben expresarse en la moneda real
@@ -682,6 +686,8 @@ function PricesForm() {
 
         packagePriceCurrency,
 
+        includedPackageKey,
+
         selectedDrinkPrices:
           nextSelectedDrinkPrices,
 
@@ -811,6 +817,8 @@ function PricesForm() {
 
               const packageHighlights = getPackageHighlights(pkg);
 
+              const isIncludedInReservation = includedPackageKey === pkg.key;
+
               return (
                 <div
                   key={
@@ -889,6 +897,31 @@ function PricesForm() {
                       </div>
                     </div>
                   ) : (
+                    <>
+                      <button
+                        type="button"
+                        aria-pressed={isIncludedInReservation}
+                        onClick={() =>
+                          setIncludedPackageKey((previous) =>
+                            previous === pkg.key ? null : pkg.key
+                          )
+                        }
+                        className={`mt-4 w-full rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                          isIncludedInReservation
+                            ? "border-green-500 bg-green-50 text-green-800"
+                            : "border-slate-200 bg-white text-slate-700 hover:border-green-300"
+                        }`}
+                      >
+                        {isIncludedInReservation
+                          ? "✓ Incluido en mi reserva"
+                          : "Ya tengo este paquete incluido"}
+                      </button>
+
+                      {isIncludedInReservation ? (
+                        <p className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm leading-6 text-green-900">
+                          Lo comparamos con coste incremental de 0 €. Podrás ver si conviene mantenerlo o cambiar a otra opción.
+                        </p>
+                      ) : (
                     <div className="relative mt-3">
                       <input
                         id={
@@ -943,11 +976,14 @@ function PricesForm() {
                         }
                       </span>
                     </div>
+                      )}
+                    </>
                   )}
 
                   {/* ERROR */}
 
                   {!isEconomicallyDisabled &&
+                    !isIncludedInReservation &&
                     validation
                       ?.error && (
                     <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
@@ -965,6 +1001,7 @@ function PricesForm() {
                   {/* WARNING */}
 
                   {!isEconomicallyDisabled &&
+                    !isIncludedInReservation &&
                     validation
                       ?.warning && (
                     <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">

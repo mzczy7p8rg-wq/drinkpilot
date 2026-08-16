@@ -179,6 +179,13 @@ export type WizardData = {
     string | null;
 
   /*
+   * Paquete que el usuario ya tiene incluido en su reserva.
+   * Su coste incremental para comparar alternativas es cero;
+   * no se confunde con un precio desconocido de 0 €.
+   */
+  includedPackageKey?: string | null;
+
+  /*
    * Precios concretos de bebidas
    * introducidos por el usuario.
    *
@@ -364,6 +371,9 @@ function createInitialData(
       ),
 
     packagePriceCurrency:
+      null,
+
+    includedPackageKey:
       null,
 
     selectedDrinkPrices:

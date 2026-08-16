@@ -17,15 +17,36 @@ export type ResolvedEconomicPackage = {
   resolvedPrice: {
     price: number;
     currency: string;
-    source: "user" | "reference";
+    source: "user" | "reference" | "included";
   };
 };
 
 export function resolveEconomicPackage(
   pkg: AllPackage,
-  customPackagePrices?: EconomicPackagePriceInput
+  customPackagePrices?: EconomicPackagePriceInput,
+  includedPackageKey?: string | null
 ): ResolvedEconomicPackage | null {
   const packageKey = pkg.key as PackageKey;
+
+  if (
+    includedPackageKey === packageKey &&
+    pkg.economicActivation !== "disabled" &&
+    pkg.existenceStatus === "verified"
+  ) {
+    return {
+      pkg,
+      packageKey,
+      referencePrice: isPositiveSafePrice(pkg.pricePerChargeUnit)
+        ? pkg.pricePerChargeUnit
+        : null,
+      resolvedPrice: {
+        price: 0,
+        currency: pkg.currency,
+        source: "included",
+      },
+    };
+  }
+
   const customPrice = resolveStoredCustomPackagePrice(
     customPackagePrices?.[packageKey],
     pkg.currency

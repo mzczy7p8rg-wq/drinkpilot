@@ -90,7 +90,8 @@ import {
 
 export type PriceSource =
   | "user"
-  | "reference";
+  | "reference"
+  | "included";
 
 export type EconomicComparisonStatus =
   | "complete"
@@ -181,6 +182,8 @@ export type ComparisonInput = {
     | null
     | undefined
   >;
+
+  includedPackageKey?: string | null;
 
 
   /*
@@ -1235,7 +1238,8 @@ export function compareDrinkPackages(
       .map((pkg) =>
         resolveEconomicPackage(
           pkg,
-          input.customPackagePrices
+          input.customPackagePrices,
+          input.includedPackageKey
         )
       )
       .filter(
