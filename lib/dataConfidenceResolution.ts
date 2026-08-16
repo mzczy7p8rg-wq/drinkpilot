@@ -16,6 +16,7 @@ import {
 export type PackagePriceConfidenceSource =
   | "user"
   | "reference"
+  | "included"
   | "pending";
 
 export type PackageEconomicConfidenceStatus =
@@ -125,6 +126,8 @@ export function resolvePackageDataConfidence(
         comparedPackage.priceSource ===
         "user"
           ? "Participa en la comparación con el precio introducido por ti."
+          : comparedPackage.priceSource === "included"
+            ? "Ya está incluido en tu reserva; se compara con coste incremental de 0 €."
           : "Participa en la comparación con el precio de referencia disponible.",
     };
   }

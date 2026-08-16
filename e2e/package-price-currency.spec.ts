@@ -97,6 +97,21 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
     page.getByText(/Estimación orientativa EUR/i).first()
   ).toBeVisible();
 
+  const includedPackageButton = page
+    .getByRole("button", { name: "Ya tengo este paquete incluido" })
+    .first();
+
+  await includedPackageButton.click();
+  await expect(
+    page.getByRole("button", { name: "✓ Incluido en mi reserva" })
+  ).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  await expect(
+    page.getByText(/coste incremental de 0 €/i)
+  ).toBeVisible();
+
   await usdButton.click();
 
   await expect(usdButton).toHaveAttribute(

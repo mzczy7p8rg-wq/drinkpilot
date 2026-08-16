@@ -261,6 +261,9 @@ export default function ResultsPage() {
       customPackagePrices:
         data.customPackagePrices,
 
+      includedPackageKey:
+        data.includedPackageKey,
+
       selectedDrinkPrices:
         data.selectedDrinkPrices,
 
@@ -1406,6 +1409,10 @@ export default function ResultsPage() {
                     pkg.priceSource ===
                     "user";
 
+                  const isIncludedInReservation =
+                    pkg.priceSource ===
+                    "included";
+
                   const thresholdImpact =
                     comparison.thresholdCruiseImpacts.find(
                       (item) =>
@@ -1454,7 +1461,11 @@ export default function ResultsPage() {
                             por persona / noche
                           </p>
 
-                          {usesUserPrice ? (
+                          {isIncludedInReservation ? (
+                            <span className="mt-2 inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                              ✓ Ya incluido en tu reserva
+                            </span>
+                          ) : usesUserPrice ? (
                             <div className="mt-2">
                               <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
                                 ✓ Precio de
