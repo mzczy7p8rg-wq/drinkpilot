@@ -10,6 +10,7 @@ export default function Hero() {
     data,
     hydrated,
     resetData,
+    savedAnalyses,
   } = useStore();
 
   const canResumeAnalysis =
@@ -51,6 +52,15 @@ export default function Hero() {
                 className="inline-flex items-center justify-center rounded-2xl border border-sky-300/40 bg-white/10 px-8 py-4 font-semibold text-sky-100 transition hover:border-sky-300/70 hover:bg-white/15"
               >
                 Continuar análisis
+              </Link>
+            )}
+
+            {hydrated && savedAnalyses.length > 0 && (
+              <Link
+                href="/analyses"
+                className="inline-flex items-center justify-center rounded-2xl border border-sky-300/40 bg-white/10 px-8 py-4 font-semibold text-sky-100 transition hover:border-sky-300/70 hover:bg-white/15"
+              >
+                Mis análisis ({savedAnalyses.length})
               </Link>
             )}
           </div>
