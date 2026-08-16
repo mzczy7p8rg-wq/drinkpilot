@@ -18,9 +18,8 @@ import {
 } from "@/data/cruiseLines";
 
 import {
-  getMissingRequiredOnboardPriceKeys,
   onboardPriceKeys,
-  resolveOnboardPriceValuesForConsumption,
+  type CalculationOnboardPriceValues,
   type OnboardPriceConsumptionValues,
   type OnboardPriceKey,
   type PartialOnboardPriceValues,
@@ -32,8 +31,8 @@ import {
 } from "@/lib/packageRules";
 
 import {
-  resolvePackageChargeDays,
-} from "@/lib/packageChargeDays";
+  resolvePackageChargeUnits,
+} from "@/lib/packageChargeUnits";
 
 
 import {
@@ -79,6 +78,16 @@ import {
   type PackageThresholdCruiseImpact,
 } from "@/lib/packageThresholdCruiseImpact";
 
+import {
+  getCostaDocumentedDrinkPriceById,
+  resolveCostaDocumentedPackageCoverage,
+} from "@/lib/costaDocumentedDrinkPriceService";
+
+import {
+  getMscDocumentedDrinkPriceById,
+  resolveMscDocumentedPackageCoverage,
+} from "@/lib/mscDocumentedDrinkPriceService";
+
 export type PriceSource =
   | "user"
   | "reference";
@@ -115,12 +124,13 @@ export type ComparisonInput = {
 
   sailingDate?: string | null;
 
-  days: number;
+  cruiseNights: number;
   people: number;
 
   coffee: number;
   water: number;
   soda: number;
+  juice?: number;
   beer: number;
   wine: number;
   cocktail: number;
@@ -199,9 +209,15 @@ export type ComparisonInput = {
 
         contextRelevance?:
           SelectedDrinkPriceContextRelevance;
+
+        referenceId?:
+          string | null;
       }
     >
   >;
+
+  documentedDrinkQuantities?:
+    Record<string, number>;
 };
 
 export type PackageComparisonResult = {
@@ -215,7 +231,7 @@ export type PackageComparisonResult = {
    * Precio realmente utilizado
    * en el cálculo.
    */
-  packagePricePerDay: number;
+  packagePricePerChargeUnit: number;
 
   priceSource: PriceSource;
 
@@ -226,7 +242,7 @@ export type PackageComparisonResult = {
    * una referencia suficientemente
    * fiable para ese paquete.
    */
-  referencePricePerDay:
+  referencePricePerChargeUnit:
     number | null;
 
   packageCost: number;
@@ -237,6 +253,9 @@ export type PackageComparisonResult = {
 
   effectiveSavings:
     number | null;
+
+  documentedProductAdditionalCost:
+    number;
 
   economicComparisonStatus:
     EconomicComparisonStatus;
@@ -300,6 +319,14 @@ export type ComparisonResult = {
    */
   economicDrinkPrices:
     PartialOnboardPriceValues;
+
+  /*
+   * Cesta numérica final utilizada por el
+   * calculador. Incluye precios ponderados de
+   * productos documentados elegidos por el usuario.
+   */
+  calculationDrinkPrices:
+    CalculationOnboardPriceValues | null;
 
   /*
    * true = existen precios individuales
@@ -416,7 +443,11 @@ export function resolveEconomicComparison(
   operationalEconomicImpact?:
     PackageOperationalRuleImpact[
       "economicImpact"
-    ]
+    ],
+
+  documentedProductAdditionalCost = 0,
+
+  documentedProductCoverageFullyResolved = false
 ): {
   status:
     EconomicComparisonStatus;
@@ -503,7 +534,8 @@ export function resolveEconomicComparison(
 
   const thresholdAdjustedSavings =
     savings -
-    thresholdAdditionalCost;
+    thresholdAdditionalCost -
+    documentedProductAdditionalCost;
 
   /*
    * Cobertura completa:
@@ -517,6 +549,16 @@ export function resolveEconomicComparison(
       status:
         "complete",
 
+      effectiveSavings:
+        thresholdAdjustedSavings,
+    };
+  }
+
+  if (
+    documentedProductCoverageFullyResolved
+  ) {
+    return {
+      status: "complete",
       effectiveSavings:
         thresholdAdjustedSavings,
     };
@@ -567,6 +609,16 @@ type EffectiveSavingsCandidate = {
   effectiveSavings:
     number | null;
 };
+
+function resolveRecommendationLevelFromDailyMargin(
+  dailyMargin: number
+): PackageComparisonResult["recommendationLevel"] {
+  if (dailyMargin <= 0) return "not-worth-it";
+  if (dailyMargin < 3) return "very-close";
+  if (dailyMargin < 8) return "worth-considering";
+  if (dailyMargin < 15) return "worth-it";
+  return "strongly-worth-it";
+}
 
 export function findBestPackageByEffectiveSavings<
   Candidate extends
@@ -624,7 +676,7 @@ export function compareDrinkPackages(
    *
    * Algunas reglas explícitamente modeladas
    * pueden participar en el cálculo económico,
-   * como la política de días facturables
+   * como la política de unidades facturables
    * del paquete.
    */
   const operationalRules =
@@ -699,7 +751,7 @@ export function compareDrinkPackages(
    * la naviera como sustituto de una bebida
    * concreta seleccionada por el usuario.
    */
-  const selectedDrinkConsumptions:
+  const categorySelectedDrinkConsumptions:
     SelectedDrinkConsumption[] = (
       [
         ["coffee", input.coffee],
@@ -741,6 +793,9 @@ export function compareDrinkPackages(
 
               contextRelevance:
                 selectedPrice?.contextRelevance,
+
+              referenceId:
+                selectedPrice?.referenceId,
             });
 
           if (!drink) {
@@ -771,6 +826,9 @@ export function compareDrinkPackages(
 
               contextRelevance:
                 drink.contextRelevance,
+
+              referenceId:
+                drink.referenceId,
             });
 
           if (!economicDrink) {
@@ -791,6 +849,122 @@ export function compareDrinkPackages(
         ): item is SelectedDrinkConsumption =>
           item !== null
       );
+
+  const categoryConsumptionPerDay = {
+    coffee: input.coffee,
+    water: input.water,
+    soda: input.soda,
+    juice: input.juice ?? 0,
+    beer: input.beer,
+    wine: input.wine,
+    cocktail: input.cocktail,
+  } satisfies Record<OnboardPriceKey, number>;
+
+  /*
+   * Las selecciones documentadas expresan
+   * variedad o preferencia relativa, no
+   * consumiciones adicionales. El total
+   * diario sigue viniendo exclusivamente
+   * del paso de consumo.
+   */
+  const validDocumentedSelections =
+    Object.entries(
+      input.documentedDrinkQuantities ?? {}
+    ).flatMap(
+      ([referenceId, selectionWeight]) => {
+              const reference =
+                activeCruiseLine === "costa"
+                  ? getCostaDocumentedDrinkPriceById(
+                      referenceId
+                    )
+                  : getMscDocumentedDrinkPriceById(
+                      referenceId
+                    );
+
+              if (
+                !reference ||
+                !Number.isSafeInteger(selectionWeight) ||
+                selectionWeight <= 0
+              ) {
+                return [];
+              }
+
+              return [{ reference, selectionWeight }];
+            }
+          );
+
+  const documentedSelectionWeightByCategory =
+    validDocumentedSelections.reduce(
+      (totals, selection) => ({
+        ...totals,
+        [selection.reference.category]:
+          (totals[
+            selection.reference.category
+          ] ?? 0) + selection.selectionWeight,
+      }),
+      {} as Partial<Record<OnboardPriceKey, number>>
+    );
+
+  const documentedDrinkConsumptions:
+    SelectedDrinkConsumption[] =
+      validDocumentedSelections.flatMap(
+        ({ reference, selectionWeight }) => {
+              const totalCategoryWeight =
+                documentedSelectionWeightByCategory[
+                  reference.category
+                ] ?? 0;
+
+              const quantityPerDay =
+                totalCategoryWeight > 0
+                  ? (categoryConsumptionPerDay[
+                      reference.category
+                    ] *
+                      selectionWeight) /
+                    totalCategoryWeight
+                  : 0;
+
+              if (quantityPerDay <= 0) {
+                return [];
+              }
+
+              const drink =
+                createSelectedDrinkPrice({
+                  category: reference.category,
+                  price: reference.price,
+                  currency: reference.currency,
+                  source: "documented-menu",
+                  referenceId: reference.id,
+                  /*
+                   * La cantidad documentada es una elección
+                   * explícita del usuario dentro de la carta,
+                   * no una referencia aplicada automáticamente.
+                   */
+                  contextRelevance: "exact",
+                });
+
+              return drink
+                ? [{ drink, quantityPerDay }]
+                : [];
+            }
+          );
+
+  const documentedCategories =
+    new Set(
+      validDocumentedSelections.map(
+        (selection) =>
+          selection.reference.category
+      )
+    );
+
+  const selectedDrinkConsumptions = [
+    ...categorySelectedDrinkConsumptions.filter(
+      (consumption) =>
+        !documentedCategories.has(
+          consumption.drink.category
+        )
+    ),
+    ...documentedDrinkConsumptions,
+  ];
 
   const hasSelectedDrinkPriceInput =
     input.selectedDrinkPrices !==
@@ -883,8 +1057,8 @@ export function compareDrinkPackages(
               evaluatePackageThresholdCruiseImpact({
                 dailyImpact,
 
-                days:
-                  input.days,
+                cruiseNights:
+                  input.cruiseNights,
 
                 people:
                   input.people,
@@ -933,6 +1107,9 @@ export function compareDrinkPackages(
     soda:
       input.soda,
 
+    juice:
+      input.juice ?? 0,
+
     beer:
       input.beer,
 
@@ -943,20 +1120,103 @@ export function compareDrinkPackages(
       input.cocktail,
   };
 
+  const calculationDrinkPriceEntries =
+    onboardPriceKeys.map(
+            (category) => {
+              const categoryQuantity =
+                onboardPriceConsumption[category] ?? 0;
+
+              const documentedForCategory =
+                documentedDrinkConsumptions.filter(
+                  (consumption) =>
+                    consumption.drink.category ===
+                    category
+                );
+
+              const documentedQuantity =
+                documentedForCategory.reduce(
+                  (total, consumption) =>
+                    total +
+                    consumption.quantityPerDay,
+                  0
+                );
+
+              if (
+                categoryQuantity <= 0
+              ) {
+                return [category, 0] as const;
+              }
+
+              if (
+                documentedQuantity <= 0 ||
+                documentedQuantity >
+                  categoryQuantity
+              ) {
+                return [
+                  category,
+                  economicDrinkPrices[category],
+                ] as const;
+              }
+
+              const documentedCost =
+                documentedForCategory.reduce(
+                  (total, consumption) =>
+                    total +
+                    consumption.drink.price *
+                      consumption.quantityPerDay,
+                  0
+                );
+
+              const genericQuantity =
+                categoryQuantity -
+                documentedQuantity;
+
+              const genericPrice =
+                economicDrinkPrices[category];
+
+              if (
+                genericQuantity > 0 &&
+                (typeof genericPrice !== "number" ||
+                  genericPrice <= 0)
+              ) {
+                return [category, null] as const;
+              }
+
+              return [
+                category,
+                (documentedCost +
+                  genericQuantity *
+                    (genericPrice ?? 0)) /
+                  categoryQuantity,
+              ] as const;
+            }
+          );
+
   const calculationDrinkPrices =
-    resolveOnboardPriceValuesForConsumption(
-      economicDrinkPrices,
-      onboardPriceConsumption
-    );
+    calculationDrinkPriceEntries.some(
+      ([, price]) =>
+        typeof price !== "number" ||
+        !Number.isFinite(price) ||
+        price < 0
+    )
+      ? null
+      : (Object.fromEntries(
+          calculationDrinkPriceEntries
+        ) as CalculationOnboardPriceValues);
 
   const economicDataAvailable =
     calculationDrinkPrices !==
     null;
 
   const missingOnboardPriceKeys =
-    getMissingRequiredOnboardPriceKeys(
-      economicDrinkPrices,
-      onboardPriceConsumption
+    calculationDrinkPriceEntries.flatMap(
+      ([category, price]) =>
+        (onboardPriceConsumption[category] ?? 0) > 0 &&
+        (typeof price !== "number" ||
+          !Number.isFinite(price) ||
+          price <= 0)
+          ? [category]
+          : []
     );
 
   /*
@@ -1027,6 +1287,9 @@ export function compareDrinkPackages(
         soda:
           input.soda,
 
+        juice:
+          input.juice ?? 0,
+
         beer:
           input.beer,
 
@@ -1069,6 +1332,27 @@ export function compareDrinkPackages(
           activeCruiseLine,
 
         includePendingPackages,
+
+        selectedDrinkReferenceIds:
+          Object.fromEntries(
+            onboardPriceKeys.flatMap(
+              (category) => {
+                const referenceIds =
+                  selectedDrinkConsumptions.flatMap(
+                    (consumption) =>
+                      consumption.drink.category ===
+                        category &&
+                      consumption.drink.referenceId
+                        ? [consumption.drink.referenceId]
+                        : []
+                  );
+
+                return referenceIds.length > 0
+                  ? [[category, referenceIds]]
+                  : [];
+              }
+            )
+          ),
       }
     );
 
@@ -1089,6 +1373,8 @@ export function compareDrinkPackages(
       economicCurrency,
 
       economicDrinkPrices,
+
+      calculationDrinkPrices,
 
       economicDataAvailable:
         false,
@@ -1129,7 +1415,7 @@ export function compareDrinkPackages(
    */
   const results:
     PackageComparisonResult[] =
-      economicPackages.map(
+      economicPackages.flatMap(
         ({
           pkg,
           packageKey,
@@ -1143,30 +1429,47 @@ export function compareDrinkPackages(
                 packageKey
             );
 
-          const packageChargeDays =
-            resolvePackageChargeDays({
-              cruiseDays:
-                input.days,
+          const packageChargeUnitPolicy =
+            operationalRule
+              ?.packageChargeUnitPolicy ??
+            "unknown";
 
-              packagePricingDayPolicy:
-                operationalRule
-                  ?.packagePricingDayPolicy ??
-                "unknown",
+          const packageChargeUnits =
+            resolvePackageChargeUnits({
+              cruiseNights:
+                input.cruiseNights,
+
+              packageChargeUnitPolicy:
+                packageChargeUnitPolicy,
             });
+
+          /*
+           * Con la entrada canónica en noches no
+           * fabricamos una equivalencia económica
+           * para políticas todavía desconocidas.
+           * El paquete conserva su cobertura, pero
+           * queda fuera de la comparación monetaria.
+           */
+          if (
+            packageChargeUnits.status !==
+              "resolved"
+          ) {
+            return [];
+          }
 
           const calculation =
             calculateRecommendation({
-              days:
-                input.days,
+              cruiseNights:
+                input.cruiseNights,
 
-              packageChargeDays:
-                packageChargeDays
-                  .chargeDays,
+              packageChargeUnits:
+                packageChargeUnits
+                  .chargeUnits,
 
               people:
                 input.people,
 
-              packagePricePerDay:
+              packagePricePerChargeUnit:
                 resolvedPrice.price,
 
               coffee:
@@ -1177,6 +1480,9 @@ export function compareDrinkPackages(
 
               soda:
                 input.soda,
+
+              juice:
+                input.juice ?? 0,
 
               beer:
                 input.beer,
@@ -1198,6 +1504,10 @@ export function compareDrinkPackages(
               waterPrice:
                 calculationDrinkPrices
                   .water,
+
+              juicePrice:
+                calculationDrinkPrices
+                  .juice,
 
               sodaPrice:
                 calculationDrinkPrices
@@ -1237,12 +1547,93 @@ export function compareDrinkPackages(
                 packageKey
             )?.economicImpact;
 
+          const documentedProductAdditionalCost =
+            selectedDrinkConsumptions.reduce(
+                  (total, consumption) => {
+                    const referenceId =
+                      consumption.drink.referenceId;
+
+                    if (!referenceId) {
+                      return total;
+                    }
+
+                    const productCoverage =
+                      activeCruiseLine === "costa"
+                        ? resolveCostaDocumentedPackageCoverage(
+                            referenceId,
+                            packageKey
+                          )
+                        : resolveMscDocumentedPackageCoverage(
+                            referenceId,
+                            packageKey
+                          );
+
+                    return productCoverage?.status ===
+                      "notIncluded"
+                      ? total +
+                          consumption.drink.price *
+                            consumption.quantityPerDay *
+                            input.cruiseNights *
+                            input.people
+                      : total;
+                  },
+                  0
+                );
+
+          const documentedProductCoverageFullyResolved =
+            Boolean(coverage) &&
+            coverage!.uncoveredCategories.length > 0 &&
+            coverage!.uncoveredCategories.every(
+              (category) => {
+                const priceCategory =
+                  category as OnboardPriceKey;
+
+                const consumptions =
+                  documentedDrinkConsumptions.filter(
+                    (consumption) =>
+                      consumption.drink.category ===
+                      priceCategory
+                  );
+
+                const allocatedQuantity =
+                  consumptions.reduce(
+                    (total, consumption) =>
+                      total +
+                      consumption.quantityPerDay,
+                    0
+                  );
+
+                return (
+                  allocatedQuantity ===
+                    onboardPriceConsumption[
+                      priceCategory
+                    ] &&
+                  consumptions.some(
+                    (consumption) =>
+                      consumption.drink.referenceId &&
+                      (activeCruiseLine === "costa"
+                        ? resolveCostaDocumentedPackageCoverage(
+                            consumption.drink.referenceId,
+                            packageKey
+                          )
+                        : resolveMscDocumentedPackageCoverage(
+                            consumption.drink.referenceId,
+                            packageKey
+                          ))?.status ===
+                        "notIncluded"
+                  )
+                );
+              }
+            );
+
           const economicComparison =
             resolveEconomicComparison(
               coverage,
               calculation.savings,
               thresholdImpact,
-              operationalEconomicImpact
+              operationalEconomicImpact,
+              documentedProductAdditionalCost,
+              documentedProductCoverageFullyResolved
             );
 
           /*
@@ -1257,7 +1648,7 @@ export function compareDrinkPackages(
            * la misma historia que effectiveSavings.
            */
           const economicMultiplier =
-            input.days *
+            input.cruiseNights *
             input.people;
 
           const effectiveDailyMargin =
@@ -1287,6 +1678,12 @@ export function compareDrinkPackages(
                 economicMultiplier
               : 0;
 
+          const documentedProductAdditionalCostPerPersonDay =
+            economicMultiplier > 0
+              ? documentedProductAdditionalCost /
+                economicMultiplier
+              : 0;
+
           /*
            * Valor diario que realmente aporta
            * el patrón de bebidas frente al paquete
@@ -1296,7 +1693,8 @@ export function compareDrinkPackages(
           const effectiveDailyDrinkValue =
             calculation
               .dailyDrinkCost -
-            thresholdAdditionalCostPerPersonDay;
+            thresholdAdditionalCostPerPersonDay -
+            documentedProductAdditionalCostPerPersonDay;
 
           const effectiveAverageDrinkValue =
             totalDrinksPerDay > 0
@@ -1321,7 +1719,7 @@ export function compareDrinkPackages(
               : calculation
                   .breakEvenDrinksPerDay;
 
-          return {
+          return [{
             packageKey,
 
             packageName:
@@ -1330,13 +1728,13 @@ export function compareDrinkPackages(
             currency:
               resolvedPrice.currency,
 
-            packagePricePerDay:
+            packagePricePerChargeUnit:
               resolvedPrice.price,
 
             priceSource:
               resolvedPrice.source,
 
-            referencePricePerDay:
+            referencePricePerChargeUnit:
               referencePrice,
 
             packageCost:
@@ -1352,6 +1750,8 @@ export function compareDrinkPackages(
               economicComparison
                 .effectiveSavings,
 
+            documentedProductAdditionalCost,
+
             economicComparisonStatus:
               economicComparison
                 .status,
@@ -1363,15 +1763,25 @@ export function compareDrinkPackages(
               effectiveDailyMargin,
 
             savingsPercentage:
-              calculation
-                .savingsPercentage,
+              economicComparison.effectiveSavings !==
+                null &&
+              calculation.drinksCost > 0
+                ? (economicComparison.effectiveSavings /
+                    calculation.drinksCost) *
+                  100
+                : calculation.savingsPercentage,
 
             recommended:
-              calculation.recommended,
+              economicComparison.effectiveSavings !==
+              null
+                ? economicComparison.effectiveSavings >
+                  0
+                : calculation.recommended,
 
             recommendationLevel:
-              calculation
-                .recommendationLevel,
+              resolveRecommendationLevelFromDailyMargin(
+                effectiveDailyMargin
+              ),
 
             breakEvenDrinksPerDay:
               effectiveBreakEvenDrinksPerDay,
@@ -1393,7 +1803,7 @@ export function compareDrinkPackages(
               coverage
                 ?.uncoveredCategories ??
               [],
-          };
+          }];
         }
       );
 
@@ -1464,6 +1874,8 @@ export function compareDrinkPackages(
     economicCurrency,
 
     economicDrinkPrices,
+
+    calculationDrinkPrices,
 
     economicDataAvailable:
       true,

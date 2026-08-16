@@ -51,7 +51,7 @@ export function resolveEconomicPackage(
   if (
     pkg.economicEligibility !== "eligible" ||
     pkg.status !== "verified" ||
-    !isPositiveSafePrice(pkg.pricePerDay)
+    !isPositiveSafePrice(pkg.pricePerChargeUnit)
   ) {
     return null;
   }
@@ -60,7 +60,7 @@ export function resolveEconomicPackage(
     return {
       pkg,
       packageKey,
-      referencePrice: pkg.pricePerDay,
+      referencePrice: pkg.pricePerChargeUnit,
       resolvedPrice: {
         price: customPrice.price,
         currency: customPrice.currency,
@@ -72,9 +72,9 @@ export function resolveEconomicPackage(
   return {
     pkg,
     packageKey,
-    referencePrice: pkg.pricePerDay,
+    referencePrice: pkg.pricePerChargeUnit,
     resolvedPrice: {
-      price: pkg.pricePerDay,
+      price: pkg.pricePerChargeUnit,
       currency: pkg.currency,
       source: "reference",
     },

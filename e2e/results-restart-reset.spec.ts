@@ -8,8 +8,9 @@ test("Nuevo análisis vuelve al primer paso con los datos limpios", async ({
       window.localStorage.setItem(
         "drinkpilot-wizard",
         JSON.stringify({
+          storageSchemaVersion: 2,
           cruiseLine: "msc",
-          days: 7,
+          cruiseNights: 7,
           coffee: 1,
           people: 2,
           adults: 2,

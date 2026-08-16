@@ -22,19 +22,57 @@ describe(
   "Costa documented drink price provider",
   () => {
     it(
-      "no publica referencias de menú sin evidencia modelada",
+      "publica únicamente las referencias modeladas de la Costa Bar List",
       () => {
         expect(
           getCostaDocumentedDrinkPrices()
-        ).toEqual([]);
+        ).toHaveLength(55);
 
         expect(
           getCostaDocumentedDrinkPrices({
+            category: "soda",
+            currency: "EUR",
+          })
+        ).toHaveLength(12);
+      }
+    );
+
+    it(
+      "conserva cafés del mismo precio con cobertura distinta",
+      () => {
+        const references =
+          getCostaDocumentedDrinkPrices({
             category: "coffee",
             currency: "EUR",
-            sailingRegion: "MED",
+          });
+
+        expect(references).toHaveLength(21);
+
+        expect(
+          getCostaDocumentedDrinkPrices({
+            category: "juice",
+            currency: "EUR",
           })
-        ).toEqual([]);
+        ).toHaveLength(4);
+
+        const shakerato = references.find(
+          (item) =>
+            item.productName === "Café shakerato"
+        );
+
+        const pistacchio = references.find(
+          (item) =>
+            item.productName === "Pistacchio"
+        );
+
+        expect(shakerato?.price).toBe(4.2);
+        expect(pistacchio?.price).toBe(4.2);
+        expect(
+          shakerato?.packageCoverage.myDrinks
+        ).toBe("included");
+        expect(
+          pistacchio?.packageCoverage.myDrinks
+        ).toBe("notIncluded");
       }
     );
 

@@ -38,7 +38,7 @@ describe(
           compareDrinkPackages({
             cruiseLine: "msc",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -79,7 +79,7 @@ describe(
           compareDrinkPackages({
             cruiseLine: "msc",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -174,7 +174,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -229,7 +229,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -286,7 +286,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -343,7 +343,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -386,7 +386,7 @@ describe(
           compareDrinkPackages({
             cruiseLine: "msc",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 2,
@@ -441,7 +441,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -622,7 +622,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -704,7 +704,7 @@ it(
         onboardCurrency: "EUR",
         sailingDate: "2026-08-15",
 
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 0,
@@ -772,7 +772,7 @@ it(
         onboardCurrency: "EUR",
         sailingDate: "2026-08-15",
 
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 0,
@@ -840,7 +840,7 @@ it(
         onboardCurrency: "EUR",
         sailingDate: "2026-08-15",
 
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 0,

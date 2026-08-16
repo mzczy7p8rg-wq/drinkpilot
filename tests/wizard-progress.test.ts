@@ -11,13 +11,14 @@ import {
 } from "@/lib/wizardProgress";
 
 const completeProgress = {
-  days: 7,
+  cruiseNights: 7,
   coffee: 1,
   water: 1,
   soda: 0,
   beer: 0,
   wine: 0,
   cocktail: 0,
+  consumptionConfirmed: true,
   people: 2,
 };
 
@@ -54,14 +55,14 @@ describe("wizard progress", () => {
       resolveWizardRedirect(
         {
           ...completeProgress,
-          days: 0,
+          cruiseNights: null,
         },
         "people"
       )
     ).toBe("/wizard");
   });
 
-  it("redirige a consumo cuando todas las categorías están vacías", () => {
+  it("acepta un consumo total de cero", () => {
     expect(
       resolveWizardRedirect(
         {
@@ -71,9 +72,29 @@ describe("wizard progress", () => {
         },
         "people"
       )
-    ).toBe(
-      "/wizard/consumption"
-    );
+    ).toBeNull();
+
+    expect(
+      hasValidConsumptionStep({
+        ...completeProgress,
+        coffee: 0,
+        water: 0,
+      })
+    ).toBe(true);
+  });
+
+  it("no confunde el estado inicial a cero con un consumo confirmado", () => {
+    expect(
+      resolveWizardRedirect(
+        {
+          ...completeProgress,
+          coffee: 0,
+          water: 0,
+          consumptionConfirmed: false,
+        },
+        "people"
+      )
+    ).toBe("/wizard/consumption");
   });
 
   it("redirige a personas cuando su valor no es válido", () => {
@@ -88,25 +109,31 @@ describe("wizard progress", () => {
     ).toBe("/wizard/people");
   });
 
-  it("permite cada ruta cuando sus requisitos anteriores están completos", () => {
+  it("prioriza viajeros cuando también faltan crucero y consumo", () => {
     expect(
       resolveWizardRedirect(
         {
           ...completeProgress,
-          coffee: 0,
-          water: 0,
           people: 0,
+          cruiseNights: null,
+          coffee: -1,
         },
+        "people"
+      )
+    ).toBe("/wizard/people");
+  });
+
+  it("permite cada ruta cuando sus requisitos anteriores están completos", () => {
+    expect(
+      resolveWizardRedirect(
+        completeProgress,
         "cruise"
       )
     ).toBeNull();
 
     expect(
       resolveWizardRedirect(
-        {
-          ...completeProgress,
-          people: 0,
-        },
+        completeProgress,
         "consumption"
       )
     ).toBeNull();

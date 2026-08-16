@@ -16,9 +16,9 @@ describe("DrinkPilot recommendation engine", () => {
     it("rechaza resultados que exceden el rango numérico seguro", () => {
       expect(() =>
         calculateRecommendation({
-          days: Number.MAX_SAFE_INTEGER,
+          cruiseNights: Number.MAX_SAFE_INTEGER,
           people: Number.MAX_SAFE_INTEGER,
-          packagePricePerDay: Number.MAX_SAFE_INTEGER,
+          packagePricePerChargeUnit: Number.MAX_SAFE_INTEGER,
           coffee: 1,
           water: 0,
           soda: 0,
@@ -37,10 +37,10 @@ describe("DrinkPilot recommendation engine", () => {
 
     it("calcula correctamente el coste diario y total", () => {
       const result = calculateRecommendation({
-        days: 7,
+        cruiseNights: 7,
         people: 2,
 
-        packagePricePerDay: 34,
+        packagePricePerChargeUnit: 34,
 
         coffee: 2,
         water: 2,
@@ -76,10 +76,10 @@ describe("DrinkPilot recommendation engine", () => {
 
     it("no recomienda cuando el paquete cuesta exactamente lo mismo", () => {
       const result = calculateRecommendation({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
-        packagePricePerDay: 34,
+        packagePricePerChargeUnit: 34,
 
         coffee: 0,
         water: 0,
@@ -110,7 +110,7 @@ describe("DrinkPilot recommendation engine", () => {
   describe("package comparison", () => {
     it("utiliza los precios seleccionados en toda la comparación económica", () => {
       const result = compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 1,
@@ -159,7 +159,7 @@ describe("DrinkPilot recommendation engine", () => {
     it("no mezcla un precio seleccionado en USD con una comparación en EUR", () => {
       const reference =
         compareDrinkPackages({
-          days: 7,
+          cruiseNights: 7,
           people: 1,
           coffee: 1,
           water: 0,
@@ -171,7 +171,7 @@ describe("DrinkPilot recommendation engine", () => {
 
       const withUsdSelection =
         compareDrinkPackages({
-          days: 7,
+          cruiseNights: 7,
           people: 1,
           coffee: 1,
           water: 0,
@@ -229,7 +229,7 @@ describe("DrinkPilot recommendation engine", () => {
       const result =
         compareDrinkPackages({
           onboardCurrency: "usd",
-          days: 7,
+          cruiseNights: 7,
           people: 1,
           coffee: 1,
           water: 1,
@@ -253,7 +253,7 @@ describe("DrinkPilot recommendation engine", () => {
           result.economicDrinkPrices
         )
       ).toEqual([
-        5, 5, 5, 5, 5, 5,
+        5, 5, 5, null, 5, 5, 5,
       ]);
 
       expect(result.packages).toEqual(
@@ -274,7 +274,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     it("no recomienda ningún paquete con consumo bajo", () => {
       const result = compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 1,
@@ -300,7 +300,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     it("recomienda My Drinks para consumo básico rentable", () => {
       const result = compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 2,
 
         coffee: 2,
@@ -326,7 +326,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     it("recomienda My Drinks Plus cuando las preferencias premium requieren cobertura adicional", () => {
       const result = compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -371,7 +371,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     it("utiliza el precio real de la reserva cuando está disponible", () => {
       const result = compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 1,
@@ -393,11 +393,11 @@ describe("DrinkPilot recommendation engine", () => {
         );
 
       expect(
-        myDrinks?.packagePricePerDay
+        myDrinks?.packagePricePerChargeUnit
       ).toBe(8);
 
       expect(
-        myDrinks?.referencePricePerDay
+        myDrinks?.referencePricePerChargeUnit
       ).toBe(34);
 
       expect(
@@ -412,7 +412,7 @@ describe("DrinkPilot recommendation engine", () => {
     it("días y personas escalan el ahorro pero no cambian el mejor paquete", () => {
       const shortCruise =
         compareDrinkPackages({
-          days: 7,
+          cruiseNights: 7,
           people: 1,
 
           coffee: 2,
@@ -425,7 +425,7 @@ describe("DrinkPilot recommendation engine", () => {
 
       const largeCruise =
         compareDrinkPackages({
-          days: 14,
+          cruiseNights: 14,
           people: 4,
 
           coffee: 2,
@@ -512,7 +512,7 @@ describe("DrinkPilot recommendation engine", () => {
 });describe("edge cases", () => {
   it("mantiene coherencia entre savings, dailyMargin y recommended", () => {
     const result = compareDrinkPackages({
-      days: 1,
+      cruiseNights: 1,
       people: 1,
 
       coffee: 2,
@@ -538,7 +538,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("un céntimo por debajo del coste diario produce ahorro positivo", () => {
     const result = compareDrinkPackages({
-      days: 1,
+      cruiseNights: 1,
       people: 1,
 
       coffee: 1,
@@ -567,7 +567,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("un céntimo por encima del coste diario no recomienda el paquete", () => {
     const result = compareDrinkPackages({
-      days: 1,
+      cruiseNights: 1,
       people: 1,
 
       coffee: 1,
@@ -596,7 +596,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("todas las preferencias premium fuerzan cobertura completa solo en My Drinks Plus", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -641,7 +641,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("muchos viajeros no alteran el margen diario ni el punto de equilibrio", () => {
     const onePerson = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -653,7 +653,7 @@ describe("DrinkPilot recommendation engine", () => {
     });
 
     const manyPeople = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 100,
 
       coffee: 2,
@@ -698,7 +698,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("ignora precios personalizados inválidos y usa la referencia", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -727,7 +727,7 @@ describe("DrinkPilot recommendation engine", () => {
       );
 
     expect(
-      myDrinks?.packagePricePerDay
+      myDrinks?.packagePricePerChargeUnit
     ).toBe(34);
 
     expect(
@@ -735,7 +735,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe("reference");
 
     expect(
-      myDrinksPlus?.packagePricePerDay
+      myDrinksPlus?.packagePricePerChargeUnit
     ).toBe(46);
 
     expect(
@@ -745,7 +745,7 @@ describe("DrinkPilot recommendation engine", () => {
 });describe("effective economic comparison", () => {
   it("marca como comparación completa un paquete con cobertura total", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -779,7 +779,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("marca como incompleta la comparación económica cuando faltan preferencias premium no cuantificadas", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -814,7 +814,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("mantiene ahorro efectivo para My Drinks Plus cuando cubre todo el perfil premium", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -875,7 +875,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe("pending");
 
     expect(
-      costaPackages.myDrinksSoft.pricePerDay
+      costaPackages.myDrinksSoft.pricePerChargeUnit
     ).toBeNull();
 
     expect(
@@ -896,7 +896,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("no entra todavía en la comparación económica", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -917,7 +917,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("nunca puede convertirse en mejor opción con precio 0 mientras siga pendiente", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 4,
@@ -1275,7 +1275,7 @@ describe("DrinkPilot recommendation engine", () => {
 });describe("Bottled water integration", () => {
   it("My Drinks mantiene desconocida la botella diaria individual en compareDrinkPackages", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -1310,7 +1310,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("My Drinks no cubre agua ilimitada a través de compareDrinkPackages", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -1353,7 +1353,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("My Drinks Plus cubre agua diaria e ilimitada a través de compareDrinkPackages", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -1396,7 +1396,7 @@ describe("DrinkPilot recommendation engine", () => {
 });describe("Non alcoholic cocktails integration", () => {
   it("My Drinks cubre cócteles sin alcohol a través de compareDrinkPackages", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -1430,7 +1430,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("My Drinks Plus cubre cócteles sin alcohol a través de compareDrinkPackages", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -1506,7 +1506,7 @@ describe("DrinkPilot recommendation engine", () => {
 
   it("My Drinks Soft sigue excluido de la comparación económica", () => {
     const result = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -1537,7 +1537,7 @@ describe("DrinkPilot recommendation engine", () => {
   it("solo devuelve paquetes con precio económico válido", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1554,12 +1554,12 @@ describe("DrinkPilot recommendation engine", () => {
     ) {
       expect(
         Number.isFinite(
-          pkg.packagePricePerDay
+          pkg.packagePricePerChargeUnit
         )
       ).toBe(true);
 
       expect(
-        pkg.packagePricePerDay
+        pkg.packagePricePerChargeUnit
       ).toBeGreaterThan(0);
     }
   });
@@ -1567,7 +1567,7 @@ describe("DrinkPilot recommendation engine", () => {
   it("My Drinks Soft permanece fuera mientras su precio siga pendiente", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 4,
@@ -1603,7 +1603,7 @@ describe("DrinkPilot recommendation engine", () => {
   it("sigue fuera de la comparación cuando no existe precio del usuario", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1633,7 +1633,7 @@ describe("DrinkPilot recommendation engine", () => {
   it("entra en la comparación cuando el usuario introduce un precio válido", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1663,7 +1663,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBeDefined();
 
     expect(
-      soft?.packagePricePerDay
+      soft?.packagePricePerChargeUnit
     ).toBe(20);
 
     expect(
@@ -1671,7 +1671,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe("user");
 
     expect(
-      soft?.referencePricePerDay
+      soft?.referencePricePerChargeUnit
     ).toBeNull();
   });
 
@@ -1689,7 +1689,7 @@ describe("DrinkPilot recommendation engine", () => {
     ) {
       const result =
         compareDrinkPackages({
-          days: 7,
+          cruiseNights: 7,
           people: 1,
 
           coffee: 2,
@@ -1720,7 +1720,7 @@ describe("DrinkPilot recommendation engine", () => {
   it("puede recomendar My Drinks Soft cuando cubre el perfil y genera ahorro", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 3,
@@ -1773,7 +1773,7 @@ describe("DrinkPilot recommendation engine", () => {
   it("no recomienda My Drinks Soft cuando el perfil contiene alcohol", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1819,7 +1819,7 @@ describe("Generic custom package prices", () => {
     const result = compareDrinkPackages({
       cruiseLine: "msc",
       onboardCurrency: "USD",
-      days: 7,
+      cruiseNights: 7,
       people: 1,
       coffee: 2,
       water: 2,
@@ -1870,13 +1870,13 @@ describe("Generic custom package prices", () => {
 
     expect(easy).toBeDefined();
     expect(easy?.currency).toBe("USD");
-    expect(easy?.packagePricePerDay).toBe(45);
+    expect(easy?.packagePricePerChargeUnit).toBe(45);
   });
 
   it("utiliza customPackagePrices para My Drinks", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1899,7 +1899,7 @@ describe("Generic custom package prices", () => {
       );
 
     expect(
-      myDrinks?.packagePricePerDay
+      myDrinks?.packagePricePerChargeUnit
     ).toBe(20);
 
     expect(
@@ -1910,7 +1910,7 @@ describe("Generic custom package prices", () => {
   it("utiliza exactamente el precio indicado en customPackagePrices", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1933,7 +1933,7 @@ describe("Generic custom package prices", () => {
       );
 
     expect(
-      myDrinks?.packagePricePerDay
+      myDrinks?.packagePricePerChargeUnit
     ).toBe(18);
 
     expect(
@@ -1944,7 +1944,7 @@ describe("Generic custom package prices", () => {
   it("ignora un precio personalizado fuera del rango seguro", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -1982,7 +1982,7 @@ describe("Generic custom package prices", () => {
   it("puede activar My Drinks Soft mediante customPackagePrices", () => {
     const result =
       compareDrinkPackages({
-        days: 7,
+        cruiseNights: 7,
         people: 1,
 
         coffee: 2,
@@ -2010,7 +2010,7 @@ describe("Generic custom package prices", () => {
     expect(soft).toBeDefined();
 
     expect(
-      soft?.packagePricePerDay
+      soft?.packagePricePerChargeUnit
     ).toBe(15);
 
     expect(
@@ -2018,7 +2018,7 @@ describe("Generic custom package prices", () => {
     ).toBe("user");
 
     expect(
-      soft?.referencePricePerDay
+      soft?.referencePricePerChargeUnit
     ).toBeNull();
   });
 });
@@ -2032,7 +2032,7 @@ describe(
           compareDrinkPackages({
             cruiseLine: "costa",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 1,
@@ -2091,7 +2091,7 @@ describe(
           cruiseLine:
             "costa" as const,
 
-          days: 7,
+          cruiseNights: 7,
           people: 1,
 
           coffee: 2,
@@ -2183,7 +2183,7 @@ describe(
           compareDrinkPackages({
             cruiseLine: "costa",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 0,
@@ -2233,7 +2233,7 @@ describe(
           compareDrinkPackages({
             cruiseLine: "costa",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 0,
@@ -2280,7 +2280,7 @@ describe(
           cruiseLine:
             "costa" as const,
 
-          days: 7,
+          cruiseNights: 7,
           people: 1,
 
           coffee: 2,
@@ -2367,7 +2367,7 @@ describe(
       cruiseLine:
         "msc" as const,
 
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 0,
@@ -2511,7 +2511,7 @@ describe(
             cruiseLine:
               "costa",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 0,
@@ -2571,7 +2571,7 @@ describe(
             cruiseLine:
               "costa",
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -2616,20 +2616,20 @@ describe(
 );
 
 describe(
-  "package charge days calculator integration",
+  "package charge units calculator integration",
   () => {
     it(
-      "separa los días de consumo de los días facturables del paquete",
+      "separa las noches de consumo de las unidades facturables del paquete",
       () => {
         const result =
           calculateRecommendation({
-            days: 7,
+            cruiseNights: 7,
 
-            packageChargeDays: 6,
+            packageChargeUnits: 6,
 
             people: 1,
 
-            packagePricePerDay: 40,
+            packagePricePerChargeUnit: 40,
 
             coffee: 1,
             water: 1,
@@ -2663,7 +2663,7 @@ describe(
 
         /*
          * El paquete utiliza únicamente
-         * los días facturables:
+         * las unidades facturables:
          *
          * 40 × 6 = 240
          */
@@ -2678,15 +2678,15 @@ describe(
     );
 
     it(
-      "mantiene compatibilidad cuando no se proporcionan días facturables separados",
+      "utiliza las noches cuando no se proporcionan unidades facturables separadas",
       () => {
         const result =
           calculateRecommendation({
-            days: 7,
+            cruiseNights: 7,
 
             people: 1,
 
-            packagePricePerDay: 40,
+            packagePricePerChargeUnit: 40,
 
             coffee: 1,
             water: 1,

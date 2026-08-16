@@ -26,7 +26,7 @@ export type PackageEconomicConfidenceStatus =
   | "disabled";
 
 export type PackageDataConfidence = {
-  pricePerDay: number | null;
+  pricePerChargeUnit: number | null;
 
   currency: string;
 
@@ -57,7 +57,7 @@ export type PackageDataConfidenceInput = {
   comparedPackage?:
     Pick<
       PackageComparisonResult,
-      | "packagePricePerDay"
+      | "packagePricePerChargeUnit"
       | "priceSource"
       | "currency"
     >;
@@ -108,9 +108,9 @@ export function resolvePackageDataConfidence(
 
   if (comparedPackage) {
     return {
-      pricePerDay:
+      pricePerChargeUnit:
         comparedPackage
-          .packagePricePerDay,
+          .packagePricePerChargeUnit,
 
       currency:
         comparedPackage.currency,
@@ -148,7 +148,7 @@ export function resolvePackageDataConfidence(
       "reference-or-user" &&
     referencePrice !== null;
 
-  const pricePerDay =
+  const pricePerChargeUnit =
     customPrice ??
     (hasUsableReference
       ? referencePrice
@@ -167,7 +167,7 @@ export function resolvePackageDataConfidence(
     "disabled"
   ) {
     return {
-      pricePerDay,
+      pricePerChargeUnit,
       currency:
         input.packageCurrency,
       priceSource,
@@ -178,9 +178,9 @@ export function resolvePackageDataConfidence(
     };
   }
 
-  if (pricePerDay === null) {
+  if (pricePerChargeUnit === null) {
     return {
-      pricePerDay: null,
+      pricePerChargeUnit: null,
       currency:
         input.packageCurrency,
       priceSource:
@@ -201,7 +201,7 @@ export function resolvePackageDataConfidence(
     )
   ) {
     return {
-      pricePerDay,
+      pricePerChargeUnit,
       currency:
         input.packageCurrency,
       priceSource,
@@ -216,7 +216,7 @@ export function resolvePackageDataConfidence(
     !input.economicDataAvailable
   ) {
     return {
-      pricePerDay,
+      pricePerChargeUnit,
       currency:
         input.packageCurrency,
       priceSource,
@@ -228,7 +228,7 @@ export function resolvePackageDataConfidence(
   }
 
   return {
-    pricePerDay,
+    pricePerChargeUnit,
     currency:
       input.packageCurrency,
     priceSource,

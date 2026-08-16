@@ -249,7 +249,7 @@ export default function DataConfidencePanel({
             customPrice?.price,
 
           referencePrice:
-            pkg.pricePerDay,
+            pkg.pricePerChargeUnit,
 
           packageCurrency:
             customPrice?.currency ?? pkg.currency,
@@ -292,7 +292,7 @@ export default function DataConfidencePanel({
       ? "Aplicados en la comparación"
       : packageRows.some(
           ({ confidence }) =>
-            confidence.pricePerDay !==
+            confidence.pricePerChargeUnit !==
             null
         )
         ? "Precios disponibles; comparación pendiente"
@@ -448,7 +448,7 @@ export default function DataConfidencePanel({
           <ul className="mt-4 space-y-3 text-sm leading-6 text-amber-950">
             <li>
               <strong>
-                Precio diario de los
+                Precio por unidad facturable de los
                 paquetes
               </strong>
 
@@ -600,14 +600,14 @@ export default function DataConfidencePanel({
                         Precio
                       </p>
 
-                      {confidence.pricePerDay !==
+                      {confidence.pricePerChargeUnit !==
                       null ? (
                         <p>
                           {formatCurrency(
-                            confidence.pricePerDay,
+                            confidence.pricePerChargeUnit,
                             confidence.currency
                           )}{" "}
-                          / día.
+                          / unidad facturable.
                           <span className="mt-1 block text-xs text-slate-500">
                             {getPackagePriceSourceLabel(
                               confidence.priceSource

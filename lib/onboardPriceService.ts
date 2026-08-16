@@ -11,6 +11,7 @@ export const onboardPriceKeys = [
   "coffee",
   "water",
   "soda",
+  "juice",
   "beer",
   "wine",
   "cocktail",
@@ -30,9 +31,11 @@ export type OnboardPriceKey =
  */
 export type PartialOnboardPriceValues =
   Record<
-    OnboardPriceKey,
+    Exclude<OnboardPriceKey, "juice">,
     number | null
-  >;
+  > & {
+    juice?: number | null;
+  };
 
 /*
  * Contrato que necesita calculator.ts.
@@ -111,9 +114,11 @@ export function getMissingOnboardPriceKeys(
  */
 export type OnboardPriceConsumptionValues =
   Record<
-    OnboardPriceKey,
+    Exclude<OnboardPriceKey, "juice">,
     number
-  >;
+  > & {
+    juice?: number;
+  };
 
 /*
  * Devuelve únicamente categorías consumidas
@@ -125,7 +130,7 @@ export function getMissingRequiredOnboardPriceKeys(
 ): OnboardPriceKey[] {
   return onboardPriceKeys.filter(
     (key) =>
-      consumption[key] > 0 &&
+      (consumption[key] ?? 0) > 0 &&
       !isValidOnboardPrice(
         values[key]
       )
@@ -159,7 +164,7 @@ export function resolveOnboardPriceValuesForConsumption(
     const key of onboardPriceKeys
   ) {
     const quantity =
-      consumption[key];
+      consumption[key] ?? 0;
 
     if (
       !Number.isSafeInteger(

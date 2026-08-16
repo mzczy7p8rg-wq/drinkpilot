@@ -2,6 +2,7 @@ import {
   expect,
   test,
 } from "@playwright/test";
+import { startAtCruiseStep } from "./wizard-helpers";
 
 test(
   "landing abre el wizard",
@@ -72,7 +73,7 @@ test(
 test(
   "Continuar análisis conserva el progreso anterior",
   async ({ page }) => {
-    await page.goto("/wizard");
+    await startAtCruiseStep(page);
 
     await page
       .getByRole("button", {
@@ -81,7 +82,7 @@ test(
       .click();
 
     await page
-      .getByLabel("Duración del crucero")
+      .getByLabel("¿Cuántas noches dura tu crucero?")
       .fill("7");
 
     await page
@@ -114,7 +115,7 @@ test(
     );
 
     await expect(
-      page.getByLabel("Duración del crucero")
+      page.getByLabel("¿Cuántas noches dura tu crucero?")
     ).toHaveValue("7");
   }
 );
@@ -122,7 +123,7 @@ test(
 test(
   "Empezar análisis descarta la búsqueda anterior",
   async ({ page }) => {
-    await page.goto("/wizard");
+    await startAtCruiseStep(page);
 
     await page
       .getByRole("button", {
@@ -131,7 +132,7 @@ test(
       .click();
 
     await page
-      .getByLabel("Duración del crucero")
+      .getByLabel("¿Cuántas noches dura tu crucero?")
       .fill("7");
 
     await page
@@ -175,7 +176,7 @@ test(
     );
 
     await expect(
-      page.getByLabel("Duración del crucero")
+      page.getByLabel("¿Cuántas noches dura tu crucero?")
     ).toHaveValue("");
   }
 );

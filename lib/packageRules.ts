@@ -79,9 +79,11 @@ export type PackagePurchaseGroupRequirement =
   | "same-cabin"
   | "same-booking-or-cabin";
 
-export type PackagePricingDayPolicy =
+export type PackageChargeUnitPolicy =
   | "unknown"
-  | "exclude-disembarkation-day";
+  | "per-night"
+  | "per-itinerary-day"
+  | "per-itinerary-day-excluding-disembarkation";
 
 
 export type PackageOperationalRules = {
@@ -225,10 +227,10 @@ export type PackageOperationalRules = {
    * Cuando se conoce, participa en el
    * coste económico del paquete.
    */
-  packagePricingDayPolicy:
-    PackagePricingDayPolicy;
+  packageChargeUnitPolicy:
+    PackageChargeUnitPolicy;
 
-  packagePricingDayPolicySource:
+  packageChargeUnitPolicySource:
     OperationalRuleSource;
 
   /*
@@ -289,12 +291,14 @@ function readVenueCoverageStatus(
   return "unknown";
 }
 
-function readPackagePricingDayPolicy(
+function readPackageChargeUnitPolicy(
   value: unknown
-): PackagePricingDayPolicy {
+): PackageChargeUnitPolicy {
   if (
+    value === "per-night" ||
+    value === "per-itinerary-day" ||
     value ===
-    "exclude-disembarkation-day"
+      "per-itinerary-day-excluding-disembarkation"
   ) {
     return value;
   }
@@ -669,8 +673,8 @@ function resolvePackageRules(
     PackagePurchaseGroupRequirement =
       "unknown";
 
-  let packagePricingDayPolicy:
-    PackagePricingDayPolicy =
+  let packageChargeUnitPolicy:
+    PackageChargeUnitPolicy =
       "unknown";
 
   /*
@@ -735,13 +739,13 @@ function resolvePackageRules(
     }
 
     if (
-      "packagePricingDayPolicy" in
+      "packageChargeUnitPolicy" in
         observed
     ) {
-      packagePricingDayPolicy =
-        readPackagePricingDayPolicy(
+      packageChargeUnitPolicy =
+        readPackageChargeUnitPolicy(
           observed
-            .packagePricingDayPolicy
+            .packageChargeUnitPolicy
         );
     }
   }
@@ -865,10 +869,10 @@ function resolvePackageRules(
               contextualRuleIds: [],
             },
 
-      packagePricingDayPolicy,
+      packageChargeUnitPolicy,
 
-      packagePricingDayPolicySource:
-        packagePricingDayPolicy !==
+      packageChargeUnitPolicySource:
+        packageChargeUnitPolicy !==
         "unknown"
           ? {
               source: "base",

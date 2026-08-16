@@ -51,6 +51,28 @@ describe(
     );
 
     it(
+      "rehidrata el precio seleccionado de un zumo",
+      () => {
+        expect(
+          resolveStoredSelectedDrinkPrices({
+            juice: {
+              price: 5.5,
+              currency: "EUR",
+              source: "documented-menu",
+            },
+          })
+        ).toEqual({
+          juice: {
+            category: "juice",
+            price: 5.5,
+            currency: "EUR",
+            source: "documented-menu",
+          },
+        });
+      }
+    );
+
+    it(
       "normaliza la moneda almacenada",
       () => {
         expect(

@@ -26,7 +26,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 0,

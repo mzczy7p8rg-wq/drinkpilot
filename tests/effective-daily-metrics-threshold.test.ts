@@ -26,7 +26,7 @@ describe(
             sailingDate:
               "2026-08-15",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 0,
@@ -74,11 +74,11 @@ describe(
 
         expect(
           premiumExtra?.packageCost
-        ).toBe(414);
+        ).toBe(483);
 
         expect(
           premiumExtra?.savings
-        ).toBe(6);
+        ).toBe(-63);
 
         /*
          * 4 bebidas/día × 1 € de
@@ -88,7 +88,7 @@ describe(
         expect(
           premiumExtra
             ?.effectiveSavings
-        ).toBe(-22);
+        ).toBe(-91);
 
         expect(
           premiumExtra
@@ -101,14 +101,14 @@ describe(
 
         /*
          * Si el resultado efectivo es
-         * -22 €, el margen diario efectivo
-         * por persona debe ser -22 / 7.
+         * -91 €, el margen diario efectivo
+         * por persona debe ser -91 / 7.
          */
         expect(
           premiumExtra
             ?.dailyMargin
         ).toBeCloseTo(
-          -22 / 7
+          -91 / 7
         );
 
         /*
@@ -121,13 +121,13 @@ describe(
          * 14 €.
          *
          * Coste equivalente diario paquete:
-         * 414 / 7.
+         * 483 / 7.
          */
         expect(
           premiumExtra
             ?.breakEvenDrinksPerDay
         ).toBeCloseTo(
-          (414 / 7) / 14
+          (483 / 7) / 14
         );
 
         /*

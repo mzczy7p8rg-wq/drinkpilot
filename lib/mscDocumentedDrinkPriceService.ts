@@ -25,6 +25,10 @@ import {
   type DrinkPriceContextRelevanceResult,
 } from "@/lib/drinkPriceContextRelevance";
 
+import type {
+  PackageKey,
+} from "@/lib/packageService";
+
 export type MscDocumentedDrinkPriceQuery = {
   category?: OnboardPriceKey;
   ship?: string;
@@ -84,6 +88,31 @@ export function getMscDocumentedDrinkPriceById(
       (item) => item.id === id
     ) ?? null
   );
+}
+
+export function resolveMscDocumentedPackageCoverage(
+  referenceId: string,
+  packageKey: PackageKey
+) {
+  const reference =
+    getMscDocumentedDrinkPriceById(referenceId);
+
+  const status =
+    reference?.packageCoverage?.[
+      packageKey as keyof NonNullable<
+        MscDocumentedDrinkPrice["packageCoverage"]
+      >
+    ];
+
+  return reference && status && status !== "unknown"
+    ? {
+        status,
+        referenceId: reference.id,
+        sourceUrl: reference.sourceUrl,
+        sourceDocument: reference.sourceDocument,
+        evidence: reference.evidence,
+      }
+    : null;
 }
 
 export function createSelectedDrinkPriceFromMscDocumentedReference(

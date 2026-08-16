@@ -24,7 +24,7 @@ export const mscPackages = {
     description:
       "Paquete MSC con bebidas calientes, refrescos, zumos, AQUA by MSC, cerveza seleccionada, vino de la casa, cócteles clásicos y alternativas sin alcohol.",
 
-    pricePerDay: null,
+    pricePerChargeUnit: null,
 
     priceStatus: "pending",
 
@@ -51,6 +51,7 @@ export const mscPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: true,
 
       beer: true,
       wine: true,
@@ -110,8 +111,8 @@ export const mscPackages = {
       packagePurchaseGroupRequirement:
         "same-cabin",
 
-      packagePricingDayPolicy:
-        "exclude-disembarkation-day",
+      packageChargeUnitPolicy:
+        "per-itinerary-day-excluding-disembarkation",
     },
 
     restrictions:
@@ -138,7 +139,7 @@ export const mscPackages = {
     description:
       "Paquete premium MSC con cafés especiales, refrescos y energy drinks, zumos y smoothies, AQUA by MSC, cerveza amplia, vinos premium, destilados premium y cócteles preparados con marcas premium.",
 
-    pricePerDay: null,
+    pricePerChargeUnit: null,
 
     priceStatus: "pending",
 
@@ -165,6 +166,7 @@ export const mscPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: true,
 
       beer: true,
       wine: true,
@@ -215,8 +217,8 @@ export const mscPackages = {
       packagePurchaseGroupRequirement:
         "same-cabin",
 
-      packagePricingDayPolicy:
-        "exclude-disembarkation-day",
+      packageChargeUnitPolicy:
+        "per-itinerary-day-excluding-disembarkation",
     },
 
     restrictions:
@@ -243,7 +245,7 @@ export const mscPackages = {
     description:
       "Paquete MSC sin alcohol con cafés especiales, bebidas calientes, refrescos y energy drinks, zumos, smoothies, AQUA by MSC y cerveza, vino y cócteles sin alcohol.",
 
-    pricePerDay: null,
+    pricePerChargeUnit: null,
 
     priceStatus: "pending",
 
@@ -271,6 +273,7 @@ export const mscPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: true,
 
       beer: false,
       wine: false,
@@ -324,8 +327,8 @@ export const mscPackages = {
       packagePurchaseGroupRequirement:
         "same-cabin",
 
-      packagePricingDayPolicy:
-        "exclude-disembarkation-day",
+      packageChargeUnitPolicy:
+        "per-itinerary-day-excluding-disembarkation",
     },
 
     restrictions:
@@ -351,7 +354,7 @@ export const mscPackages = {
     description:
       "Paquete MSC destinado a menores vinculados a familias que adquieren determinados paquetes adultos. Incluye bebidas calientes, refrescos, energy drinks, zumos, smoothies, AQUA by MSC y cócteles sin alcohol.",
 
-    pricePerDay: null,
+    pricePerChargeUnit: null,
 
     priceStatus: "pending",
 
@@ -384,6 +387,7 @@ export const mscPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: true,
 
       beer: false,
       wine: false,
@@ -421,8 +425,8 @@ export const mscPackages = {
       packagePurchaseGroupRequirement:
         "same-cabin",
 
-      packagePricingDayPolicy:
-        "exclude-disembarkation-day",
+      packageChargeUnitPolicy:
+        "per-itinerary-day-excluding-disembarkation",
     },
 
     restrictions:

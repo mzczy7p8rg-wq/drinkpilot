@@ -102,6 +102,41 @@ describe(
   "selected drink prices for cruise context",
   () => {
     it(
+      "revalida una referencia documentada Costa sin perder su identidad",
+      () => {
+        const result =
+          resolveSelectedDrinkPricesForCruiseContext({
+            cruiseContext:
+              createCruiseContext({
+                cruiseLine: "costa",
+                onboardCurrency: "EUR",
+              }),
+            selectedDrinkPrices: {
+              soda: {
+                category: "soda",
+                price: 5,
+                currency: "EUR",
+                source: "documented-menu",
+                referenceId:
+                  "costa-bar-list-red-bull",
+                contextRelevance: "exact",
+              },
+            },
+          });
+
+        expect(result.soda).toMatchObject({
+          category: "soda",
+          price: 5,
+          currency: "EUR",
+          source: "documented-menu",
+          referenceId:
+            "costa-bar-list-red-bull",
+          contextRelevance: "exact",
+        });
+      }
+    );
+
+    it(
       "conserva un precio manual cuando su moneda sigue siendo compatible",
       () => {
         const manualPrice =

@@ -141,13 +141,13 @@ body {
   color: #f8fafc;
 }
 
-.cruise-days-input::-webkit-inner-spin-button,
-.cruise-days-input::-webkit-outer-spin-button {
+.cruise-nights-input::-webkit-inner-spin-button,
+.cruise-nights-input::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
 }
 
-.cruise-days-input {
+.cruise-nights-input {
   appearance: textfield;
 }
 

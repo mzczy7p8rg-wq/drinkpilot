@@ -1,16 +1,17 @@
 import { expect, test } from "@playwright/test";
+import { startAtCruiseStep } from "./wizard-helpers";
 
 test("distingue la moneda de referencia de la moneda de la reserva", async ({
   page,
 }) => {
-  await page.goto("/wizard");
+  await startAtCruiseStep(page);
 
   await page
     .getByRole("button", { name: /Costa Cruceros/i })
     .click();
 
   await page
-    .getByLabel("Duración del crucero")
+    .getByLabel("¿Cuántas noches dura tu crucero?")
     .fill("7");
 
   await page
@@ -130,7 +131,7 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
    * no se haya introducido ningún precio.
    */
   await page.getByRole("link", { name: "Continuar" }).click();
-  await expect(page).toHaveURL(/\/wizard\/people$/);
+  await expect(page).toHaveURL(/\/wizard\/review$/);
 
   await page.goto("/wizard/prices");
 

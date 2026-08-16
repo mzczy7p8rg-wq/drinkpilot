@@ -15,7 +15,7 @@ import {
 describe("DrinkPilot recommendation explanations", () => {
   it("explica correctamente una recomendación rentable de My Drinks", () => {
     const comparison = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 2,
 
       coffee: 2,
@@ -72,7 +72,7 @@ describe("DrinkPilot recommendation explanations", () => {
 
   it("explica por qué My Drinks Plus gana cuando existen preferencias premium", () => {
     const comparison = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 2,
@@ -114,7 +114,7 @@ describe("DrinkPilot recommendation explanations", () => {
 
   it("avisa correctamente cuando un paquete cubre todo pero cuesta más", () => {
     const comparison = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -164,7 +164,7 @@ describe("DrinkPilot recommendation explanations", () => {
      * ahorro = 0
      */
     const comparison = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -213,7 +213,7 @@ describe("DrinkPilot recommendation explanations", () => {
 
   it("utiliza el ahorro calculado cuando el usuario introduce un precio real", () => {
     const comparison = compareDrinkPackages({
-      days: 7,
+      cruiseNights: 7,
       people: 1,
 
       coffee: 1,
@@ -258,7 +258,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
         {
           packageKey: "test-package",
           packageName: "Test Package",
-          packagePricePerDay: 40,
+          packagePricePerChargeUnit: 40,
           packageCost: 280,
           drinksCost: 350,
           savings: 70,
@@ -271,7 +271,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
           coveredCategories: [],
           uncoveredCategories: [],
           priceSource: "reference",
-          referencePricePerDay: 40,
+          referencePricePerChargeUnit: 40,
           economicComparisonStatus: "complete",
         },
       ],
@@ -279,7 +279,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
       bestPackage: {
         packageKey: "test-package",
         packageName: "Test Package",
-        packagePricePerDay: 40,
+        packagePricePerChargeUnit: 40,
         packageCost: 280,
         drinksCost: 350,
         savings: 70,
@@ -292,7 +292,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
         coveredCategories: [],
         uncoveredCategories: [],
         priceSource: "reference",
-        referencePricePerDay: 40,
+        referencePricePerChargeUnit: 40,
         economicComparisonStatus: "complete",
       },
 
@@ -320,7 +320,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
       ][number] = {
       packageKey: "test-package",
       packageName: "Test Package",
-      packagePricePerDay: 40,
+      packagePricePerChargeUnit: 40,
       packageCost: 280,
       drinksCost: 350,
       savings: 70,
@@ -333,7 +333,7 @@ describe("threshold uncertainty in recommendation explanation", () => {
       coveredCategories: [],
       uncoveredCategories: [],
       priceSource: "reference",
-      referencePricePerDay: 40,
+      referencePricePerChargeUnit: 40,
       economicComparisonStatus: "complete",
     };
 
@@ -537,7 +537,7 @@ describe(
           packageName:
             "Test Package",
 
-          packagePricePerDay:
+          packagePricePerChargeUnit:
             40,
 
           packageCost:
@@ -576,7 +576,7 @@ describe(
           priceSource:
             "reference",
 
-          referencePricePerDay:
+          referencePricePerChargeUnit:
             40,
 
           economicComparisonStatus:
@@ -661,7 +661,7 @@ describe(
           packageName:
             "Test Package",
 
-          packagePricePerDay:
+          packagePricePerChargeUnit:
             40,
 
           packageCost:
@@ -700,7 +700,7 @@ describe(
           priceSource:
             "reference",
 
-          referencePricePerDay:
+          referencePricePerChargeUnit:
             40,
 
           economicComparisonStatus:

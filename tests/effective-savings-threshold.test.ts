@@ -26,7 +26,7 @@ describe(
               status:
                 "known-unquantified",
 
-              days:
+              cruiseNights:
                 7,
 
               people:
@@ -72,7 +72,7 @@ describe(
               status:
                 "quantified",
 
-              days:
+              cruiseNights:
                 7,
 
               people:

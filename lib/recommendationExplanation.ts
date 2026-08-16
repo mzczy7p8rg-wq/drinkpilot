@@ -81,6 +81,7 @@ const coverageLabels: Record<CoverageCategory, string> = {
   coffee: "café",
   water: "agua",
   soda: "refrescos",
+  juice: "zumos",
   beer: "cerveza",
   wine: "vino",
   cocktail: "cócteles",

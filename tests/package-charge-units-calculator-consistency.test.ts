@@ -9,18 +9,18 @@ import {
 } from "@/lib/calculator";
 
 describe(
-  "calculator consistency with package charge days",
+  "calculator consistency with package charge units",
   () => {
     it(
       "mantiene coherentes ahorro, margen diario y punto de equilibrio cuando se factura menos días que el consumo",
       () => {
         const result =
           calculateRecommendation({
-            days: 7,
-            packageChargeDays: 6,
+            cruiseNights: 7,
+            packageChargeUnits: 6,
             people: 1,
 
-            packagePricePerDay: 34,
+            packagePricePerChargeUnit: 34,
 
             coffee: 0,
             water: 0,

@@ -1,9 +1,9 @@
 export type CalculationInput = {
   /*
-   * Días completos de consumo durante
-   * el crucero.
+   * Noches del crucero utilizadas como unidad
+   * canónica del modelo de consumo.
    */
-  days: number;
+  cruiseNights: number;
 
   /*
    * Días realmente facturables del
@@ -13,15 +13,16 @@ export type CalculationInput = {
    * histórico y utiliza todos los días
    * del crucero.
    */
-  packageChargeDays?: number;
+  packageChargeUnits?: number;
 
   people: number;
 
-  packagePricePerDay: number;
+  packagePricePerChargeUnit: number;
 
   coffee: number;
   water: number;
   soda: number;
+  juice?: number;
   beer: number;
   wine: number;
   cocktail: number;
@@ -29,6 +30,7 @@ export type CalculationInput = {
   coffeePrice: number;
   waterPrice: number;
   sodaPrice: number;
+  juicePrice?: number;
   beerPrice: number;
   winePrice: number;
   cocktailPrice: number;
@@ -54,7 +56,7 @@ export type CalculationResult = {
   dailyDrinkCost: number;
 
   // Diferencia diaria entre consumo estimado
-  // y precio diario del paquete
+  // y precio por unidad facturable del paquete
   dailyMargin: number;
 
   // Porcentaje de ahorro respecto al coste
@@ -66,6 +68,7 @@ export type CalculationResult = {
   coffeeCost: number;
   waterCost: number;
   sodaCost: number;
+  juiceCost: number;
   beerCost: number;
   wineCost: number;
   cocktailCost: number;
@@ -108,6 +111,10 @@ export function calculateRecommendation(
   const dailyBeerCost =
     input.beer * input.beerPrice;
 
+  const dailyJuiceCost =
+    (input.juice ?? 0) *
+    (input.juicePrice ?? 0);
+
   const dailyWineCost =
     input.wine * input.winePrice;
 
@@ -118,6 +125,7 @@ export function calculateRecommendation(
     dailyCoffeeCost +
     dailyWaterCost +
     dailySodaCost +
+    dailyJuiceCost +
     dailyBeerCost +
     dailyWineCost +
     dailyCocktailCost;
@@ -132,7 +140,7 @@ export function calculateRecommendation(
    * duración completa del crucero.
    */
   const consumptionMultiplier =
-    input.days * input.people;
+    input.cruiseNights * input.people;
 
   const coffeeCost =
     dailyCoffeeCost *
@@ -148,6 +156,10 @@ export function calculateRecommendation(
 
   const beerCost =
     dailyBeerCost *
+    consumptionMultiplier;
+
+  const juiceCost =
+    dailyJuiceCost *
     consumptionMultiplier;
 
   const wineCost =
@@ -166,6 +178,7 @@ export function calculateRecommendation(
     coffeeCost +
     waterCost +
     sodaCost +
+    juiceCost +
     beerCost +
     wineCost +
     cocktailCost;
@@ -174,16 +187,16 @@ export function calculateRecommendation(
    * Coste total del paquete
    */
 
-  const packageChargeDays =
-    input.packageChargeDays ??
-    input.days;
+  const packageChargeUnits =
+    input.packageChargeUnits ??
+    input.cruiseNights;
 
   const packageMultiplier =
-    packageChargeDays *
+    packageChargeUnits *
     input.people;
 
   const packageCost =
-    input.packagePricePerDay *
+    input.packagePricePerChargeUnit *
     packageMultiplier;
 
   /*
@@ -209,12 +222,12 @@ export function calculateRecommendation(
    */
 
   const effectivePackagePricePerCruiseDay =
-    input.days > 0
+    input.cruiseNights > 0
       ? (
-          input.packagePricePerDay *
-          packageChargeDays
-        ) / input.days
-      : input.packagePricePerDay;
+          input.packagePricePerChargeUnit *
+          packageChargeUnits
+        ) / input.cruiseNights
+      : input.packagePricePerChargeUnit;
 
   /*
    * Diferencia diaria equivalente por persona
@@ -276,6 +289,7 @@ export function calculateRecommendation(
     coffeeCost,
     waterCost,
     sodaCost,
+    juiceCost,
     beerCost,
     wineCost,
     cocktailCost,
@@ -322,6 +336,7 @@ export function calculateRecommendation(
     coffeeCost,
     waterCost,
     sodaCost,
+    juiceCost,
     beerCost,
     wineCost,
     cocktailCost,

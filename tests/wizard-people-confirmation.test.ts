@@ -20,8 +20,6 @@ describe(
       () => {
         const restored =
           resolveStoredWizardProgress({
-            days: 7,
-
             coffee: 1,
             water: 0,
             soda: 0,
@@ -38,7 +36,9 @@ describe(
           resolveWizardRedirect(
             {
               ...restored,
+              cruiseNights: 7,
               cocktail: 0,
+              consumptionConfirmed: true,
             },
             "people"
           );

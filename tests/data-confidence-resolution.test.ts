@@ -26,13 +26,13 @@ describe(
             economicDataAvailable:
               true,
             comparedPackage: {
-              packagePricePerDay: 25,
+              packagePricePerChargeUnit: 25,
               priceSource: "user",
               currency: "EUR",
             },
           })
         ).toEqual({
-          pricePerDay: 25,
+          pricePerChargeUnit: 25,
           currency: "EUR",
           priceSource: "user",
           economicStatus:
@@ -89,7 +89,7 @@ describe(
               true,
           });
 
-        expect(result.pricePerDay).toBe(
+        expect(result.pricePerChargeUnit).toBe(
           55
         );
         expect(

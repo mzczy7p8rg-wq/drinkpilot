@@ -26,7 +26,7 @@ export const costaPackages = {
      * No utilizamos 0 porque 0 € sería
      * conceptualmente un precio real.
      */
-    pricePerDay: null,
+    pricePerChargeUnit: null,
 
     priceStatus: "pending",
 
@@ -61,6 +61,7 @@ export const costaPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: false,
 
       beer: false,
       wine: false,
@@ -111,6 +112,9 @@ export const costaPackages = {
 
       packagePurchaseGroupRequirement:
         "same-booking-or-cabin",
+
+      packageChargeUnitPolicy:
+        "per-night",
     },
 
     restrictions:
@@ -140,7 +144,7 @@ export const costaPackages = {
     description:
       "Paquete con bebidas alcohólicas y sin alcohol, cafetería, vinos por copa, cerveza de barril, refrescos, aperitivos, cócteles clásicos, licores y destilados incluidos según las condiciones de Costa.",
 
-    pricePerDay: 34,
+    pricePerChargeUnit: 34,
 
     priceStatus: "reference",
 
@@ -165,6 +169,7 @@ export const costaPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: false,
 
       beer: true,
       wine: true,
@@ -205,6 +210,9 @@ export const costaPackages = {
 
       packagePurchaseGroupRequirement:
         "same-booking-or-cabin",
+
+      packageChargeUnitPolicy:
+        "per-night",
     },
 
     restrictions:
@@ -230,7 +238,7 @@ export const costaPackages = {
     description:
       "Paquete ampliado con cafetería, vinos seleccionados, cócteles especiales, licores y destilados de marcas superiores, además de agua embotellada y una selección más amplia de bebidas.",
 
-    pricePerDay: 46,
+    pricePerChargeUnit: 46,
 
     priceStatus: "reference",
 
@@ -255,6 +263,7 @@ export const costaPackages = {
       coffee: true,
       water: true,
       soda: true,
+      juice: false,
 
       beer: true,
       wine: true,
@@ -300,6 +309,9 @@ export const costaPackages = {
 
       packagePurchaseGroupRequirement:
         "same-booking-or-cabin",
+
+      packageChargeUnitPolicy:
+        "per-night",
     },
 
     restrictions:

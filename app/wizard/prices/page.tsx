@@ -46,6 +46,11 @@ import {
 } from "@/lib/mscDocumentedDrinkPriceService";
 
 import {
+  getCostaDocumentedDrinkPrices,
+  resolveCostaDocumentedDrinkPriceSelectionForContext,
+} from "@/lib/costaDocumentedDrinkPriceService";
+
+import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
@@ -232,6 +237,13 @@ function PricesForm() {
     ).referenceSources
   );
 
+  const [
+    documentedDrinkQuantities,
+    setDocumentedDrinkQuantities,
+  ] = useState(
+    data.documentedDrinkQuantities
+  );
+
   const drinkPriceValidations =
     Object.fromEntries(
       onboardPriceKeys.map(
@@ -265,7 +277,7 @@ function PricesForm() {
             ] ?? "",
 
             getHighPriceThreshold(
-              pkg.pricePerDay
+              pkg.pricePerChargeUnit
             )
           ),
         ]
@@ -294,6 +306,41 @@ function PricesForm() {
   const canContinue =
     packagePricesValid &&
     drinkPricesValid;
+
+  function toggleDocumentedDrink(
+    referenceId: string
+  ) {
+    const next = {
+      ...documentedDrinkQuantities,
+    };
+
+    if (
+      (documentedDrinkQuantities[
+        referenceId
+      ] ?? 0) > 0
+    ) {
+      delete next[referenceId];
+    } else {
+      next[referenceId] = 1;
+    }
+
+    setDocumentedDrinkQuantities(
+      next
+    );
+
+    /*
+     * La selección debe sobrevivir aunque
+     * el usuario recargue o navegue antes
+     * de pulsar Continuar.
+     */
+    setData(
+      (previous) => ({
+        ...previous,
+        documentedDrinkQuantities:
+          next,
+      })
+    );
+  }
 
   function updatePriceInput(
     packageKey: string,
@@ -352,6 +399,18 @@ function PricesForm() {
     referenceId: string,
     price: number
   ) {
+    const selectedPrice =
+      selectedDrinkCurrency
+        ? createSelectedDrinkPrice({
+            category,
+            price,
+            currency:
+              selectedDrinkCurrency,
+            source: "official",
+            referenceId,
+          })
+        : null;
+
     setDrinkPriceInputs(
       (previous) => ({
         ...previous,
@@ -378,6 +437,18 @@ function PricesForm() {
           "official",
       })
     );
+
+    if (selectedPrice) {
+      setData(
+        (previous) => ({
+          ...previous,
+          selectedDrinkPrices: {
+            ...previous.selectedDrinkPrices,
+            [category]: selectedPrice,
+          },
+        })
+      );
+    }
   }
 
   function selectDocumentedDrinkReference(
@@ -444,6 +515,9 @@ function PricesForm() {
          */
         selectedDrinkPrices:
           {},
+
+        documentedDrinkQuantities:
+          {},
       })
     );
 
@@ -468,6 +542,8 @@ function PricesForm() {
     setSelectedDrinkReferenceSources(
       {}
     );
+
+    setDocumentedDrinkQuantities({});
   }
 
   function savePrices() {
@@ -541,10 +617,15 @@ function PricesForm() {
             const contextualSelection =
               source === "documented-menu" &&
               referenceId
-                ? resolveMscDocumentedDrinkPriceSelectionForContext(
-                    referenceId,
-                    cruiseContext
-                  )
+                ? data.cruiseLine === "costa"
+                  ? resolveCostaDocumentedDrinkPriceSelectionForContext(
+                      referenceId,
+                      cruiseContext
+                    )
+                  : resolveMscDocumentedDrinkPriceSelectionForContext(
+                      referenceId,
+                      cruiseContext
+                    )
                 : null;
 
             const resolvedRelevance =
@@ -603,6 +684,8 @@ function PricesForm() {
 
         selectedDrinkPrices:
           nextSelectedDrinkPrices,
+
+        documentedDrinkQuantities,
       })
     );
   }
@@ -707,12 +790,12 @@ function PricesForm() {
                 ] ?? "";
 
               const hasReferencePrice =
-                typeof pkg.pricePerDay ===
+                typeof pkg.pricePerChargeUnit ===
                   "number" &&
                 Number.isFinite(
-                  pkg.pricePerDay
+                  pkg.pricePerChargeUnit
                 ) &&
-                pkg.pricePerDay >
+                pkg.pricePerChargeUnit >
                   0;
 
               const requiresUserPrice =
@@ -739,19 +822,11 @@ function PricesForm() {
 
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
-                        Qué incluye
-                      </p>
-                      <p className="mt-1 font-semibold leading-6 text-slate-900">
-                        {packageHighlights.length > 0
-                          ? packageHighlights.join(" · ")
-                          : "Consulta las condiciones del paquete"}
-                      </p>
                       <label
                         htmlFor={
                           inputId
                         }
-                        className="mt-2 block text-sm text-slate-500"
+                        className="block text-base font-semibold text-slate-900"
                       >
                         {
                           pkg.icon
@@ -762,7 +837,16 @@ function PricesForm() {
                       </label>
 
                       <p className="mt-1 text-xs text-slate-500">
-                        Precio por adulto y día
+                        Precio por adulto y noche
+                      </p>
+
+                      <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-sky-700">
+                        Qué incluye
+                      </p>
+                      <p className="mt-1 font-semibold leading-6 text-slate-900">
+                        {packageHighlights.length > 0
+                          ? packageHighlights.join(" · ")
+                          : "Consulta las condiciones del paquete"}
                       </p>
                     </div>
 
@@ -776,10 +860,10 @@ function PricesForm() {
                         Estimación orientativa{" "}
                         {pkg.currency}{" "}
                         {formatCurrency(
-                          pkg.pricePerDay as number,
+                          pkg.pricePerChargeUnit as number,
                           pkg.currency
                         )}{" "}
-                        / día
+                        / noche
                       </span>
                     )}
                   </div>
@@ -836,7 +920,7 @@ function PricesForm() {
                         placeholder={
                           hasReferencePrice
                             ? `Ej. ${(
-                                pkg.pricePerDay as number
+                                pkg.pricePerChargeUnit as number
                               ).toFixed(
                                 2
                               )}`
@@ -926,10 +1010,10 @@ function PricesForm() {
                             DrinkPilot
                             utilizará{" "}
                             {formatCurrency(
-                              pkg.pricePerDay as number,
+                              pkg.pricePerChargeUnit as number,
                               cruiseLine.currency
                             )}{" "}
-                            / día como
+                            / noche como
                             referencia.
                           </p>
                         ) : (
@@ -1118,13 +1202,18 @@ function PricesForm() {
                         : undefined;
 
                     const documentedReferences =
-                      data.cruiseLine === "msc" &&
                       documentedCurrency
-                        ? getMscDocumentedDrinkPrices({
-                            category,
-                            currency:
-                              documentedCurrency,
-                          })
+                        ? data.cruiseLine === "costa"
+                          ? getCostaDocumentedDrinkPrices({
+                              category,
+                              currency:
+                                documentedCurrency,
+                            })
+                          : getMscDocumentedDrinkPrices({
+                              category,
+                              currency:
+                                documentedCurrency,
+                            })
                         : [];
 
                     const cruiseContext = {
@@ -1148,10 +1237,15 @@ function PricesForm() {
                       documentedReferences
                         .map((reference) => {
                           const selection =
-                            resolveMscDocumentedDrinkPriceSelectionForContext(
-                              reference.id,
-                              cruiseContext
-                            );
+                            data.cruiseLine === "costa"
+                              ? resolveCostaDocumentedDrinkPriceSelectionForContext(
+                                  reference.id,
+                                  cruiseContext
+                                )
+                              : resolveMscDocumentedDrinkPriceSelectionForContext(
+                                  reference.id,
+                                  cruiseContext
+                                );
 
                           return selection
                             ? {
@@ -1191,6 +1285,22 @@ function PricesForm() {
                       selectedDrinkReferenceIds[
                         category
                       ];
+
+                    const availableDocumentedReferences =
+                      contextualDocumentedReferences.filter(
+                        (item) =>
+                          item.contextRelevance
+                            .relevance !==
+                          "mismatch"
+                      );
+
+                    const selectedDocumentedDrinkCount =
+                      availableDocumentedReferences.filter(
+                        (item) =>
+                          (documentedDrinkQuantities[
+                            item.reference.id
+                          ] ?? 0) > 0
+                      ).length;
 
                     return (
                       <div
@@ -1269,24 +1379,40 @@ function PricesForm() {
                           </div>
                         ) : null}
 
-                        {contextualDocumentedReferences.some(
-                          (item) =>
-                            item.contextRelevance.relevance !==
-                            "mismatch"
-                        ) ? (
-                          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">
-                              Precios documentados en menús MSC
+                        {availableDocumentedReferences.length > 0 ? (
+                          <details
+                            className="group mt-3 rounded-xl border border-slate-200 bg-slate-50"
+                          >
+                            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl p-3 text-left marker:content-none">
+                              <span>
+                                <span className="block text-xs font-semibold uppercase tracking-wide text-slate-700">
+                                  Elegir bebidas del menú documentado
+                                </span>
+
+                                <span className="mt-1 block text-xs text-slate-500">
+                                  {availableDocumentedReferences.length} opciones de {data.cruiseLine === "costa" ? "Costa" : "MSC"}
+                                  {selectedDocumentedDrinkCount > 0
+                                    ? ` · ${selectedDocumentedDrinkCount} ${selectedDocumentedDrinkCount === 1 ? "seleccionada" : "seleccionadas"}`
+                                    : ""}
+                                </span>
+                              </span>
+
+                              <span
+                                aria-hidden="true"
+                                className="text-lg text-slate-500 transition-transform group-open:rotate-180"
+                              >
+                                ↓
+                              </span>
+                            </summary>
+
+                            <div className="border-t border-slate-200 p-3">
+
+                            <p className="mt-1 text-xs leading-5 text-slate-600">
+                              Marca todas las bebidas que sueles alternar. Tus {data[category]} consumiciones diarias del paso 3 no aumentarán por elegir más variedades.
                             </p>
 
                             <div className="mt-2 flex flex-wrap gap-2">
-                              {contextualDocumentedReferences
-                                .filter(
-                                  (item) =>
-                                    item.contextRelevance
-                                      .relevance !==
-                                    "mismatch"
-                                )
+                              {availableDocumentedReferences
                                 .map(
                                   ({
                                     reference,
@@ -1295,6 +1421,60 @@ function PricesForm() {
                                     const isSelected =
                                       selectedReferenceId ===
                                       reference.id;
+
+                                    const documentedQuantity =
+                                      documentedDrinkQuantities[
+                                        reference.id
+                                      ] ?? 0;
+
+                                    if (
+                                      data.cruiseLine === "costa" ||
+                                      data.cruiseLine === "msc"
+                                    ) {
+                                      return (
+                                        <div
+                                          key={reference.id}
+                                          className={`rounded-lg border px-3 py-2 text-xs ${
+                                            documentedQuantity > 0
+                                              ? "border-sky-500 bg-sky-50 text-slate-900"
+                                              : "border-slate-300 bg-white text-slate-900"
+                                          }`}
+                                        >
+                                          <span className="block font-semibold">
+                                            {reference.productName}
+                                          </span>
+
+                                          <span className="mt-1 block text-slate-500">
+                                            {reference.format
+                                              ? `${reference.format} · `
+                                              : ""}
+                                            {formatCurrency(
+                                              reference.price,
+                                              reference.currency
+                                            )}
+                                          </span>
+
+                                          <button
+                                            type="button"
+                                            aria-pressed={documentedQuantity > 0}
+                                            onClick={() =>
+                                              toggleDocumentedDrink(
+                                                reference.id
+                                              )
+                                            }
+                                            className={`mt-3 w-full rounded-lg border px-3 py-2 font-semibold transition ${
+                                              documentedQuantity > 0
+                                                ? "border-sky-600 bg-sky-700 text-white"
+                                                : "border-slate-300 bg-white text-slate-700 hover:border-sky-400"
+                                            }`}
+                                          >
+                                            {documentedQuantity > 0
+                                              ? "✓ Seleccionada"
+                                              : "Seleccionar"}
+                                          </button>
+                                        </div>
+                                      );
+                                    }
 
                                     return (
                                       <button
@@ -1343,7 +1523,7 @@ function PricesForm() {
                                         >
                                           {reference.menuName
                                             ? `${reference.menuName} · menú documentado`
-                                            : "Menú MSC documentado"}
+                                            : "Menú documentado"}
                                         </span>
 
                                         <span
@@ -1368,9 +1548,12 @@ function PricesForm() {
                             </div>
 
                             <p className="mt-2 text-xs leading-5 text-slate-600">
-                              Precios observados en menús documentados. Solo mostramos referencias sin contradicciones conocidas con el contexto de tu crucero.
+                              {data.cruiseLine === "costa"
+                                ? "Carta histórica alojada fuera del dominio oficial de Costa. Conservamos su procedencia y no la tratamos como tarifa oficial vigente."
+                                : "Carta histórica MSC de marzo de 2023 en EUR. Conservamos su documento y no la tratamos como tarifa oficial vigente."}
                             </p>
-                          </div>
+                            </div>
+                          </details>
                         ) : null}
 
                         <div className="relative mt-3">

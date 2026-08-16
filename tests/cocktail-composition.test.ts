@@ -6,6 +6,7 @@ import {
 
 import {
   updateCocktailComposition,
+  updateOptionalCocktailComposition,
 } from "@/lib/cocktailComposition";
 
 describe(
@@ -103,6 +104,46 @@ describe(
             },
             "alcoholicCocktail",
             -1
+          )
+        ).toEqual({
+          alcoholicCocktail: 0,
+          nonAlcoholicCocktail: 1,
+        });
+      }
+    );
+
+    it(
+      "trata 0 + 0 como composición opcional no especificada",
+      () => {
+        expect(
+          updateOptionalCocktailComposition(
+            1,
+            {
+              alcoholicCocktail: null,
+              nonAlcoholicCocktail: null,
+            },
+            "alcoholicCocktail",
+            0
+          )
+        ).toEqual({
+          alcoholicCocktail: null,
+          nonAlcoholicCocktail: null,
+        });
+      }
+    );
+
+    it(
+      "conserva un cero explícito cuando el reparto sí está especificado",
+      () => {
+        expect(
+          updateOptionalCocktailComposition(
+            1,
+            {
+              alcoholicCocktail: null,
+              nonAlcoholicCocktail: null,
+            },
+            "nonAlcoholicCocktail",
+            1
           )
         ).toEqual({
           alcoholicCocktail: 0,

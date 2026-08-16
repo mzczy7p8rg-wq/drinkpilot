@@ -903,35 +903,35 @@ describe(
 
         expect(
           mscEasy
-            ?.packagePricingDayPolicy
+            ?.packageChargeUnitPolicy
         ).toBe(
-          "exclude-disembarkation-day"
+          "per-itinerary-day-excluding-disembarkation"
         );
 
         expect(
           mscPremiumExtra
-            ?.packagePricingDayPolicy
+            ?.packageChargeUnitPolicy
         ).toBe(
-          "exclude-disembarkation-day"
+          "per-itinerary-day-excluding-disembarkation"
         );
 
         expect(
           mscAlcoholFree
-            ?.packagePricingDayPolicy
+            ?.packageChargeUnitPolicy
         ).toBe(
-          "exclude-disembarkation-day"
+          "per-itinerary-day-excluding-disembarkation"
         );
 
         expect(
           mscEasy
-            ?.packagePricingDayPolicySource
+            ?.packageChargeUnitPolicySource
             .source
         ).toBe("base");
       }
     );
 
     it(
-      "no inventa una política de días facturables para Costa",
+      "resuelve por noche los paquetes diarios documentados de Costa",
       () => {
         const rules =
           getPackageOperationalRules(
@@ -942,8 +942,8 @@ describe(
           rules.every(
             (rule) =>
               rule
-                .packagePricingDayPolicy ===
-              "unknown"
+                .packageChargeUnitPolicy ===
+              "per-night"
           )
         ).toBe(true);
       }

@@ -16,19 +16,19 @@ describe(
       () => {
         expect(
           resolveStoredWizardProgress({
-            days: 7,
             coffee: 2,
             water: 3,
             soda: 1,
+            juice: 2,
             beer: 2,
             wine: 1,
             people: 4,
           })
         ).toEqual({
-          days: 7,
           coffee: 2,
           water: 3,
           soda: 1,
+          juice: 2,
           beer: 2,
           wine: 1,
           people: 4,
@@ -37,23 +37,23 @@ describe(
     );
 
     it(
-      "conserva cero como estado vacío de días y bebidas",
+      "conserva cero como estado vacío de bebidas",
       () => {
         expect(
           resolveStoredWizardProgress({
-            days: 0,
             coffee: 0,
             water: 0,
             soda: 0,
+            juice: 0,
             beer: 0,
             wine: 0,
             people: 1,
           })
         ).toEqual({
-          days: 0,
           coffee: 0,
           water: 0,
           soda: 0,
+          juice: 0,
           beer: 0,
           wine: 0,
           people: 1,
@@ -66,19 +66,19 @@ describe(
       () => {
         expect(
           resolveStoredWizardProgress({
-            days: -7,
             coffee: 1.5,
             water: Number.POSITIVE_INFINITY,
             soda: "2",
+            juice: -2,
             beer: -1,
             wine: null,
             people: 0,
           })
         ).toEqual({
-          days: 0,
           coffee: 0,
           water: 0,
           soda: 0,
+          juice: 0,
           beer: 0,
           wine: 0,
           people: 0,
@@ -94,19 +94,19 @@ describe(
 
         expect(
           resolveStoredWizardProgress({
-            days: unsafeInteger,
             coffee: unsafeInteger,
             water: 1,
             soda: 0,
+            juice: unsafeInteger,
             beer: 0,
             wine: 0,
             people: unsafeInteger,
           })
         ).toEqual({
-          days: 0,
           coffee: 0,
           water: 1,
           soda: 0,
+          juice: 0,
           beer: 0,
           wine: 0,
           people: 0,
@@ -119,19 +119,19 @@ describe(
       () => {
         expect(
           resolveStoredWizardProgress({
-            days: 366,
             coffee: 101,
             water: 1,
             soda: 0,
+            juice: 101,
             beer: 0,
             wine: 0,
             people: 101,
           })
         ).toEqual({
-          days: 0,
           coffee: 0,
           water: 1,
           soda: 0,
+          juice: 0,
           beer: 0,
           wine: 0,
           people: 0,
@@ -145,24 +145,23 @@ describe(
         expect(
           resolveStoredWizardProgress(
             {
-              days: "7",
               people: -2,
             },
             {
-              days: 3,
               coffee: 1,
               water: 1,
               soda: 1,
+              juice: 1,
               beer: 1,
               wine: 1,
               people: 2,
             }
           )
         ).toEqual({
-          days: 3,
           coffee: 1,
           water: 1,
           soda: 1,
+          juice: 1,
           beer: 1,
           wine: 1,
           people: 2,
@@ -180,20 +179,20 @@ describe(
           resolveStoredWizardProgress(
             {},
             {
-              days: unsafeInteger,
               coffee: unsafeInteger,
               water: unsafeInteger,
               soda: unsafeInteger,
+              juice: unsafeInteger,
               beer: unsafeInteger,
               wine: unsafeInteger,
               people: unsafeInteger,
             }
           )
         ).toEqual({
-          days: 0,
           coffee: 0,
           water: 0,
           soda: 0,
+          juice: 0,
           beer: 0,
           wine: 0,
           people: 0,

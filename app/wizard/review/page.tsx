@@ -306,10 +306,10 @@ export default function ReviewPage() {
               </div>
 
               <p className="mt-2 text-lg font-bold text-slate-900 sm:text-xl">
-                {data.days}{" "}
-                {data.days === 1
-                  ? "día"
-                  : "días"}
+                {data.cruiseNights}{" "}
+                {data.cruiseNights === 1
+                  ? "noche"
+                  : "noches"}
               </p>
             </div>
 
@@ -485,19 +485,19 @@ export default function ReviewPage() {
                   customPrice !== null;
 
                 const hasReferencePrice =
-                  typeof pkg.pricePerDay ===
+                  typeof pkg.pricePerChargeUnit ===
                     "number" &&
                   Number.isFinite(
-                    pkg.pricePerDay
+                    pkg.pricePerChargeUnit
                   ) &&
-                  pkg.pricePerDay >
+                  pkg.pricePerChargeUnit >
                     0;
 
                 const displayedPrice =
                   hasCustomPrice
                     ? customPrice.price
                     : hasReferencePrice
-                    ? pkg.pricePerDay
+                    ? pkg.pricePerChargeUnit
                     : null;
 
                 return (

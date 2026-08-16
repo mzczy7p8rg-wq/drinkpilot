@@ -29,8 +29,8 @@ import {
 } from "@/lib/store";
 
 import {
-  MAX_CRUISE_DAYS,
-  isValidCruiseDays,
+  MAX_CRUISE_NIGHTS,
+  isValidCruiseNights,
 } from "@/lib/wizardNumberValidation";
 import {
   marketOptions,
@@ -66,12 +66,12 @@ function WizardForm() {
   ] = useState(false);
 
   const [
-    days,
-    setDays,
+    cruiseNights,
+    setCruiseNights,
   ] = useState(
-    data.days > 0
+    data.cruiseNights !== null
       ? String(
-          data.days
+          data.cruiseNights
         )
       : ""
   );
@@ -100,13 +100,13 @@ function WizardForm() {
     data.sailingRegion ?? ""
   );
 
-  const parsedDays =
-    Number(days);
+  const parsedCruiseNights =
+    Number(cruiseNights);
 
-  const isValidDays =
-    days.trim() !== "" &&
-    isValidCruiseDays(
-      parsedDays
+  const hasValidCruiseNights =
+    cruiseNights.trim() !== "" &&
+    isValidCruiseNights(
+      parsedCruiseNights
     );
 
   /*
@@ -123,7 +123,7 @@ function WizardForm() {
     Boolean(
       selectedCruiseLine
     ) &&
-    isValidDays &&
+    hasValidCruiseNights &&
     isValidSailingDate;
 
   function handleContinue() {
@@ -197,8 +197,8 @@ function WizardForm() {
 
           ...nextCruiseContext,
 
-          days:
-            parsedDays,
+          cruiseNights:
+            parsedCruiseNights,
 
           /*
            * El consumo pertenece al análisis
@@ -212,9 +212,13 @@ function WizardForm() {
                 coffee: 0,
                 water: 0,
                 soda: 0,
+                juice: 0,
                 beer: 0,
                 wine: 0,
                 cocktail: 0,
+
+                consumptionConfirmed:
+                  false,
 
                 alcoholicCocktail:
                   null,
@@ -244,6 +248,11 @@ function WizardForm() {
               selectedDrinkPrices:
                 pricesAfterCruiseLineChange,
             }),
+
+          documentedDrinkQuantities:
+            cruiseLineChanged
+              ? {}
+              : previous.documentedDrinkQuantities,
         };
       }
     );
@@ -469,19 +478,19 @@ function WizardForm() {
 
         <section className="mt-7 sm:max-w-sm">
           <label
-            htmlFor="cruiseDays"
+            htmlFor="cruiseNights"
             className="text-sm font-semibold text-slate-700"
           >
-            Duración del crucero
+            ¿Cuántas noches dura tu crucero?
           </label>
 
           <div className="mt-2 flex items-stretch gap-2">
             <button
               type="button"
-              aria-label="Quitar un día"
-              disabled={days === "" || Number(days) <= 1}
+              aria-label="Quitar una noche"
+              disabled={cruiseNights === "" || Number(cruiseNights) <= 1}
               onClick={() =>
-                setDays(String(Math.max(1, Number(days || 1) - 1)))
+                setCruiseNights(String(Math.max(1, Number(cruiseNights || 1) - 1)))
               }
               className="grid min-h-16 w-16 shrink-0 place-items-center rounded-2xl border border-sky-300/30 bg-white/10 text-2xl font-bold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -490,25 +499,25 @@ function WizardForm() {
 
             <div className="relative min-w-0 flex-1">
               <input
-              id="cruiseDays"
+              id="cruiseNights"
               type="number"
               min="1"
-              max={MAX_CRUISE_DAYS}
+              max={MAX_CRUISE_NIGHTS}
               step="1"
               inputMode="numeric"
               value={
-                days
+                cruiseNights
               }
-              aria-invalid={days !== "" && !isValidDays}
+              aria-invalid={cruiseNights !== "" && !hasValidCruiseNights}
               aria-describedby={
-                days !== "" && !isValidDays
-                  ? "cruiseDaysError"
+                cruiseNights !== "" && !hasValidCruiseNights
+                  ? "cruiseNightsError"
                   : undefined
               }
               onChange={(
                 event
               ) =>
-                setDays(
+                setCruiseNights(
                   event.target.value
                 )
               }
@@ -524,25 +533,25 @@ function WizardForm() {
                 }
               }}
               placeholder="Ej. 7"
-              className={`cruise-days-input h-full min-h-16 w-full rounded-2xl border bg-white px-4 py-4 pr-20 text-center text-xl font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
-                days !== "" &&
-                !isValidDays
+              className={`cruise-nights-input h-full min-h-16 w-full rounded-2xl border bg-white px-4 py-4 pr-20 text-center text-xl font-semibold text-slate-900 outline-none transition placeholder:font-normal placeholder:text-slate-400 ${
+                cruiseNights !== "" &&
+                !hasValidCruiseNights
                   ? "border-red-300 focus:ring-2 focus:ring-red-400"
                   : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
               }`}
               />
 
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">
-                días
+                noches
               </span>
             </div>
 
             <button
               type="button"
-              aria-label="Añadir un día"
-              disabled={days !== "" && Number(days) >= MAX_CRUISE_DAYS}
+              aria-label="Añadir una noche"
+              disabled={cruiseNights !== "" && Number(cruiseNights) >= MAX_CRUISE_NIGHTS}
               onClick={() =>
-                setDays(String(Math.min(MAX_CRUISE_DAYS, Number(days || 0) + 1)))
+                setCruiseNights(String(Math.min(MAX_CRUISE_NIGHTS, Number(cruiseNights || 0) + 1)))
               }
               className="grid min-h-16 w-16 shrink-0 place-items-center rounded-2xl border border-sky-300/30 bg-sky-700 text-2xl font-bold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -550,17 +559,21 @@ function WizardForm() {
             </button>
           </div>
 
-          {days !== "" &&
-            !isValidDays && (
+          {cruiseNights !== "" &&
+            !hasValidCruiseNights && (
               <p
-                id="cruiseDaysError"
+                id="cruiseNightsError"
                 className="mt-3 text-sm font-medium text-red-600"
               >
                 Introduce un número
-                entero de días entre 1
-                y {MAX_CRUISE_DAYS}.
+                entero de noches entre 1
+                y {MAX_CRUISE_NIGHTS}.
               </p>
             )}
+
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Si tu itinerario muestra 8 días / 7 noches, introduce 7.
+          </p>
         </section>
 
         {/* CONTEXTO OPCIONAL */}
