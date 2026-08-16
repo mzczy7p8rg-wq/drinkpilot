@@ -138,6 +138,11 @@ export default function ReviewPage() {
       operationalRules
     );
 
+  const waterLabel =
+    data.cruiseLine === "msc"
+      ? "Agua no embotellada (AQUA by MSC)"
+      : "Agua";
+
   const drinks = [
     {
       label: "Café",
@@ -145,7 +150,7 @@ export default function ReviewPage() {
       value: data.coffee,
     },
     {
-      label: "Agua",
+      label: waterLabel,
       icon: "💧",
       value: data.water,
     },
@@ -617,7 +622,7 @@ export default function ReviewPage() {
                         item.label ===
                         ({
                           coffee: "Café",
-                          water: "Agua",
+                          water: waterLabel,
                           soda: "Refrescos",
                           beer: "Cerveza",
                           wine: "Vino",
