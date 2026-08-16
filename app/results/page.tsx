@@ -52,6 +52,10 @@ import {
   getTotalDrinksPerDay,
 } from "@/lib/wizardProgress";
 
+import {
+  resolveIncludedPackageUpgradeDecision,
+} from "@/lib/includedPackageUpgrade";
+
 const coverageLabels: Record<
   CoverageCategory,
   string
@@ -898,6 +902,12 @@ export default function ResultsPage() {
   const bestPackage =
     comparison.bestPackage;
 
+  const includedPackageUpgradeDecision =
+    resolveIncludedPackageUpgradeDecision(
+      comparison.packages,
+      data.includedPackageKey
+    );
+
   const comparedPackageKeys =
     new Set(
       comparison.packages.map(
@@ -1154,6 +1164,33 @@ export default function ResultsPage() {
             cruiseLine={data.cruiseLine}
             minors={data.minors}
           />
+
+          {includedPackageUpgradeDecision && (
+            <section className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-left sm:mt-8">
+              <p className="text-sm font-semibold uppercase tracking-wide text-sky-800">
+                Tu paquete actual
+              </p>
+              <h2 className="mt-1 text-xl font-bold text-slate-900">
+                {includedPackageUpgradeDecision.current.packageName} ya está incluido en tu reserva
+              </h2>
+
+              {includedPackageUpgradeDecision.status === "upgrade" ? (
+                <p className="mt-3 leading-6 text-slate-700">
+                  <strong>Mejora a {includedPackageUpgradeDecision.alternative.packageName}.</strong>{" "}
+                  Con los precios que has indicado, aporta {formatCurrency(includedPackageUpgradeDecision.savingsDifference, includedPackageUpgradeDecision.current.currency)} más de resultado efectivo durante el crucero.
+                </p>
+              ) : includedPackageUpgradeDecision.status === "keep" ? (
+                <p className="mt-3 leading-6 text-slate-700">
+                  <strong>Mantén {includedPackageUpgradeDecision.current.packageName}.</strong>{" "}
+                  La alternativa comparable no mejora el resultado económico efectivo para tu perfil.
+                </p>
+              ) : (
+                <p className="mt-3 leading-6 text-slate-700">
+                  Para decidir si te conviene un upgrade, introduce el precio real de la alternativa. DrinkPilot no completa ese importe con estimaciones inventadas.
+                </p>
+              )}
+            </section>
+          )}
 
           {/* EXPLICACIÓN PRINCIPAL */}
 
