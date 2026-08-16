@@ -21,7 +21,7 @@ describe(
             onboardCurrency:
               "EUR",
 
-            days: 7,
+            cruiseNights: 7,
             people: 1,
 
             coffee: 0,

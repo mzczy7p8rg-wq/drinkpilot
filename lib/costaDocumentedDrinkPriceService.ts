@@ -25,6 +25,10 @@ import {
   type SelectedDrinkPrice,
 } from "@/lib/selectedDrinkPrice";
 
+import type {
+  PackageKey,
+} from "@/lib/packageService";
+
 export type CostaDocumentedDrinkPriceQuery = {
   category?: OnboardPriceKey;
   ship?: string;
@@ -78,6 +82,44 @@ export function getCostaDocumentedDrinkPriceById(
   return costaDocumentedDrinkPrices.find(
     (item) => item.id === id
   ) ?? null;
+}
+
+export type CostaDocumentedPackageCoverageResolution = {
+  status:
+    CostaDocumentedDrinkPrice["packageCoverage"][keyof CostaDocumentedDrinkPrice["packageCoverage"]];
+  referenceId: string;
+  sourceUrl: string;
+  evidence: "documented-menu";
+};
+
+export function resolveCostaDocumentedPackageCoverage(
+  referenceId: string,
+  packageKey: PackageKey
+): CostaDocumentedPackageCoverageResolution | null {
+  const reference =
+    getCostaDocumentedDrinkPriceById(referenceId);
+
+  if (
+    !reference ||
+    !(
+      packageKey in
+      reference.packageCoverage
+    )
+  ) {
+    return null;
+  }
+
+  const status =
+    reference.packageCoverage[
+      packageKey as keyof typeof reference.packageCoverage
+    ];
+
+  return {
+    status,
+    referenceId: reference.id,
+    sourceUrl: reference.sourceUrl,
+    evidence: reference.evidence,
+  };
 }
 
 export function createSelectedDrinkPriceFromCostaDocumentedReference(

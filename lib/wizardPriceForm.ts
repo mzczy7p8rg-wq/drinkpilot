@@ -5,6 +5,7 @@ export const drinkCategoryLabels: Record<OnboardPriceKey, string> = {
   coffee: "Café",
   water: "Agua",
   soda: "Refresco",
+  juice: "Zumo",
   beer: "Cerveza",
   wine: "Vino",
   cocktail: "Cóctel",

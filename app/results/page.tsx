@@ -23,10 +23,6 @@ import {
 } from "@/lib/adultPackageFilter";
 
 import {
-  resolveOnboardPriceValuesForConsumption,
-} from "@/lib/onboardPriceService";
-
-import {
   getCruiseLine,
 } from "@/data/cruiseLines";
 
@@ -63,6 +59,7 @@ const coverageLabels: Record<
   coffee: "café",
   water: "agua",
   soda: "refrescos",
+  juice: "zumos",
   beer: "cerveza",
   wine: "vino",
   cocktail: "cócteles",
@@ -207,8 +204,8 @@ export default function ResultsPage() {
       sailingDate:
         data.sailingDate,
 
-      days:
-        data.days,
+      cruiseNights:
+        data.cruiseNights ?? 0,
 
       people:
         data.people,
@@ -221,6 +218,9 @@ export default function ResultsPage() {
 
       soda:
         data.soda,
+
+      juice:
+        data.juice,
 
       beer:
         data.beer,
@@ -263,34 +263,13 @@ export default function ResultsPage() {
 
       selectedDrinkPrices:
         data.selectedDrinkPrices,
+
+      documentedDrinkQuantities:
+        data.documentedDrinkQuantities,
     });
 
-  const economicDrinkPrices =
-    comparison.economicDrinkPrices;
-
   const calculationDrinkPrices =
-    resolveOnboardPriceValuesForConsumption(
-      economicDrinkPrices,
-      {
-        coffee:
-          data.coffee,
-
-        water:
-          data.water,
-
-        soda:
-          data.soda,
-
-        beer:
-          data.beer,
-
-        wine:
-          data.wine,
-
-        cocktail:
-          data.cocktail,
-      }
-    );
+    comparison.calculationDrinkPrices;
 
   const economicCurrency =
     comparison.economicCurrency;
@@ -394,6 +373,7 @@ export default function ResultsPage() {
       coffee: "café",
       water: "agua",
       soda: "refrescos",
+      juice: "zumos",
       beer: "cerveza",
       wine: "vino",
       cocktail: "cócteles",
@@ -855,13 +835,13 @@ export default function ResultsPage() {
    */
   const baseline =
     calculateRecommendation({
-      days:
-        data.days,
+      cruiseNights:
+        data.cruiseNights ?? 0,
 
       people:
         data.people,
 
-      packagePricePerDay:
+      packagePricePerChargeUnit:
         0,
 
       coffee:
@@ -872,6 +852,9 @@ export default function ResultsPage() {
 
       soda:
         data.soda,
+
+      juice:
+        data.juice,
 
       beer:
         data.beer,
@@ -887,6 +870,9 @@ export default function ResultsPage() {
 
       waterPrice:
         calculationDrinkPrices.water,
+
+      juicePrice:
+        calculationDrinkPrices.juice,
 
       sodaPrice:
         calculationDrinkPrices.soda,
@@ -1024,7 +1010,7 @@ export default function ResultsPage() {
         data.coffee,
 
       price:
-        economicDrinkPrices.coffee,
+        calculationDrinkPrices.coffee,
 
       total:
         baseline.coffeeCost,
@@ -1040,7 +1026,7 @@ export default function ResultsPage() {
         data.water,
 
       price:
-        economicDrinkPrices.water,
+        calculationDrinkPrices.water,
 
       total:
         baseline.waterCost,
@@ -1056,10 +1042,26 @@ export default function ResultsPage() {
         data.soda,
 
       price:
-        economicDrinkPrices.soda,
+        calculationDrinkPrices.soda,
 
       total:
         baseline.sodaCost,
+    },
+
+    {
+      key: "juice",
+
+      label:
+        "🧃 Zumos",
+
+      quantity:
+        data.juice,
+
+      price:
+        calculationDrinkPrices.juice,
+
+      total:
+        baseline.juiceCost,
     },
 
     {
@@ -1072,7 +1074,7 @@ export default function ResultsPage() {
         data.beer,
 
       price:
-        economicDrinkPrices.beer,
+        calculationDrinkPrices.beer,
 
       total:
         baseline.beerCost,
@@ -1088,7 +1090,7 @@ export default function ResultsPage() {
         data.wine,
 
       price:
-        economicDrinkPrices.wine,
+        calculationDrinkPrices.wine,
 
       total:
         baseline.wineCost,
@@ -1104,7 +1106,7 @@ export default function ResultsPage() {
         data.cocktail,
 
       price:
-        economicDrinkPrices.cocktail,
+        calculationDrinkPrices.cocktail,
 
       total:
         baseline.cocktailCost,
@@ -1254,11 +1256,11 @@ export default function ResultsPage() {
               </p>
 
               <p className="mt-2 text-2xl font-bold sm:text-3xl">
-                {data.days}
+                {data.cruiseNights}
               </p>
 
               <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-                días
+                noches
               </p>
             </div>
 
@@ -1297,14 +1299,24 @@ export default function ResultsPage() {
                 ⭐ Premium
               </p>
 
-              <p className="mt-2 text-2xl font-bold sm:text-3xl">
-                {
-                  selectedPremiumPreferences
-                }
+              <p
+                className={`mt-2 font-bold ${
+                  selectedPremiumPreferences === 0
+                    ? "text-xl text-green-700 sm:text-2xl"
+                    : "text-2xl sm:text-3xl"
+                }`}
+              >
+                {selectedPremiumPreferences === 0
+                  ? "✓ Sin requisitos"
+                  : selectedPremiumPreferences}
               </p>
 
               <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-                preferencias
+                {selectedPremiumPreferences === 0
+                  ? "premium seleccionados"
+                  : selectedPremiumPreferences === 1
+                    ? "preferencia"
+                    : "preferencias"}
               </p>
             </div>
 
@@ -1436,10 +1448,10 @@ export default function ResultsPage() {
 
                           <p className="mt-1 font-bold text-slate-900 sm:text-lg">
                             {formatCurrency(
-                              pkg.packagePricePerDay,
+                              pkg.packagePricePerChargeUnit,
                               pkg.currency
                             )}{" "}
-                            por persona / día
+                            por persona / noche
                           </p>
 
                           {usesUserPrice ? (
@@ -1449,18 +1461,18 @@ export default function ResultsPage() {
                                 tu reserva
                               </span>
 
-                              {pkg.referencePricePerDay !==
+                              {pkg.referencePricePerChargeUnit !==
                                 null &&
-                                pkg.packagePricePerDay !==
-                                  pkg.referencePricePerDay && (
+                                pkg.packagePricePerChargeUnit !==
+                                  pkg.referencePricePerChargeUnit && (
                                   <p className="mt-2 text-xs text-slate-500">
                                     Referencia
                                     DrinkPilot:{" "}
                                     {formatCurrency(
-                                      pkg.referencePricePerDay,
+                                      pkg.referencePricePerChargeUnit,
                                       pkg.currency
                                     )}{" "}
-                                    / día
+                                    / noche
                                   </p>
                                 )}
                             </div>
@@ -1649,18 +1661,9 @@ export default function ResultsPage() {
                           </p>
 
                           <p className="mt-1 text-xs leading-5 text-green-800">
-                            El paquete
-                            cubre todo lo
-                            que has
-                            indicado, por
-                            lo que el
-                            resultado
-                            mostrado puede
-                            compararse
-                            directamente
-                            con pagar las
-                            bebidas por
-                            separado.
+                            {pkg.fullyCovered
+                              ? "El paquete cubre todo lo que has indicado, por lo que el resultado mostrado puede compararse directamente con pagar las bebidas por separado."
+                              : "Todos los precios necesarios están resueltos. Los costes conocidos de las bebidas que el paquete no cubre ya están incorporados al resultado orientativo."}
                           </p>
                         </div>
                       ) : pkg.economicComparisonStatus ===

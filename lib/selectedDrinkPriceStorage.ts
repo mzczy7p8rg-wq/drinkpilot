@@ -3,6 +3,10 @@ import type {
 } from "@/lib/onboardPriceService";
 
 import {
+  onboardPriceKeys,
+} from "@/lib/onboardPriceService";
+
+import {
   createSelectedDrinkPrice,
   type SelectedDrinkPrice,
 } from "@/lib/selectedDrinkPrice";
@@ -29,16 +33,6 @@ export type SelectedDrinkPrices =
     >
   >;
 
-const ONBOARD_PRICE_KEYS: OnboardPriceKey[] =
-  [
-    "coffee",
-    "water",
-    "soda",
-    "beer",
-    "wine",
-    "cocktail",
-  ];
-
 export function resolveStoredSelectedDrinkPrices(
   input: unknown
 ): SelectedDrinkPrices {
@@ -57,7 +51,7 @@ export function resolveStoredSelectedDrinkPrices(
     SelectedDrinkPrices = {};
 
   for (
-    const category of ONBOARD_PRICE_KEYS
+    const category of onboardPriceKeys
   ) {
     const candidate =
       stored[category];

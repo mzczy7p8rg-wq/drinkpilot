@@ -195,7 +195,9 @@ export default function AnalysesPage() {
                       ) : null}
 
                       <p className="mt-2 text-sm text-slate-300">
-                        {analysis.data.days > 0 ? `${analysis.data.days} días` : "Duración pendiente"}
+                        {analysis.data.cruiseNights !== null
+                          ? `${analysis.data.cruiseNights} ${analysis.data.cruiseNights === 1 ? "noche" : "noches"}`
+                          : "Duración pendiente"}
                         {analysis.data.sailingDate ? ` · Salida ${formatAnalysisSailingDate(analysis.data.sailingDate)}` : ""}
                         {` · ${analysis.data.adults} adulto${analysis.data.adults === 1 ? "" : "s"}`}
                         {analysis.data.minors > 0 ? ` · ${analysis.data.minors} menor${analysis.data.minors === 1 ? "" : "es"}` : ""}

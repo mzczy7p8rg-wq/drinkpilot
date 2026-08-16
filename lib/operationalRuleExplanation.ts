@@ -72,16 +72,36 @@ export function getOperationalRuleNoticeImpactLabel(
   return null;
 }
 
-function buildPackagePricingDayPolicyMessage(
+function buildPackageChargeUnitPolicyMessage(
   rule: PackageOperationalRules
 ): string | null {
   if (
-    rule.packagePricingDayPolicy ===
-    "exclude-disembarkation-day"
+    rule.packageChargeUnitPolicy ===
+    "per-itinerary-day-excluding-disembarkation"
   ) {
     return (
       `${rule.packageName}: el día de desembarque ` +
       `no se factura dentro del precio del paquete.`
+    );
+  }
+
+  if (
+    rule.packageChargeUnitPolicy ===
+    "per-night"
+  ) {
+    return (
+      `${rule.packageName}: el paquete se factura ` +
+      `por noche de crucero.`
+    );
+  }
+
+  if (
+    rule.packageChargeUnitPolicy ===
+    "per-itinerary-day"
+  ) {
+    return (
+      `${rule.packageName}: el paquete se factura ` +
+      `por cada jornada del itinerario, incluido el desembarque.`
     );
   }
 
@@ -399,13 +419,13 @@ export function buildOperationalRuleNotices(
       });
     }
 
-    const packagePricingDayPolicyMessage =
-      buildPackagePricingDayPolicyMessage(
+    const packageChargeUnitPolicyMessage =
+      buildPackageChargeUnitPolicyMessage(
         rule
       );
 
     if (
-      packagePricingDayPolicyMessage
+      packageChargeUnitPolicyMessage
     ) {
       notices.push({
         id:
@@ -424,18 +444,18 @@ export function buildOperationalRuleNotices(
           "economic",
 
         message:
-          packagePricingDayPolicyMessage,
+          packageChargeUnitPolicyMessage,
 
         source:
           rule
-            .packagePricingDayPolicySource
+            .packageChargeUnitPolicySource
             .source === "contextual"
             ? "contextual"
             : "base",
 
         appliedContextualRuleIds:
           rule
-            .packagePricingDayPolicySource
+            .packageChargeUnitPolicySource
             .contextualRuleIds,
       });
     }

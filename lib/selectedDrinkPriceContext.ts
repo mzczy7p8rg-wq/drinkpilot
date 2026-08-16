@@ -15,6 +15,10 @@ import {
 } from "@/lib/mscDocumentedDrinkPriceService";
 
 import {
+  resolveCostaDocumentedDrinkPriceSelectionForContext,
+} from "@/lib/costaDocumentedDrinkPriceService";
+
+import {
   resolveMscSpecificDrinkPriceSelection,
 } from "@/lib/mscSpecificDrinkPriceService";
 
@@ -156,10 +160,58 @@ export function resolveSelectedDrinkPricesForCruiseContext(
       continue;
     }
 
+    if (!selectedDrinkPrice.referenceId) {
+      continue;
+    }
+
+    if (
+      input.cruiseContext.cruiseLine ===
+        "costa"
+    ) {
+      if (
+        selectedDrinkPrice.source !==
+        "documented-menu"
+      ) {
+        continue;
+      }
+
+      const selection =
+        resolveCostaDocumentedDrinkPriceSelectionForContext(
+          selectedDrinkPrice.referenceId,
+          input.cruiseContext
+        );
+
+      if (
+        !selection ||
+        selection.selectedDrinkPrice
+          .category !==
+          selectedDrinkPrice.category ||
+        selection.contextRelevance
+          .relevance === "mismatch"
+      ) {
+        continue;
+      }
+
+      const normalizedSelection =
+        createSelectedDrinkPrice({
+          ...selection.selectedDrinkPrice,
+          contextRelevance:
+            selection.contextRelevance
+              .relevance,
+        });
+
+      if (normalizedSelection) {
+        result[
+          selectedDrinkPrice.category
+        ] = normalizedSelection;
+      }
+
+      continue;
+    }
+
     if (
       input.cruiseContext.cruiseLine !==
-        "msc" ||
-      !selectedDrinkPrice.referenceId
+        "msc"
     ) {
       continue;
     }

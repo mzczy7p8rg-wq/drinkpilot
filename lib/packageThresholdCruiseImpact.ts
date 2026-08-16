@@ -12,7 +12,7 @@ export type PackageThresholdCruiseImpact = {
   status:
     PackageThresholdCruiseImpactStatus;
 
-  days:
+  cruiseNights:
     number | null;
 
   people:
@@ -35,7 +35,7 @@ type PackageThresholdCruiseImpactInput = {
   dailyImpact:
     PackageThresholdConsumptionImpact;
 
-  days:
+  cruiseNights:
     number | null | undefined;
 
   people:
@@ -59,18 +59,18 @@ export function evaluatePackageThresholdCruiseImpact(
 ): PackageThresholdCruiseImpact {
   const {
     dailyImpact,
-    days,
+    cruiseNights,
     people,
   } = input;
 
   if (
-    !isPositiveFiniteNumber(days) ||
+    !isPositiveFiniteNumber(cruiseNights) ||
     !isPositiveFiniteNumber(people)
   ) {
     return {
       status: "unknown",
 
-      days: null,
+      cruiseNights: null,
       people: null,
 
       totalDrinks: null,
@@ -96,12 +96,12 @@ export function evaluatePackageThresholdCruiseImpact(
     return {
       status: "unknown",
 
-      days,
+      cruiseNights,
       people,
 
       totalDrinks:
         dailyImpact.totalDrinksPerDay *
-        days *
+        cruiseNights *
         people,
 
       drinksAboveThreshold:
@@ -117,13 +117,13 @@ export function evaluatePackageThresholdCruiseImpact(
 
   const totalDrinks =
     dailyImpact.totalDrinksPerDay *
-    days *
+    cruiseNights *
     people;
 
   const drinksAboveThreshold =
     dailyImpact
       .drinksAboveThresholdPerDay *
-    days *
+    cruiseNights *
     people;
 
   const drinksExcludedFromCoverage =
@@ -133,7 +133,7 @@ export function evaluatePackageThresholdCruiseImpact(
       ? null
       : dailyImpact
           .drinksExcludedFromCoveragePerDay *
-        days *
+        cruiseNights *
         people;
 
   if (
@@ -143,7 +143,7 @@ export function evaluatePackageThresholdCruiseImpact(
     return {
       status: "none",
 
-      days,
+      cruiseNights,
       people,
 
       totalDrinks,
@@ -169,7 +169,7 @@ export function evaluatePackageThresholdCruiseImpact(
       status:
         "known-unquantified",
 
-      days,
+      cruiseNights,
       people,
 
       totalDrinks,
@@ -186,7 +186,7 @@ export function evaluatePackageThresholdCruiseImpact(
   return {
     status: "quantified",
 
-    days,
+    cruiseNights,
     people,
 
     totalDrinks,
@@ -197,7 +197,7 @@ export function evaluatePackageThresholdCruiseImpact(
 
     additionalCostTotal:
       dailyImpact.additionalCostPerDay *
-      days *
+      cruiseNights *
       people,
   };
 }

@@ -17,12 +17,12 @@ export function isPositiveSafeInteger(
   );
 }
 
-export function isValidCruiseDays(
+export function isValidCruiseNights(
   value: unknown
 ): value is number {
   return (
     isPositiveSafeInteger(value) &&
-    value <= MAX_CRUISE_DAYS
+    value <= MAX_CRUISE_NIGHTS
   );
 }
 
@@ -43,6 +43,6 @@ export function isValidDailyDrinkCount(
     value <= MAX_DAILY_DRINKS_PER_CATEGORY
   );
 }
-export const MAX_CRUISE_DAYS = 365;
+export const MAX_CRUISE_NIGHTS = 365;
 export const MAX_TRAVELERS = 100;
 export const MAX_DAILY_DRINKS_PER_CATEGORY = 100;

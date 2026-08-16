@@ -17,7 +17,7 @@ describe(
       () => {
         expect(
           mscDocumentedDrinkPrices
-        ).toHaveLength(8);
+        ).toHaveLength(135);
 
         expect(
           mscDocumentedDrinkPrices.every(
@@ -205,7 +205,7 @@ describe(
       "conserva el contexto de MSC World America",
       () => {
         expect(
-          mscDocumentedDrinkPrices.every(
+          mscDocumentedDrinkPrices.slice(0, 8).every(
             (item) =>
               item.ship ===
                 "MSC World America" &&
@@ -244,13 +244,75 @@ describe(
         expect(
           mscDocumentedDrinkPrices.every(
             (item) =>
-              item.sourceUrl.startsWith(
-                "https://"
-              ) &&
-              !item.sourceUrl.includes("[") &&
-              !item.sourceUrl.includes("]")
+              item.sourceUrl === null
+                ? item.sourceDocument ===
+                  "00c6f9_e331c43a1e7d43198142e527483cd3d4.pdf"
+                : item.sourceUrl.startsWith(
+                    "https://"
+                  ) &&
+                  !item.sourceUrl.includes("[") &&
+                  !item.sourceUrl.includes("]")
           )
         ).toBe(true);
+      }
+    );
+  }
+);
+
+describe(
+  "MSC Cocktails & more EUR March 2023",
+  () => {
+    it(
+      "conserva el documento local, fecha, moneda y categorías compatibles",
+      () => {
+        const references =
+          mscDocumentedDrinkPrices.filter(
+            (item) =>
+              item.sourceDocument ===
+              "00c6f9_e331c43a1e7d43198142e527483cd3d4.pdf"
+          );
+
+        expect(references).toHaveLength(127);
+        expect(
+          references.every(
+            (item) =>
+              item.currency === "EUR" &&
+              item.observedAt === "2023-03" &&
+              item.sourceUrl === null
+          )
+        ).toBe(true);
+
+        expect(
+          references.filter(
+            (item) => item.category === "juice"
+          )
+        ).toHaveLength(2);
+      }
+    );
+
+    it(
+      "distingue Fever-Tree y Red Bull de los refrescos básicos en Easy histórico",
+      () => {
+        const byName = (name: string) =>
+          mscDocumentedDrinkPrices.find(
+            (item) =>
+              item.sourceDocument ===
+                "00c6f9_e331c43a1e7d43198142e527483cd3d4.pdf" &&
+              item.productName === name
+          );
+
+        expect(
+          byName("Refresco en lata")
+            ?.packageCoverage?.mscEasy
+        ).toBe("included");
+        expect(
+          byName("Fever-Tree Tonic")
+            ?.packageCoverage?.mscEasy
+        ).toBe("notIncluded");
+        expect(
+          byName("Red Bull")
+            ?.packageCoverage?.mscEasy
+        ).toBe("notIncluded");
       }
     );
   }
@@ -343,7 +405,9 @@ describe(
               item.menuName ===
                 "Fleetwide menu" ||
               item.menuName ===
-                "Coffee Emporium"
+                "Coffee Emporium" ||
+              item.menuName ===
+                "MSC Cocktails & more"
           )
         ).toBe(true);
       }

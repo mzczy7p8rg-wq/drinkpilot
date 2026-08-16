@@ -28,7 +28,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await page
     .getByRole("button", { name: /Costa Cruceros/i })
     .click();
-  await page.getByLabel("Duración del crucero").fill("7");
+  await page.getByLabel("¿Cuántas noches dura tu crucero?").fill("7");
   await page.getByRole("button", { name: "Continuar" }).click();
 
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
@@ -80,7 +80,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     page.getByRole("heading", { name: "Revisa tu análisis" })
   ).toBeVisible();
   await expect(page.getByText("Costa Cruceros").first()).toBeVisible();
-  await expect(page.getByText("7 días")).toBeVisible();
+  await expect(page.getByText("7 noches")).toBeVisible();
   await expect(page.getByText("2 adultos · 1 menor")).toBeVisible();
   await expect(page.getByText("Cerveza embotellada")).toBeVisible();
   await expect(page.getByText("Cerveza de tirador")).toBeVisible();
@@ -223,7 +223,7 @@ test("no muestra el aviso infantil cuando viajan solo adultos", async ({
     .click();
 
   await page
-    .getByLabel("Duración del crucero")
+    .getByLabel("¿Cuántas noches dura tu crucero?")
     .fill("7");
 
   await page

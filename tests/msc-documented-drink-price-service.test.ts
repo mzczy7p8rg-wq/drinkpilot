@@ -17,7 +17,7 @@ describe(
       () => {
         expect(
           getMscDocumentedDrinkPrices()
-        ).toHaveLength(8);
+        ).toHaveLength(135);
       }
     );
 
@@ -29,7 +29,7 @@ describe(
             category: "beer",
           });
 
-        expect(beer).toHaveLength(2);
+        expect(beer).toHaveLength(22);
 
         expect(
           beer.every(

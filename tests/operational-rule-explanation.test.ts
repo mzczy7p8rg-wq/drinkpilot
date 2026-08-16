@@ -127,15 +127,13 @@ describe(
 
         expect(
           notices.length
-        ).toBe(6);
+        ).toBe(9);
 
         expect(
           notices.every(
             (notice) =>
               notice.source ===
-                "base" &&
-              notice.calculationImpact ===
-                "informational"
+                "base"
           )
         ).toBe(true);
 
@@ -163,6 +161,21 @@ describe(
                   packageKey &&
                 notice.type ===
                   "package-purchase-group-requirement"
+            )
+          ).toBe(true);
+
+          expect(
+            notices.some(
+              (notice) =>
+                notice.packageKey ===
+                  packageKey &&
+                notice.type ===
+                  "package-pricing-day-policy" &&
+                notice.calculationImpact ===
+                  "economic" &&
+                notice.message.includes(
+                  "por noche"
+                )
             )
           ).toBe(true);
         }
@@ -1046,22 +1059,36 @@ describe(
     );
 
     it(
-      "no genera aviso cuando la política de días facturables es desconocida",
+      "expone la política por noche documentada para Costa",
       () => {
         const rules =
           getPackageOperationalRules({
             cruiseLine: "costa",
           });
 
-        expect(
+        const pricingNotices =
           buildOperationalRuleNotices(
             rules
-          ).some(
+          ).filter(
             (notice) =>
               notice.type ===
               "package-pricing-day-policy"
+          );
+
+        expect(
+          pricingNotices
+        ).toHaveLength(3);
+
+        expect(
+          pricingNotices.every(
+            (notice) =>
+              notice.message.includes(
+                "por noche"
+              ) &&
+              notice.calculationImpact ===
+                "economic"
           )
-        ).toBe(false);
+        ).toBe(true);
       }
     );
   }

@@ -27,8 +27,17 @@ import {
 } from "@/lib/cocktailConsumptionStorage";
 
 import {
+  resolveStoredConsumptionConfirmation,
+} from "@/lib/consumptionConfirmationStorage";
+
+import {
   resolveStoredWizardProgress,
 } from "@/lib/wizardProgressStorage";
+
+import {
+  CURRENT_WIZARD_STORAGE_VERSION,
+  resolveStoredCruiseDuration,
+} from "@/lib/cruiseDurationStorage";
 
 import {
   resolveStoredWizardPreferences,
@@ -43,6 +52,11 @@ import {
   resolveStoredSelectedDrinkPrices,
   type SelectedDrinkPrices,
 } from "@/lib/selectedDrinkPriceStorage";
+
+import {
+  resolveStoredDocumentedDrinkQuantities,
+  type DocumentedDrinkQuantities,
+} from "@/lib/documentedDrinkQuantities";
 
 import {
   resolveSelectedDrinkPricesForCruiseContext,
@@ -94,14 +108,28 @@ export type WizardData = {
    */
   shipName?: string | null;
 
-  days: number;
+  /*
+   * Nueva unidad canónica de duración.
+   *
+   * null mientras la sesión proceda del campo
+   * legacy `days` o el usuario todavía no haya
+   * confirmado el número de noches.
+   */
+  cruiseNights: number | null;
 
   coffee: number;
   water: number;
   soda: number;
+  juice: number;
   beer: number;
   wine: number;
   cocktail: number;
+
+  /*
+   * Distingue un perfil confirmado con cero
+   * bebidas del estado inicial aún no respondido.
+   */
+  consumptionConfirmed: boolean;
 
   /*
    * Consumption v2.
@@ -159,6 +187,9 @@ export type WizardData = {
   selectedDrinkPrices:
     SelectedDrinkPrices;
 
+  documentedDrinkQuantities:
+    DocumentedDrinkQuantities;
+
   people: number;
 
   /*
@@ -183,6 +214,10 @@ export type WizardData = {
  */
 type LegacyStoredWizardData =
   Partial<WizardData> & {
+    storageSchemaVersion?: unknown;
+
+    days?: unknown;
+
     myDrinksSoftCustomPrice?:
       number | null;
 
@@ -280,14 +315,18 @@ function createInitialData(
 
     shipName: null,
 
-    days: 0,
+    cruiseNights: null,
 
     coffee: 0,
     water: 0,
     soda: 0,
+    juice: 0,
     beer: 0,
     wine: 0,
     cocktail: 0,
+
+    consumptionConfirmed:
+      false,
 
     alcoholicCocktail:
       null,
@@ -328,6 +367,9 @@ function createInitialData(
       null,
 
     selectedDrinkPrices:
+      {},
+
+    documentedDrinkQuantities:
       {},
 
     /*
@@ -689,10 +731,36 @@ export function StoreProvider({
             baseData
           );
 
+        const storedCruiseDuration =
+          resolveStoredCruiseDuration(
+            parsedData
+          );
+
         const storedWizardPreferences =
           resolveStoredWizardPreferences(
             parsedData,
             baseData
+          );
+
+        const consumptionConfirmed =
+          resolveStoredConsumptionConfirmation(
+            parsedData,
+            {
+              coffee:
+                storedWizardProgress.coffee,
+              water:
+                storedWizardProgress.water,
+              soda:
+                storedWizardProgress.soda,
+              juice:
+                storedWizardProgress.juice,
+              beer:
+                storedWizardProgress.beer,
+              wine:
+                storedWizardProgress.wine,
+              cocktail:
+                storedCocktailConsumption.cocktail,
+            }
           );
 
         /*
@@ -725,9 +793,9 @@ export function StoreProvider({
               ? parsedData.shipName.trim().slice(0, 80)
               : null,
 
-          days:
-            storedWizardProgress
-              .days,
+          cruiseNights:
+            storedCruiseDuration
+              .cruiseNights,
 
           coffee:
             storedWizardProgress
@@ -741,6 +809,10 @@ export function StoreProvider({
             storedWizardProgress
               .soda,
 
+          juice:
+            storedWizardProgress
+              .juice,
+
           beer:
             storedWizardProgress
               .beer,
@@ -752,6 +824,8 @@ export function StoreProvider({
           cocktail:
             storedCocktailConsumption
               .cocktail,
+
+          consumptionConfirmed,
 
           alcoholicCocktail:
             storedCocktailConsumption
@@ -804,6 +878,11 @@ export function StoreProvider({
           selectedDrinkPrices:
             storedSelectedDrinkPrices,
 
+          documentedDrinkQuantities:
+            resolveStoredDocumentedDrinkQuantities(
+              parsedData.documentedDrinkQuantities
+            ),
+
           people:
             storedWizardProgress
               .people,
@@ -853,7 +932,12 @@ export function StoreProvider({
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(
-          data
+          {
+            storageSchemaVersion:
+              CURRENT_WIZARD_STORAGE_VERSION,
+
+            ...data,
+          }
         )
       );
     } catch (error) {

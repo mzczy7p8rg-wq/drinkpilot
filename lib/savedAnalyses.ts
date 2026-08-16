@@ -105,7 +105,8 @@ function isStoredAnalysis(value: unknown): value is SavedAnalysis {
     typeof candidateData === "object" &&
     !Array.isArray(candidateData) &&
     isCruiseLineKey(candidateData?.cruiseLine) &&
-    typeof candidateData?.days === "number" &&
+    (candidateData?.cruiseNights === null ||
+      typeof candidateData?.cruiseNights === "number") &&
     typeof candidateData?.people === "number" &&
     (candidateData?.shipName === undefined ||
       candidateData.shipName === null ||

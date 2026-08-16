@@ -45,6 +45,16 @@ export const mscOnboardPrices = {
       "Pendiente de una referencia oficial general suficientemente fiable.",
   },
 
+  juice: {
+    name: "Zumo",
+    icon: "🧃",
+    price: null,
+    currency: "EUR",
+    status: "pending",
+    note:
+      "Pendiente de una referencia oficial general suficientemente fiable.",
+  },
+
   beer: {
     name: "Cerveza",
     icon: "🍺",
@@ -101,6 +111,9 @@ export const mscOnboardPriceValues = {
 
   soda:
     mscOnboardPrices.soda.price,
+
+  juice:
+    mscOnboardPrices.juice.price,
 
   beer:
     mscOnboardPrices.beer.price,

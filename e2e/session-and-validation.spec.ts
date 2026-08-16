@@ -1,12 +1,14 @@
 import { expect, test } from "@playwright/test";
+import { startAtCruiseStep } from "./wizard-helpers";
 
 test("restaura una sesión válida en Review", async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.setItem(
       "drinkpilot-wizard",
       JSON.stringify({
+        storageSchemaVersion: 2,
         cruiseLine: "costa",
-        days: 7,
+        cruiseNights: 7,
         coffee: 1,
         people: 2,
       })
@@ -18,8 +20,80 @@ test("restaura una sesión válida en Review", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Revisa tu análisis" })
   ).toBeVisible();
-  await expect(page.getByText("7 días")).toBeVisible();
+  await expect(page.getByText("7 noches")).toBeVisible();
   await expect(page.getByText("2 adultos")).toBeVisible();
+});
+
+test("pide confirmar las noches de una sesión legacy ambigua", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "drinkpilot-wizard",
+      JSON.stringify({
+        cruiseLine: "costa",
+        days: 8,
+        coffee: 1,
+        people: 2,
+      })
+    );
+  });
+
+  await page.goto("/wizard/review");
+
+  await expect(page).toHaveURL(
+    /\/wizard$/
+  );
+
+  const nights = page.getByLabel(
+    "¿Cuántas noches dura tu crucero?"
+  );
+
+  await expect(nights).toHaveValue("");
+  await expect(
+    page.getByText(
+      "Si tu itinerario muestra 8 días / 7 noches, introduce 7."
+    )
+  ).toBeVisible();
+});
+
+test("las sesiones nuevas persisten cruiseNights y no vuelven a escribir days", async ({
+  page,
+}) => {
+  await startAtCruiseStep(page);
+
+  await page
+    .getByLabel(
+      "¿Cuántas noches dura tu crucero?"
+    )
+    .fill("7");
+
+  await page
+    .getByRole("button", {
+      name: "Continuar",
+    })
+    .click();
+
+  await expect(page).toHaveURL(
+    /\/wizard\/consumption$/
+  );
+
+  const stored = await page.evaluate(
+    () =>
+      JSON.parse(
+        window.localStorage.getItem(
+          "drinkpilot-wizard"
+        ) ?? "{}"
+      ) as Record<string, unknown>
+  );
+
+  expect(stored).toMatchObject({
+    storageSchemaVersion: 2,
+    cruiseNights: 7,
+  });
+  expect(stored).not.toHaveProperty(
+    "days"
+  );
 });
 
 test("recupera el wizard ante una sesión corrupta", async ({ page }) => {
@@ -32,7 +106,7 @@ test("recupera el wizard ante una sesión corrupta", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "¿Con quién navegas?" })
   ).toBeVisible();
-  await expect(page.getByLabel("Duración del crucero")).toHaveValue("");
+  await expect(page.getByLabel("¿Cuántas noches dura tu crucero?")).toHaveValue("");
 });
 
 test("normaliza sesiones antiguas con más de 10 personas", async ({
@@ -42,8 +116,9 @@ test("normaliza sesiones antiguas con más de 10 personas", async ({
     window.localStorage.setItem(
       "drinkpilot-wizard",
       JSON.stringify({
+        storageSchemaVersion: 2,
         cruiseLine: "costa",
-        days: 7,
+        cruiseNights: 7,
         coffee: 1,
         people: 25,
       })
@@ -61,15 +136,15 @@ test("normaliza sesiones antiguas con más de 10 personas", async ({
   ).toBeDisabled();
 });
 
-test("expone errores accesibles para límites de días y personas", async ({
+test("expone errores accesibles para límites de noches y personas", async ({
   page,
 }) => {
   await page.goto("/wizard");
 
-  const days = page.getByLabel("Duración del crucero");
-  await days.fill("366");
+  const nights = page.getByLabel("¿Cuántas noches dura tu crucero?");
+  await nights.fill("366");
 
-  await expect(days).toHaveAttribute("aria-invalid", "true");
+  await expect(nights).toHaveAttribute("aria-invalid", "true");
   await expect(page.getByText("entre 1 y 365")).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Continuar" })
@@ -79,8 +154,9 @@ test("expone errores accesibles para límites de días y personas", async ({
     window.localStorage.setItem(
       "drinkpilot-wizard",
       JSON.stringify({
+        storageSchemaVersion: 2,
         cruiseLine: "costa",
-        days: 7,
+        cruiseNights: 7,
         coffee: 1,
       })
     );

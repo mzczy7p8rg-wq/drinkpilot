@@ -19,13 +19,16 @@ const data = {
   sailingRegion: null,
   onboardCurrency: null,
   sailingDate: null,
-  days: 7,
+  shipName: null,
+  cruiseNights: 7,
   coffee: 1,
   water: 1,
   soda: 0,
+  juice: 0,
   beer: 0,
   wine: 0,
   cocktail: 0,
+  consumptionConfirmed: true,
   alcoholicCocktail: null,
   nonAlcoholicCocktail: null,
   alcoholicCocktails: false,
@@ -39,6 +42,7 @@ const data = {
   customPackagePrices: {},
   packagePriceCurrency: null,
   selectedDrinkPrices: {},
+  documentedDrinkQuantities: {},
   people: 2,
   adults: 2,
   minors: 0,
@@ -219,13 +223,13 @@ describe("saved analyses", () => {
     const updated = upsertSavedAnalysis(
       [initial],
       initial.id,
-      { ...data, days: 10 },
+      { ...data, cruiseNights: 10 },
       "2026-08-15T11:00:00.000Z"
     );
 
     expect(updated[0].createdAt).toBe(initial.createdAt);
     expect(updated[0].updatedAt).toBe("2026-08-15T11:00:00.000Z");
-    expect(updated[0].data.days).toBe(10);
+    expect(updated[0].data.cruiseNights).toBe(10);
   });
 
   it("duplica con identidad propia sin compartir los datos", () => {

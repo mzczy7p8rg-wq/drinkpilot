@@ -1,31 +1,32 @@
 import { expect, test } from "@playwright/test";
+import { startAtCruiseStep } from "./wizard-helpers";
 
-test("permite ajustar los días con controles visibles", async ({ page }) => {
+test("permite ajustar las noches con controles visibles", async ({ page }) => {
   await page.goto("/wizard");
 
-  const duration = page.getByLabel("Duración del crucero");
+  const duration = page.getByLabel("¿Cuántas noches dura tu crucero?");
   await expect(duration).toHaveValue("");
 
-  await page.getByRole("button", { name: "Añadir un día" }).click();
+  await page.getByRole("button", { name: "Añadir una noche" }).click();
   await expect(duration).toHaveValue("1");
 
-  await page.getByRole("button", { name: "Añadir un día" }).click();
+  await page.getByRole("button", { name: "Añadir una noche" }).click();
   await expect(duration).toHaveValue("2");
 
-  await page.getByRole("button", { name: "Quitar un día" }).click();
+  await page.getByRole("button", { name: "Quitar una noche" }).click();
   await expect(duration).toHaveValue("1");
   await expect(
-    page.getByRole("button", { name: "Quitar un día" })
+    page.getByRole("button", { name: "Quitar una noche" })
   ).toBeDisabled();
 });
 
 test("conserva mercado y región hasta la revisión", async ({ page }) => {
-  await page.goto("/wizard");
+  await startAtCruiseStep(page);
 
   await page
     .getByRole("button", { name: /MSC Cruises/i })
     .click();
-  await page.getByLabel("Duración del crucero").fill("7");
+  await page.getByLabel("¿Cuántas noches dura tu crucero?").fill("7");
   await page
     .getByLabel("Mercado de la reserva")
     .selectOption({ label: "Estados Unidos" });
@@ -54,17 +55,6 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
   ).toHaveCount(0);
   await page.getByRole("link", { name: "Continuar" }).click();
 
-  await expect(page).toHaveURL(/\/wizard\/people$/);
-  await expect(
-    page.getByRole("heading", { name: "¿Quién viaja?" })
-  ).toBeVisible();
-  await expect(
-    page.getByLabel("Cantidad de adultos")
-  ).toContainText("1");
-  await page
-    .getByRole("button", { name: "Continuar" })
-    .click();
-
   await expect(page).toHaveURL(/\/wizard\/review$/);
   await expect(page.getByText("MSC Cruises").first()).toBeVisible();
   await expect(page.getByText("Estados Unidos")).toBeVisible();
@@ -72,12 +62,12 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
 });
 
 test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
-  await page.goto("/wizard");
+  await startAtCruiseStep(page);
 
   await page
     .getByRole("button", { name: /Costa Cruceros/i })
     .click();
-  await page.getByLabel("Duración del crucero").fill("7");
+  await page.getByLabel("¿Cuántas noches dura tu crucero?").fill("7");
   await page
     .getByRole("button", { name: "Continuar" })
     .click();
@@ -90,6 +80,9 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
   const coffeeCounter = page.getByRole("group", {
     name: "Cafés",
   });
+  const juiceCounter = page.getByRole("group", {
+    name: "Zumos",
+  });
 
   await beerCounter
     .getByRole("button", { name: "Aumentar Cervezas" })
@@ -99,12 +92,20 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
     .getByRole("button", { name: "Aumentar Cafés" })
     .click();
 
+  await juiceCounter
+    .getByRole("button", { name: "Aumentar Zumos" })
+    .click();
+
   await expect(
     beerCounter.getByLabel("Cantidad de Cervezas")
   ).toHaveText("1");
 
   await expect(
     coffeeCounter.getByLabel("Cantidad de Cafés")
+  ).toHaveText("1");
+
+  await expect(
+    juiceCounter.getByLabel("Cantidad de Zumos")
   ).toHaveText("1");
 
   await page
@@ -129,6 +130,9 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
   const nextCoffeeCounter = page.getByRole("group", {
     name: "Cafés",
   });
+  const nextJuiceCounter = page.getByRole("group", {
+    name: "Zumos",
+  });
 
   await expect(
     nextBeerCounter.getByLabel("Cantidad de Cervezas")
@@ -136,6 +140,10 @@ test("reinicia el consumo al cambiar de naviera", async ({ page }) => {
 
   await expect(
     nextCoffeeCounter.getByLabel("Cantidad de Cafés")
+  ).toHaveText("0");
+
+  await expect(
+    nextJuiceCounter.getByLabel("Cantidad de Zumos")
   ).toHaveText("0");
 });
 
@@ -207,7 +215,7 @@ test("explica la cobertura y comparación de cada naviera", async ({ page }) => 
     "Información del paquete disponible"
   );
   await expect(costaButton).toContainText(
-    "Precios disponibles"
+    "Algunos precios están pendientes"
   );
 
   await expect(mscButton).toContainText(

@@ -36,7 +36,7 @@ test("identifica un análisis por barco, fecha y duración", async ({ page }) =>
   await page.getByRole("button", { name: /Continuar/i }).click();
 
   await page.getByLabel("Nombre del barco").fill("Costa Toscana");
-  await page.getByLabel("Duración del crucero").fill("7");
+  await page.getByLabel("¿Cuántas noches dura tu crucero?").fill("7");
   await page.getByLabel("Fecha de salida").fill("2026-09-15");
   await page.getByRole("button", { name: /Continuar/i }).click();
 
@@ -46,7 +46,7 @@ test("identifica un análisis por barco, fecha y duración", async ({ page }) =>
 
   await expect(analysis).toContainText("Costa Toscana");
   await expect(analysis).toContainText("Costa Cruceros");
-  await expect(analysis).toContainText("7 días");
+  await expect(analysis).toContainText("7 noches");
   await expect(analysis).toContainText("15 sept 2026");
 });
 
@@ -89,13 +89,15 @@ test("ordena Mis análisis por más reciente, nombre y naviera", async ({ page }
     onboardCurrency: null,
     sailingDate: null,
     shipName: null,
-    days: 7,
+    cruiseNights: 7,
     coffee: 1,
     water: 1,
     soda: 0,
+    juice: 0,
     beer: 0,
     wine: 0,
     cocktail: 0,
+    consumptionConfirmed: true,
     alcoholicCocktail: null,
     nonAlcoholicCocktail: null,
     alcoholicCocktails: false,
@@ -109,6 +111,7 @@ test("ordena Mis análisis por más reciente, nombre y naviera", async ({ page }
     customPackagePrices: {},
     packagePriceCurrency: null,
     selectedDrinkPrices: {},
+    documentedDrinkQuantities: {},
     people: 2,
     adults: 2,
     minors: 0,

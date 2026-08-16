@@ -35,6 +35,16 @@ export const costaOnboardPrices = {
       "Precio medio de referencia utilizado por DrinkPilot. Pendiente de contrastar con una carta oficial vigente de Costa Cruceros.",
   },
 
+  juice: {
+    name: "Zumo",
+    icon: "🧃",
+    price: null,
+    currency: "EUR",
+    status: "pending",
+    note:
+      "La carta documenta varios zumos con precios distintos. DrinkPilot no fabrica un precio genérico: elige un producto documentado o introduce el precio real.",
+  },
+
   beer: {
     name: "Cerveza",
     icon: "🍺",
@@ -79,6 +89,7 @@ export const costaOnboardPriceValues = {
   coffee: costaOnboardPrices.coffee.price,
   water: costaOnboardPrices.water.price,
   soda: costaOnboardPrices.soda.price,
+  juice: costaOnboardPrices.juice.price,
   beer: costaOnboardPrices.beer.price,
   wine: costaOnboardPrices.wine.price,
   cocktail: costaOnboardPrices.cocktail.price,

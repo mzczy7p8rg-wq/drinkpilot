@@ -49,7 +49,7 @@ describe(
             dailyImpact:
               createDailyImpact(),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -96,7 +96,7 @@ describe(
                   0,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -138,7 +138,7 @@ describe(
                   null,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -171,7 +171,7 @@ describe(
             dailyImpact:
               createDailyImpact(),
 
-            days:
+            cruiseNights:
               null,
 
             people:
@@ -204,7 +204,7 @@ describe(
             dailyImpact:
               createDailyImpact(),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -233,7 +233,7 @@ describe(
             dailyImpact:
               createDailyImpact(),
 
-            days:
+            cruiseNights:
               0,
 
             people:
@@ -245,7 +245,7 @@ describe(
             dailyImpact:
               createDailyImpact(),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -276,7 +276,7 @@ describe(
                   4,
               }),
 
-            days:
+            cruiseNights:
               10,
 
             people:
@@ -319,7 +319,7 @@ describe(
                   2,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -343,7 +343,7 @@ describe(
                   null,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -376,7 +376,7 @@ describe(
                   0,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -415,7 +415,7 @@ describe(
                   10,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:
@@ -460,7 +460,7 @@ describe(
                   0,
               }),
 
-            days:
+            cruiseNights:
               7,
 
             people:

@@ -8,10 +8,23 @@ import type {
   CruiseLineKey,
 } from "@/data/cruiseLines";
 
+import type {
+  OnboardPriceKey,
+} from "@/lib/onboardPriceService";
+
+import {
+  resolveCostaDocumentedPackageCoverage,
+} from "@/lib/costaDocumentedDrinkPriceService";
+
+import {
+  resolveMscDocumentedPackageCoverage,
+} from "@/lib/mscDocumentedDrinkPriceService";
+
 export type CoverageInput = {
   coffee: number;
   water: number;
   soda: number;
+  juice?: number;
   beer: number;
   wine: number;
 
@@ -59,6 +72,7 @@ export type CoverageCategory =
   | "coffee"
   | "water"
   | "soda"
+  | "juice"
   | "beer"
   | "wine"
 
@@ -124,6 +138,10 @@ export type CoverageOptions = {
    * comparison.ts.
    */
   includePendingPackages?: boolean;
+
+  selectedDrinkReferenceIds?: Partial<
+    Record<OnboardPriceKey, readonly string[]>
+  >;
 };
 
 /*
@@ -153,8 +171,35 @@ type CoveragePackage =
  */
 function isCategoryCovered(
   pkg: CoveragePackage,
-  category: CoverageCategory
+  category: CoverageCategory,
+  cruiseLine: CruiseLineKey,
+  selectedDrinkReferenceIds: readonly string[] = []
 ): boolean {
+  if (selectedDrinkReferenceIds.length > 0) {
+    const documentedCoverage =
+      selectedDrinkReferenceIds.map(
+        (referenceId) =>
+          cruiseLine === "costa"
+            ? resolveCostaDocumentedPackageCoverage(
+                referenceId,
+                pkg.key as PackageKey
+              )
+            : resolveMscDocumentedPackageCoverage(
+                referenceId,
+                pkg.key as PackageKey
+              )
+      );
+
+    if (
+      documentedCoverage.every(Boolean)
+    ) {
+      return documentedCoverage.every(
+        (coverage) =>
+          coverage?.status === "included"
+      );
+    }
+  }
+
   /*
    * AGUA EMBOTELLADA DIARIA
    *
@@ -268,6 +313,12 @@ export function calculatePackageCoverage(
     );
   }
 
+  if ((input.juice ?? 0) > 0) {
+    requestedCategories.push(
+      "juice"
+    );
+  }
+
   if (input.beer > 0) {
     requestedCategories.push(
       "beer"
@@ -371,7 +422,11 @@ export function calculatePackageCoverage(
           (category) =>
             isCategoryCovered(
               pkg,
-              category
+              category,
+              cruiseLine,
+              options.selectedDrinkReferenceIds?.[
+                category as OnboardPriceKey
+              ] ?? []
             )
         );
 
@@ -380,7 +435,11 @@ export function calculatePackageCoverage(
           (category) =>
             !isCategoryCovered(
               pkg,
-              category
+              category,
+              cruiseLine,
+              options.selectedDrinkReferenceIds?.[
+                category as OnboardPriceKey
+              ] ?? []
             )
         );
 

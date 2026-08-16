@@ -3,6 +3,11 @@ export type CocktailComposition = {
   nonAlcoholicCocktail: number;
 };
 
+export type OptionalCocktailComposition = {
+  alcoholicCocktail: number | null;
+  nonAlcoholicCocktail: number | null;
+};
+
 function sanitizeCount(
   value: unknown
 ): number {
@@ -88,4 +93,44 @@ export function updateCocktailComposition(
         maximum
       ),
   };
+}
+
+/*
+ * En el formulario, 0 + 0 significa que el usuario
+ * todavía no ha especificado el reparto opcional.
+ * Cualquier reparto con al menos una bebida conserva
+ * los ceros como valores explícitos y conocidos.
+ */
+export function updateOptionalCocktailComposition(
+  totalCocktails: number,
+  current: OptionalCocktailComposition,
+  field:
+    | "alcoholicCocktail"
+    | "nonAlcoholicCocktail",
+  requestedValue: number
+): OptionalCocktailComposition {
+  const composition =
+    updateCocktailComposition(
+      totalCocktails,
+      {
+        alcoholicCocktail:
+          current.alcoholicCocktail ?? 0,
+        nonAlcoholicCocktail:
+          current.nonAlcoholicCocktail ?? 0,
+      },
+      field,
+      requestedValue
+    );
+
+  if (
+    composition.alcoholicCocktail === 0 &&
+    composition.nonAlcoholicCocktail === 0
+  ) {
+    return {
+      alcoholicCocktail: null,
+      nonAlcoholicCocktail: null,
+    };
+  }
+
+  return composition;
 }

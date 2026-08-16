@@ -8,7 +8,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { WizardBrand } from "@/components/Brand";
 
 import {
-  updateCocktailComposition,
+  updateOptionalCocktailComposition,
 } from "@/lib/cocktailComposition";
 
 import {
@@ -17,7 +17,7 @@ import {
 
 import {
   getTotalDrinksPerDay,
-  hasValidConsumptionStep,
+  hasValidConsumptionValues,
 } from "@/lib/wizardProgress";
 
 export default function ConsumptionPage() {
@@ -33,8 +33,8 @@ export default function ConsumptionPage() {
       data
     );
 
-  const hasConsumption =
-    hasValidConsumptionStep(
+  const hasValidConsumption =
+    hasValidConsumptionValues(
       data
     );
 
@@ -150,6 +150,18 @@ export default function ConsumptionPage() {
           />
 
           <DrinkCounter
+            label="🧃 Zumos"
+            accessibleLabel="Zumos"
+            value={data.juice}
+            onChange={(value) =>
+              setData((prev) => ({
+                ...prev,
+                juice: Math.max(0, value),
+              }))
+            }
+          />
+
+          <DrinkCounter
             label="🍷 Vinos"
             accessibleLabel="Vinos"
             value={data.wine}
@@ -217,18 +229,14 @@ export default function ConsumptionPage() {
                   onChange={(value) =>
                     setData((prev) => {
                       const composition =
-                        updateCocktailComposition(
+                        updateOptionalCocktailComposition(
                           prev.cocktail,
                           {
                             alcoholicCocktail:
-                              prev
-                                .alcoholicCocktail ??
-                              0,
+                              prev.alcoholicCocktail,
 
                             nonAlcoholicCocktail:
-                              prev
-                                .nonAlcoholicCocktail ??
-                              0,
+                              prev.nonAlcoholicCocktail,
                           },
                           "alcoholicCocktail",
                           value
@@ -253,18 +261,14 @@ export default function ConsumptionPage() {
                   onChange={(value) =>
                     setData((prev) => {
                       const composition =
-                        updateCocktailComposition(
+                        updateOptionalCocktailComposition(
                           prev.cocktail,
                           {
                             alcoholicCocktail:
-                              prev
-                                .alcoholicCocktail ??
-                              0,
+                              prev.alcoholicCocktail,
 
                             nonAlcoholicCocktail:
-                              prev
-                                .nonAlcoholicCocktail ??
-                              0,
+                              prev.nonAlcoholicCocktail,
                           },
                           "nonAlcoholicCocktail",
                           value
@@ -278,6 +282,10 @@ export default function ConsumptionPage() {
                   }
                 />
               </div>
+
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Si dejas ambos valores a 0, lo trataremos como no especificado.
+              </p>
 
               {hasCocktailComposition && (
                 <div
@@ -318,10 +326,10 @@ export default function ConsumptionPage() {
 
         </div>
 
-        {!hasConsumption && (
-          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-center">
-            <p className="text-sm font-medium text-amber-800">
-              Añade al menos una bebida para continuar.
+        {totalDrinksPerDay === 0 && (
+          <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-center">
+            <p className="text-sm font-medium text-green-800">
+              ✓ Cero también es válido. DrinkPilot analizará que no consumes bebidas de estas categorías.
             </p>
           </div>
         )}
@@ -339,17 +347,23 @@ export default function ConsumptionPage() {
 
           <Link
             href={
-              hasConsumption
+              hasValidConsumption
                 ? "/wizard/preferences"
                 : "#"
             }
             onClick={(event) => {
-              if (!hasConsumption) {
+              if (!hasValidConsumption) {
                 event.preventDefault();
+                return;
               }
+
+              setData((prev) => ({
+                ...prev,
+                consumptionConfirmed: true,
+              }));
             }}
             className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
-              hasConsumption
+              hasValidConsumption
                 ? "bg-sky-700 text-white hover:bg-sky-800 active:bg-sky-800"
                 : "pointer-events-none bg-slate-300 text-slate-500"
             }`}

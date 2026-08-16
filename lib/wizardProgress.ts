@@ -3,7 +3,7 @@ import type {
 } from "@/lib/store";
 
 import {
-  isValidCruiseDays,
+  isValidCruiseNights,
   isValidDailyDrinkCount,
   isValidTravelerCount,
 } from "@/lib/wizardNumberValidation";
@@ -16,15 +16,16 @@ export type WizardRequirement =
 type WizardProgressData =
   Pick<
     WizardData,
-    | "days"
+    | "cruiseNights"
     | "coffee"
     | "water"
     | "soda"
     | "beer"
     | "wine"
     | "cocktail"
+    | "consumptionConfirmed"
     | "people"
-  >;
+  > & { juice?: number };
 
 export function getTotalDrinksPerDay(
   data: WizardProgressData
@@ -33,6 +34,7 @@ export function getTotalDrinksPerDay(
     data.coffee +
     data.water +
     data.soda +
+    (data.juice ?? 0) +
     data.beer +
     data.wine +
     data.cocktail
@@ -42,18 +44,31 @@ export function getTotalDrinksPerDay(
 export function hasValidCruiseStep(
   data: WizardProgressData
 ): boolean {
-  return isValidCruiseDays(
-    data.days
+  return isValidCruiseNights(
+    data.cruiseNights
   );
 }
 
 export function hasValidConsumptionStep(
   data: WizardProgressData
 ): boolean {
+  return (
+    hasValidConsumptionValues(
+      data
+    ) &&
+    data.consumptionConfirmed ===
+      true
+  );
+}
+
+export function hasValidConsumptionValues(
+  data: WizardProgressData
+): boolean {
   const counts = [
     data.coffee,
     data.water,
     data.soda,
+    data.juice ?? 0,
     data.beer,
     data.wine,
     data.cocktail,
@@ -67,7 +82,7 @@ export function hasValidConsumptionStep(
     return false;
   }
 
-  return getTotalDrinksPerDay(data) > 0;
+  return true;
 }
 
 export function hasValidPeopleStep(
@@ -82,6 +97,19 @@ export function resolveWizardRedirect(
   data: WizardProgressData,
   requirement: WizardRequirement
 ): string | null {
+  /*
+   * El orden debe reflejar el wizard visible:
+   * Viajeros -> Crucero -> Consumo.
+   *
+   * Si validamos primero el crucero, un reset
+   * completo desvía "Nuevo análisis" al antiguo
+   * primer paso en lugar de mantener al usuario
+   * en Viajeros.
+   */
+  if (!hasValidPeopleStep(data)) {
+    return "/wizard/people";
+  }
+
   if (!hasValidCruiseStep(data)) {
     return "/wizard";
   }
@@ -96,10 +124,6 @@ export function resolveWizardRedirect(
 
   if (requirement === "consumption") {
     return null;
-  }
-
-  if (!hasValidPeopleStep(data)) {
-    return "/wizard/people";
   }
 
   return null;
