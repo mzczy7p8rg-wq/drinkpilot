@@ -133,6 +133,11 @@ export default function ResultsPage() {
       data.bottledWaterDailyAllowance,
   ].filter(Boolean).length;
 
+  const waterConsumptionLabel =
+    data.cruiseLine === "msc"
+      ? "💧 Agua no embotellada (AQUA by MSC)"
+      : "💧 Agua";
+
   /*
    * Conteo universal de precios reales.
    *
@@ -1023,7 +1028,7 @@ export default function ResultsPage() {
       key: "water",
 
       label:
-        "💧 Agua",
+        waterConsumptionLabel,
 
       quantity:
         data.water,

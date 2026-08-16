@@ -41,6 +41,16 @@ export default function ConsumptionPage() {
   const hasCocktails =
     data.cocktail > 0;
 
+  const waterLabel =
+    data.cruiseLine === "msc"
+      ? "💧 Agua no embotellada (AQUA by MSC)"
+      : "💧 Agua";
+
+  const accessibleWaterLabel =
+    data.cruiseLine === "msc"
+      ? "Agua no embotellada (AQUA by MSC)"
+      : "Agua";
+
   const hasCocktailComposition =
     data.alcoholicCocktail !== null &&
     data.nonAlcoholicCocktail !== null;
@@ -114,8 +124,8 @@ export default function ConsumptionPage() {
           />
 
           <DrinkCounter
-            label="💧 Agua"
-            accessibleLabel="Agua"
+            label={waterLabel}
+            accessibleLabel={accessibleWaterLabel}
             value={data.water}
             onChange={(value) =>
               setData((prev) => ({
@@ -124,6 +134,12 @@ export default function ConsumptionPage() {
               }))
             }
           />
+
+          {data.cruiseLine === "msc" && (
+            <p className="px-1 text-sm leading-6 text-slate-500">
+              Si prefieres agua embotellada, indícalo en el siguiente paso como una preferencia independiente.
+            </p>
+          )}
 
           <DrinkCounter
             label="🥤 Refrescos"
