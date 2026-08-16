@@ -111,6 +111,14 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   await expect(
     page.getByText(/coste incremental de 0 €/i)
   ).toBeVisible();
+  await expect(
+    page.getByText("Coste del upgrade por adulto y noche").first()
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Introduce solo el suplemento para cambiar desde tu paquete actual."
+    ).first()
+  ).toBeVisible();
 
   await usdButton.click();
 
