@@ -845,7 +845,9 @@ function PricesForm() {
                       </label>
 
                       <p className="mt-1 text-xs text-slate-500">
-                        Precio por adulto y noche
+                        {includedPackageKey && !isIncludedInReservation
+                          ? "Coste del upgrade por adulto y noche"
+                          : "Precio por adulto y noche"}
                       </p>
 
                       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-sky-700">
@@ -922,6 +924,7 @@ function PricesForm() {
                           Lo comparamos con coste incremental de 0 €. Podrás ver si conviene mantenerlo o cambiar a otra opción.
                         </p>
                       ) : (
+                    <>
                     <div className="relative mt-3">
                       <input
                         id={
@@ -966,7 +969,6 @@ function PricesForm() {
                             : "border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500"
                         }`}
                       />
-
                       <span
                         aria-label={`Moneda del precio de tu reserva: ${packagePriceCurrency}`}
                         className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-semibold text-slate-500"
@@ -976,6 +978,12 @@ function PricesForm() {
                         }
                       </span>
                     </div>
+                    {includedPackageKey ? (
+                      <p className="mt-2 text-xs leading-5 text-slate-500">
+                        Introduce solo el suplemento para cambiar desde tu paquete actual.
+                      </p>
+                    ) : null}
+                    </>
                       )}
                     </>
                   )}
