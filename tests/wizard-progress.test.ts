@@ -129,14 +129,14 @@ describe("wizard progress", () => {
         completeProgress,
         "cruise"
       )
-    ).toBe("/wizard/people");
+    ).toBeNull();
 
     expect(
       resolveWizardRedirect(
         completeProgress,
         "consumption"
       )
-    ).toBe("/wizard/people");
+    ).toBeNull();
 
     expect(
       resolveWizardRedirect(

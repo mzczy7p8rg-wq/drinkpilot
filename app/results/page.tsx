@@ -1203,6 +1203,18 @@ export default function ResultsPage() {
               }
             </div>
 
+            {bestPackage && (
+              <p className="mt-4 text-xs font-black uppercase tracking-[0.18em] text-sky-700">
+                Recomendación DrinkPilot
+              </p>
+            )}
+
+            {bestPackage && (
+              <p className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">
+                {bestPackage.packageName}
+              </p>
+            )}
+
             <h2
               className={`mt-3 text-2xl font-bold sm:text-3xl ${explanationStyle.title}`}
             >
