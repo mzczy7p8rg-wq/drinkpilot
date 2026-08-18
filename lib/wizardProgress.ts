@@ -96,7 +96,8 @@ export function hasValidPeopleStep(
 export function resolveWizardRedirect(
   data: WizardProgressData,
   requirement: WizardRequirement
-): string | null {
+): string | null 
+{
   /*
    * El orden debe reflejar el wizard visible:
    * Viajeros -> Crucero -> Consumo.
