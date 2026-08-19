@@ -255,8 +255,7 @@ export default function ReviewPage() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Comprueba los datos antes
-            de ver la recomendación.
+            Comprueba que los datos son correctos. Con esta información calcularemos qué opción encaja mejor contigo.
           </p>
         </div>
 
