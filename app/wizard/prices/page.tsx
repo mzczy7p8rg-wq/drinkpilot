@@ -734,7 +734,7 @@ function PricesForm() {
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
           💡 Este paso es opcional. Si conoces el precio de tu reserva,
-          añádelo para obtener un resultado más preciso.
+          añádelo para obtener un resultado más preciso. Si tu reserva ya incluye un paquete, puedes añadir los precios de otros paquetes disponibles en la página oficial de tu naviera para compararlos.
         </div>
 
         {data.cruiseLine === "costa" && (
