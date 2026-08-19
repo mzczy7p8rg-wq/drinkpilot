@@ -1210,9 +1210,19 @@ export default function ResultsPage() {
             )}
 
             {bestPackage && (
-              <p className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">
-                {bestPackage.packageName}
-              </p>
+              <div className="mx-auto mt-5 max-w-xl rounded-2xl border border-green-200 bg-white/80 p-5 shadow-sm">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-green-700">
+                  Tu recomendación
+                </p>
+
+                <p className="mt-2 text-3xl font-black text-slate-900 sm:text-4xl">
+                  {bestPackage.packageName}
+                </p>
+
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {bestPackage.packageName} encaja mejor con tu perfil porque cubre todas las preferencias diarias que has indicado.
+                </p>
+              </div>
             )}
 
             <h2
