@@ -322,7 +322,7 @@ export default function ResultsPage() {
    * durante el crucero ya conocemos.
    *
    * "known-unquantified" significa:
-   * sabemos cuántas consumiciones quedan
+   * sabemos cuántas bebidas quedan
    * por encima del threshold, pero todavía
    * no inventamos un coste adicional.
    */
@@ -402,7 +402,7 @@ export default function ResultsPage() {
               </div>
 
               <h1 className="mt-4 text-3xl font-bold text-slate-900 sm:text-4xl">
-                Análisis de cobertura disponible
+                Análisis de tus paquetes disponibles
               </h1>
 
               <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
@@ -412,8 +412,8 @@ export default function ResultsPage() {
                 </strong>{" "}
                 cubren tus preferencias, pero{" "}
                 {missingDrinkPrices
-                  ? "todavía no dispone de suficientes precios individuales fiables para calcular ahorro o rentabilidad."
-                  : `no dispone de ningún precio de paquete utilizable en ${economicCurrency} para completar la comparación económica.`}
+                  ? "todavía no dispone de suficientes precios individuales fiables para calcular si el paquete compensa económicamente."
+                  : `no tenemos suficientes datos de precio para completar la comparación económica.`}
               </p>
             </div>
 
@@ -554,7 +554,7 @@ export default function ResultsPage() {
                 </h2>
 
                 <p className="mt-2 text-sm leading-6 text-violet-900">
-                  Algunos paquetes incluyen bebidas solo hasta un determinado precio por consumición. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
+                  Algunos paquetes incluyen bebidas solo hasta un determinado precio por bebida. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
                 </p>
 
                 <div className="mt-4 grid gap-3">
@@ -638,23 +638,23 @@ export default function ResultsPage() {
                                 </strong>{" "}
                                 {affectedDrinks ===
                                 1
-                                  ? "consumición prevista supera"
-                                  : "consumiciones previstas superan"}{" "}
+                                  ? "bebida prevista supera"
+                                  : "bebidas previstas superan"}{" "}
                                 el límite de precio conocido del paquete durante el crucero.
                               </p>
 
                               {excludedDrinks !== null && excludedDrinks > 0 && (
                                 <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
                                   <p className="text-sm font-semibold text-amber-950">
-                                    ⚠️ Fuera de cobertura:{" "}
+                                    ⚠️ No incluidas:{" "}
                                     {excludedDrinks}{" "}
                                     {excludedDrinks === 1
-                                      ? "consumición"
-                                      : "consumiciones"}
+                                      ? "bebida"
+                                      : "bebidas"}
                                   </p>
 
                                   <p className="mt-1 text-xs leading-5 text-amber-900">
-                                    Estas consumiciones quedarían fuera de cobertura por superar el límite de precio conocido del paquete.
+                                    Estas bebidas no estarían incluidas porque superan el límite de precio del paquete.
                                   </p>
                                 </div>
                               )}
@@ -696,7 +696,7 @@ export default function ResultsPage() {
                               </>
                             ) : (
                               <p className="mt-1 text-sm leading-6 text-amber-900">
-                                Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                                Aún no podemos calcularlo. DrinkPilot no añade un importe al cálculo porque no dispone de información suficiente sobre cómo se cobran las bebidas que superan el límite.
                               </p>
                             )}
                           </div>
@@ -1900,7 +1900,7 @@ export default function ResultsPage() {
                   : "precios reales"}
                 . DrinkPilot les ha
                 dado prioridad sobre sus
-                precios de referencia al
+                precios disponibles al
                 calcular la
                 recomendación.
               </p>
@@ -1914,7 +1914,7 @@ export default function ResultsPage() {
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-violet-900">
-                Algunos paquetes incluyen bebidas solo hasta un determinado precio por consumición. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
+                Algunos paquetes incluyen bebidas solo hasta un determinado precio por bebida. Con los precios que has introducido podemos detectar cuándo tu consumo previsto supera ese límite.
               </p>
 
               <div className="mt-4 grid gap-3">
@@ -1998,8 +1998,8 @@ export default function ResultsPage() {
                               </strong>{" "}
                               {affectedDrinks ===
                               1
-                                ? "consumición prevista supera"
-                                : "consumiciones previstas superan"}{" "}
+                                ? "bebida prevista supera"
+                                : "bebidas previstas superan"}{" "}
                               el límite de precio conocido del paquete durante el crucero.
                             </p>
 
@@ -2009,12 +2009,12 @@ export default function ResultsPage() {
                                   ⚠️ Fuera de cobertura:{" "}
                                   {excludedDrinks}{" "}
                                   {excludedDrinks === 1
-                                    ? "consumición"
-                                    : "consumiciones"}
+                                    ? "bebida"
+                                    : "bebidas"}
                                 </p>
 
                                 <p className="mt-1 text-xs leading-5 text-amber-900">
-                                  Estas consumiciones quedarían fuera de cobertura por superar el límite de precio conocido del paquete.
+                                  Estas bebidas no estarían incluidas porque superan el límite de precio del paquete.
                                 </p>
                               </div>
                             )}
@@ -2058,7 +2058,7 @@ export default function ResultsPage() {
                             </>
                           ) : (
                             <p className="mt-1 text-sm leading-6 text-slate-700">
-                              Aún no cuantificable. DrinkPilot no añade un importe al cálculo porque todavía no dispone de evidencia suficiente para determinar cómo se cobra cada consumición que supera el límite.
+                              Aún no podemos calcularlo. DrinkPilot no añade un importe al cálculo porque no dispone de información suficiente sobre cómo se cobran las bebidas que superan el límite.
                             </p>
                           )}
                         </div>
