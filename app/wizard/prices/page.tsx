@@ -862,12 +862,11 @@ function PricesForm() {
 
                     {!hasReferencePrice ? (
                       <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
-                        Sin precio de
-                        referencia
+                        Sin precio disponible
                       </span>
                     ) : (
                       <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                        Estimación orientativa{" "}
+                        Precio estimado{" "}
                         {pkg.currency}{" "}
                         {formatCurrency(
                           pkg.pricePerChargeUnit as number,
@@ -921,7 +920,7 @@ function PricesForm() {
 
                       {isIncludedInReservation ? (
                         <p className="mt-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm leading-6 text-green-900">
-                          Lo comparamos con coste incremental de 0 €. Podrás ver si conviene mantenerlo o cambiar a otra opción.
+                          Como ya está incluido en tu reserva, su coste para esta comparación será 0 €. Podrás ver si te conviene mantenerlo o cambiar a otra opción.
                         </p>
                       ) : (
                     <>
@@ -980,7 +979,7 @@ function PricesForm() {
                     </div>
                     {includedPackageKey ? (
                       <p className="mt-2 text-xs leading-5 text-slate-500">
-                        Introduce solo el suplemento para cambiar desde tu paquete actual.
+                        Introduce solo la diferencia de precio para cambiar desde tu paquete actual.
                       </p>
                     ) : null}
                     </>
@@ -1033,19 +1032,7 @@ function PricesForm() {
                         {requiresUserPrice ? (
                           <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
                             <p className="text-xs leading-5 text-slate-600">
-                              Si queda
-                              vacío, este
-                              paquete
-                              continuará
-                              fuera de la
-                              comparación
-                              económica
-                              porque no
-                              dispone de
-                              una
-                              referencia
-                              suficientemente
-                              fiable.
+                              Si queda vacío, este paquete no se incluirá en la comparación económica porque no tenemos un coste de referencia suficientemente fiable.
                             </p>
                           </div>
                         ) : hasReferencePrice ? (
@@ -1367,7 +1354,7 @@ function PricesForm() {
                         {officialReferences.length > 0 ? (
                           <div className="mt-3 rounded-xl border border-sky-100 bg-sky-50 p-3">
                             <p className="text-xs font-semibold uppercase tracking-wide text-sky-800">
-                              Referencias oficiales MSC
+                              Precios oficiales MSC
                             </p>
 
                             <div className="mt-2 flex flex-wrap gap-2">
@@ -1419,7 +1406,7 @@ function PricesForm() {
                             </div>
 
                             <p className="mt-2 text-xs leading-5 text-sky-800">
-                              Puedes usar una referencia oficial o escribir tu precio real manualmente.
+                              Puedes usar un precio oficial o escribir tu precio real manualmente.
                             </p>
                           </div>
                         ) : null}
@@ -1431,7 +1418,7 @@ function PricesForm() {
                             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl p-3 text-left marker:content-none">
                               <span>
                                 <span className="block text-xs font-semibold uppercase tracking-wide text-slate-700">
-                                  Elegir bebidas del menú documentado
+                                  Elegir bebidas con precio documentado
                                 </span>
 
                                 <span className="mt-1 block text-xs text-slate-500">
@@ -1453,7 +1440,7 @@ function PricesForm() {
                             <div className="border-t border-slate-200 p-3">
 
                             <p className="mt-1 text-xs leading-5 text-slate-600">
-                              Marca todas las bebidas que sueles alternar. Tus {data[category]} consumiciones diarias del paso 3 no aumentarán por elegir más variedades.
+                              Marca todas las bebidas que sueles alternar. Tus {data[category]} bebidas diarias del paso 3 no aumentarán por elegir más variedades.
                             </p>
 
                             <div className="mt-2 flex flex-wrap gap-2">
@@ -1583,8 +1570,8 @@ function PricesForm() {
                                         >
                                           {contextRelevance.relevance ===
                                           "exact"
-                                            ? "Contexto coincidente"
-                                            : "Compatible · faltan datos"}
+                                            ? "Encaja con tu crucero"
+                                            : "Puede encajar · faltan datos"}
                                         </span>
                                       </button>
                                     );
@@ -1638,7 +1625,7 @@ function PricesForm() {
 
                         <p className="mt-2 text-xs leading-5 text-slate-500">
                           Precio de una
-                          consumición individual.
+                          bebida.
                         </p>
 
                         {validation.error ? (
