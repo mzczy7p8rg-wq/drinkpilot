@@ -140,7 +140,7 @@ export default function ReviewPage() {
 
   const waterLabel =
     data.cruiseLine === "msc"
-      ? "Agua no embotellada (AQUA by MSC)"
+      ? "Agua no embotellada incluida"
       : "Agua";
 
   const drinks = [
@@ -195,7 +195,7 @@ export default function ReviewPage() {
       "Cócteles sin alcohol",
 
     data.draftBeer &&
-      "Cerveza de tirador",
+      "Cerveza de barril",
 
     data.premiumCocktails &&
       "Cócteles premium",
@@ -208,7 +208,7 @@ export default function ReviewPage() {
 
     data.bottledWaterDailyAllowance &&
     !data.bottledWaterUnlimited &&
-      "Una botella de agua diaria",
+      "Al menos una botella de agua al día",
 
     data.bottledWaterUnlimited &&
       "Agua embotellada sin límite",
@@ -436,8 +436,7 @@ export default function ReviewPage() {
                 </div>
               ) : (
                 <p className="mt-3 text-sm leading-5 text-slate-500">
-                  Sin preferencias
-                  premium adicionales.
+                  Sin preferencias adicionales.
                 </p>
               )}
             </div>
@@ -523,8 +522,8 @@ export default function ReviewPage() {
                         </p>
 
                         <p className="mt-1 text-xs text-slate-500">
-                          por persona /
-                          día
+                          por adulto /
+                          noche
                         </p>
                       </div>
 
@@ -547,12 +546,11 @@ export default function ReviewPage() {
                           </p>
                         ) : hasReferencePrice ? (
                           <p className="mt-1 text-xs font-medium text-amber-700">
-                            ⚠ Referencia
+                            ⚠ Precio estimado
                           </p>
                         ) : (
                           <p className="mt-1 text-xs font-medium text-slate-500">
-                            Sin precio de
-                            referencia
+                            Sin precio disponible
                           </p>
                         )}
                       </div>
@@ -563,12 +561,7 @@ export default function ReviewPage() {
                       pkg.economicActivation ===
                         "user-price-only" && (
                         <p className="mt-3 text-xs leading-5 text-slate-500">
-                          Necesita el
-                          precio real de
-                          tu reserva para
-                          participar en la
-                          comparación
-                          económica.
+                          Añade tu precio para mejorar la comparación económica.
                         </p>
                       )}
                   </div>
@@ -646,12 +639,12 @@ export default function ReviewPage() {
                       "documented-menu" &&
                     selectedPrice.contextRelevance ===
                       "exact"
-                      ? "Contexto coincidente"
+                      ? "Encaja con tu crucero"
                       : selectedPrice.source ===
                           "documented-menu" &&
                         selectedPrice.contextRelevance ===
                           "compatible"
-                      ? "Compatible · faltan datos"
+                      ? "Puede encajar · faltan datos"
                       : null;
 
                   const isEconomicallyUsable =
@@ -699,8 +692,8 @@ export default function ReviewPage() {
                             }`}
                           >
                             {isEconomicallyUsable
-                              ? "Apto para el cálculo económico"
-                              : "Solo informativo · no participa todavía en el cálculo económico"}
+                              ? "Se utilizará en la comparación económica"
+                              : "Se mostrará como información, pero no se utilizará en la comparación económica"}
                           </p>
                         </div>
 
@@ -726,13 +719,7 @@ export default function ReviewPage() {
         {/* CONFIRMACIÓN */}
 
         <div className="mt-5 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Todo listo. DrinkPilot solo
-          incorporará al cálculo los
-          precios con moneda y evidencia
-          compatibles. Las demás
-          referencias se conservarán como
-          información, sin alterar los
-          importes.
+          💡 Todo listo. DrinkPilot utilizará en la comparación económica solo los precios que pueda aplicar a tu análisis. Los demás se mostrarán como información, sin modificar el resultado.
         </div>
 
         {/* NAVEGACIÓN */}
