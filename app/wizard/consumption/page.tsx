@@ -43,12 +43,12 @@ export default function ConsumptionPage() {
 
   const waterLabel =
     data.cruiseLine === "msc"
-      ? "💧 Agua no embotellada (AQUA by MSC)"
+      ? "💧 Agua no embotellada incluida"
       : "💧 Agua";
 
   const accessibleWaterLabel =
     data.cruiseLine === "msc"
-      ? "Agua no embotellada (AQUA by MSC)"
+      ? "Agua no embotellada incluida"
       : "Agua";
 
   const hasCocktailComposition =
@@ -92,11 +92,11 @@ export default function ConsumptionPage() {
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            ¿Qué sueles beber?
+            ¿Qué bebidas consumes al día?
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Indica el consumo aproximado de una persona al día, no el total del grupo.
+            Indica el consumo que encaja contigo. DrinkPilot lo tendrá en cuenta en tu análisis.
           </p>
 
         </div>
@@ -104,7 +104,7 @@ export default function ConsumptionPage() {
         {/* AYUDA */}
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Ejemplo: si viajáis 3 adultos y tomáis 6 cafés al día entre todos, indica aproximadamente 2 cafés por persona.
+          💡 Ejemplo: si viajáis 3 adultos y tomáis 6 cafés al día entre todos, indica 2 cafés por persona y día.
         </div>
 
         {/* CONTADORES */}
@@ -300,7 +300,7 @@ export default function ConsumptionPage() {
               </div>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Si dejas ambos valores a 0, lo trataremos como no especificado.
+                Si no quieres repartir los cócteles, deja ambos valores en 0.
               </p>
 
               {hasCocktailComposition && (
@@ -313,7 +313,7 @@ export default function ConsumptionPage() {
                 >
                   {isCocktailCompositionValid
                     ? `✓ Reparto completo: ${cocktailCompositionTotal} de ${data.cocktail}.`
-                    : `El reparto suma ${cocktailCompositionTotal} de ${data.cocktail}. Ajusta las cantidades si quieres completar la composición.`}
+                    : `El reparto suma ${cocktailCompositionTotal} de ${data.cocktail}. Ajusta las cantidades si quieres completar el reparto.`}
                 </div>
               )}
             </div>
@@ -345,7 +345,7 @@ export default function ConsumptionPage() {
         {totalDrinksPerDay === 0 && (
           <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-center">
             <p className="text-sm font-medium text-green-800">
-              ✓ Cero también es válido. DrinkPilot analizará que no consumes bebidas de estas categorías.
+              ✓ Cero también es válido. Puedes continuar aunque no consumas ninguna de estas bebidas.
             </p>
           </div>
         )}
