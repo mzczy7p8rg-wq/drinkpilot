@@ -96,7 +96,7 @@ export default function ConsumptionPage() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Indica cuántas bebidas tomaría un adulto en un día normal.
+            Indica el consumo aproximado de una persona al día, no el total del grupo.
           </p>
 
         </div>
@@ -104,7 +104,7 @@ export default function ConsumptionPage() {
         {/* AYUDA */}
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Piensa en un día normal, sin contar con ningún paquete.
+          💡 Ejemplo: si viajáis 3 adultos y tomáis 6 cafés al día entre todos, indica aproximadamente 2 cafés por persona.
         </div>
 
         {/* CONTADORES */}
