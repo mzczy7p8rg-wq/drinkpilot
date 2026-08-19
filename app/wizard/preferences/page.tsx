@@ -111,7 +111,7 @@ export default function PreferencesPage() {
           </p>
 
           <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            ¿Qué te gustaría tener incluido?
+            ¿Qué preferencias te gustaría tener incluidas en tu paquete?
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
@@ -126,7 +126,7 @@ export default function PreferencesPage() {
         <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
           <PreferenceCard
             title="🍸 Cócteles con alcohol"
-            description="Valoras que el paquete incluya cócteles y combinados con alcohol."
+            description="Te gustaría disponer de cócteles y combinados con alcohol."
             checked={
               data.alcoholicCocktails
             }
@@ -142,7 +142,7 @@ export default function PreferencesPage() {
 
           <PreferenceCard
             title="🍹 Cócteles sin alcohol"
-            description="Valoras disponer de cócteles y combinados sin alcohol incluidos en el paquete."
+            description="Te gustaría disponer de cócteles y combinados sin alcohol."
             checked={
               data.nonAlcoholicCocktails
             }
@@ -157,8 +157,8 @@ export default function PreferencesPage() {
           />
 
           <PreferenceCard
-            title="🍺 Cerveza de tirador"
-            description="Valoras que el paquete incluya cerveza de tirador."
+            title="🍺 Cerveza de barril"
+            description="Te gustaría disponer de cerveza de barril."
             checked={data.draftBeer}
             onChange={(checked) =>
               setData((prev) => ({ ...prev, draftBeer: checked }))
@@ -167,15 +167,15 @@ export default function PreferencesPage() {
 
           <details className="rounded-2xl border border-slate-200 bg-white p-4">
             <summary className="cursor-pointer font-semibold text-slate-800">
-              Opciones premium (opcional)
+              Más opciones
             </summary>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Ábrelo si buscas cerveza embotellada o bebidas de gama superior.
+              Ábrelo si prefieres cerveza embotellada, una selección más amplia de cócteles o marcas de gama superior.
             </p>
             <div className="mt-4 space-y-3">
               <PreferenceCard
                 title="🍺 Cerveza embotellada"
-                description="La cerveza básica suele servirse de tirador; marca esta opción si prefieres cerveza embotellada."
+                description="Si prefieres cerveza embotellada, marca esta opción."
                 checked={data.bottledBeer}
                 onChange={(checked) =>
                   setData((prev) => ({ ...prev, bottledBeer: checked }))
@@ -183,7 +183,7 @@ export default function PreferencesPage() {
               />
               <PreferenceCard
                 title="🍸 Cócteles premium"
-                description="Quieres una selección más amplia de cócteles."
+                description="Te gustaría disponer de una selección más amplia de cócteles."
                 checked={data.premiumCocktails}
                 onChange={(checked) =>
                   setData((prev) => ({ ...prev, premiumCocktails: checked }))
@@ -191,7 +191,7 @@ export default function PreferencesPage() {
               />
               <PreferenceCard
                 title="🥃 Destilados premium"
-                description="Te interesan marcas de gama superior."
+                description="Te gustaría disponer de marcas de gama superior."
                 checked={data.premiumSpirits}
                 onChange={(checked) =>
                   setData((prev) => ({ ...prev, premiumSpirits: checked }))
@@ -207,17 +207,14 @@ export default function PreferencesPage() {
               </p>
 
               <p className="mt-1 text-sm leading-6 text-slate-500">
-                Distingue entre disponer
-                de una botella diaria y
-                necesitar acceso sin
-                límite.
+                Elige si para ti es suficiente una botella al día o si prefieres agua embotellada sin límite.
               </p>
             </div>
 
             <div className="space-y-3">
               <PreferenceCard
-                title="Una botella de agua diaria"
-                description="Te resulta suficiente disponer al menos de una botella de agua embotellada incluida cada día."
+                title="Al menos una botella de agua al día"
+                description="Te gustaría disponer de al menos una botella de agua embotellada incluida cada día."
                 checked={
                   data.bottledWaterDailyAllowance
                 }
@@ -238,7 +235,7 @@ export default function PreferencesPage() {
 
               <PreferenceCard
                 title="Agua embotellada sin límite"
-                description="Valoras disponer de agua embotellada ampliamente durante el crucero, sin limitarte a una asignación diaria."
+                description="Te gustaría disponer de agua embotellada sin límite durante el crucero."
                 checked={
                   data.bottledWaterUnlimited
                 }
