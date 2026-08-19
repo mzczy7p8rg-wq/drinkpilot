@@ -424,15 +424,13 @@ export default function ResultsPage() {
 
             <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
               <h2 className="font-bold text-amber-950">
-                {missingDrinkPrices
-                  ? "⚠️ Comparación económica pendiente"
-                  : "⚠️ Falta un precio de paquete comparable"}
+                ⚠️ Comparación económica pendiente
               </h2>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
                 {missingDrinkPrices
-                  ? "Faltan referencias económicas suficientemente fiables para:"
-                  : `La cesta de bebidas está completa, pero no hay ningún paquete con un precio económico utilizable en ${economicCurrency}.`}
+                  ? "Nos faltan algunos datos para completar la comparación:"
+                  : "Con los datos disponibles, no hemos podido completar una comparación clara entre paquetes."}
               </p>
 
               {missingDrinkPrices && (
@@ -494,7 +492,7 @@ export default function ResultsPage() {
                           </h3>
 
                           <p className="mt-1 text-sm text-slate-500">
-                            Cobertura de tu perfil
+                            Encaja con tus preferencias
                           </p>
                         </div>
 
@@ -1153,7 +1151,7 @@ export default function ResultsPage() {
 
           <div className="mx-auto mt-5 max-w-2xl rounded-xl border border-sky-200 bg-sky-50 p-4 text-left">
             <p className="font-semibold text-sky-950">
-              ℹ️ Resultado orientativo
+              ℹ️ Estimación personalizada
             </p>
             <p className="mt-1 text-sm leading-6 text-sky-900">
               Los costes y posibles ahorros son estimaciones basadas en los datos que has indicado y en los precios disponibles. Comprueba siempre el precio y las condiciones finales de tu reserva antes de contratar un paquete.
@@ -1177,16 +1175,16 @@ export default function ResultsPage() {
               {includedPackageUpgradeDecision.status === "upgrade" ? (
                 <p className="mt-3 leading-6 text-slate-700">
                   <strong>Mejora a {includedPackageUpgradeDecision.alternative.packageName}.</strong>{" "}
-                  Con los precios que has indicado, aporta {formatCurrency(includedPackageUpgradeDecision.savingsDifference, includedPackageUpgradeDecision.current.currency)} más de resultado efectivo durante el crucero.
+                  Con los precios que has indicado, el cambio supone una mejora estimada de {formatCurrency(includedPackageUpgradeDecision.savingsDifference, includedPackageUpgradeDecision.current.currency)} durante el crucero.
                 </p>
               ) : includedPackageUpgradeDecision.status === "keep" ? (
                 <p className="mt-3 leading-6 text-slate-700">
                   <strong>Mantén {includedPackageUpgradeDecision.current.packageName}.</strong>{" "}
-                  La alternativa comparable no mejora el resultado económico efectivo para tu perfil.
+                  El otro paquete no aporta una mejora clara con los datos que has indicado.
                 </p>
               ) : (
                 <p className="mt-3 leading-6 text-slate-700">
-                  Para decidir si te conviene un upgrade, introduce el precio real de la alternativa. DrinkPilot no completa ese importe con estimaciones inventadas.
+                  Para decidir si te conviene un upgrade, introduce el precio real de la alternativa. DrinkPilot no completa ese importe con datos no confirmados.
                 </p>
               )}
             </section>
@@ -1220,7 +1218,7 @@ export default function ResultsPage() {
                 </p>
 
                 <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {bestPackage.packageName} encaja mejor con tu perfil porque cubre todas las preferencias diarias que has indicado.
+                  El paquete que mejor encaja contigo es {bestPackage.packageName} porque cubre todas las preferencias diarias que has indicado.
                 </p>
               </div>
             )}
@@ -1270,13 +1268,12 @@ export default function ResultsPage() {
                 </p>
 
                 <p className="mt-2 text-sm text-slate-600 sm:text-base">
-                  de resultado orientativo a favor del paquete durante el crucero
+                  de mejora estimada a favor del paquete durante el crucero
                 </p>
 
                 <div className="mx-auto mt-5 max-w-sm rounded-xl bg-white/70 p-4">
                   <p className="text-sm text-slate-600">
-                    Cobertura de tu
-                    perfil
+                    Encaja con tus preferencias
                   </p>
 
                   <p className="mt-1 text-2xl font-bold text-green-800">
@@ -1442,7 +1439,7 @@ export default function ResultsPage() {
                   proporcionado. Todos
                   los importes de esta
                   comparación son
-                  orientativos.
+                  estimados.
                 </p>
               </div>
 
@@ -1680,7 +1677,7 @@ export default function ResultsPage() {
 
                         <div className="col-span-2 rounded-xl border border-slate-200 bg-white p-3">
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Resultado orientativo
+                            Diferencia estimada
                           </p>
 
                           <p
@@ -1719,7 +1716,7 @@ export default function ResultsPage() {
                             </p>
 
                             <p className="mt-1 text-xs leading-5 text-violet-800">
-                              Este importe ya está descontado del resultado orientativo mostrado.
+                              Este importe ya está incluido en el resultado mostrado.
                             </p>
                           </div>
                         )}
@@ -1738,7 +1735,7 @@ export default function ResultsPage() {
                           <p className="mt-1 text-xs leading-5 text-green-800">
                             {pkg.fullyCovered
                               ? "El paquete cubre todo lo que has indicado, por lo que el resultado mostrado puede compararse directamente con pagar las bebidas por separado."
-                              : "Todos los precios necesarios están resueltos. Los costes conocidos de las bebidas que el paquete no cubre ya están incorporados al resultado orientativo."}
+                              : "Todos los precios necesarios están resueltos. Los costes conocidos de las bebidas que el paquete no cubre ya están incorporados al resultado mostrado."}
                           </p>
                         </div>
                       ) : pkg.economicComparisonStatus ===
@@ -1815,7 +1812,7 @@ export default function ResultsPage() {
 
                       <div className="mt-5 border-t border-slate-200 pt-4">
                         <p className="text-sm leading-6 text-slate-600">
-                          Margen diario orientativo:{" "}
+                          Margen diario estimado:{" "}
                           <strong
                             className={
                               pkg.dailyMargin >
@@ -1833,7 +1830,7 @@ export default function ResultsPage() {
                         </p>
 
                         <p className="mt-2 text-sm leading-6 text-slate-600">
-                          Punto de equilibrio orientativo:{" "}
+                          Punto de equilibrio estimado:{" "}
                           <strong>
                             {pkg.breakEvenDrinksPerDay.toFixed(
                               1
