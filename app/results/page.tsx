@@ -56,6 +56,10 @@ import {
   resolveIncludedPackageUpgradeDecision,
 } from "@/lib/includedPackageUpgrade";
 
+import {
+  isBreakEvenAvailable,
+} from "@/lib/breakEvenAvailability";
+
 const coverageLabels: Record<
   CoverageCategory,
   string
@@ -1831,13 +1835,24 @@ export default function ResultsPage() {
 
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                           Punto de equilibrio estimado:{" "}
-                          <strong>
-                            {pkg.breakEvenDrinksPerDay.toFixed(
-                              1
-                            )}
-                          </strong>{" "}
-                          bebidas por
-                          persona / día
+                          {isBreakEvenAvailable({
+                            dailyDrinkCost:
+                              pkg.dailyDrinkCost,
+                          }) ? (
+                            <>
+                              <strong>
+                                {pkg.breakEvenDrinksPerDay.toFixed(
+                                  1
+                                )}
+                              </strong>{" "}
+                              bebidas por
+                              persona / día
+                            </>
+                          ) : (
+                            <strong>
+                              No disponible con los datos actuales
+                            </strong>
+                          )}
                         </p>
                       </div>
                     </div>
