@@ -255,6 +255,7 @@ export function calculateRecommendation(
     input.coffee +
     input.water +
     input.soda +
+    (input.juice ?? 0) +
     input.beer +
     input.wine +
     input.cocktail;
