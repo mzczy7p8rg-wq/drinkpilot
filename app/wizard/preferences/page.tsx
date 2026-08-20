@@ -10,6 +10,11 @@ import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
+import {
+  resolveWaterPreferenceChoice,
+  resolveWaterPreferenceState,
+} from "@/lib/waterPreferenceChoice";
+
 type PreferenceCardProps = {
   title: string;
   description: string;
@@ -85,6 +90,15 @@ export default function PreferencesPage() {
     data.bottledWaterUnlimited ||
       data.bottledWaterDailyAllowance,
   ].filter(Boolean).length;
+
+const waterPreferenceChoice =
+  resolveWaterPreferenceChoice({
+    bottledWaterDailyAllowance:
+      data.bottledWaterDailyAllowance,
+
+    bottledWaterUnlimited:
+      data.bottledWaterUnlimited,
+  });
 
   if (!ready) {
     return (
@@ -216,19 +230,17 @@ export default function PreferencesPage() {
                 title="Al menos una botella de agua al día"
                 description="Te gustaría disponer de al menos una botella de agua embotellada incluida cada día."
                 checked={
-                  data.bottledWaterDailyAllowance
+                  waterPreferenceChoice ===
+                  "daily"
                 }
                 onChange={(checked) =>
                   setData((prev) => ({
                     ...prev,
-
-                    bottledWaterDailyAllowance:
-                      checked,
-
-                    bottledWaterUnlimited:
+                    ...resolveWaterPreferenceState(
                       checked
-                        ? prev.bottledWaterUnlimited
-                        : false,
+                        ? "daily"
+                        : "none"
+                    ),
                   }))
                 }
               />
@@ -237,19 +249,17 @@ export default function PreferencesPage() {
                 title="Agua embotellada sin límite"
                 description="Te gustaría disponer de agua embotellada sin límite durante el crucero."
                 checked={
-                  data.bottledWaterUnlimited
+                  waterPreferenceChoice ===
+                  "unlimited"
                 }
                 onChange={(checked) =>
                   setData((prev) => ({
                     ...prev,
-
-                    bottledWaterUnlimited:
-                      checked,
-
-                    bottledWaterDailyAllowance:
+                    ...resolveWaterPreferenceState(
                       checked
-                        ? true
-                        : prev.bottledWaterDailyAllowance,
+                        ? "unlimited"
+                        : "none"
+                    ),
                   }))
                 }
               />
