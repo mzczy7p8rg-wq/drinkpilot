@@ -629,14 +629,28 @@ export function findBestPackageByEffectiveSavings<
 >(
   packages: Candidate[]
 ): Candidate | null {
-  return (
-    packages.find(
-      (pkg) =>
-        pkg.fullyCovered &&
-        pkg.effectiveSavings !== null &&
-        pkg.effectiveSavings > 0
-    ) ?? null
-  );
+  let bestPackage: Candidate | null = null;
+
+  for (const pkg of packages) {
+    if (
+      !pkg.fullyCovered ||
+      pkg.effectiveSavings === null ||
+      pkg.effectiveSavings <= 0
+    ) {
+      continue;
+    }
+
+    if (
+      bestPackage === null ||
+      pkg.effectiveSavings >
+        (bestPackage.effectiveSavings ??
+          -Infinity)
+    ) {
+      bestPackage = pkg;
+    }
+  }
+
+  return bestPackage;
 }
 
 export function compareDrinkPackages(

@@ -186,3 +186,36 @@ describe(
     );
   }
 );
+
+describe("best package by effective savings", () => {
+  it("selecciona el mayor ahorro efectivo entre varios paquetes completamente cubiertos", () => {
+    const packages = [
+      {
+        packageKey: "first",
+        packageName: "First Package",
+        savings: 40,
+        effectiveSavings: 40,
+        fullyCovered: true,
+      },
+      {
+        packageKey: "better",
+        packageName: "Better Package",
+        savings: 90,
+        effectiveSavings: 90,
+        fullyCovered: true,
+      },
+    ];
+
+    const result =
+      findBestPackageByEffectiveSavings(
+        packages
+      );
+
+    expect(
+      result?.packageKey
+    ).toBe(
+      "better"
+    );
+  });
+});
+
