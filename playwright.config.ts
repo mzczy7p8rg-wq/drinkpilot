@@ -45,5 +45,19 @@ export default defineConfig({
         ...devices["Pixel 7"],
       },
     },
+    {
+      name: "webkit",
+
+      use: {
+        ...devices["Desktop Safari"],
+      },
+    },
+    {
+      name: "tablet-webkit",
+
+      use: {
+        ...devices["iPad Pro 11"],
+      },
+    },
   ],
 });

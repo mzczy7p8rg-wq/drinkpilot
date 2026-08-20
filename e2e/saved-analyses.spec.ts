@@ -38,7 +38,10 @@ test("identifica un análisis por barco, fecha y duración", async ({ page }) =>
   await page.getByLabel("Nombre del barco").fill("Costa Toscana");
   await page.getByLabel("¿Cuántas noches dura tu crucero?").fill("7");
   await page.getByLabel("Fecha de salida").fill("2026-09-15");
-  await page.getByRole("button", { name: /Continuar/i }).click();
+  await Promise.all([
+    page.waitForURL(/\/wizard\/consumption$/),
+    page.getByRole("button", { name: /Continuar/i }).click(),
+  ]);
 
   await page.goto("/analyses");
 
