@@ -119,3 +119,25 @@ describe(
     );
   }
 );
+
+it(
+  "considera conocida la composición cuando no hay cócteles aunque el reparto sea null",
+  () => {
+    const result =
+      resolveAlcoholConsumption({
+        beer: 16,
+        wine: 0,
+        cocktail: 0,
+        alcoholicCocktail: null,
+        nonAlcoholicCocktail: null,
+      });
+
+    expect(
+      result.cocktailCompositionKnown
+    ).toBe(true);
+
+    expect(
+      result.alcoholicDrinksPerDay
+    ).toBe(16);
+  }
+);

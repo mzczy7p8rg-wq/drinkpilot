@@ -98,11 +98,14 @@ export function resolveAlcoholConsumption(
    * Así evitamos inferencias silenciosas.
    */
   const cocktailCompositionKnown =
-    alcoholicCocktail !== null &&
-    nonAlcoholicCocktail !== null &&
-    alcoholicCocktail +
-      nonAlcoholicCocktail ===
-      legacyCocktail;
+    legacyCocktail === 0 ||
+    (
+      alcoholicCocktail !== null &&
+      nonAlcoholicCocktail !== null &&
+      alcoholicCocktail +
+        nonAlcoholicCocktail ===
+        legacyCocktail
+    );
 
   const knownAlcoholicDrinksPerDay =
     beer +
