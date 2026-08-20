@@ -8,6 +8,10 @@ import {
   compareDrinkPackages,
 } from "@/lib/comparison";
 
+import {
+  buildRecommendationExplanation,
+} from "@/lib/recommendationExplanation";
+
 describe(
   "MSC alcohol limit economic uncertainty",
   () => {
@@ -157,6 +161,21 @@ describe(
         expect(
           result.anyPackageWorthIt
         ).toBe(false);
+
+    const explanation =
+      buildRecommendationExplanation(
+        result
+      );
+
+    expect(
+      explanation.tone
+    ).toBe("warning");
+
+    expect(
+      explanation.title
+    ).not.toContain(
+      "mejor opción provisional"
+    );
       }
     );
   }
