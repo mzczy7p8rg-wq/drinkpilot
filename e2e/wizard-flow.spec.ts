@@ -34,7 +34,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
   await expect(
     page.getByRole("heading", {
-      name: "¿Qué sueles beber?",
+      name: "¿Qué bebidas consumes al día?",
     })
   ).toBeVisible();
 
@@ -51,10 +51,12 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/wizard\/preferences$/);
   await expect(
-    page.getByRole("heading", { name: "¿Qué te gustaría tener incluido?" })
+    page.getByRole("heading", {
+      name: "¿Qué preferencias te gustaría tener incluidas en tu paquete?",
+    })
   ).toBeVisible();
   const draftBeerPreference = page.getByRole("checkbox", {
-    name: /Cerveza de tirador/i,
+    name: /Cerveza de barril/i,
   });
   await draftBeerPreference.check();
   await expect(draftBeerPreference).toBeChecked();
@@ -62,7 +64,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     name: /Cerveza embotellada/i,
   });
   await page
-    .getByText("Opciones premium (opcional)", { exact: true })
+    .getByText("Más opciones", { exact: true })
     .click();
   await bottledBeerPreference.check();
   await expect(bottledBeerPreference).toBeChecked();
@@ -83,7 +85,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
   await expect(page.getByText("7 noches")).toBeVisible();
   await expect(page.getByText("2 adultos · 1 menor")).toBeVisible();
   await expect(page.getByText("Cerveza embotellada")).toBeVisible();
-  await expect(page.getByText("Cerveza de tirador")).toBeVisible();
+  await expect(page.getByText("Cerveza de barril")).toBeVisible();
   await expect(page.getByText("32,50")).toBeVisible();
 
   await page.getByRole("button", { name: "Ver recomendación" }).click();
@@ -93,7 +95,7 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     page.getByRole("heading", { name: /Tu recomendación DrinkPilot/i })
   ).toBeVisible();
   await expect(
-    page.getByText("ℹ️ Resultado orientativo", { exact: true })
+    page.getByText("ℹ️ Estimación personalizada", { exact: true })
   ).toBeVisible();
 
   const minorsNotice = page

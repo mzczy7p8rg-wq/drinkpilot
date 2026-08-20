@@ -94,7 +94,7 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   );
 
   await expect(
-    page.getByText(/Estimación orientativa EUR/i).first()
+    page.getByText(/Precio estimado EUR/i).first()
   ).toBeVisible();
 
   const includedPackageButton = page
@@ -109,14 +109,14 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
     "true"
   );
   await expect(
-    page.getByText(/coste incremental de 0 €/i)
+    page.getByText(/su coste para esta comparación será 0 €/i)
   ).toBeVisible();
   await expect(
     page.getByText("Coste del upgrade por adulto y noche").first()
   ).toBeVisible();
   await expect(
     page.getByText(
-      "Introduce solo el suplemento para cambiar desde tu paquete actual."
+      "Introduce solo la diferencia de precio para cambiar desde tu paquete actual."
     ).first()
   ).toBeVisible();
 
@@ -134,7 +134,7 @@ test("distingue la moneda de referencia de la moneda de la reserva", async ({
   ).toBeVisible();
 
   await expect(
-    page.getByText(/Estimación orientativa EUR/i).first()
+    page.getByText(/Precio estimado EUR/i).first()
   ).toBeVisible();
 
   await expect(
