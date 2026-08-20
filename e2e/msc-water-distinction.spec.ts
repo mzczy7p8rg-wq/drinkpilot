@@ -10,7 +10,7 @@ test("separa AQUA by MSC del agua embotellada", async ({ page }) => {
 
   await expect(
     page.getByRole("group", {
-      name: "Agua no embotellada (AQUA by MSC)",
+      name: "Agua no embotellada incluida",
     })
   ).toBeVisible();
   await expect(

@@ -42,7 +42,9 @@ test("conserva mercado y región hasta la revisión", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/wizard\/preferences$/);
   await expect(
-    page.getByRole("heading", { name: "¿Qué te gustaría tener incluido?" })
+    page.getByRole("heading", {
+      name: "¿Qué preferencias te gustaría tener incluidas en tu paquete?",
+    })
   ).toBeVisible();
   await page.getByRole("link", { name: "Continuar" }).click();
 
