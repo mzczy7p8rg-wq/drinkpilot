@@ -7,6 +7,7 @@ import { calculateRecommendation } from "@/lib/calculator";
 import { compareDrinkPackages } from "@/lib/comparison";
 import { CoverageCategory } from "@/lib/coverage";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
+import { resolveDisplayedEconomicDifference } from "@/lib/economicDifferenceDisplay";
 
 import {
   buildOperationalRuleNotices,
@@ -1494,8 +1495,11 @@ export default function ResultsPage() {
                       : null;
 
                   const displayedSavings =
-                    pkg.effectiveSavings ??
-                    pkg.savings;
+                    resolveDisplayedEconomicDifference({
+                      effectiveSavings:
+                        pkg.effectiveSavings,
+                      savings: pkg.savings,
+                    });
 
                   return (
                     <div
@@ -1686,19 +1690,21 @@ export default function ResultsPage() {
 
                           <p
                             className={`mt-1 text-lg font-bold sm:text-xl ${
-                              displayedSavings >
-                              0
+                              displayedSavings === null
+                                ? "text-amber-800"
+                                : displayedSavings > 0
                                 ? "text-green-700"
-                                : displayedSavings <
-                                  0
+                                : displayedSavings < 0
                                 ? "text-red-700"
                                 : "text-slate-700"
                             }`}
                           >
-                            {formatSignedCurrency(
-                              displayedSavings,
-                              pkg.currency
-                            )}
+                            {displayedSavings === null
+                              ? "No disponible"
+                              : formatSignedCurrency(
+                                  displayedSavings,
+                                  pkg.currency
+                                )}
                           </p>
                         </div>
                       </div>
