@@ -505,12 +505,14 @@ export default function ResultsPage() {
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${
                             pkg.fullyCovered
                               ? "bg-green-100 text-green-800"
+                              : pkg.unknownCoverageCategories.length > 0
+                              ? "bg-amber-100 text-amber-800"
                               : "bg-slate-200 text-slate-700"
                           }`}
                         >
-                          {pkg.coverageScore.toFixed(
-                            0
-                          )} %
+                          {pkg.unknownCoverageCategories.length > 0
+                            ? "Pendiente"
+                            : `${pkg.coverageScore.toFixed(0)} %`}
                         </span>
                       </div>
 
@@ -1611,10 +1613,9 @@ export default function ResultsPage() {
                             </p>
 
                             <p className="mt-1 text-2xl font-bold text-slate-900">
-                              {pkg.coverageScore.toFixed(
-                                0
-                              )}{" "}
-                              %
+                              {pkg.unknownCoverageCategories.length > 0
+                                ? "Pendiente"
+                                : `${pkg.coverageScore.toFixed(0)} %`}
                             </p>
                           </div>
 
