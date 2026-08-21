@@ -37,13 +37,31 @@ export default function ConsumptionPage() {
   const updateActiveProfile = (
     update: (profile: AdultConsumptionProfile) => AdultConsumptionProfile
   ) => {
-    setData((prev) => ({
-      ...prev,
-      adultConsumptionProfiles: prev.adultConsumptionProfiles.map(
+    setData((prev) => {
+      const profiles = prev.adultConsumptionProfiles.map(
         (profile, index) =>
           index === activeAdultIndex ? update(profile) : profile
-      ),
-    }));
+      );
+      const onlyProfile = profiles.length === 1 ? profiles[0] : null;
+
+      return {
+        ...prev,
+        adultConsumptionProfiles: profiles,
+        ...(onlyProfile
+          ? {
+              coffee: onlyProfile.coffee,
+              water: onlyProfile.water,
+              soda: onlyProfile.soda,
+              juice: onlyProfile.juice,
+              beer: onlyProfile.beer,
+              wine: onlyProfile.wine,
+              cocktail: onlyProfile.cocktail,
+              alcoholicCocktail: onlyProfile.alcoholicCocktail,
+              nonAlcoholicCocktail: onlyProfile.nonAlcoholicCocktail,
+            }
+          : {}),
+      };
+    });
   };
 
   const totalDrinksPerDay = activeProfile

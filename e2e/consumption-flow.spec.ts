@@ -154,4 +154,21 @@ test("permite registrar consumos distintos para dos adultos", async ({ page }) =
     { label: "Adulto 1", coffee: 1, beer: 0, consumptionConfirmed: true },
     { label: "Adulto 2", coffee: 0, beer: 2, consumptionConfirmed: true },
   ]);
+
+  await page.getByRole("link", { name: "Continuar" }).click();
+  await expect(page).toHaveURL(/\/wizard\/prices$/);
+  await page.getByLabel(/My Drinks$/).fill("34");
+  await page.getByRole("link", { name: "Continuar" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/review$/);
+  await expect(page.getByText("Adulto 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Adulto 2", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Café:\s*1/)).toBeVisible();
+  await expect(page.getByText(/Cerveza:\s*2/)).toBeVisible();
+
+  await page.getByRole("button", { name: "Ver recomendación" }).click();
+  await expect(page).toHaveURL(/\/results$/);
+  await expect(
+    page.getByText("Cantidad del grupo / día")
+  ).not.toHaveCount(0);
 });

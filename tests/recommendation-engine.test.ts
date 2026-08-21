@@ -108,6 +108,60 @@ describe("DrinkPilot recommendation engine", () => {
   });
 
   describe("package comparison", () => {
+    it("uses distinct adult profiles for the group economy", () => {
+      const result = compareDrinkPackages({
+        cruiseNights: 7,
+        people: 2,
+        coffee: 2,
+        water: 0,
+        soda: 0,
+        beer: 0,
+        wine: 0,
+        cocktail: 0,
+        adultConsumptionProfiles: [
+          {
+            id: "adult-1",
+            label: "Adulto 1",
+            coffee: 1,
+            water: 0,
+            soda: 0,
+            juice: 0,
+            beer: 0,
+            wine: 0,
+            cocktail: 0,
+            alcoholicCocktail: null,
+            nonAlcoholicCocktail: null,
+            consumptionConfirmed: true,
+          },
+          {
+            id: "adult-2",
+            label: "Adulto 2",
+            coffee: 3,
+            water: 0,
+            soda: 0,
+            juice: 0,
+            beer: 0,
+            wine: 0,
+            cocktail: 0,
+            alcoholicCocktail: null,
+            nonAlcoholicCocktail: null,
+            consumptionConfirmed: true,
+          },
+        ],
+        selectedDrinkPrices: {
+          coffee: {
+            category: "coffee",
+            price: 10,
+            currency: "EUR",
+            source: "user",
+          },
+        },
+      });
+
+      expect(result.packages.length).toBeGreaterThan(0);
+      expect(result.packages.every((pkg) => pkg.drinksCost === 280)).toBe(true);
+    });
+
     it("utiliza los precios seleccionados en toda la comparación económica", () => {
       const result = compareDrinkPackages({
         cruiseNights: 7,

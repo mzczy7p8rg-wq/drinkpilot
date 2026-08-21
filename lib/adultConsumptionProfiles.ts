@@ -46,6 +46,55 @@ export type LegacyAdultConsumptionInput =
     adultConsumptionProfiles?: unknown;
   };
 
+export type AdultConsumptionTotals = Pick<
+  AdultConsumptionProfile,
+  "coffee" | "water" | "soda" | "juice" | "beer" | "wine" | "cocktail"
+>;
+
+const consumptionKeys: readonly (keyof AdultConsumptionTotals)[] = [
+  "coffee",
+  "water",
+  "soda",
+  "juice",
+  "beer",
+  "wine",
+  "cocktail",
+];
+
+export function totalAdultDrinksPerDay(
+  profile: AdultConsumptionProfile
+): number {
+  return consumptionKeys.reduce(
+    (total, key) => total + profile[key],
+    0
+  );
+}
+
+export function aggregateAdultConsumptionProfiles(
+  profiles: readonly AdultConsumptionProfile[]
+): { group: AdultConsumptionTotals; perAdultAverage: AdultConsumptionTotals } {
+  const group = consumptionKeys.reduce(
+    (totals, key) => ({
+      ...totals,
+      [key]: profiles.reduce(
+        (total, profile) => total + profile[key],
+        0
+      ),
+    }),
+    {} as AdultConsumptionTotals
+  );
+  const adultCount = profiles.length;
+  const perAdultAverage = consumptionKeys.reduce(
+    (averages, key) => ({
+      ...averages,
+      [key]: adultCount > 0 ? group[key] / adultCount : 0,
+    }),
+    {} as AdultConsumptionTotals
+  );
+
+  return { group, perAdultAverage };
+}
+
 function defaultProfileId(index: number): string {
   return `adult-${index + 1}`;
 }

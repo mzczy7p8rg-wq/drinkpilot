@@ -5,8 +5,10 @@ import {
 } from "vitest";
 
 import {
+  aggregateAdultConsumptionProfiles,
   resizeAdultConsumptionProfiles,
   resolveStoredAdultConsumptionProfiles,
+  totalAdultDrinksPerDay,
 } from "@/lib/adultConsumptionProfiles";
 import { calculateRecommendation } from "@/lib/calculator";
 
@@ -24,6 +26,23 @@ const legacyConsumption = {
 };
 
 describe("adult consumption profile storage", () => {
+  it("sums the group and derives an exact per-adult average", () => {
+    const profiles = resolveStoredAdultConsumptionProfiles({
+      adults: 2,
+      adultConsumptionProfiles: [
+        { coffee: 1, beer: 0, consumptionConfirmed: true },
+        { coffee: 3, beer: 2, consumptionConfirmed: true },
+      ],
+    });
+
+    expect(totalAdultDrinksPerDay(profiles[0])).toBe(1);
+    expect(totalAdultDrinksPerDay(profiles[1])).toBe(5);
+    expect(aggregateAdultConsumptionProfiles(profiles)).toMatchObject({
+      group: { coffee: 4, beer: 2 },
+      perAdultAverage: { coffee: 2, beer: 1 },
+    });
+  });
+
   it.each([1, 2, 10])(
     "migrates one legacy profile into %i identical adult profiles",
     (adults) => {

@@ -21,7 +21,7 @@ test("restaura una sesión válida en Review", async ({ page }) => {
     page.getByRole("heading", { name: "Revisa tu análisis" })
   ).toBeVisible();
   await expect(page.getByText("7 noches")).toBeVisible();
-  await expect(page.getByText("2 adultos")).toBeVisible();
+  await expect(page.getByText("2 adultos", { exact: true })).toBeVisible();
 
   const migrated = await page.evaluate(() =>
     JSON.parse(
