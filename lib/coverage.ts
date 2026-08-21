@@ -114,6 +114,9 @@ export type PackageCoverageResult = {
   uncoveredCategories:
     CoverageCategory[];
 
+  unknownCoverageCategories:
+    CoverageCategory[];
+
   coverageScore: number;
 
   fullyCovered: boolean;
@@ -171,12 +174,12 @@ type CoveragePackage =
  * porque la cobertura de agua embotellada
  * tiene más detalle que un simple booleano.
  */
-function isCategoryCovered(
+function resolveCategoryCoverage(
   pkg: CoveragePackage,
   category: CoverageCategory,
   cruiseLine: CruiseLineKey,
   selectedDrinkReferenceIds: readonly string[] = []
-): boolean {
+): "covered" | "uncovered" | "unknown" {
   if (selectedDrinkReferenceIds.length > 0) {
     const documentedReferences =
       selectedDrinkReferenceIds.map((referenceId) =>
@@ -205,7 +208,9 @@ function isCategoryCovered(
       return documentedCoverage.every(
         (coverage) =>
           coverage?.status === "included"
-      );
+      )
+        ? "covered"
+        : "uncovered";
     }
 
     const hasDocumentedProductWithUnknownCoverage =
@@ -215,7 +220,7 @@ function isCategoryCovered(
       );
 
     if (hasDocumentedProductWithUnknownCoverage) {
-      return false;
+      return "unknown";
     }
   }
 
@@ -251,7 +256,7 @@ function isCategoryCovered(
         typeof allowance === "number" &&
         allowance >= 1
       ) {
-        return true;
+        return "covered";
       }
     }
 
@@ -264,18 +269,18 @@ function isCategoryCovered(
       pkg.coverage
         .bottledWaterUnlimited === true
     ) {
-      return true;
+      return "covered";
     }
 
-    return false;
+    return "uncovered";
   }
 
   /*
    * RESTO DE CATEGORÍAS
    */
-  return (
-    pkg.coverage[category] === true
-  );
+  return pkg.coverage[category] === true
+    ? "covered"
+    : "uncovered";
 }
 
 export function calculatePackageCoverage(
@@ -440,27 +445,40 @@ export function calculatePackageCoverage(
       const coveredCategories =
         requestedCategories.filter(
           (category) =>
-            isCategoryCovered(
+            resolveCategoryCoverage(
               pkg,
               category,
               cruiseLine,
               options.selectedDrinkReferenceIds?.[
                 category as OnboardPriceKey
               ] ?? []
-            )
+            ) === "covered"
         );
 
       const uncoveredCategories =
         requestedCategories.filter(
           (category) =>
-            !isCategoryCovered(
+            resolveCategoryCoverage(
               pkg,
               category,
               cruiseLine,
               options.selectedDrinkReferenceIds?.[
                 category as OnboardPriceKey
               ] ?? []
-            )
+            ) === "uncovered"
+        );
+
+      const unknownCoverageCategories =
+        requestedCategories.filter(
+          (category) =>
+            resolveCategoryCoverage(
+              pkg,
+              category,
+              cruiseLine,
+              options.selectedDrinkReferenceIds?.[
+                category as OnboardPriceKey
+              ] ?? []
+            ) === "unknown"
         );
 
       const coverageScore =
@@ -484,11 +502,13 @@ export function calculatePackageCoverage(
 
         uncoveredCategories,
 
+        unknownCoverageCategories,
+
         coverageScore,
 
         fullyCovered:
-          uncoveredCategories.length ===
-          0,
+          uncoveredCategories.length === 0 &&
+          unknownCoverageCategories.length === 0,
       };
     }
   );

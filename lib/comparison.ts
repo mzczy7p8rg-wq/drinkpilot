@@ -293,6 +293,9 @@ export type PackageComparisonResult = {
 
   uncoveredCategories:
     CoverageCategory[];
+
+  unknownCoverageCategories:
+    CoverageCategory[];
 };
 
 export type PackageThresholdCruiseImpactResult = {
@@ -439,6 +442,9 @@ export function resolveEconomicComparison(
 
         uncoveredCategories:
           CoverageCategory[];
+
+        unknownCoverageCategories?:
+          CoverageCategory[];
       }
     | undefined,
 
@@ -469,6 +475,15 @@ export function resolveEconomicComparison(
 
       effectiveSavings:
         null,
+    };
+  }
+
+  if (
+    (coverage.unknownCoverageCategories?.length ?? 0) > 0
+  ) {
+    return {
+      status: "partial-unknown",
+      effectiveSavings: null,
     };
   }
 
@@ -1832,6 +1847,11 @@ export function compareDrinkPackages(
             uncoveredCategories:
               coverage
                 ?.uncoveredCategories ??
+              [],
+
+            unknownCoverageCategories:
+              coverage
+                ?.unknownCoverageCategories ??
               [],
           }];
         }

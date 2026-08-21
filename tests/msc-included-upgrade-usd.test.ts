@@ -35,6 +35,12 @@ describe("MSC Easy incluido y upgrade en USD", () => {
       "mscEasy",
       "mscPremiumExtra",
     ]);
+    expect(comparison.packages[0]?.uncoveredCategories).not.toContain(
+      "cocktail"
+    );
+    expect(comparison.packages[0]?.unknownCoverageCategories).toContain(
+      "cocktail"
+    );
     expect(
       resolveIncludedPackageUpgradeDecision(
         comparison.packages,

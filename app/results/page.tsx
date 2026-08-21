@@ -520,12 +520,35 @@ export default function ResultsPage() {
                         </p>
                       ) : (
                         <div className="mt-4">
-                          <p className="text-sm font-semibold text-slate-700">
-                            No cubre:
-                          </p>
+                          {pkg.uncoveredCategories.length > 0 && (
+                            <>
+                              <p className="text-sm font-semibold text-slate-700">
+                                No cubre:
+                              </p>
 
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {pkg.uncoveredCategories.map(
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {pkg.uncoveredCategories.map(
+                                  (category) => (
+                                    <span
+                                      key={category}
+                                      className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700"
+                                    >
+                                      {coverageLabels[category]}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            </>
+                          )}
+
+                          {pkg.unknownCoverageCategories.length > 0 && (
+                            <>
+                              <p className="mt-3 text-sm font-semibold text-amber-800">
+                                Cobertura pendiente de confirmar:
+                              </p>
+
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {pkg.unknownCoverageCategories.map(
                               (
                                 category
                               ) => (
@@ -543,7 +566,9 @@ export default function ResultsPage() {
                                 </span>
                               )
                             )}
-                          </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1651,6 +1676,15 @@ export default function ResultsPage() {
                               )}
                           </p>
                         )}
+
+                        {pkg.unknownCoverageCategories.length > 0 && (
+                          <p className="mt-2 text-sm font-medium leading-6 text-amber-900">
+                            <strong>Cobertura pendiente de confirmar:</strong>{" "}
+                            {pkg.unknownCoverageCategories
+                              .map((category) => coverageLabels[category])
+                              .join(", ")}
+                          </p>
+                        )}
                       </div>
 
                       {/* ECONOMÍA */}
@@ -1760,19 +1794,19 @@ export default function ResultsPage() {
                           </summary>
 
                           <p className="mt-1 text-xs leading-5 text-amber-900">
-                            Este importe no
-                            incluye el
-                            posible coste
-                            adicional de
-                            las
-                            preferencias
-                            que el paquete
-                            no cubre.
-                            Por eso no debe
-                            interpretarse
-                            como un resultado
-                            final.
+                            Faltan datos para confirmar toda la cobertura o
+                            cuantificar el posible coste adicional. Por eso no
+                            debe interpretarse como un resultado final.
                           </p>
+
+                          {pkg.unknownCoverageCategories.length > 0 && (
+                            <p className="mt-2 text-xs leading-5 text-amber-900">
+                              <strong>Cobertura pendiente:</strong>{" "}
+                              {pkg.unknownCoverageCategories
+                                .map((category) => coverageLabels[category])
+                                .join(", ")}.
+                            </p>
+                          )}
 
                           {pkg
                             .uncoveredCategories
