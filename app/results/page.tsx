@@ -1469,6 +1469,12 @@ export default function ResultsPage() {
                     pkg.priceSource ===
                     "included";
 
+                  const economicOption =
+                    economicOptionsComparison.options.find(
+                      (option) =>
+                        option.key === pkg.packageKey
+                    );
+
                   const thresholdImpact =
                     comparison.thresholdCruiseImpacts.find(
                       (item) =>
@@ -1662,14 +1668,17 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Bebidas aparte
+                            Fuera del paquete
                           </p>
 
                           <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                            {formatCurrency(
-                              pkg.drinksCost,
-                              pkg.currency
-                            )}
+                            {economicOption?.outsidePackageCost === null ||
+                            economicOption?.outsidePackageCost === undefined
+                              ? "Pendiente"
+                              : formatCurrency(
+                                  economicOption.outsidePackageCost,
+                                  pkg.currency
+                                )}
                           </p>
                         </div>
 

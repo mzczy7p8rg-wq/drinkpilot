@@ -154,6 +154,10 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     )
   ).toBeVisible();
 
+  await expect(
+    page.getByText("Bebidas aparte", { exact: true })
+  ).toHaveCount(0);
+
   const feedbackLink = page.getByRole("link", {
     name: "Enviar opinión",
   });
