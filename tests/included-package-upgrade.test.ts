@@ -7,6 +7,7 @@ const included = {
   currency: "EUR",
   packageCost: 0,
   effectiveSavings: 30,
+  economicComparisonStatus: "complete" as const,
   coverageScore: 60,
   fullyCovered: true,
 };
@@ -66,7 +67,7 @@ describe("included package upgrade decision", () => {
     });
   });
 
-  it("no recomienda un upgrade con cobertura incompleta aunque tenga mejor ahorro", () => {
+  it("compara un upgrade con cobertura incompleta cuando todo el gasto exterior está cuantificado", () => {
     const result = resolveIncludedPackageUpgradeDecision(
       [
         included,
@@ -76,6 +77,32 @@ describe("included package upgrade decision", () => {
           packageName: "Premium Extra",
           packageCost: 70,
           effectiveSavings: 200,
+          coverageScore: 90,
+          fullyCovered: false,
+        },
+      ],
+      "easy"
+    );
+
+    expect(result).toMatchObject({
+      status: "upgrade",
+      savingsDifference: 170,
+      addedCost: 70,
+      coverageDifference: 30,
+    });
+  });
+
+  it("no recomienda un upgrade parcial cuando su gasto exterior sigue sin cuantificar", () => {
+    const result = resolveIncludedPackageUpgradeDecision(
+      [
+        included,
+        {
+          ...included,
+          packageKey: "premium",
+          packageName: "Premium Extra",
+          packageCost: 70,
+          effectiveSavings: null,
+          economicComparisonStatus: "partial-unknown" as const,
           coverageScore: 90,
           fullyCovered: false,
         },

@@ -39,6 +39,8 @@ import {
   getMarketLabel,
   getSailingRegionLabel,
 } from "@/lib/cruiseContextOptions";
+import { getCostaDocumentedDrinkPriceById } from "@/lib/costaDocumentedDrinkPriceService";
+import { getMscDocumentedDrinkPriceById } from "@/lib/mscDocumentedDrinkPriceService";
 
 function formatCurrency(
   amount: number,
@@ -167,6 +169,21 @@ export default function ReviewPage() {
     wine: { label: "Vino", icon: "🍷" },
     cocktail: { label: "Cócteles", icon: "🍸" },
   };
+
+  const documentedDrinkSelections = Object.entries(
+    data.documentedDrinkQuantities
+  ).flatMap(([referenceId, selectionWeight]) => {
+    if (selectionWeight <= 0) {
+      return [];
+    }
+
+    const drink =
+      data.cruiseLine === "costa"
+        ? getCostaDocumentedDrinkPriceById(referenceId)
+        : getMscDocumentedDrinkPriceById(referenceId);
+
+    return drink ? [drink] : [];
+  });
 
   const preferences = [
     data.alcoholicCocktails &&
@@ -450,6 +467,9 @@ export default function ReviewPage() {
           <div className="mt-4 space-y-4">
             {adultPackages.map(
               (pkg) => {
+                const isIncludedInReservation =
+                  data.includedPackageKey === pkg.key;
+
                 const customPrice =
                   data
                     .customPackagePrices[
@@ -469,7 +489,9 @@ export default function ReviewPage() {
                     0;
 
                 const displayedPrice =
-                  hasCustomPrice
+                  isIncludedInReservation
+                    ? 0
+                    : hasCustomPrice
                     ? customPrice.price
                     : hasReferencePrice
                     ? pkg.pricePerChargeUnit
@@ -494,8 +516,10 @@ export default function ReviewPage() {
                         </p>
 
                         <p className="mt-1 text-xs text-slate-500">
-                          por adulto /
-                          noche
+                          {data.includedPackageKey &&
+                          !isIncludedInReservation
+                            ? "coste del upgrade por adulto / noche"
+                            : "por adulto / noche"}
                         </p>
                       </div>
 
@@ -512,7 +536,11 @@ export default function ReviewPage() {
                             : "Pendiente"}
                         </p>
 
-                        {hasCustomPrice ? (
+                        {isIncludedInReservation ? (
+                          <p className="mt-1 text-xs font-medium text-emerald-700">
+                            ✓ Incluido en tu reserva
+                          </p>
+                        ) : hasCustomPrice ? (
                           <p className="mt-1 text-xs font-medium text-sky-700">
                             ✓ Tu reserva
                           </p>
@@ -528,7 +556,8 @@ export default function ReviewPage() {
                       </div>
                     </div>
 
-                    {!hasCustomPrice &&
+                    {!isIncludedInReservation &&
+                      !hasCustomPrice &&
                       !hasReferencePrice &&
                       pkg.economicActivation ===
                         "user-price-only" && (
@@ -565,9 +594,8 @@ export default function ReviewPage() {
             </Link>
           </div>
 
-          {Object.keys(
-            data.selectedDrinkPrices
-          ).length > 0 ? (
+          {Object.keys(data.selectedDrinkPrices).length > 0 ||
+          documentedDrinkSelections.length > 0 ? (
             <div className="mt-4 space-y-3">
               {Object.entries(
                 data.selectedDrinkPrices
@@ -665,6 +693,31 @@ export default function ReviewPage() {
                   );
                 }
               )}
+
+              {documentedDrinkSelections.map((drink) => (
+                <div
+                  key={drink.id}
+                  className="rounded-xl bg-slate-50 p-3 sm:p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-800">
+                        {drinkPresentation[drink.category]?.icon ?? "🥤"}{" "}
+                        {drink.productName}
+                      </p>
+                      <p className="mt-1 text-xs font-medium text-slate-500">
+                        Bebida documentada seleccionada
+                      </p>
+                      <p className="mt-1 text-xs font-semibold text-emerald-700">
+                        Se utilizará para repartir tu consumo diario, sin añadir bebidas
+                      </p>
+                    </div>
+                    <p className="shrink-0 font-bold text-slate-900">
+                      {formatCurrency(drink.price, drink.currency)}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <p className="mt-4 text-sm leading-5 text-slate-500">

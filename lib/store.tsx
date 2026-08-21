@@ -80,6 +80,7 @@ import {
   resolveStoredAdultConsumptionProfiles,
   type AdultConsumptionProfile,
 } from "@/lib/adultConsumptionProfiles";
+import { resolveStoredIncludedPackageKey } from "@/lib/includedPackagePersistence";
 
 export type { CustomPackagePrices } from "@/lib/customPackagePrice";
 
@@ -932,6 +933,12 @@ export function StoreProvider({
             parsedData.packagePriceCurrency === "USD"
               ? parsedData.packagePriceCurrency
               : null,
+
+          includedPackageKey:
+            resolveStoredIncludedPackageKey(
+              cruiseLine,
+              parsedData.includedPackageKey
+            ),
 
           selectedDrinkPrices:
             storedSelectedDrinkPrices,

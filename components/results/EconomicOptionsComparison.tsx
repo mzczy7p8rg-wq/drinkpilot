@@ -15,12 +15,10 @@ export default function EconomicOptionsComparison({
 }) {
   const { bestOption, currency } = comparison;
 
-  if (!bestOption) {
-    return null;
-  }
-
   const conclusion =
-    bestOption.status === "no-package"
+    !bestOption
+      ? "Comparación pendiente: faltan importes para decidir entre tu paquete incluido y los upgrades."
+      : bestOption.status === "no-package"
       ? "Pagar las bebidas por separado es la opción más económica."
       : bestOption.status === "included"
         ? `Mantén ${bestOption.name}: es la opción más económica para tu consumo.`
@@ -36,7 +34,9 @@ export default function EconomicOptionsComparison({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-sky-800">
-            Comparación económica completa
+            {bestOption
+              ? "Comparación económica completa"
+              : "Comparación económica pendiente"}
           </p>
           <h2
             id="economic-options-title"
@@ -49,14 +49,14 @@ export default function EconomicOptionsComparison({
           </p>
         </div>
 
-        <span className="self-start rounded-full bg-green-700 px-3 py-2 text-sm font-semibold text-white">
-          Mejor coste total
+        <span className={`self-start rounded-full px-3 py-2 text-sm font-semibold text-white ${bestOption ? "bg-green-700" : "bg-amber-700"}`}>
+          {bestOption ? "Mejor coste total" : "Comparación pendiente"}
         </span>
       </div>
 
       <div className="mt-5 grid gap-3 md:hidden">
         {comparison.options.map((option) => {
-          const isBest = option.key === bestOption.key;
+          const isBest = option.key === bestOption?.key;
 
           return (
             <article
@@ -131,7 +131,7 @@ export default function EconomicOptionsComparison({
           </thead>
           <tbody className="divide-y divide-slate-200">
             {comparison.options.map((option) => {
-              const isBest = option.key === bestOption.key;
+              const isBest = option.key === bestOption?.key;
 
               return (
                 <tr key={option.key} className={isBest ? "bg-green-50" : "bg-white"}>
@@ -184,7 +184,9 @@ export default function EconomicOptionsComparison({
           )}
         {comparison.hasIncompleteOptions && (
           <p className="mt-3 text-sm leading-6 text-amber-800">
-            La conclusión compara únicamente las opciones con todos los precios necesarios. Las alternativas pendientes permanecen visibles, pero no se usan para decidir.
+            {bestOption
+              ? "La conclusión compara únicamente las opciones con todos los precios necesarios. Las alternativas pendientes permanecen visibles, pero no se usan para decidir."
+              : "Las opciones permanecen visibles, pero no elegimos ninguna hasta conocer todos los importes necesarios."}
           </p>
         )}
       </div>

@@ -96,18 +96,28 @@ export function buildEconomicOptionsComparison({
   });
 
   const options = [noPackage, ...packageOptions];
+  const includedOption = packageOptions.find(
+    (option) => option.status === "included"
+  );
+  const canRankIncludedAlternatives =
+    !hasIncludedPackage ||
+    (includedOption?.totalCost ?? null) !== null;
+
   const completeOptions = options.filter(
     (option): option is EconomicOption & { totalCost: number } =>
-      option.totalCost !== null
+      option.totalCost !== null &&
+      (!hasIncludedPackage || option.status !== "no-package")
   );
 
-  const bestOption = completeOptions.reduce<
+  const bestOption = canRankIncludedAlternatives
+    ? completeOptions.reduce<
     (EconomicOption & { totalCost: number }) | null
   >(
     (best, option) =>
       !best || option.totalCost < best.totalCost ? option : best,
     null
-  );
+  )
+    : null;
 
   return {
     currency,

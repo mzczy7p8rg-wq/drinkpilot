@@ -1175,7 +1175,7 @@ export default function ResultsPage() {
                 </p>
               ) : (
                 <p className="mt-3 leading-6 text-slate-700">
-                  Para decidir si te conviene un upgrade, introduce el precio real de la alternativa. DrinkPilot no completa ese importe con datos no confirmados.
+                  Todavía no podemos cerrar la comparación entre mantenerlo y mejorar. Comprueba el suplemento del upgrade y los precios de las bebidas que quedarían fuera; DrinkPilot no completa importes no confirmados.
                 </p>
               )}
             </section>

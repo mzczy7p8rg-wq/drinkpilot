@@ -130,4 +130,31 @@ describe("complete economic options comparison", () => {
     expect(result.bestOption?.key).toBe("no-package");
     expect(result.hasIncompleteOptions).toBe(true);
   });
+
+  it("does not crown no package when the package already included is incomplete", () => {
+    const result = buildEconomicOptionsComparison({
+      currency: "EUR",
+      baselineCost: 300,
+      packages: [
+        {
+          ...packageOption,
+          packageCost: 0,
+          effectiveSavings: null,
+          economicComparisonStatus: "partial-unknown",
+          priceSource: "included",
+        },
+        {
+          ...packageOption,
+          packageKey: "premium",
+          packageName: "Premium Extra",
+          packageCost: 70,
+          effectiveSavings: null,
+          economicComparisonStatus: "partial-unknown",
+        },
+      ],
+    });
+
+    expect(result.bestOption).toBeNull();
+    expect(result.options[0].key).toBe("no-package");
+  });
 });

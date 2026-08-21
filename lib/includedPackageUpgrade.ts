@@ -4,6 +4,10 @@ export type IncludedPackageUpgradeCandidate = {
   currency: string;
   packageCost: number;
   effectiveSavings: number | null;
+  economicComparisonStatus:
+    | "complete"
+    | "partial-calculable"
+    | "partial-unknown";
   coverageScore: number;
   fullyCovered: boolean;
 };
@@ -24,8 +28,9 @@ export type IncludedPackageUpgradeDecision =
 
 /*
  * Compara el paquete ya incluido con las alternativas que tienen un
- * ahorro efectivo cuantificable. Nunca transforma una cobertura parcial
- * ni un precio ausente en una recomendación de upgrade.
+ * ahorro efectivo completamente cuantificado. La cobertura puede ser parcial
+ * si todos los consumos exteriores están valorados; nunca transforma un
+ * precio ausente en una recomendación de upgrade.
  */
 export function resolveIncludedPackageUpgradeDecision(
   packages: IncludedPackageUpgradeCandidate[],
@@ -39,7 +44,11 @@ export function resolveIncludedPackageUpgradeDecision(
     (item) => item.packageKey === includedPackageKey
   );
 
-  if (!current || current.effectiveSavings === null) {
+  if (
+    !current ||
+    current.economicComparisonStatus !== "complete" ||
+    current.effectiveSavings === null
+  ) {
     return current ? { status: "insufficient-data", current } : null;
   }
 
@@ -47,7 +56,7 @@ export function resolveIncludedPackageUpgradeDecision(
     .filter(
       (item) =>
         item.packageKey !== current.packageKey &&
-        item.fullyCovered &&
+        item.economicComparisonStatus === "complete" &&
         item.effectiveSavings !== null
     )
     .sort(
