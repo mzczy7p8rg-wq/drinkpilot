@@ -39,4 +39,22 @@ describe("comparison header", () => {
       "Mejor opción: My Drinks"
     );
   });
+
+  it("explica que faltan datos cuando no puede decidir un upgrade", () => {
+    expect(
+      resolveComparisonHeader(null, {
+        status: "insufficient-data",
+        current: {
+          packageKey: "mscEasy",
+          packageName: "Easy Package",
+          currency: "USD",
+          packageCost: 0,
+          effectiveSavings: null,
+          economicComparisonStatus: "partial-unknown",
+          coverageScore: 0,
+          fullyCovered: false,
+        },
+      })
+    ).toBe("Comparación pendiente de datos");
+  });
 });

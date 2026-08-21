@@ -1488,6 +1488,9 @@ export default function ResultsPage() {
                   includedPackageUpgradeDecision?.status === "keep" ||
                   includedPackageUpgradeDecision?.status === "upgrade"
                     ? "bg-green-100 text-green-800"
+                    : includedPackageUpgradeDecision?.status ===
+                        "insufficient-data"
+                    ? "bg-amber-100 text-amber-800"
                     : "bg-red-100 text-red-800"
                 }`}
               >

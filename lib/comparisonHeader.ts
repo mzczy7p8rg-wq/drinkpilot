@@ -16,6 +16,10 @@ export function resolveComparisonHeader(
     return `Mejora a ${includedPackageUpgradeDecision.alternative.packageName}`;
   }
 
+  if (includedPackageUpgradeDecision?.status === "insufficient-data") {
+    return "Comparación pendiente de datos";
+  }
+
   if (bestPackage) {
     return `Mejor opción: ${bestPackage.packageName}`;
   }

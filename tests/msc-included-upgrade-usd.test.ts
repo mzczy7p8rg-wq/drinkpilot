@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compareDrinkPackages } from "@/lib/comparison";
+import { resolveComparisonHeader } from "@/lib/comparisonHeader";
 import { resolveIncludedPackageUpgradeDecision } from "@/lib/includedPackageUpgrade";
 
 describe("MSC Easy incluido y upgrade en USD", () => {
@@ -41,11 +42,15 @@ describe("MSC Easy incluido y upgrade en USD", () => {
     expect(comparison.packages[0]?.unknownCoverageCategories).toContain(
       "cocktail"
     );
-    expect(
+    const decision =
       resolveIncludedPackageUpgradeDecision(
         comparison.packages,
         "mscEasy"
-      )
-    ).toMatchObject({ status: "insufficient-data" });
+      );
+
+    expect(decision).toMatchObject({ status: "insufficient-data" });
+    expect(
+      resolveComparisonHeader(comparison.bestPackage, decision)
+    ).toBe("Comparación pendiente de datos");
   });
 });
