@@ -76,6 +76,10 @@ import {
   upsertSavedAnalysis,
   type SavedAnalysis,
 } from "@/lib/savedAnalyses";
+import {
+  resolveStoredAdultConsumptionProfiles,
+  type AdultConsumptionProfile,
+} from "@/lib/adultConsumptionProfiles";
 
 export type { CustomPackagePrices } from "@/lib/customPackagePrice";
 
@@ -197,6 +201,15 @@ export type WizardData = {
   documentedDrinkQuantities:
     DocumentedDrinkQuantities;
 
+  /*
+   * Perfiles individuales preparados para Fase 5.
+   *
+   * Mientras el cálculo productivo continúe usando la cesta superior,
+   * esta colección se persiste y migra sin alterar los resultados actuales.
+   */
+  adultConsumptionProfiles:
+    AdultConsumptionProfile[];
+
   people: number;
 
   /*
@@ -261,6 +274,16 @@ type StoreContextType = {
 
 const STORAGE_KEY =
   "drinkpilot-wizard";
+
+function serializeWizardData(
+  data: WizardData
+): string {
+  return JSON.stringify({
+    storageSchemaVersion:
+      CURRENT_WIZARD_STORAGE_VERSION,
+    ...data,
+  });
+}
 
 /*
  * NAVIERA POR DEFECTO
@@ -381,6 +404,9 @@ function createInitialData(
 
     documentedDrinkQuantities:
       {},
+
+    adultConsumptionProfiles:
+      [],
 
     /*
      * 0 = paso Personas todavía
@@ -518,9 +544,18 @@ export function StoreProvider({
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
+      const storedAnalysesRaw =
+        window.localStorage.getItem(SAVED_ANALYSES_KEY);
       const storedAnalyses = parseStoredAnalyses(
-        window.localStorage.getItem(SAVED_ANALYSES_KEY)
+        storedAnalysesRaw
       );
+
+      if (storedAnalysesRaw) {
+        window.localStorage.setItem(
+          SAVED_ANALYSES_KEY,
+          serializeSavedAnalyses(storedAnalyses)
+        );
+      }
       const storedActiveAnalysisId =
         window.localStorage.getItem(ACTIVE_ANALYSIS_KEY);
 
@@ -773,6 +808,19 @@ export function StoreProvider({
             }
           );
 
+        const adultConsumptionProfiles =
+          resolveStoredAdultConsumptionProfiles({
+            ...parsedData,
+            adults:
+              isValidTravelerCount(parsedData.adults)
+                ? parsedData.adults
+                : storedWizardProgress.people,
+            people:
+              storedWizardProgress.people,
+            adultConsumptionProfiles:
+              parsedData.adultConsumptionProfiles,
+          });
+
         /*
          * La hidratación posmontaje desde
          * localStorage evita divergencias
@@ -893,6 +941,8 @@ export function StoreProvider({
               parsedData.documentedDrinkQuantities
             ),
 
+          adultConsumptionProfiles,
+
           people:
             storedWizardProgress
               .people,
@@ -941,14 +991,7 @@ export function StoreProvider({
        */
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(
-          {
-            storageSchemaVersion:
-              CURRENT_WIZARD_STORAGE_VERSION,
-
-            ...data,
-          }
-        )
+        serializeWizardData(data)
       );
     } catch (error) {
       console.error(
@@ -1013,7 +1056,7 @@ export function StoreProvider({
 
     setData(nextData);
     setActiveAnalysisId(id);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+    window.localStorage.setItem(STORAGE_KEY, serializeWizardData(nextData));
     window.localStorage.setItem(ACTIVE_ANALYSIS_KEY, id);
 
     return true;

@@ -12,6 +12,9 @@ import {
   upsertSavedAnalysis,
 } from "@/lib/savedAnalyses";
 import type { WizardData } from "@/lib/store";
+import {
+  resolveStoredAdultConsumptionProfiles,
+} from "@/lib/adultConsumptionProfiles";
 
 const data = {
   cruiseLine: "costa",
@@ -43,6 +46,19 @@ const data = {
   packagePriceCurrency: null,
   selectedDrinkPrices: {},
   documentedDrinkQuantities: {},
+  adultConsumptionProfiles:
+    resolveStoredAdultConsumptionProfiles({
+      adults: 2,
+      people: 2,
+      coffee: 1,
+      water: 1,
+      soda: 0,
+      juice: 0,
+      beer: 0,
+      wine: 0,
+      cocktail: 0,
+      consumptionConfirmed: true,
+    }),
   people: 2,
   adults: 2,
   minors: 0,
@@ -212,6 +228,28 @@ describe("saved analyses", () => {
       resolveStoredAnalyses(JSON.parse(serializeSavedAnalyses([valid])))
     ).toEqual([valid]);
     expect(parseStoredAnalyses("{broken-json")).toEqual([]);
+  });
+
+  it("migra perfiles dentro de una colección guardada v1", () => {
+    const legacyData: Partial<WizardData> = structuredClone(data);
+    delete legacyData.adultConsumptionProfiles;
+    const legacy = {
+      id: "legacy",
+      name: null,
+      createdAt: "2026-08-15T10:00:00.000Z",
+      updatedAt: "2026-08-15T10:00:00.000Z",
+      data: legacyData,
+    };
+
+    const [migrated] = resolveStoredAnalyses({
+      version: 1,
+      analyses: [legacy],
+    });
+
+    expect(migrated.data.adultConsumptionProfiles).toHaveLength(2);
+    expect(migrated.data.adultConsumptionProfiles).toEqual(
+      resolveStoredAdultConsumptionProfiles(legacyData)
+    );
   });
 
   it("actualiza un análisis sin cambiar su fecha de creación", () => {

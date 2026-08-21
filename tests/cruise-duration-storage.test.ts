@@ -32,6 +32,23 @@ describe(
     );
 
     it(
+      "conserva cruiseNights de una sesión v2 al migrar a perfiles adultos",
+      () => {
+        expect(
+          resolveStoredCruiseDuration({
+            storageSchemaVersion: 2,
+            cruiseNights: 7,
+            days: 8,
+          })
+        ).toEqual({
+          cruiseNights: 7,
+          legacyDays: null,
+          requiresConfirmation: false,
+        });
+      }
+    );
+
+    it(
       "no convierte los 8 días de una sesión legacy en 7 noches",
       () => {
         expect(

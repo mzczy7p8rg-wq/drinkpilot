@@ -22,6 +22,21 @@ test("restaura una sesión válida en Review", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText("7 noches")).toBeVisible();
   await expect(page.getByText("2 adultos")).toBeVisible();
+
+  const migrated = await page.evaluate(() =>
+    JSON.parse(
+      window.localStorage.getItem("drinkpilot-wizard") ?? "{}"
+    )
+  );
+
+  expect(migrated).toMatchObject({
+    storageSchemaVersion: 3,
+    cruiseNights: 7,
+    adultConsumptionProfiles: [
+      expect.objectContaining({ coffee: 1 }),
+      expect.objectContaining({ coffee: 1 }),
+    ],
+  });
 });
 
 test("pide confirmar las noches de una sesión legacy ambigua", async ({
@@ -88,7 +103,7 @@ test("las sesiones nuevas persisten cruiseNights y no vuelven a escribir days", 
   );
 
   expect(stored).toMatchObject({
-    storageSchemaVersion: 2,
+    storageSchemaVersion: 3,
     cruiseNights: 7,
   });
   expect(stored).not.toHaveProperty(

@@ -6,6 +6,9 @@ import {
 } from "@/lib/wizardNumberValidation";
 
 export const CURRENT_WIZARD_STORAGE_VERSION =
+  3;
+
+const FIRST_CRUISE_NIGHTS_STORAGE_VERSION =
   2;
 
 export type StoredCruiseDurationInput = {
@@ -33,7 +36,11 @@ export function resolveStoredCruiseDuration(
   input: StoredCruiseDurationInput
 ): StoredCruiseDuration {
   if (
-    input.storageSchemaVersion ===
+    typeof input.storageSchemaVersion === "number" &&
+    Number.isSafeInteger(input.storageSchemaVersion) &&
+    input.storageSchemaVersion >=
+      FIRST_CRUISE_NIGHTS_STORAGE_VERSION &&
+    input.storageSchemaVersion <=
       CURRENT_WIZARD_STORAGE_VERSION &&
     isValidCruiseNights(
       input.cruiseNights
