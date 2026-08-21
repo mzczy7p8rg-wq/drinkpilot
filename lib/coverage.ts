@@ -396,7 +396,8 @@ export function calculatePackageCoverage(
    */
 
   if (
-    input.bottledWaterDailyAllowance
+    input.bottledWaterDailyAllowance &&
+    !input.bottledWaterUnlimited
   ) {
     requestedCategories.push(
       "bottledWaterDailyAllowance"

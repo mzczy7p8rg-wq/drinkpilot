@@ -1283,7 +1283,7 @@ describe("DrinkPilot recommendation engine", () => {
     ).toBe(false);
   });
 
-  it("My Drinks Plus cubre tanto una botella diaria como agua ilimitada", () => {
+  it("My Drinks Plus trata agua ilimitada como una sola preferencia", () => {
     const result =
       calculatePackageCoverage({
         coffee: 0,
@@ -1312,7 +1312,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     expect(
       myDrinksPlus?.coveredCategories
-    ).toContain(
+    ).not.toContain(
       "bottledWaterDailyAllowance"
     );
 
@@ -1386,7 +1386,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     expect(
       myDrinks?.uncoveredCategories
-    ).toContain(
+    ).not.toContain(
       "bottledWaterDailyAllowance"
     );
 
@@ -1429,7 +1429,7 @@ describe("DrinkPilot recommendation engine", () => {
 
     expect(
       myDrinksPlus?.coveredCategories
-    ).toContain(
+    ).not.toContain(
       "bottledWaterDailyAllowance"
     );
 
