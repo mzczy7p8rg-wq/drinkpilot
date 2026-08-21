@@ -1171,7 +1171,10 @@ export default function ResultsPage() {
               ) : includedPackageUpgradeDecision.status === "keep" ? (
                 <p className="mt-3 leading-6 text-slate-700">
                   <strong>Mantén {includedPackageUpgradeDecision.current.packageName}.</strong>{" "}
-                  El otro paquete no aporta una mejora clara con los datos que has indicado.
+                  El upgrade a {includedPackageUpgradeDecision.alternative.packageName} costaría aproximadamente {formatCurrency(
+                    Math.abs(includedPackageUpgradeDecision.savingsDifference),
+                    includedPackageUpgradeDecision.current.currency
+                  )} más durante el crucero.
                 </p>
               ) : (
                 <p className="mt-3 leading-6 text-slate-700">

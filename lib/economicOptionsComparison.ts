@@ -55,7 +55,9 @@ export function buildEconomicOptionsComparison({
 
   const noPackage: EconomicOption = {
     key: "no-package",
-    name: "Sin paquete",
+    name: hasIncludedPackage
+      ? "Referencia: bebidas por separado"
+      : "Sin paquete",
     status: "no-package",
     packageCost: 0,
     outsidePackageCost: normalizedBaseline,

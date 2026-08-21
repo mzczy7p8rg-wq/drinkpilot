@@ -63,6 +63,10 @@ describe("complete economic options comparison", () => {
       outsidePackageCost: 60,
       totalCost: 60,
     });
+    expect(result.options[0]).toMatchObject({
+      name: "Referencia: bebidas por separado",
+      status: "no-package",
+    });
     expect(result.bestOption?.key).toBe("easy");
   });
 

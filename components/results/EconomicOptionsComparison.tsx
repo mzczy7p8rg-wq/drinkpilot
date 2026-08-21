@@ -14,6 +14,16 @@ export default function EconomicOptionsComparison({
   comparison: EconomicOptionsComparisonModel;
 }) {
   const { bestOption, currency } = comparison;
+  const hasIncludedPackage = comparison.options.some(
+    (option) => option.status === "included"
+  );
+
+  const getStatusLabel = (
+    option: EconomicOptionsComparisonModel["options"][number]
+  ) =>
+    option.status === "no-package" && hasIncludedPackage
+      ? "Referencia sin aplicar la cobertura incluida"
+      : statusLabels[option.status];
 
   const conclusion =
     !bestOption
@@ -42,7 +52,9 @@ export default function EconomicOptionsComparison({
             id="economic-options-title"
             className="mt-1 text-2xl font-bold text-slate-900"
           >
-            Sin paquete, paquetes y upgrades
+            {hasIncludedPackage
+              ? "Tu paquete incluido y upgrades"
+              : "Sin paquete, paquetes y upgrades"}
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
             El coste total suma el precio del paquete o suplemento y las bebidas conocidas que quedarían fuera de su cobertura.
@@ -71,7 +83,7 @@ export default function EconomicOptionsComparison({
                 <div>
                   <h3 className="font-bold text-slate-900">{option.name}</h3>
                   <p className="mt-1 text-xs text-slate-500">
-                    {statusLabels[option.status]}
+                    {getStatusLabel(option)}
                   </p>
                 </div>
                 {isBest && (
@@ -138,7 +150,7 @@ export default function EconomicOptionsComparison({
                   <td className="px-4 py-4">
                     <p className="font-bold text-slate-900">{option.name}</p>
                     <p className="mt-1 text-xs text-slate-500">
-                      {statusLabels[option.status]}
+                      {getStatusLabel(option)}
                       {isBest ? " · Mejor opción" : ""}
                     </p>
                   </td>
