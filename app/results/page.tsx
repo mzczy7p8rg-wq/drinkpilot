@@ -30,6 +30,7 @@ import {
 
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 import ConsumptionSummary from "@/components/results/ConsumptionSummary";
+import EconomicOptionsComparison from "@/components/results/EconomicOptionsComparison";
 import MinorsCalculationNotice from "@/components/results/MinorsCalculationNotice";
 import { WizardBrand } from "@/components/Brand";
 
@@ -53,6 +54,10 @@ import {
 import {
   resolveIncludedPackageUpgradeDecision,
 } from "@/lib/includedPackageUpgrade";
+
+import {
+  buildEconomicOptionsComparison,
+} from "@/lib/economicOptionsComparison";
 
 import {
   isBreakEvenAvailable,
@@ -879,6 +884,13 @@ export default function ResultsPage() {
   const bestPackage =
     comparison.bestPackage;
 
+  const economicOptionsComparison =
+    buildEconomicOptionsComparison({
+      currency: economicCurrency,
+      baselineCost: baseline.drinksCost,
+      packages: comparison.packages,
+    });
+
   const includedPackageUpgradeDecision =
     resolveIncludedPackageUpgradeDecision(
       comparison.packages,
@@ -1169,6 +1181,10 @@ export default function ResultsPage() {
             </section>
           )}
 
+          <EconomicOptionsComparison
+            comparison={economicOptionsComparison}
+          />
+
           {/* EXPLICACIÓN PRINCIPAL */}
 
           <div
@@ -1453,6 +1469,12 @@ export default function ResultsPage() {
                     pkg.priceSource ===
                     "included";
 
+                  const economicOption =
+                    economicOptionsComparison.options.find(
+                      (option) =>
+                        option.key === pkg.packageKey
+                    );
+
                   const thresholdImpact =
                     comparison.thresholdCruiseImpacts.find(
                       (item) =>
@@ -1646,14 +1668,17 @@ export default function ResultsPage() {
 
                         <div>
                           <p className="text-xs uppercase tracking-wide text-slate-500">
-                            Bebidas aparte
+                            Fuera del paquete
                           </p>
 
                           <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-                            {formatCurrency(
-                              pkg.drinksCost,
-                              pkg.currency
-                            )}
+                            {economicOption?.outsidePackageCost === null ||
+                            economicOption?.outsidePackageCost === undefined
+                              ? "Pendiente"
+                              : formatCurrency(
+                                  economicOption.outsidePackageCost,
+                                  pkg.currency
+                                )}
                           </p>
                         </div>
 
