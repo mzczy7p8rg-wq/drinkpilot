@@ -9,6 +9,7 @@ import { aggregateAdultConsumptionProfiles } from "@/lib/adultConsumptionProfile
 import { CoverageCategory } from "@/lib/coverage";
 import { formatCoverageCategoryLabel } from "@/lib/coverageDisplay";
 import { resolveComparisonHeader } from "@/lib/comparisonHeader";
+import { formatPackagePricePerChargeUnit } from "@/lib/packagePriceDisplay";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { resolveDisplayedEconomicDifference } from "@/lib/economicDifferenceDisplay";
 
@@ -1564,11 +1565,11 @@ export default function ResultsPage() {
                           </p>
 
                           <p className="mt-1 font-bold text-slate-900 sm:text-lg">
-                            {formatCurrency(
+                            {formatPackagePricePerChargeUnit(
                               pkg.packagePricePerChargeUnit,
-                              pkg.currency
-                            )}{" "}
-                            por persona / noche
+                              pkg.currency,
+                              isIncludedInReservation
+                            )}
                           </p>
 
                           {isIncludedInReservation ? (
