@@ -8,9 +8,10 @@ test("usuario completa consumo y avanza al siguiente paso", async ({ page }) => 
     .getByRole("button", { name: /Costa Cruceros/i })
     .click();
   await page.getByLabel("¿Cuántas noches dura tu crucero?").fill("7");
-  await page
-    .getByRole("button", { name: "Continuar" })
-    .click();
+  await Promise.all([
+    page.waitForURL(/\/wizard\/consumption$/),
+    page.getByRole("button", { name: "Continuar" }).click(),
+  ]);
 
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
   await expect(
@@ -59,9 +60,10 @@ test("exige confirmar Consumo y acepta un perfil confirmado con valor cero", asy
   await page
     .getByLabel("¿Cuántas noches dura tu crucero?")
     .fill("7");
-  await page
-    .getByRole("button", { name: "Continuar" })
-    .click();
+  await Promise.all([
+    page.waitForURL(/\/wizard\/consumption$/),
+    page.getByRole("button", { name: "Continuar" }).click(),
+  ]);
 
   await page.goto("/wizard/preferences");
   await expect(page).toHaveURL(/\/wizard\/consumption$/);
