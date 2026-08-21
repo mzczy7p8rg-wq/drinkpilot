@@ -342,7 +342,7 @@ export function buildRecommendationExplanation(
           `${bestPackage.packageName} encaja mejor con lo que buscas`,
 
         summary:
-          `Aunque ${highestGrossSavingsPackage.packageName} tendría un ahorro bruto mayor, no cubre completamente tus preferencias.`,
+          `${highestGrossSavingsPackage.packageName} puede parecer más favorable antes de descontar las bebidas que deja fuera, pero no cubre completamente tus preferencias.`,
 
         reason:
           `${bestPackage.packageName} cubre el 100 % de lo solicitado y mantiene un ahorro efectivo estimado de ${formatCurrency(

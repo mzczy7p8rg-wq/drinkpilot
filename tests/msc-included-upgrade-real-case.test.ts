@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { compareDrinkPackages } from "@/lib/comparison";
 import { resolveIncludedPackageUpgradeDecision } from "@/lib/includedPackageUpgrade";
+import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 
 describe("MSC Easy incluido frente a Premium Extra", () => {
   it("compara el coste incremental real para tres adultos y siete noches", () => {
@@ -57,5 +58,12 @@ describe("MSC Easy incluido frente a Premium Extra", () => {
       current: { packageName: "Easy Package" },
       alternative: { packageName: "Premium Extra Package" },
     });
+
+    const explanation = buildRecommendationExplanation(comparison);
+
+    expect(explanation.summary).toContain(
+      "antes de descontar las bebidas que deja fuera"
+    );
+    expect(explanation.summary).not.toContain("ahorro bruto");
   });
 });
