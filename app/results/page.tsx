@@ -8,6 +8,7 @@ import { calculateAdultProfileGroupRecommendation } from "@/lib/adultProfileGrou
 import { aggregateAdultConsumptionProfiles } from "@/lib/adultConsumptionProfiles";
 import { CoverageCategory } from "@/lib/coverage";
 import { formatCoverageCategoryLabel } from "@/lib/coverageDisplay";
+import { resolveComparisonHeader } from "@/lib/comparisonHeader";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { resolveDisplayedEconomicDifference } from "@/lib/economicDifferenceDisplay";
 
@@ -931,6 +932,12 @@ export default function ResultsPage() {
       data.includedPackageKey
     );
 
+  const comparisonHeader =
+    resolveComparisonHeader(
+      bestPackage,
+      includedPackageUpgradeDecision
+    );
+
   const comparedPackageKeys =
     new Set(
       comparison.packages.map(
@@ -1475,19 +1482,17 @@ export default function ResultsPage() {
                 </p>
               </div>
 
-              {bestPackage ? (
-                <span className="self-start rounded-full bg-green-100 px-4 py-2 text-sm font-semibold text-green-800">
-                  Mejor opción:{" "}
-                  {
-                    bestPackage.packageName
-                  }
-                </span>
-              ) : (
-                <span className="self-start rounded-full bg-red-100 px-4 py-2 text-sm font-semibold text-red-800">
-                  Sin opción completa
-                  con resultado favorable
-                </span>
-              )}
+              <span
+                className={`self-start rounded-full px-4 py-2 text-sm font-semibold ${
+                  bestPackage ||
+                  includedPackageUpgradeDecision?.status === "keep" ||
+                  includedPackageUpgradeDecision?.status === "upgrade"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {comparisonHeader}
+              </span>
             </div>
 
             <div className="mt-5 grid gap-4 md:mt-6 md:grid-cols-2">
