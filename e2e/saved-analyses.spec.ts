@@ -55,7 +55,10 @@ test("identifica un análisis por barco, fecha y duración", async ({ page }) =>
 
 test("permite poner y quitar un nombre personalizado", async ({ page }) => {
   await page.goto("/wizard/people");
-  await page.getByRole("button", { name: /Continuar/i }).click();
+  await Promise.all([
+    page.waitForURL(/\/wizard$/),
+    page.getByRole("button", { name: /Continuar/i }).click(),
+  ]);
   await page.goto("/analyses");
 
   const analysis = page.locator("article").first();
