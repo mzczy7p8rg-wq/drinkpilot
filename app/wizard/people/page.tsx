@@ -14,6 +14,9 @@ import {
   hasValidConsumptionStep,
   hasValidCruiseStep,
 } from "@/lib/wizardProgress";
+import {
+  resizeAdultConsumptionProfiles,
+} from "@/lib/adultConsumptionProfiles";
 
 const MIN_VISIBLE_PEOPLE = 1;
 const MAX_VISIBLE_PEOPLE = 10;
@@ -62,6 +65,11 @@ function PeopleForm() {
       people: parsedAdults,
       adults: parsedAdults,
       minors: parsedMinors,
+      adultConsumptionProfiles:
+        resizeAdultConsumptionProfiles(
+          prev.adultConsumptionProfiles,
+          parsedAdults
+        ),
     }));
 
     router.push(isReturningFromAnalysis ? "/wizard/review" : "/wizard");

@@ -95,3 +95,80 @@ test("exige confirmar Consumo y acepta un perfil confirmado con valor cero", asy
     cocktail: 0,
   });
 });
+
+test("permite registrar consumos distintos para dos adultos", async ({ page }) => {
+  await page.goto("/wizard/people");
+  await page
+    .getByRole("button", { name: "Aumentar adultos" })
+    .click();
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  await page
+    .getByLabel("¿Cuántas noches dura tu crucero?")
+    .fill("7");
+  await page
+    .getByRole("button", { name: "Continuar" })
+    .click();
+
+  const coffeeCounter = page.getByRole("group", { name: "Cafés" });
+  await coffeeCounter
+    .getByRole("button", { name: "Aumentar Cafés" })
+    .click();
+
+  await page
+    .getByRole("button", { name: "Adulto 2" })
+    .click();
+  await expect(
+    coffeeCounter.getByLabel("Cantidad de Cafés")
+  ).toHaveText("0");
+
+  const beerCounter = page.getByRole("group", { name: "Cervezas" });
+  await beerCounter
+    .getByRole("button", { name: "Aumentar Cervezas" })
+    .click();
+  await beerCounter
+    .getByRole("button", { name: "Aumentar Cervezas" })
+    .click();
+
+  await page
+    .getByRole("button", { name: "Adulto 1" })
+    .click();
+  await expect(
+    coffeeCounter.getByLabel("Cantidad de Cafés")
+  ).toHaveText("1");
+  await expect(
+    beerCounter.getByLabel("Cantidad de Cervezas")
+  ).toHaveText("0");
+
+  await page
+    .getByRole("link", { name: "Continuar" })
+    .click();
+
+  const stored = await page.evaluate(() =>
+    JSON.parse(window.localStorage.getItem("drinkpilot-wizard") ?? "{}")
+  );
+
+  expect(stored.adultConsumptionProfiles).toMatchObject([
+    { label: "Adulto 1", coffee: 1, beer: 0, consumptionConfirmed: true },
+    { label: "Adulto 2", coffee: 0, beer: 2, consumptionConfirmed: true },
+  ]);
+
+  await page.getByRole("link", { name: "Continuar" }).click();
+  await expect(page).toHaveURL(/\/wizard\/prices$/);
+  await page.getByLabel(/My Drinks$/).fill("34");
+  await page.getByRole("link", { name: "Continuar" }).click();
+
+  await expect(page).toHaveURL(/\/wizard\/review$/);
+  await expect(page.getByText("Adulto 1", { exact: true })).toBeVisible();
+  await expect(page.getByText("Adulto 2", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Café:\s*1/)).toBeVisible();
+  await expect(page.getByText(/Cerveza:\s*2/)).toBeVisible();
+
+  await page.getByRole("button", { name: "Ver recomendación" }).click();
+  await expect(page).toHaveURL(/\/results$/);
+  await expect(
+    page.getByText("Cantidad del grupo / día")
+  ).not.toHaveCount(0);
+});

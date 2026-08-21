@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 
 import { useStore } from "@/lib/store";
-import { calculateRecommendation } from "@/lib/calculator";
 import { compareDrinkPackages } from "@/lib/comparison";
+import { calculateAdultProfileGroupRecommendation } from "@/lib/adultProfileGroupCalculation";
+import { aggregateAdultConsumptionProfiles } from "@/lib/adultConsumptionProfiles";
 import { CoverageCategory } from "@/lib/coverage";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { resolveDisplayedEconomicDifference } from "@/lib/economicDifferenceDisplay";
@@ -48,10 +49,6 @@ import {
 import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
-
-import {
-  getTotalDrinksPerDay,
-} from "@/lib/wizardProgress";
 
 import {
   resolveIncludedPackageUpgradeDecision,
@@ -121,10 +118,12 @@ export default function ResultsPage() {
       data.cruiseLine
     );
 
-  const totalDrinksPerDay =
-    getTotalDrinksPerDay(
-      data
-    );
+  const profileConsumption = aggregateAdultConsumptionProfiles(
+    data.adultConsumptionProfiles
+  );
+  const totalDrinksPerDay = Object.values(
+    profileConsumption.group
+  ).reduce((total, quantity) => total + quantity, 0);
 
   const selectedPremiumPreferences = [
     data.alcoholicCocktails,
@@ -224,26 +223,19 @@ export default function ResultsPage() {
       people:
         data.people,
 
-      coffee:
-        data.coffee,
+      coffee: profileConsumption.perAdultAverage.coffee,
 
-      water:
-        data.water,
+      water: profileConsumption.perAdultAverage.water,
 
-      soda:
-        data.soda,
+      soda: profileConsumption.perAdultAverage.soda,
 
-      juice:
-        data.juice,
+      juice: profileConsumption.perAdultAverage.juice,
 
-      beer:
-        data.beer,
+      beer: profileConsumption.perAdultAverage.beer,
 
-      wine:
-        data.wine,
+      wine: profileConsumption.perAdultAverage.wine,
 
-      cocktail:
-        data.cocktail,
+      cocktail: profileConsumption.perAdultAverage.cocktail,
 
       alcoholicCocktail:
         data.alcoholicCocktail,
@@ -283,6 +275,9 @@ export default function ResultsPage() {
 
       documentedDrinkQuantities:
         data.documentedDrinkQuantities,
+
+      adultConsumptionProfiles:
+        data.adultConsumptionProfiles,
     });
 
   const calculationDrinkPrices =
@@ -849,36 +844,15 @@ export default function ResultsPage() {
    * el comparador de paquetes.
    */
   const baseline =
-    calculateRecommendation({
+    calculateAdultProfileGroupRecommendation({
       cruiseNights:
         data.cruiseNights ?? 0,
-
-      people:
-        data.people,
 
       packagePricePerChargeUnit:
         0,
 
-      coffee:
-        data.coffee,
-
-      water:
-        data.water,
-
-      soda:
-        data.soda,
-
-      juice:
-        data.juice,
-
-      beer:
-        data.beer,
-
-      wine:
-        data.wine,
-
-      cocktail:
-        data.cocktail,
+      profiles:
+        data.adultConsumptionProfiles,
 
       coffeePrice:
         calculationDrinkPrices.coffee,
@@ -1028,7 +1002,7 @@ export default function ResultsPage() {
         "☕ Café",
 
       quantity:
-        data.coffee,
+        profileConsumption.group.coffee,
 
       price:
         calculationDrinkPrices.coffee,
@@ -1044,7 +1018,7 @@ export default function ResultsPage() {
         waterConsumptionLabel,
 
       quantity:
-        data.water,
+        profileConsumption.group.water,
 
       price:
         calculationDrinkPrices.water,
@@ -1060,7 +1034,7 @@ export default function ResultsPage() {
         "🥤 Refrescos",
 
       quantity:
-        data.soda,
+        profileConsumption.group.soda,
 
       price:
         calculationDrinkPrices.soda,
@@ -1076,7 +1050,7 @@ export default function ResultsPage() {
         "🧃 Zumos",
 
       quantity:
-        data.juice,
+        profileConsumption.group.juice,
 
       price:
         calculationDrinkPrices.juice,
@@ -1092,7 +1066,7 @@ export default function ResultsPage() {
         "🍺 Cervezas",
 
       quantity:
-        data.beer,
+        profileConsumption.group.beer,
 
       price:
         calculationDrinkPrices.beer,
@@ -1108,7 +1082,7 @@ export default function ResultsPage() {
         "🍷 Vinos",
 
       quantity:
-        data.wine,
+        profileConsumption.group.wine,
 
       price:
         calculationDrinkPrices.wine,
@@ -1124,7 +1098,7 @@ export default function ResultsPage() {
         "🍸 Cócteles",
 
       quantity:
-        data.cocktail,
+        profileConsumption.group.cocktail,
 
       price:
         calculationDrinkPrices.cocktail,
@@ -2303,6 +2277,7 @@ export default function ResultsPage() {
           <ConsumptionSummary
             rows={consumptionRows}
             currency={economicCurrency}
+            quantityLabel="Cantidad del grupo / día"
           />
 
           {/* FEEDBACK BETA */}

@@ -34,9 +34,7 @@ import {
   useWizardRouteGuard,
 } from "@/lib/useWizardRouteGuard";
 
-import {
-  getTotalDrinksPerDay,
-} from "@/lib/wizardProgress";
+import { totalAdultDrinksPerDay } from "@/lib/adultConsumptionProfiles";
 import {
   getMarketLabel,
   getSailingRegionLabel,
@@ -143,49 +141,32 @@ export default function ReviewPage() {
       ? "Agua no embotellada incluida"
       : "Agua";
 
-  const drinks = [
-    {
-      label: "Café",
-      icon: "☕",
-      value: data.coffee,
-    },
-    {
-      label: waterLabel,
-      icon: "💧",
-      value: data.water,
-    },
-    {
-      label: "Refrescos",
-      icon: "🥤",
-      value: data.soda,
-    },
-    {
-      label: "Cerveza",
-      icon: "🍺",
-      value: data.beer,
-    },
-    {
-      label: "Vino",
-      icon: "🍷",
-      value: data.wine,
-    },
-    {
-      label: "Cócteles",
-      icon: "🍸",
-      value: data.cocktail,
-    },
-  ];
-
-  const activeDrinks =
-    drinks.filter(
-      (drink) =>
-        drink.value > 0
-    );
-
-  const totalDrinksPerDay =
-    getTotalDrinksPerDay(
-      data
-    );
+  const profileSummaries = data.adultConsumptionProfiles.map((profile) => ({
+    profile,
+    total: totalAdultDrinksPerDay(profile),
+    drinks: [
+      { label: "Café", icon: "☕", value: profile.coffee },
+      { label: waterLabel, icon: "💧", value: profile.water },
+      { label: "Refrescos", icon: "🥤", value: profile.soda },
+      { label: "Zumos", icon: "🧃", value: profile.juice },
+      { label: "Cerveza", icon: "🍺", value: profile.beer },
+      { label: "Vino", icon: "🍷", value: profile.wine },
+      { label: "Cócteles", icon: "🍸", value: profile.cocktail },
+    ].filter((drink) => drink.value > 0),
+  }));
+  const groupDrinksPerDay = profileSummaries.reduce(
+    (total, summary) => total + summary.total,
+    0
+  );
+  const drinkPresentation: Record<string, { label: string; icon: string }> = {
+    coffee: { label: "Café", icon: "☕" },
+    water: { label: waterLabel, icon: "💧" },
+    soda: { label: "Refrescos", icon: "🥤" },
+    juice: { label: "Zumos", icon: "🧃" },
+    beer: { label: "Cerveza", icon: "🍺" },
+    wine: { label: "Vino", icon: "🍷" },
+    cocktail: { label: "Cócteles", icon: "🍸" },
+  };
 
   const preferences = [
     data.alcoholicCocktails &&
@@ -351,11 +332,11 @@ export default function ReviewPage() {
               </h2>
 
               <p className="mt-2 text-sm leading-5 text-slate-500">
-                {totalDrinksPerDay}{" "}
-                {totalDrinksPerDay === 1
+                {groupDrinksPerDay}{" "}
+                {groupDrinksPerDay === 1
                   ? "bebida"
                   : "bebidas"}{" "}
-                por persona / día
+                al día entre {data.adults} {data.adults === 1 ? "adulto" : "adultos"}
               </p>
             </div>
 
@@ -367,41 +348,32 @@ export default function ReviewPage() {
             </Link>
           </div>
 
-          {activeDrinks.length >
-          0 ? (
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
-              {activeDrinks.map(
-                (drink) => (
-                  <div
-                    key={
-                      drink.label
-                    }
-                    className="rounded-xl bg-slate-50 p-3"
-                  >
-                    <p className="text-xs leading-5 text-slate-500 sm:text-sm">
-                      {
-                        drink.icon
-                      }{" "}
-                      {
-                        drink.label
-                      }
-                    </p>
-
-                    <p className="mt-1 text-lg font-bold text-slate-900">
-                      {
-                        drink.value
-                      }
-                    </p>
+          <div className="mt-4 space-y-3">
+            {profileSummaries.map(({ profile, total, drinks }) => (
+              <div key={profile.id} className="rounded-xl bg-slate-50 p-3 sm:p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-semibold text-slate-900">{profile.label}</h3>
+                  <span className="text-sm font-semibold text-sky-800">
+                    {total} {total === 1 ? "bebida" : "bebidas"} / día
+                  </span>
+                </div>
+                {drinks.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {drinks.map((drink) => (
+                      <span
+                        key={drink.label}
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      >
+                        {drink.icon} {drink.label}: <strong>{drink.value}</strong>
+                      </span>
+                    ))}
                   </div>
-                )
-              )}
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-slate-500">
-              No has indicado consumo
-              diario.
-            </p>
-          )}
+                ) : (
+                  <p className="mt-2 text-sm text-slate-500">Sin consumo diario indicado.</p>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* PREFERENCIAS */}
@@ -608,22 +580,7 @@ export default function ReviewPage() {
                     return null;
                   }
 
-                  const drink =
-                    drinks.find(
-                      (item) =>
-                        item.label ===
-                        ({
-                          coffee: "Café",
-                          water: waterLabel,
-                          soda: "Refrescos",
-                          beer: "Cerveza",
-                          wine: "Vino",
-                          cocktail: "Cócteles",
-                        } as Record<
-                          string,
-                          string
-                        >)[category]
-                    );
+                  const drink = drinkPresentation[category];
 
                   const sourceLabel =
                     selectedPrice.source ===

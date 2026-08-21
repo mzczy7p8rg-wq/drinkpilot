@@ -5,10 +5,14 @@ import {
   hasValidCruiseStep,
   hasValidPeopleStep,
 } from "@/lib/wizardProgress";
+import {
+  resolveStoredAdultConsumptionProfiles,
+} from "@/lib/adultConsumptionProfiles";
 
 export const SAVED_ANALYSES_KEY = "drinkpilot-saved-analyses";
 export const ACTIVE_ANALYSIS_KEY = "drinkpilot-active-analysis";
-const SAVED_ANALYSES_VERSION = 1;
+const SAVED_ANALYSES_VERSION = 2;
+const LEGACY_SAVED_ANALYSES_VERSION = 1;
 
 export type SavedAnalysis = {
   id: string;
@@ -119,7 +123,11 @@ export function resolveStoredAnalyses(value: unknown): SavedAnalysis[] {
     value &&
     typeof value === "object" &&
     !Array.isArray(value) &&
-    (value as { version?: unknown }).version === SAVED_ANALYSES_VERSION &&
+    (
+      (value as { version?: unknown }).version === SAVED_ANALYSES_VERSION ||
+      (value as { version?: unknown }).version ===
+        LEGACY_SAVED_ANALYSES_VERSION
+    ) &&
     Array.isArray((value as { analyses?: unknown }).analyses)
       ? (value as { analyses: unknown[] }).analyses
       : Array.isArray(value)
@@ -140,6 +148,15 @@ export function resolveStoredAnalyses(value: unknown): SavedAnalysis[] {
           typeof item.name === "string"
             ? normalizeAnalysisName(item.name)
             : null,
+        data: {
+          ...item.data,
+          adultConsumptionProfiles:
+            resolveStoredAdultConsumptionProfiles({
+              ...item.data,
+              adultConsumptionProfiles:
+                item.data.adultConsumptionProfiles,
+            }),
+        },
       });
     }
   }

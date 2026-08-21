@@ -11,9 +11,11 @@ export type ConsumptionSummaryRow = {
 export default function ConsumptionSummary({
   rows,
   currency,
+  quantityLabel = "Cantidad / día",
 }: {
   rows: ConsumptionSummaryRow[];
   currency: string;
+  quantityLabel?: string;
 }) {
   return (
     <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 sm:mt-10">
@@ -28,7 +30,7 @@ export default function ConsumptionSummary({
 
             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-lg bg-slate-50 p-3">
-                <p className="text-xs text-slate-500">Cantidad / día</p>
+                <p className="text-xs text-slate-500">{quantityLabel}</p>
                 <p className="mt-1 text-base font-bold text-slate-900">
                   {row.quantity}
                 </p>
@@ -61,7 +63,7 @@ export default function ConsumptionSummary({
           <thead className="bg-slate-100">
             <tr>
               <th className="p-3 text-left">Bebida</th>
-              <th className="p-3 text-center">Cantidad/día</th>
+              <th className="p-3 text-center">{quantityLabel}</th>
               <th className="p-3 text-center">Precio usado</th>
               <th className="p-3 text-right">Total crucero</th>
             </tr>

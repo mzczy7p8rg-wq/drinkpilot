@@ -40,7 +40,15 @@ test("selecciona entre 1 y 10 adultos con controles menos y más", async ({
   );
 
   expect(stored).toMatchObject({
+    storageSchemaVersion: 3,
     people: 9,
     adults: 9,
   });
+  expect(stored.adultConsumptionProfiles).toHaveLength(9);
+  expect(
+    stored.adultConsumptionProfiles.every(
+      (profile: { consumptionConfirmed?: unknown }) =>
+        profile.consumptionConfirmed === false
+    )
+  ).toBe(true);
 });

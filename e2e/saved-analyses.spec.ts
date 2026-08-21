@@ -179,4 +179,19 @@ test("ordena Mis análisis por más reciente, nombre y naviera", async ({ page }
 
   await sort.selectOption("recent");
   await expect(titles).toHaveText(["Beta", "Alfa", "Zeta"]);
+
+  const migratedCollection = await page.evaluate(() =>
+    JSON.parse(
+      window.localStorage.getItem("drinkpilot-saved-analyses") ?? "{}"
+    )
+  );
+
+  expect(migratedCollection.version).toBe(2);
+  expect(migratedCollection.analyses).toHaveLength(3);
+  expect(
+    migratedCollection.analyses.every(
+      (analysis: { data?: { adultConsumptionProfiles?: unknown[] } }) =>
+        analysis.data?.adultConsumptionProfiles?.length === 2
+    )
+  ).toBe(true);
 });

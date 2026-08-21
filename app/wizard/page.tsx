@@ -234,6 +234,21 @@ function WizardForm() {
 
                 nonAlcoholicCocktail:
                   null,
+
+                adultConsumptionProfiles:
+                  previous.adultConsumptionProfiles.map((profile) => ({
+                    ...profile,
+                    coffee: 0,
+                    water: 0,
+                    soda: 0,
+                    juice: 0,
+                    beer: 0,
+                    wine: 0,
+                    cocktail: 0,
+                    alcoholicCocktail: null,
+                    nonAlcoholicCocktail: null,
+                    consumptionConfirmed: false,
+                  })),
               }
             : {}),
 

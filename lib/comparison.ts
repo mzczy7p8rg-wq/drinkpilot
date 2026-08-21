@@ -1,4 +1,6 @@
 import { calculateRecommendation } from "@/lib/calculator";
+import type { AdultConsumptionProfile } from "@/lib/adultConsumptionProfiles";
+import { calculateAdultProfileGroupRecommendation } from "@/lib/adultProfileGroupCalculation";
 
 import {
   calculatePackageCoverage,
@@ -221,6 +223,8 @@ export type ComparisonInput = {
 
   documentedDrinkQuantities?:
     Record<string, number>;
+
+  adultConsumptionProfiles?: readonly AdultConsumptionProfile[];
 };
 
 export type PackageComparisonResult = {
@@ -1475,8 +1479,7 @@ export function compareDrinkPackages(
             return [];
           }
 
-          const calculation =
-            calculateRecommendation({
+          const commonCalculationInput = {
               cruiseNights:
                 input.cruiseNights,
 
@@ -1484,32 +1487,8 @@ export function compareDrinkPackages(
                 packageChargeUnits
                   .chargeUnits,
 
-              people:
-                input.people,
-
               packagePricePerChargeUnit:
                 resolvedPrice.price,
-
-              coffee:
-                input.coffee,
-
-              water:
-                input.water,
-
-              soda:
-                input.soda,
-
-              juice:
-                input.juice ?? 0,
-
-              beer:
-                input.beer,
-
-              wine:
-                input.wine,
-
-              cocktail:
-                input.cocktail,
 
               /*
                * Todos los cálculos utilizan
@@ -1542,7 +1521,39 @@ export function compareDrinkPackages(
               cocktailPrice:
                 calculationDrinkPrices
                   .cocktail,
-            });
+            };
+
+          const profileCalculation =
+            input.adultConsumptionProfiles?.length
+              ? calculateAdultProfileGroupRecommendation({
+                  ...commonCalculationInput,
+                  profiles: input.adultConsumptionProfiles,
+                })
+              : null;
+
+          const calculation = profileCalculation
+            ? {
+                packageCost: profileCalculation.packageCost,
+                drinksCost: profileCalculation.drinksCost,
+                savings: profileCalculation.savings,
+                dailyDrinkCost: profileCalculation.dailyDrinkCostPerAdult,
+                dailyMargin: profileCalculation.dailyMarginPerAdult,
+                savingsPercentage: profileCalculation.savingsPercentage,
+                recommended: profileCalculation.recommended,
+                breakEvenDrinksPerDay:
+                  profileCalculation.breakEvenDrinksPerDayPerAdult,
+              }
+            : calculateRecommendation({
+                ...commonCalculationInput,
+                people: input.people,
+                coffee: input.coffee,
+                water: input.water,
+                soda: input.soda,
+                juice: input.juice ?? 0,
+                beer: input.beer,
+                wine: input.wine,
+                cocktail: input.cocktail,
+              });
 
           const coverage =
             coverageResults.find(
