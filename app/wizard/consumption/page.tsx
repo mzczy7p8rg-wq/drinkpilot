@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import { useStore } from "@/lib/store";
 import DrinkCounter from "@/components/DrinkCounter";
@@ -16,30 +17,57 @@ import {
 } from "@/lib/useWizardRouteGuard";
 
 import {
-  getTotalDrinksPerDay,
   hasValidConsumptionValues,
 } from "@/lib/wizardProgress";
+import type { AdultConsumptionProfile } from "@/lib/adultConsumptionProfiles";
 
 export default function ConsumptionPage() {
   const { data, setData } = useStore();
+  const [activeAdultIndex, setActiveAdultIndex] = useState(0);
 
   const { ready } =
     useWizardRouteGuard(
       "cruise"
     );
 
-  const totalDrinksPerDay =
-    getTotalDrinksPerDay(
-      data
-    );
+  const activeProfile =
+    data.adultConsumptionProfiles[activeAdultIndex] ??
+    data.adultConsumptionProfiles[0];
+
+  const updateActiveProfile = (
+    update: (profile: AdultConsumptionProfile) => AdultConsumptionProfile
+  ) => {
+    setData((prev) => ({
+      ...prev,
+      adultConsumptionProfiles: prev.adultConsumptionProfiles.map(
+        (profile, index) =>
+          index === activeAdultIndex ? update(profile) : profile
+      ),
+    }));
+  };
+
+  const totalDrinksPerDay = activeProfile
+    ? activeProfile.coffee +
+      activeProfile.water +
+      activeProfile.soda +
+      activeProfile.juice +
+      activeProfile.beer +
+      activeProfile.wine +
+      activeProfile.cocktail
+    : 0;
 
   const hasValidConsumption =
-    hasValidConsumptionValues(
-      data
+    data.adultConsumptionProfiles.length === data.adults &&
+    data.adultConsumptionProfiles.every((profile) =>
+      hasValidConsumptionValues({
+        ...profile,
+        people: data.people,
+        cruiseNights: data.cruiseNights,
+      })
     );
 
   const hasCocktails =
-    data.cocktail > 0;
+    (activeProfile?.cocktail ?? 0) > 0;
 
   const waterLabel =
     data.cruiseLine === "msc"
@@ -52,17 +80,17 @@ export default function ConsumptionPage() {
       : "Agua";
 
   const hasCocktailComposition =
-    data.alcoholicCocktail !== null &&
-    data.nonAlcoholicCocktail !== null;
+    activeProfile?.alcoholicCocktail !== null &&
+    activeProfile?.nonAlcoholicCocktail !== null;
 
   const cocktailCompositionTotal =
-    (data.alcoholicCocktail ?? 0) +
-    (data.nonAlcoholicCocktail ?? 0);
+    (activeProfile?.alcoholicCocktail ?? 0) +
+    (activeProfile?.nonAlcoholicCocktail ?? 0);
 
   const isCocktailCompositionValid =
     hasCocktailComposition &&
     cocktailCompositionTotal ===
-      data.cocktail;
+      activeProfile?.cocktail;
 
   if (!ready) {
     return (
@@ -96,7 +124,7 @@ export default function ConsumptionPage() {
           </h1>
 
           <p className="mt-3 text-sm leading-6 text-slate-500 sm:text-base">
-            Indica el consumo que encaja contigo. DrinkPilot lo tendrá en cuenta en tu análisis.
+            Indica por separado el consumo medio de cada adulto y día.
           </p>
 
         </div>
@@ -104,7 +132,30 @@ export default function ConsumptionPage() {
         {/* AYUDA */}
 
         <div className="mt-5 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm leading-6 text-sky-900 sm:mt-6">
-          💡 Ejemplo: si viajáis 3 adultos y tomáis 6 cafés al día entre todos, indica 2 cafés por persona y día.
+          💡 Selecciona un adulto y registra solo lo que consume esa persona en un día habitual.
+        </div>
+
+        <div className="mt-6" aria-label="Perfiles de consumo por adulto">
+          <p className="text-sm font-semibold text-slate-700">
+            ¿De quién es este consumo?
+          </p>
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {data.adultConsumptionProfiles.map((profile, index) => (
+              <button
+                key={profile.id}
+                type="button"
+                onClick={() => setActiveAdultIndex(index)}
+                aria-pressed={index === activeAdultIndex}
+                className={`shrink-0 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
+                  index === activeAdultIndex
+                    ? "border-sky-700 bg-sky-700 text-white"
+                    : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                {profile.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* CONTADORES */}
@@ -114,9 +165,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label="☕ Cafés"
             accessibleLabel="Cafés"
-            value={data.coffee}
+            value={activeProfile?.coffee ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
                 coffee: Math.max(0, value),
               }))
@@ -126,9 +177,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label={waterLabel}
             accessibleLabel={accessibleWaterLabel}
-            value={data.water}
+            value={activeProfile?.water ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
                 water: Math.max(0, value),
               }))
@@ -144,9 +195,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label="🥤 Refrescos"
             accessibleLabel="Refrescos"
-            value={data.soda}
+            value={activeProfile?.soda ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
                 soda: Math.max(0, value),
               }))
@@ -156,9 +207,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label="🍺 Cervezas"
             accessibleLabel="Cervezas"
-            value={data.beer}
+            value={activeProfile?.beer ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
                 beer: Math.max(0, value),
               }))
@@ -168,9 +219,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label="🧃 Zumos"
             accessibleLabel="Zumos"
-            value={data.juice}
+            value={activeProfile?.juice ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
                 juice: Math.max(0, value),
               }))
@@ -180,9 +231,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label="🍷 Vinos"
             accessibleLabel="Vinos"
-            value={data.wine}
+            value={activeProfile?.wine ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
                 wine: Math.max(0, value),
               }))
@@ -192,9 +243,9 @@ export default function ConsumptionPage() {
           <DrinkCounter
             label="🍸 Cócteles"
             accessibleLabel="Cócteles"
-            value={data.cocktail}
+            value={activeProfile?.cocktail ?? 0}
             onChange={(value) =>
-              setData((prev) => ({
+              updateActiveProfile((prev) => ({
                 ...prev,
 
                 cocktail:
@@ -224,9 +275,9 @@ export default function ConsumptionPage() {
                 <p className="mt-1 text-sm leading-6 text-slate-600">
                   Opcional. Reparte tus{" "}
                   <strong>
-                    {data.cocktail}
+                    {activeProfile?.cocktail ?? 0}
                   </strong>{" "}
-                  {data.cocktail === 1
+                  {activeProfile?.cocktail === 1
                     ? "cóctel"
                     : "cócteles"}{" "}
                   entre las dos categorías.
@@ -238,12 +289,12 @@ export default function ConsumptionPage() {
                   label="🍸 Con alcohol"
                   accessibleLabel="Cócteles con alcohol"
                   value={
-                    data.alcoholicCocktail ??
+                    activeProfile?.alcoholicCocktail ??
                     0
                   }
-                  max={data.cocktail}
+                  max={activeProfile?.cocktail ?? 0}
                   onChange={(value) =>
-                    setData((prev) => {
+                    updateActiveProfile((prev) => {
                       const composition =
                         updateOptionalCocktailComposition(
                           prev.cocktail,
@@ -270,12 +321,12 @@ export default function ConsumptionPage() {
                   label="🍹 Sin alcohol"
                   accessibleLabel="Cócteles sin alcohol"
                   value={
-                    data.nonAlcoholicCocktail ??
+                    activeProfile?.nonAlcoholicCocktail ??
                     0
                   }
-                  max={data.cocktail}
+                  max={activeProfile?.cocktail ?? 0}
                   onChange={(value) =>
-                    setData((prev) => {
+                    updateActiveProfile((prev) => {
                       const composition =
                         updateOptionalCocktailComposition(
                           prev.cocktail,
@@ -312,8 +363,8 @@ export default function ConsumptionPage() {
                   }`}
                 >
                   {isCocktailCompositionValid
-                    ? `✓ Reparto completo: ${cocktailCompositionTotal} de ${data.cocktail}.`
-                    : `El reparto suma ${cocktailCompositionTotal} de ${data.cocktail}. Ajusta las cantidades si quieres completar el reparto.`}
+                    ? `✓ Reparto completo: ${cocktailCompositionTotal} de ${activeProfile?.cocktail ?? 0}.`
+                    : `El reparto suma ${cocktailCompositionTotal} de ${activeProfile?.cocktail ?? 0}. Ajusta las cantidades si quieres completar el reparto.`}
                 </div>
               )}
             </div>
@@ -326,7 +377,7 @@ export default function ConsumptionPage() {
         <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center sm:p-5">
 
           <p className="text-sm font-medium text-slate-500">
-            Consumo diario estimado
+            Consumo diario de {activeProfile?.label ?? "este adulto"}
           </p>
 
           <p className="mt-1 text-3xl font-bold text-slate-900">
@@ -376,6 +427,9 @@ export default function ConsumptionPage() {
               setData((prev) => ({
                 ...prev,
                 consumptionConfirmed: true,
+                adultConsumptionProfiles: prev.adultConsumptionProfiles.map(
+                  (profile) => ({ ...profile, consumptionConfirmed: true })
+                ),
               }));
             }}
             className={`rounded-xl px-3 py-4 text-center text-sm font-semibold transition sm:text-base ${
