@@ -7,6 +7,7 @@ import { compareDrinkPackages } from "@/lib/comparison";
 import { calculateAdultProfileGroupRecommendation } from "@/lib/adultProfileGroupCalculation";
 import { aggregateAdultConsumptionProfiles } from "@/lib/adultConsumptionProfiles";
 import { CoverageCategory } from "@/lib/coverage";
+import { formatCoverageCategoryLabel } from "@/lib/coverageDisplay";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 import { resolveDisplayedEconomicDifference } from "@/lib/economicDifferenceDisplay";
 
@@ -535,7 +536,11 @@ export default function ResultsPage() {
                                       key={category}
                                       className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700"
                                     >
-                                      {coverageLabels[category]}
+                                      {formatCoverageCategoryLabel(
+                                        category,
+                                        coverageLabels[category],
+                                        pkg
+                                      )}
                                     </span>
                                   )
                                 )}
@@ -561,9 +566,11 @@ export default function ResultsPage() {
                                   className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700"
                                 >
                                   {
-                                    coverageLabels[
-                                      category
-                                    ]
+                                    formatCoverageCategoryLabel(
+                                      category,
+                                      coverageLabels[category],
+                                      pkg
+                                    )
                                   }
                                 </span>
                               )
@@ -1646,9 +1653,11 @@ export default function ResultsPage() {
                                 (
                                   category
                                 ) =>
-                                  coverageLabels[
-                                    category
-                                  ]
+                                  formatCoverageCategoryLabel(
+                                    category,
+                                    coverageLabels[category],
+                                    pkg
+                                  )
                               )
                               .join(
                                 ", "
@@ -1668,9 +1677,11 @@ export default function ResultsPage() {
                                 (
                                   category
                                 ) =>
-                                  coverageLabels[
-                                    category
-                                  ]
+                                  formatCoverageCategoryLabel(
+                                    category,
+                                    coverageLabels[category],
+                                    pkg
+                                  )
                               )
                               .join(
                                 ", "
@@ -1682,7 +1693,13 @@ export default function ResultsPage() {
                           <p className="mt-2 text-sm font-medium leading-6 text-amber-900">
                             <strong>Cobertura pendiente de confirmar:</strong>{" "}
                             {pkg.unknownCoverageCategories
-                              .map((category) => coverageLabels[category])
+                              .map((category) =>
+                                formatCoverageCategoryLabel(
+                                  category,
+                                  coverageLabels[category],
+                                  pkg
+                                )
+                              )
                               .join(", ")}
                           </p>
                         )}
@@ -1804,7 +1821,13 @@ export default function ResultsPage() {
                             <p className="mt-2 text-xs leading-5 text-amber-900">
                               <strong>Cobertura pendiente:</strong>{" "}
                               {pkg.unknownCoverageCategories
-                                .map((category) => coverageLabels[category])
+                                .map((category) =>
+                                  formatCoverageCategoryLabel(
+                                    category,
+                                    coverageLabels[category],
+                                    pkg
+                                  )
+                                )
                                 .join(", ")}.
                             </p>
                           )}
@@ -1823,9 +1846,11 @@ export default function ResultsPage() {
                                   (
                                     category
                                   ) =>
-                                    coverageLabels[
-                                      category
-                                    ]
+                                    formatCoverageCategoryLabel(
+                                      category,
+                                      coverageLabels[category],
+                                      pkg
+                                    )
                                 )
                                 .join(
                                   ", "
