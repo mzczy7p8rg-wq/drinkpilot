@@ -486,6 +486,42 @@ export function buildRecommendationExplanation(
     const extraCost =
       Math.abs(effectiveSavings);
 
+    const includedPackage = packages.find(
+      (pkg) => pkg.priceSource === "included"
+    );
+    const includedEffectiveSavings = includedPackage
+      ? getEffectiveSavings(includedPackage)
+      : null;
+
+    if (
+      includedPackage &&
+      includedEffectiveSavings !== null &&
+      includedPackage.packageKey !== bestCoveredPackage.packageKey &&
+      includedEffectiveSavings > effectiveSavings
+    ) {
+      const upgradeExtraCost =
+        includedEffectiveSavings - effectiveSavings;
+
+      return {
+        title:
+          `Mantener ${includedPackage.packageName} es más económico que mejorar`,
+
+        summary:
+          `${bestCoveredPackage.packageName} cubre completamente lo que has indicado, pero mantener ${includedPackage.packageName} y pagar solo las bebidas que deja fuera cuesta menos.`,
+
+        reason:
+          `Con esta estimación, el upgrade a ${bestCoveredPackage.packageName} costaría aproximadamente ${formatCurrency(
+            upgradeExtraCost,
+            bestCoveredPackage.currency ?? "EUR"
+          )} más.`,
+
+        secondaryReason:
+          "Por eso DrinkPilot recomienda conservar el paquete que ya tienes incluido.",
+
+        tone: "warning",
+      };
+    }
+
     return {
       title:
         "Tus preferencias están cubiertas, pero el paquete no compensa",
