@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compareDrinkPackages } from "@/lib/comparison";
+import { resolveComparisonHeader } from "@/lib/comparisonHeader";
 import { resolveIncludedPackageUpgradeDecision } from "@/lib/includedPackageUpgrade";
 
 function compareCostaUpgrade(upgradePrice: number) {
@@ -50,18 +51,26 @@ describe("Costa My Drinks incluido frente a My Drinks Plus", () => {
       effectiveSavings: 21,
     });
 
-    expect(
+    const decision =
       resolveIncludedPackageUpgradeDecision(
         comparison.packages,
         "myDrinks"
-      )
-    ).toMatchObject({
+      );
+
+    expect(decision).toMatchObject({
       status: "upgrade",
       addedCost: 84,
       savingsDifference: 21,
       current: { packageName: "My Drinks" },
       alternative: { packageName: "My Drinks Plus" },
     });
+
+    expect(
+      resolveComparisonHeader(
+        comparison.bestPackage,
+        decision
+      )
+    ).toBe("Mejora a My Drinks Plus");
   });
 
   it("mantiene My Drinks cuando el suplemento supera el Red Bull exterior", () => {
@@ -76,17 +85,25 @@ describe("Costa My Drinks incluido frente a My Drinks Plus", () => {
       effectiveSavings: -21,
     });
 
-    expect(
+    const decision =
       resolveIncludedPackageUpgradeDecision(
         comparison.packages,
         "myDrinks"
-      )
-    ).toMatchObject({
+      );
+
+    expect(decision).toMatchObject({
       status: "keep",
       addedCost: 126,
       savingsDifference: -21,
       current: { packageName: "My Drinks" },
       alternative: { packageName: "My Drinks Plus" },
     });
+
+    expect(
+      resolveComparisonHeader(
+        comparison.bestPackage,
+        decision
+      )
+    ).toBe("Mantén My Drinks");
   });
 });

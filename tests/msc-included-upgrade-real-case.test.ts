@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { compareDrinkPackages } from "@/lib/comparison";
+import { resolveComparisonHeader } from "@/lib/comparisonHeader";
 import { resolveIncludedPackageUpgradeDecision } from "@/lib/includedPackageUpgrade";
 import { buildRecommendationExplanation } from "@/lib/recommendationExplanation";
 
@@ -50,18 +51,26 @@ describe("MSC Easy incluido frente a Premium Extra", () => {
       effectiveSavings: 63,
     });
 
-    expect(
+    const decision =
       resolveIncludedPackageUpgradeDecision(
         comparison.packages,
         "mscEasy"
-      )
-    ).toMatchObject({
+      );
+
+    expect(decision).toMatchObject({
       status: "upgrade",
       addedCost: 210,
       savingsDifference: 63,
       current: { packageName: "Easy Package" },
       alternative: { packageName: "Premium Extra Package" },
     });
+
+    expect(
+      resolveComparisonHeader(
+        comparison.bestPackage,
+        decision
+      )
+    ).toBe("Mejora a Premium Extra Package");
 
     const explanation = buildRecommendationExplanation(comparison);
 
@@ -74,18 +83,26 @@ describe("MSC Easy incluido frente a Premium Extra", () => {
   it("mantiene Easy cuando el suplemento supera el gasto que evita", () => {
     const comparison = compareRealMscUpgrade(15);
 
-    expect(
+    const decision =
       resolveIncludedPackageUpgradeDecision(
         comparison.packages,
         "mscEasy"
-      )
-    ).toMatchObject({
+      );
+
+    expect(decision).toMatchObject({
       status: "keep",
       addedCost: 315,
       savingsDifference: -42,
       current: { packageName: "Easy Package" },
       alternative: { packageName: "Premium Extra Package" },
     });
+
+    expect(
+      resolveComparisonHeader(
+        comparison.bestPackage,
+        decision
+      )
+    ).toBe("Mantén Easy Package");
 
     const explanation = buildRecommendationExplanation(comparison);
 
