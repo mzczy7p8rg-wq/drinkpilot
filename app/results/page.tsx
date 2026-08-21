@@ -30,6 +30,7 @@ import {
 
 import DataConfidencePanel from "@/components/DataConfidencePanel";
 import ConsumptionSummary from "@/components/results/ConsumptionSummary";
+import EconomicOptionsComparison from "@/components/results/EconomicOptionsComparison";
 import MinorsCalculationNotice from "@/components/results/MinorsCalculationNotice";
 import { WizardBrand } from "@/components/Brand";
 
@@ -53,6 +54,10 @@ import {
 import {
   resolveIncludedPackageUpgradeDecision,
 } from "@/lib/includedPackageUpgrade";
+
+import {
+  buildEconomicOptionsComparison,
+} from "@/lib/economicOptionsComparison";
 
 import {
   isBreakEvenAvailable,
@@ -879,6 +884,13 @@ export default function ResultsPage() {
   const bestPackage =
     comparison.bestPackage;
 
+  const economicOptionsComparison =
+    buildEconomicOptionsComparison({
+      currency: economicCurrency,
+      baselineCost: baseline.drinksCost,
+      packages: comparison.packages,
+    });
+
   const includedPackageUpgradeDecision =
     resolveIncludedPackageUpgradeDecision(
       comparison.packages,
@@ -1168,6 +1180,10 @@ export default function ResultsPage() {
               )}
             </section>
           )}
+
+          <EconomicOptionsComparison
+            comparison={economicOptionsComparison}
+          />
 
           {/* EXPLICACIÓN PRINCIPAL */}
 

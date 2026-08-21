@@ -130,6 +130,30 @@ test("completa el wizard y muestra la recomendación", async ({ page }) => {
     )
   ).toBeVisible();
 
+  const economicOptions = page.locator("section").filter({
+    has: page.getByRole("heading", {
+      name: "Sin paquete, paquetes y upgrades",
+    }),
+  });
+  await expect(economicOptions).toBeVisible();
+  await expect(
+    economicOptions
+      .locator("th:visible, dt:visible")
+      .filter({ hasText: /^Fuera del paquete$/ })
+      .first()
+  ).toBeVisible();
+  await expect(
+    economicOptions
+      .locator("th:visible, dt:visible")
+      .filter({ hasText: /^Coste total$/ })
+      .first()
+  ).toBeVisible();
+  await expect(
+    economicOptions.getByText(
+      "Pagar las bebidas por separado es la opción más económica."
+    )
+  ).toBeVisible();
+
   const feedbackLink = page.getByRole("link", {
     name: "Enviar opinión",
   });
