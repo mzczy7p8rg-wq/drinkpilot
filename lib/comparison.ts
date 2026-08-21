@@ -1257,7 +1257,8 @@ export function compareDrinkPackages(
         resolveEconomicPackage(
           pkg,
           input.customPackagePrices,
-          input.includedPackageKey
+          input.includedPackageKey,
+          economicCurrency
         )
       )
       .filter(

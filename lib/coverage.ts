@@ -13,10 +13,12 @@ import type {
 } from "@/lib/onboardPriceService";
 
 import {
+  getCostaDocumentedDrinkPriceById,
   resolveCostaDocumentedPackageCoverage,
 } from "@/lib/costaDocumentedDrinkPriceService";
 
 import {
+  getMscDocumentedDrinkPriceById,
   resolveMscDocumentedPackageCoverage,
 } from "@/lib/mscDocumentedDrinkPriceService";
 
@@ -176,6 +178,13 @@ function isCategoryCovered(
   selectedDrinkReferenceIds: readonly string[] = []
 ): boolean {
   if (selectedDrinkReferenceIds.length > 0) {
+    const documentedReferences =
+      selectedDrinkReferenceIds.map((referenceId) =>
+        cruiseLine === "costa"
+          ? getCostaDocumentedDrinkPriceById(referenceId)
+          : getMscDocumentedDrinkPriceById(referenceId)
+      );
+
     const documentedCoverage =
       selectedDrinkReferenceIds.map(
         (referenceId) =>
@@ -197,6 +206,16 @@ function isCategoryCovered(
         (coverage) =>
           coverage?.status === "included"
       );
+    }
+
+    const hasDocumentedProductWithUnknownCoverage =
+      documentedReferences.some(
+        (reference, index) =>
+          reference !== null && documentedCoverage[index] === null
+      );
+
+    if (hasDocumentedProductWithUnknownCoverage) {
+      return false;
     }
   }
 

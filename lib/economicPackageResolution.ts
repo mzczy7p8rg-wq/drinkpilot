@@ -24,7 +24,8 @@ export type ResolvedEconomicPackage = {
 export function resolveEconomicPackage(
   pkg: AllPackage,
   customPackagePrices?: EconomicPackagePriceInput,
-  includedPackageKey?: string | null
+  includedPackageKey?: string | null,
+  includedPackageCurrency?: string | null
 ): ResolvedEconomicPackage | null {
   const packageKey = pkg.key as PackageKey;
 
@@ -41,7 +42,9 @@ export function resolveEconomicPackage(
         : null,
       resolvedPrice: {
         price: 0,
-        currency: pkg.currency,
+        currency:
+          includedPackageCurrency?.trim().toUpperCase() ||
+          pkg.currency,
         source: "included",
       },
     };
